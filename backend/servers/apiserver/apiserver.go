@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	apiServerV1Url = "/api/v1/"
+	v1Url = "/api/v1/"
 )
 
 // APIServer defines the servers structure for the Oats API service.
@@ -24,8 +24,7 @@ func (s *APIServer) Start() error {
 	s.L.Info("apiserver - starting service...")
 	mux := http.NewServeMux()
 
-	mux.Handle(apiServerV1Url,
-		http.StripPrefix(strings.TrimSuffix(apiServerV1Url, "/"), &v1.APIServerV1{L: s.L}))
+	mux.Handle(v1Url, http.StripPrefix(strings.TrimSuffix(v1Url, "/"), &v1.APIServerV1{L: s.L}))
 
 	s.L.Info("apiserver - service started, serving requests")
 	return http.ListenAndServe(":3000", mux)
