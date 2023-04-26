@@ -20,7 +20,11 @@ vendor/
 # Go workspace file
 go.work
 
-# Editor folders and files
-*.idea
-*.fleet
-*.vscode
+# Editor configurations
+**/.idea
+**/.fleet
+**/.vscode
+
+# Env files
+*.env*
+!backend/.env.example

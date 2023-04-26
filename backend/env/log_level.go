@@ -9,8 +9,8 @@ const (
 type LogLevel string
 
 const (
-	LogLevelDev  LogLevel = "0"
-	LogLevelProd          = "1"
+	LogLevelProd  LogLevel = "0"
+	LogLevelDebug          = "1"
 )
 
 // GetLogLevel returns the LogLevel specified in the environment variable.
