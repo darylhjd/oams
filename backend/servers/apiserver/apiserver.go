@@ -3,11 +3,16 @@ package apiserver
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oats/backend/logger"
 	v1 "github.com/darylhjd/oats/backend/servers/apiserver/v1"
+)
+
+const (
+	apiServerV1Url = "/api/v1/"
 )
 
 // APIServer defines the servers structure for the Oats API service.
@@ -16,12 +21,13 @@ type APIServer struct {
 }
 
 func (s *APIServer) Start() error {
-	s.L.Info("apiserver: starting service...")
+	s.L.Info("apiserver - starting service...")
 	mux := http.NewServeMux()
 
-	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", &v1.APIServerV1{L: s.L}))
+	mux.Handle(apiServerV1Url,
+		http.StripPrefix(strings.TrimSuffix(apiServerV1Url, "/"), &v1.APIServerV1{L: s.L}))
 
-	s.L.Info("apiserver: service started, serving requests")
+	s.L.Info("apiserver - service started, serving requests")
 	return http.ListenAndServe(":3000", mux)
 }
 

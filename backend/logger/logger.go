@@ -18,7 +18,7 @@ func NewLogger() (*zap.Logger, error) {
 	case env.LogLevelDev:
 		return zap.NewDevelopment()
 	default:
-		log.Printf("%s not a valid log level, using default development logging.\n", logLevel)
+		log.Printf("%q not a valid log level, using default development logging.\n", logLevel)
 		return zap.NewDevelopment()
 	}
 }
