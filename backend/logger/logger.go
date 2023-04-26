@@ -8,7 +8,7 @@ import (
 	"github.com/darylhjd/oats/backend/env"
 )
 
-// NewLogger returns a logger with the specified logging Level.
+// NewLogger returns a logger with the specified logging LogLevel.
 func NewLogger() (*zap.Logger, error) {
 	logLevel := env.GetLogLevel()
 

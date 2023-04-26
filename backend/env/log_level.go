@@ -3,18 +3,17 @@ package env
 import "os"
 
 const (
-	LogLevel Var = "LOG_LEVEL"
+	logLevel = "LOG_LEVEL"
 )
 
-// Level defines the levels of logging that is supported by Oats.
-type Level string
+type LogLevel string
 
 const (
-	LogLevelDev  Level = "0"
-	LogLevelProd       = "1"
+	LogLevelDev  LogLevel = "0"
+	LogLevelProd          = "1"
 )
 
-// GetLogLevel returns the Level of logging specified in the environment variable LogLevel.
-func GetLogLevel() Level {
-	return Level(os.Getenv(string(LogLevel)))
+// GetLogLevel returns the LogLevel specified in the environment variable.
+func GetLogLevel() LogLevel {
+	return LogLevel(os.Getenv(logLevel))
 }
