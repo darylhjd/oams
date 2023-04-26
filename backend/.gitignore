@@ -27,4 +27,4 @@ go.work
 
 # Env files
 *.env*
-!backend/.env.example
+!.env.example
