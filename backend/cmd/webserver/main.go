@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/darylhjd/oats/backend/env"
+	_ "github.com/darylhjd/oats/backend/env/autoloader"
 	"github.com/darylhjd/oats/backend/servers/webserver"
 )
 
