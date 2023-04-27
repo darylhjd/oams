@@ -3,13 +3,16 @@ module github.com/darylhjd/oats/backend
 go 1.20
 
 require (
+	github.com/darylhjd/oats/frontend v0.0.0-20230427120229-016a8c9ed4db
+	github.com/joho/godotenv v1.5.1
+	github.com/stretchr/testify v1.8.2
+	go.uber.org/zap v1.24.0
+)
+
+require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.24.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
