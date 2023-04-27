@@ -1,6 +1,6 @@
-# This workflow executes all tests in the Oats backend module.
+# This workflow executes all tests in Oats.
 
-name: Backend Test
+name: Test
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
   GOPRIVATE: "github.com/darylhjd/*"
 
 jobs:
-  build:
+  test-all:
     runs-on: ubuntu-latest
     
     steps:
@@ -36,7 +36,7 @@ jobs:
           TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: git config --global url."https://darylhjd:${TOKEN}@github.com".insteadOf "https://github.com"
 
-      - name: Install dependencies
+      - name: Install Go dependencies
         run: |
           cd backend  
           go get ./...
@@ -47,7 +47,7 @@ jobs:
           npm install
           npm run build
 
-      - name: Test
+      - name: Test backend
         run: |
           cd backend
           go test ./...
