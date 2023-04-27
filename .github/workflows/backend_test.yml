@@ -24,16 +24,27 @@ jobs:
       with:
         go-version-file: go.work
 
+    - name: Set up Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.16.0
+
     - name: Configuration for private dependencies
       env:
         TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      run: git config --global url."https://darylhjd:${TOKEN}@github.com".insteadOf "https://github.com"
+        USERNAME: ${{ secrets.USERNAME }}
+      run: git config --global url."https://${USERNAME}:${TOKEN}@github.com".insteadOf "https://github.com"
 
     - name: Install dependencies
       run: |
         cd backend  
         go get ./...
-    
+
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+
     - name: Test
       run: |
         cd backend
