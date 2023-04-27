@@ -1,3 +1,6 @@
+# Go workspace file
+go.work
+
 # Editor configurations
 **/.idea
 **/.fleet
