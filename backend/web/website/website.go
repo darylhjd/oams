@@ -6,7 +6,7 @@ var (
 	//go:embed *.html
 	Templates embed.FS
 
-	//go:embed css/* js/*
+	//go:embed css/* js/* images/*
 	Static embed.FS
 )
 
