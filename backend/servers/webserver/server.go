@@ -2,17 +2,25 @@ package webserver
 
 import (
 	"fmt"
+	"io/fs"
 	"net/http"
 
 	"go.uber.org/zap"
+
+	"github.com/darylhjd/oats/frontend"
 
 	"github.com/darylhjd/oats/backend/env"
 	"github.com/darylhjd/oats/backend/logger"
 )
 
+const (
+	homeUrl = "/"
+)
+
 // WebServer defines the server structure for the Oats Web Server.
 type WebServer struct {
-	l *zap.Logger
+	l   *zap.Logger
+	app fs.FS
 }
 
 // Start the WebServer.
@@ -29,10 +37,13 @@ func (s *WebServer) Start() error {
 }
 
 func (s *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.l.Debug("webserver - received request",
+		zap.String("url", r.URL.String()))
+
 	mux := http.NewServeMux()
 
 	// Add your paths here.
-	mux.HandleFunc(homeUrl, s.home)
+	mux.Handle(homeUrl, http.FileServer(http.FS(s.app)))
 
 	mux.ServeHTTP(w, r)
 }
@@ -41,12 +52,17 @@ func (s *WebServer) GetLogger() *zap.Logger {
 	return s.l
 }
 
-// NewWebServer creates a new WebServer. Use Start() to start the server.
-func NewWebServer() (*WebServer, error) {
+// New creates a new WebServer. Use Start() to start the server.
+func New() (*WebServer, error) {
 	l, err := logger.NewLogger()
+	if err != nil {
+		return nil, fmt.Errorf("webserver - failed to initialise logger: %w", err)
+	}
+
+	server, err := fs.Sub(frontend.Website, "build")
 	if err != nil {
 		return nil, fmt.Errorf("webserver - failed to initialise: %w", err)
 	}
 
-	return &WebServer{l}, nil
+	return &WebServer{l, server}, nil
 }

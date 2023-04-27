@@ -3,6 +3,6 @@ package webserver
 import "net/http/httptest"
 
 func newTestWebServer() *httptest.Server {
-	webServer, _ := NewWebServer()
+	webServer, _ := New()
 	return httptest.NewServer(webServer)
 }

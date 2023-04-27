@@ -31,7 +31,7 @@ func (s *APIServer) Start() error {
 		return err
 	}
 
-	s.l.Info(fmt.Sprintf("apiserver - service started on port %s", port))
+	s.l.Info("apiserver - service started", zap.String("port", port))
 	return http.ListenAndServe(fmt.Sprintf(":%s", port), s)
 }
 
@@ -48,8 +48,8 @@ func (s *APIServer) GetLogger() *zap.Logger {
 	return s.l
 }
 
-// NewAPIServer creates a new APIServer. Use Start() to start the server.
-func NewAPIServer() (*APIServer, error) {
+// New creates a new APIServer. Use Start() to start the server.
+func New() (*APIServer, error) {
 	l, err := logger.NewLogger()
 	if err != nil {
 		return nil, fmt.Errorf("apiserver - failed to initialise: %w", err)
