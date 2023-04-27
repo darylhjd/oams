@@ -19,6 +19,8 @@ func MustLoad() {
 	switch environment {
 	case AppEnvLocal:
 		err = godotenv.Load(GetEnvLoc())
+	case AppEnvIntegration:
+		return
 	default:
 		err = fmt.Errorf("env - unknown %s value: %s", appEnv, environment)
 	}

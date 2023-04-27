@@ -7,10 +7,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oats/frontend"
-
 	"github.com/darylhjd/oats/backend/env"
 	"github.com/darylhjd/oats/backend/logger"
+	"github.com/darylhjd/oats/frontend"
 )
 
 const (
