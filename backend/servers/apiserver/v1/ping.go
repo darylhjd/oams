@@ -15,7 +15,7 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 Oats API Service is running normally!`
 
 	if _, err := w.Write([]byte(response)); err != nil {
-		v.l.Error("apiserver - could not write response",
+		v.l.Error("apiserver/v1 - could not write response",
 			zap.String("url", pingUrl),
 			zap.Error(err))
 	}
