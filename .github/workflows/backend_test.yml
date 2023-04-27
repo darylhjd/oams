@@ -26,7 +26,7 @@ jobs:
 
     - name: Configuration for private dependencies
       env:
-        TOKEN: ${{ secretes.PERSONAL_ACCESS_TOKEN }}
+        TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: git config --global url."https://darylhjd:${TOKEN}@github.com".insteadOf "https://github.com"
 
     - name: Install dependencies
