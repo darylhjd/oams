@@ -8,6 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/lib/pq"
 
 	_ "github.com/darylhjd/oats/backend/env/autoloader"
 )
@@ -15,7 +16,10 @@ import (
 const (
 	migrationNamespace = "migration"
 
-	migrationDir = "config/migrations"
+	migrationDir         = "config/migrations"
+	createDatabase       = "CREATE DATABASE"
+	dropDatabaseIfExists = "DROP DATABASE IF EXISTS"
+	dropDatabase         = "DROP DATABASE"
 )
 
 //go:embed config/migrations/*.sql
@@ -50,4 +54,45 @@ func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 	}
 
 	return migrate.NewWithSourceInstance(migrationNamespace, migrationSource, connString)
+}
+
+// Create creates a new database with the specified name.
+// Warning, this is a high-risk operation!
+func Create(dbName string, truncate bool) error {
+	db, err := ConnectDB("")
+	if err != nil {
+		return err
+	}
+
+	if truncate {
+		if _, err = db.Db.Exec(dropDatabaseIfExists + pq.QuoteIdentifier(dbName)); err != nil {
+			return err
+		}
+	}
+
+	if _, err = db.Db.Exec(createDatabase + pq.QuoteIdentifier(dbName)); err != nil {
+		return err
+	}
+
+	return db.Close()
+}
+
+// Drop drops a database of the specified name.
+// Warning, this is a high risk operation!
+func Drop(dbName string, mustExist bool) error {
+	db, err := ConnectDB("")
+	if err != nil {
+		return err
+	}
+
+	statement := dropDatabaseIfExists
+	if mustExist {
+		statement = dropDatabase
+	}
+
+	if _, err = db.Db.Exec(statement + pq.QuoteIdentifier(dbName)); err != nil {
+		return err
+	}
+
+	return db.Close()
 }

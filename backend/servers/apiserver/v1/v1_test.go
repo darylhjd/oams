@@ -3,6 +3,7 @@ package v1
 import (
 	"log"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"go.uber.org/zap"
@@ -21,7 +22,10 @@ func TestMain(m *testing.M) {
 	}
 
 	testDb = testEnv.Db
-	tests.RunAndTearDown(m, testEnv, namespace)
+	res := m.Run()
+	tests.TearDown(m, testEnv, namespace)
+
+	os.Exit(res)
 }
 
 func newTestAPIServerV1(t *testing.T) *httptest.Server {
