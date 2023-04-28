@@ -8,13 +8,24 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  GOPRIVATE: "github.com/darylhjd/*"
-
 jobs:
   test-all:
     runs-on: ubuntu-latest
-    
+
+    services:
+      postgres:
+        image: postgres:15.2-bullseye
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          POSTGRES_USER: oats-tester
+          POSTGRES_PASSWORD: oats-test
+        ports:
+          - 32769:5432
+
     steps:
       - uses: actions/checkout@v3
 
@@ -33,6 +44,7 @@ jobs:
 
       - name: Configuration for private dependencies
         env:
+          GOPRIVATE: "github.com/darylhjd/*"
           TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: git config --global url."https://darylhjd:${TOKEN}@github.com".insteadOf "https://github.com"
 
@@ -48,6 +60,14 @@ jobs:
           npm run build
 
       - name: Test backend
+        env:
+          APP_ENV: ${{ vars.APP_ENV }}
+          DATABASE_TYPE: ${{ vars.DATABASE_TYPE }}
+          DATABASE_NAME: ${{ vars.DATABASE_NAME }}
+          DATABASE_USER: ${{ vars.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ vars.DATABASE_PASSWORD }}
+          DATABASE_HOST: ${{ vars.DATABASE_HOST }}
+          DATABASE_PORT: ${{ vars.DATABASE_PORT }}
         run: |
           cd backend
           go test ./...

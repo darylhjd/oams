@@ -4,15 +4,20 @@ import (
 	"net/http"
 
 	"go.uber.org/zap"
+
+	"github.com/darylhjd/oats/backend/database"
 )
 
 const (
+	namespace = "apiserver/v1"
+
 	baseUrl = "/"
 	pingUrl = "/ping"
 )
 
 type APIServerV1 struct {
-	l *zap.Logger
+	l  *zap.Logger
+	db *database.DB
 }
 
 func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +31,6 @@ func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // NewAPIServerV1 creates a new APIServerV1. This is a sub-router and should not be used
 // as a base router.
-func NewAPIServerV1(l *zap.Logger) *APIServerV1 {
-	return &APIServerV1{l: l}
+func NewAPIServerV1(l *zap.Logger, db *database.DB) *APIServerV1 {
+	return &APIServerV1{l, db}
 }

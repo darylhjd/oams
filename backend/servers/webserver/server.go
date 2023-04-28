@@ -7,12 +7,15 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/darylhjd/oats/frontend"
+
 	"github.com/darylhjd/oats/backend/env"
 	"github.com/darylhjd/oats/backend/logger"
-	"github.com/darylhjd/oats/frontend"
 )
 
 const (
+	Namespace = "webserver"
+
 	homeUrl = "/"
 )
 
@@ -24,19 +27,19 @@ type WebServer struct {
 
 // Start the WebServer.
 func (s *WebServer) Start() error {
-	s.l.Info("webserver - starting service...")
+	s.l.Info(fmt.Sprintf("%s - starting service...", Namespace))
 
 	port, err := env.GetWebServerPort()
 	if err != nil {
 		return err
 	}
 
-	s.l.Info(fmt.Sprintf("webserver - service started on port %s", port))
+	s.l.Info(fmt.Sprintf("%s - service started on port %s", Namespace, port))
 	return http.ListenAndServe(fmt.Sprintf(":%s", port), s)
 }
 
 func (s *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.l.Debug("webserver - received request",
+	s.l.Debug(fmt.Sprintf("%s - received request", Namespace),
 		zap.String("url", r.URL.String()))
 
 	mux := http.NewServeMux()
@@ -55,12 +58,12 @@ func (s *WebServer) GetLogger() *zap.Logger {
 func New() (*WebServer, error) {
 	l, err := logger.NewLogger()
 	if err != nil {
-		return nil, fmt.Errorf("webserver - failed to initialise logger: %w", err)
+		return nil, fmt.Errorf("%s - failed to initialise logger: %w", Namespace, err)
 	}
 
 	server, err := fs.Sub(frontend.Website, "build")
 	if err != nil {
-		return nil, fmt.Errorf("webserver - failed to initialise: %w", err)
+		return nil, fmt.Errorf("%s - failed to initialise: %w", Namespace, err)
 	}
 
 	return &WebServer{l, server}, nil
