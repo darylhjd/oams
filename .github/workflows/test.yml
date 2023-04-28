@@ -30,7 +30,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         env:
-          POSTGRES_PASSWORD: $DATABASE_PASSWORD
+          POSTGRES_PASSWORD: oats-test
         ports:
           - 32769:5432
 
