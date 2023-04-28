@@ -3,14 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/darylhjd/oats/backend/env"
 	_ "github.com/darylhjd/oats/backend/env/autoloader"
 	"github.com/darylhjd/oats/backend/servers/webserver"
 )
 
 func main() {
-	env.MustLoad()
-
 	webServer, err := webserver.New()
 	if err != nil {
 		log.Fatalf("cmd - cannot start webserver service: %s", err)
