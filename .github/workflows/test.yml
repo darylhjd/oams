@@ -9,10 +9,13 @@ on:
     branches: [ "main" ]
 
 env:
-  GOPRIVATE: "github.com/darylhjd/*"
-
   APP_ENV: ${{ vars.APP_ENV }}
   DATABASE_TYPE: ${{ vars.DATABASE_TYPE }}
+  DATABASE_NAME: ${{ vars.DATABASE_NAME }}
+  DATABASE_USER: ${{ vars.DATABASE_USER }}
+  DATABASE_PASSWORD: ${{ vars.DATABASE_PASSWORD }}
+  DATABASE_HOST: ${{ vars.DATABASE_HOST }}
+  DATABASE_PORT: ${{ vars.DATABASE_PORT }}
 
 jobs:
   test-all:
@@ -27,15 +30,12 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         env:
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: $DATABASE_PASSWORD
         ports:
-          - 5432:5432
+          - $DATABASE_PORT:5432
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Check environment
-        run: echo $APP_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -52,6 +52,7 @@ jobs:
 
       - name: Configuration for private dependencies
         env:
+          GOPRIVATE: "github.com/darylhjd/*"
           TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: git config --global url."https://darylhjd:${TOKEN}@github.com".insteadOf "https://github.com"
 
