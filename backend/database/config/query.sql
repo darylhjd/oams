@@ -1,7 +1,8 @@
 -- name: GetStudent :one
 SELECT *
 FROM Students
-WHERE matric_no = $1 LIMIT 1;
+WHERE matric_no = $1
+LIMIT 1;
 
 -- name: ListStudents :many
 SELECT *
