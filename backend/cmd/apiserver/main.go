@@ -10,7 +10,7 @@ import (
 func main() {
 	apiServer, err := apiserver.New()
 	if err != nil {
-		log.Fatalf("cmd - cannot start apiserver service: %s", err)
+		log.Fatalf("cmd - cannot start apiserver service: %s\n", err)
 	}
 
 	if err = apiServer.Start(); err != nil {
