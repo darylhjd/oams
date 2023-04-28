@@ -32,6 +32,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Check environment
+        env:
+          APP_ENV: ${{ env.APP_ENV }}
+        run: echo "$APP_ENV"
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
