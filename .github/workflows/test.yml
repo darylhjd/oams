@@ -10,11 +10,11 @@ on:
 
 env:
   GOPRIVATE: "github.com/darylhjd/*"
+  APP_ENV: ${{ env.APP_ENV }}
 
 jobs:
   test-all:
     runs-on: ubuntu-latest
-    environment: integration-testing
 
     services:
       postgres:
@@ -33,9 +33,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Check environment
-        env:
-          APP_ENV: ${{ env.APP_ENV }}
-        run: echo "$APP_ENV"
+        run: echo $APP_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v4
