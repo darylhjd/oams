@@ -10,7 +10,7 @@ import (
 )
 
 func TestAPIServerV1_ping(t *testing.T) {
-	server := newTestAPIServerV1NoDB(t)
+	server := newTestAPIServerV1(t)
 	defer server.Close()
 
 	reqUrl, err := url.JoinPath(server.URL, "/ping")

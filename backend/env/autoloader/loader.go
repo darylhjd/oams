@@ -1,3 +1,11 @@
+/*
+Package autoloader is used to load the environment variables automatically by importing this
+library for side effects. Only in certain circumstances should this be used:
+- When creating a new cmd.
+- For testing.
+Please use this wisely! It is tempting to import this everywhere but this will result in
+unnecessary calls to this function.
+*/
 package autoloader
 
 import (
