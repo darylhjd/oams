@@ -10,7 +10,7 @@ on:
 
 env:
   GOPRIVATE: "github.com/darylhjd/*"
-  APP_ENV: ${{ env.APP_ENV }}
+  APP_ENV: ${{ vars.APP_ENV }}
 
 jobs:
   test-all:
