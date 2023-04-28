@@ -12,7 +12,11 @@ import (
 	_ "github.com/darylhjd/oats/backend/env/autoloader"
 )
 
-const namespace = "migrations"
+const (
+	migrationNamespace = "migration"
+
+	migrationDir = "config/migrations"
+)
 
 //go:embed config/migrations/*.sql
 var migrations embed.FS
@@ -22,10 +26,10 @@ var migrations embed.FS
 func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 	// If both not provided.
 	if db == nil && dbName == "" {
-		return nil, fmt.Errorf("%s - database name or instance not provided", namespace)
+		return nil, fmt.Errorf("%s - database name or instance not provided", migrationNamespace)
 	}
 
-	migrationSource, err := iofs.New(migrations, "config/migrations")
+	migrationSource, err := iofs.New(migrations, migrationDir)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +41,7 @@ func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 			return nil, err
 		}
 
-		return migrate.NewWithInstance(namespace, migrationSource, "database", instance)
+		return migrate.NewWithInstance(migrationNamespace, migrationSource, Namespace, instance)
 	}
 
 	_, connString, err := GetConnectionProperties(dbName)
@@ -45,5 +49,5 @@ func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 		return nil, err
 	}
 
-	return migrate.NewWithSourceInstance(namespace, migrationSource, connString)
+	return migrate.NewWithSourceInstance(migrationNamespace, migrationSource, connString)
 }

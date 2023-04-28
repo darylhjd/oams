@@ -12,6 +12,11 @@ import (
 	_ "github.com/darylhjd/oats/backend/env/autoloader"
 )
 
+const (
+	createDatabase       = "CREATE DATABASE"
+	dropDatabaseIfExists = "DROP DATABASE IF EXISTS"
+)
+
 // TestEnv provides the caller with a sand-boxed test environment.
 type TestEnv struct {
 	Db  *database.DB
@@ -70,7 +75,12 @@ func CreateAndConnect(_ *testing.M, dbName string) (*database.DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Db.Exec("CREATE DATABASE" + pq.QuoteIdentifier(dbName))
+	_, err = db.Db.Exec(dropDatabaseIfExists + pq.QuoteIdentifier(dbName))
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Db.Exec(createDatabase + pq.QuoteIdentifier(dbName))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +99,7 @@ func DropDatabase(_ *testing.M, dbName string) error {
 		return err
 	}
 
-	_, err = db.Db.Exec("DROP DATABASE" + pq.QuoteIdentifier(dbName))
+	_, err = db.Db.Exec(dropDatabaseIfExists + pq.QuoteIdentifier(dbName))
 	if err != nil {
 		return err
 	}

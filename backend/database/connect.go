@@ -10,6 +10,8 @@ import (
 	"github.com/darylhjd/oats/backend/env"
 )
 
+const Namespace = "database"
+
 // DB contains the database connection pool and the query interface to the database.
 type DB struct {
 	Db *sql.DB
@@ -35,7 +37,7 @@ func Connect() (*DB, error) {
 func ConnectDB(dbName string) (*DB, error) {
 	driver, connString, err := GetConnectionProperties(dbName)
 	if err != nil {
-		return nil, fmt.Errorf("database - cannot parse connection properties: %w", err)
+		return nil, fmt.Errorf("%s - cannot parse connection properties: %w", Namespace, err)
 	}
 
 	db, err := sql.Open(driver, connString)
