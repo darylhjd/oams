@@ -10,7 +10,7 @@ import (
 func main() {
 	webServer, err := webserver.New()
 	if err != nil {
-		log.Fatalf("cmd - cannot start webserver service: %s", err)
+		log.Fatalf("cmd - cannot start webserver service: %s\n", err)
 	}
 
 	if err = webServer.Start(); err != nil {

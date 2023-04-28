@@ -7,6 +7,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/darylhjd/oats/backend/database"
 	"github.com/darylhjd/oats/backend/env"
 	"github.com/darylhjd/oats/backend/logger"
 	"github.com/darylhjd/oats/backend/servers/apiserver/v1"
@@ -55,5 +56,10 @@ func New() (*APIServer, error) {
 		return nil, fmt.Errorf("apiserver - failed to initialise: %w", err)
 	}
 
-	return &APIServer{l, v1.NewAPIServerV1(l)}, nil
+	db, err := database.Connect()
+	if err != nil {
+		return nil, fmt.Errorf("apiserver - could not connect to database: %w", err)
+	}
+
+	return &APIServer{l, v1.NewAPIServerV1(l, db)}, nil
 }

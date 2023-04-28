@@ -10,7 +10,7 @@ import (
 )
 
 func TestAPIServerV1_base(t *testing.T) {
-	server := newTestAPIServerV1()
+	server := newTestAPIServerV1NoDB(t)
 	defer server.Close()
 
 	reqUrl, err := url.JoinPath(server.URL, "/")
