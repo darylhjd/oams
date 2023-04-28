@@ -24,9 +24,8 @@ jobs:
           DATABASE_TYPE: ${{ secrets.DATABASE_TYPE }}
           POSTGRES_USER: ${{ secrets.DATABASE_USER }}
           POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
         ports:
-          - $DATABASE_PORT:5432
+          - 5432:5432
 
     steps:
       - uses: actions/checkout@v3
