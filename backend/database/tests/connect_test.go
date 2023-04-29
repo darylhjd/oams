@@ -12,7 +12,7 @@ import (
 
 func TestConnectDB(t *testing.T) {
 	a := assert.New(t)
-	a.Nil(testDb.Db.Ping())
+	a.Nil(testDb.C.Ping())
 }
 
 func TestGetConnectionProperties(t *testing.T) {

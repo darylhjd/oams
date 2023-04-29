@@ -14,7 +14,7 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	response := "Pong~\n\n" +
 		"Oats API Service is running normally!"
 
-	if v.db.Db.Ping() != nil {
+	if v.db.C.Ping() != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response = "Uh oh, not connected!"
 	}

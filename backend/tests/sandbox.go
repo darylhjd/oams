@@ -31,7 +31,7 @@ func SetUp(_ *testing.M, namespace string) (*TestEnv, error) {
 		log.Fatal(err)
 	}
 
-	mig, err := database.NewMigrate(namespace, testDb.Db)
+	mig, err := database.NewMigrate(namespace, testDb.C)
 	if err != nil {
 		log.Fatal(err)
 	}

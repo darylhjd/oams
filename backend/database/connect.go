@@ -14,13 +14,13 @@ const Namespace = "database"
 
 // DB contains the database connection pool and the query interface to the database.
 type DB struct {
-	Db *sql.DB
-	Q  *Queries
+	C *sql.DB
+	Q *Queries
 }
 
 // Close the database connection.
 func (d *DB) Close() error {
-	return d.Db.Close()
+	return d.C.Close()
 }
 
 // Connect and return an interface to the Oats database.

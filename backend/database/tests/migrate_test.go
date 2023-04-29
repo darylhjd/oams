@@ -41,7 +41,7 @@ func TestMigrations(t *testing.T) {
 	}
 
 	// This time, use database instance to get migrator.
-	migrator, err = database.NewMigrate("", migratorTestDb.Db)
+	migrator, err = database.NewMigrate("", migratorTestDb.C)
 	a.Nil(err)
 
 	sErr, dbErr = migrator.Close()
