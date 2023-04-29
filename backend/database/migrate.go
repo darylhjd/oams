@@ -65,12 +65,12 @@ func Create(dbName string, truncate bool) error {
 	}
 
 	if truncate {
-		if _, err = db.Db.Exec(dropDatabaseIfExists + pq.QuoteIdentifier(dbName)); err != nil {
+		if _, err = db.C.Exec(dropDatabaseIfExists + pq.QuoteIdentifier(dbName)); err != nil {
 			return err
 		}
 	}
 
-	if _, err = db.Db.Exec(createDatabase + pq.QuoteIdentifier(dbName)); err != nil {
+	if _, err = db.C.Exec(createDatabase + pq.QuoteIdentifier(dbName)); err != nil {
 		return err
 	}
 
@@ -90,7 +90,7 @@ func Drop(dbName string, mustExist bool) error {
 		statement = dropDatabase
 	}
 
-	if _, err = db.Db.Exec(statement + pq.QuoteIdentifier(dbName)); err != nil {
+	if _, err = db.C.Exec(statement + pq.QuoteIdentifier(dbName)); err != nil {
 		return err
 	}
 

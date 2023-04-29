@@ -17,7 +17,7 @@ func TestSetUpTearDown(t *testing.T) {
 	a.Nil(err)
 
 	// Check that the database is created.
-	a.Nil(testEnv.Db.Db.Ping())
+	a.Nil(testEnv.Db.C.Ping())
 
 	// Check that the migration ran correctly.
 	_, err = testEnv.Db.Q.ListStudents(context.Background())
