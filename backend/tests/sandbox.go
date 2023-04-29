@@ -53,10 +53,6 @@ func TearDown(_ *testing.M, testEnv *TestEnv, namespace string) {
 		log.Fatal(sErr, dErr)
 	}
 
-	if err := testEnv.Db.Close(); err != nil {
-		log.Fatal(err)
-	}
-
 	if err := database.Drop(namespace, true); err != nil {
 		log.Fatal(err)
 	}
