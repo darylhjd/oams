@@ -39,6 +39,7 @@ func parseFlags() (*arguments, error) {
 			"By default, this will do a no-op migration.")
 	steps := flag.Int("steps", noOp,
 		"Number of steps up or down to migrate the database.\n"+
+			fmt.Sprintf("Value should not be %d.\n", noOp)+
 			"One of `version`, `steps`, `full-up`, or `full-down` must be set.\n"+
 			"By default, this will do a no-op migration.")
 	fullUp := flag.Bool("full-up", false,
