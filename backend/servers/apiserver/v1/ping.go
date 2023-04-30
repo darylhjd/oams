@@ -12,7 +12,7 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	v.l.Debug(fmt.Sprintf("%s - handling ping request", namespace))
 
 	response := "Pong~\n\n" +
-		"Oats API Service is running normally!"
+		"OAMS API Service is running normally!"
 
 	if v.db.C.Ping() != nil {
 		w.WriteHeader(http.StatusInternalServerError)

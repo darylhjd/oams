@@ -7,10 +7,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oats/backend/database"
-	"github.com/darylhjd/oats/backend/env"
-	"github.com/darylhjd/oats/backend/logger"
-	"github.com/darylhjd/oats/backend/servers/apiserver/v1"
+	"github.com/darylhjd/oams/backend/database"
+	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/logger"
+	"github.com/darylhjd/oams/backend/servers/apiserver/v1"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 	v1Url = "/api/v1/"
 )
 
-// APIServer defines the server structure for the Oats API service.
+// APIServer defines the server structure for the OAMS API service.
 type APIServer struct {
 	l  *zap.Logger
 	db *database.DB

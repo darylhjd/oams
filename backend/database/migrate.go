@@ -10,11 +10,11 @@ import (
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/lib/pq"
 
-	_ "github.com/darylhjd/oats/backend/env/autoloader"
+	_ "github.com/darylhjd/oams/backend/env/autoloader"
 )
 
 const (
-	migrationNamespace = "migration"
+	MigrationNamespace = "database/migration"
 
 	migrationDir         = "config/migrations"
 	createDatabase       = "CREATE DATABASE"
@@ -30,7 +30,7 @@ var migrations embed.FS
 func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 	// If both not provided.
 	if db == nil && dbName == "" {
-		return nil, fmt.Errorf("%s - database name or instance not provided", migrationNamespace)
+		return nil, fmt.Errorf("%s - database name or instance not provided", MigrationNamespace)
 	}
 
 	migrationSource, err := iofs.New(migrations, migrationDir)
@@ -45,7 +45,7 @@ func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 			return nil, err
 		}
 
-		return migrate.NewWithInstance(migrationNamespace, migrationSource, Namespace, instance)
+		return migrate.NewWithInstance(MigrationNamespace, migrationSource, Namespace, instance)
 	}
 
 	_, connString, err := GetConnectionProperties(dbName)
@@ -53,10 +53,11 @@ func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 		return nil, err
 	}
 
-	return migrate.NewWithSourceInstance(migrationNamespace, migrationSource, connString)
+	return migrate.NewWithSourceInstance(MigrationNamespace, migrationSource, connString)
 }
 
 // Create creates a new database with the specified name.
+// Use truncate to specify if the operation deletes an existing database with the same name and creates a new one.
 // Warning, this is a high-risk operation!
 func Create(dbName string, truncate bool) error {
 	db, err := ConnectDB("")
@@ -78,6 +79,7 @@ func Create(dbName string, truncate bool) error {
 }
 
 // Drop drops a database of the specified name.
+// Use mustExist to specify if the operation fails if the database does not exist.
 // Warning, this is a high risk operation!
 func Drop(dbName string, mustExist bool) error {
 	db, err := ConnectDB("")

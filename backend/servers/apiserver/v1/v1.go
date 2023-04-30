@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oats/backend/database"
+	"github.com/darylhjd/oams/backend/database"
 )
 
 const (

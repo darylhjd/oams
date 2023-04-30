@@ -8,8 +8,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oats/backend/database"
-	"github.com/darylhjd/oats/backend/tests"
+	"github.com/darylhjd/oams/backend/database"
+	"github.com/darylhjd/oams/backend/tests"
 )
 
 // testDb provides a package-level sand-boxed database for testing.

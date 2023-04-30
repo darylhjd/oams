@@ -1,4 +1,4 @@
-# This workflow executes all tests in Oats.
+# This workflow executes all tests in OAMS.
 
 name: Test
 
@@ -21,8 +21,8 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         env:
-          POSTGRES_USER: oats-tester
-          POSTGRES_PASSWORD: oats-test
+          POSTGRES_USER: oams-tester
+          POSTGRES_PASSWORD: oams-test
         ports:
           - 32769:5432
 
