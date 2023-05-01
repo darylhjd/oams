@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	MigrationNamespace = "db:migration"
+	MigrationNamespace = "database/migration"
 
 	migrationDir         = "config/migrations"
 	createDatabase       = "CREATE DATABASE"
