@@ -12,6 +12,6 @@
 
 <div align="center">
 
-    <img src=".github/assets/spark_joy.jpg" alt="Spark Joy">
+<img src=".github/assets/spark_joy.jpg" alt="Spark Joy">
 
 </div>
