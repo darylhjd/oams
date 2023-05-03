@@ -57,7 +57,7 @@ func validateArguments(args *arguments) error {
 		return fmt.Errorf("%s - invalid options provided for operation", database.MigrationNamespace)
 	}
 
-	// If non-migration operation, we can exit early
+	// If non-migration operation, we can exit early.
 	if !args.migrate {
 		return nil
 	}

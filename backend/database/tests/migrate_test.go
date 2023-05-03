@@ -10,8 +10,6 @@ import (
 
 const migrationTest = "migration_test"
 
-var migratorTestDb *database.DB
-
 func TestMigrations(t *testing.T) {
 	// We need to test in order.
 	// 1. Create
@@ -28,7 +26,7 @@ func TestMigrations(t *testing.T) {
 	a.Nil(database.Create(migrationTest, true))
 
 	var err error
-	migratorTestDb, err = database.ConnectDB(migrationTest)
+	migratorTestDb, err := database.ConnectDB(migrationTest)
 	a.Nil(err)
 
 	// Check Migrator.

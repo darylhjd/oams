@@ -3,7 +3,7 @@ module github.com/darylhjd/oams/backend
 go 1.20
 
 require (
-	github.com/darylhjd/oams/frontend v0.0.0-20230503220729-1d0bb05c0fa6
+	github.com/darylhjd/oams/frontend v0.0.0-20230503222224-ddcfa83135c4
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9

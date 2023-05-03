@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/database"
+	"github.com/darylhjd/oams/backend/servers"
 )
 
 const (
@@ -23,8 +24,8 @@ type APIServerV1 struct {
 func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(baseUrl, v.base)
-	mux.HandleFunc(pingUrl, v.ping)
+	mux.HandleFunc(baseUrl, servers.AllowMethods(v.base, http.MethodGet))
+	mux.HandleFunc(pingUrl, servers.AllowMethods(v.ping, http.MethodGet))
 
 	mux.ServeHTTP(w, r)
 }
