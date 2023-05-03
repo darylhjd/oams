@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	_ "github.com/darylhjd/oats/backend/env/autoloader"
-	"github.com/darylhjd/oats/backend/servers/apiserver"
+	_ "github.com/darylhjd/oams/backend/env/autoloader"
+	"github.com/darylhjd/oams/backend/servers/apiserver"
 )
 
 func main() {

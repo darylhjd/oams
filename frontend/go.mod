@@ -1,3 +1,3 @@
-module github.com/darylhjd/oats/frontend
+module github.com/darylhjd/oams/frontend
 
 go 1.20

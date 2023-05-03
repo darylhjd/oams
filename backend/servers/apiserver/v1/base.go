@@ -17,7 +17,7 @@ func (v *APIServerV1) base(w http.ResponseWriter, r *http.Request) {
 
 	v.l.Debug(fmt.Sprintf("%s - handling base request", namespace))
 
-	response := "Welcome to Oats API Service V1!\n\n" +
+	response := "Welcome to OAMS API Service V1!\n\n" +
 		"To get started, read the API docs."
 
 	if _, err := w.Write([]byte(response)); err != nil {

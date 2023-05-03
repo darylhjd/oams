@@ -27,5 +27,5 @@ func TestAPIServerV1_base(t *testing.T) {
 	}
 
 	a.Equal(http.StatusOK, resp.StatusCode)
-	a.Contains(string(body), "Welcome to Oats API Service V1!")
+	a.Contains(string(body), "Welcome to OAMS API Service V1!")
 }

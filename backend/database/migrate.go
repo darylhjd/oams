@@ -10,7 +10,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/lib/pq"
 
-	_ "github.com/darylhjd/oats/backend/env/autoloader"
+	_ "github.com/darylhjd/oams/backend/env/autoloader"
 )
 
 const (

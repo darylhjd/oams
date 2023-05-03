@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/darylhjd/oats/backend/env"
+	"github.com/darylhjd/oams/backend/env"
 )
 
 // parseFlags for the programme.

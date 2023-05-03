@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/darylhjd/oats/backend/database"
+	"github.com/darylhjd/oams/backend/database"
 )
 
 // validateArguments that were provided to the application.

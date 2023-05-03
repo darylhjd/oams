@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/darylhjd/oats/backend/database"
+	"github.com/darylhjd/oams/backend/database"
 )
 
 func TestConnectDB(t *testing.T) {

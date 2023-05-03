@@ -7,10 +7,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oats/frontend"
-
-	"github.com/darylhjd/oats/backend/env"
-	"github.com/darylhjd/oats/backend/logger"
+	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/logger"
+	"github.com/darylhjd/oams/frontend"
 )
 
 const (
@@ -19,7 +18,7 @@ const (
 	homeUrl = "/"
 )
 
-// WebServer defines the server structure for the Oats Web Server.
+// WebServer defines the server structure for the OAMS Web Server.
 type WebServer struct {
 	l   *zap.Logger
 	app fs.FS

@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/darylhjd/oats/backend/env"
+	"github.com/darylhjd/oams/backend/env"
 )
 
 const Namespace = "database"
@@ -23,7 +23,7 @@ func (d *DB) Close() error {
 	return d.C.Close()
 }
 
-// Connect and return an interface to the Oats database.
+// Connect and return an interface to the OAMS database.
 func Connect() (*DB, error) {
 	name, err := env.GetDatabaseName()
 	if err != nil {

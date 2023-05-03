@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/darylhjd/oats/backend/database"
-	"github.com/darylhjd/oats/backend/tests"
+	"github.com/darylhjd/oams/backend/database"
+	"github.com/darylhjd/oams/backend/tests"
 )
 
 var testDb *database.DB
