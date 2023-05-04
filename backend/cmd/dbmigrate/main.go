@@ -15,9 +15,10 @@ type arguments struct {
 	name string
 
 	// Operations
-	migrate bool
-	create  bool
-	drop    bool
+	migrate  bool
+	create   bool
+	drop     bool
+	truncate bool
 
 	// Options
 	version  uint
@@ -53,6 +54,8 @@ func main() {
 		err = createOp(args, migrator)
 	case args.drop:
 		err = dropOp(args, migrator)
+	case args.truncate:
+		err = truncateOp(args, migrator)
 	default:
 		log.Fatalf("%s - reached impossible operation", database.MigrationNamespace)
 	}
@@ -88,4 +91,8 @@ func createOp(args *arguments, _ *migrate.Migrate) error {
 
 func dropOp(args *arguments, _ *migrate.Migrate) error {
 	return database.Drop(args.name, true)
+}
+
+func truncateOp(_ *arguments, migrator *migrate.Migrate) error {
+	return migrator.Drop()
 }

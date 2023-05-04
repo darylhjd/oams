@@ -20,17 +20,23 @@ func parseFlags() (*arguments, error) {
 			"If no name is provided, then the default database will be used.")
 	mig := flag.Bool("migrate", false,
 		"Set this flag to tell the programme that you intend to do migrations on the specified database.\n"+
-			"One of `migrate`, `create`, or `drop` must be set.\n"+
+			"Specify the name of the database with the `name` flag.\n"+
+			"One of `migrate`, `create`, `drop`, or `truncate` must be set.\n"+
 			"By default, this is false.")
 	create := flag.Bool("create", false,
 		"Set this flag to tell the programme that you intend to create a new database.\n"+
 			"Specify the name of the database with the `name` flag.\n"+
-			"One of `migrate`, `create`, or `drop` must be set.\n"+
+			"One of `migrate`, `create`, `drop`, or `truncate` must be set.\n"+
 			"By default, this is false.")
 	drop := flag.Bool("drop", false,
 		"Set this flag to tell the programme that you intend to drop a database.\n"+
 			"Specify the name of the database with the `name` flag.\n"+
-			"One of `migrate`, `create`, or `drop` must be set.\n"+
+			"One of `migrate`, `create`, `drop`, or `truncate` must be set.\n"+
+			"By default, this is false.")
+	truncate := flag.Bool("truncate", false,
+		"Set this flag to tell the programme that you intend to drop everything (tables, data, etc...) on the specified database.\n"+
+			"Specify the name of the database with the `name` flag.\n"+
+			"One of `migrate`, `create`, `drop`, or `truncate` must be set.\n"+
 			"By default, this is false.")
 	version := flag.Uint("version", noOp,
 		"Version of the database to migrate to.\n"+
@@ -58,6 +64,7 @@ func parseFlags() (*arguments, error) {
 		migrate:  *mig,
 		create:   *create,
 		drop:     *drop,
+		truncate: *truncate,
 		version:  *version,
 		steps:    *steps,
 		fullUp:   *fullUp,
