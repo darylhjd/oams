@@ -28,6 +28,10 @@ func validateArguments(args *arguments) error {
 		ops++
 	}
 
+	if args.truncate {
+		ops++
+	}
+
 	if ops == noOp {
 		return fmt.Errorf("%s - no operation specified", database.MigrationNamespace)
 	} else if ops > minOp {
