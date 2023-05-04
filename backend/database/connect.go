@@ -10,7 +10,12 @@ import (
 	"github.com/darylhjd/oams/backend/env"
 )
 
-const Namespace = "database"
+const (
+	Namespace = "database"
+
+	sslMode     = "sslmode"
+	sslRootCert = "sslrootcert"
+)
 
 // DB contains the database connection pool and the query interface to the database.
 type DB struct {
@@ -80,9 +85,20 @@ func GetConnectionProperties(dbName string) (driver, connString string, err erro
 		return "", "", err
 	}
 
-	// TODO: Set up SSL.
+	// Check SSL mode.
+	ssl, err := env.GetDatabaseSSLMode()
+	if err != nil {
+		return "", "", err
+	}
+
+	sslRootCertLoc, err := env.GetDatabaseSSLRootCertLocation()
+	if err != nil {
+		return "", "", err
+	}
+
 	params := url.Values{}
-	params.Set("sslmode", "disable")
+	params.Set(sslMode, ssl)
+	params.Set(sslRootCert, sslRootCertLoc)
 
 	return driver, (&url.URL{
 		Scheme:   driver,
