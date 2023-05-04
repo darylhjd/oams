@@ -76,51 +76,7 @@ func Test_validateArguments(t *testing.T) {
 			arguments{
 				name:    "testing",
 				migrate: true,
-				create:  false,
-				drop:    false,
 				version: 1,
-			},
-			false,
-			"",
-		},
-		{
-			"create operation specified",
-			arguments{
-				name:    "testing",
-				migrate: false,
-				create:  true,
-				drop:    false,
-			},
-			false,
-			"",
-		},
-		{
-			"create operation specified but with options",
-			arguments{
-				name:   "testing",
-				create: true,
-				fullUp: true,
-			},
-			true,
-			"invalid options provided for operation",
-		},
-		{
-			"drop operation specified but with options",
-			arguments{
-				name:     "testing",
-				drop:     true,
-				fullDown: true,
-			},
-			true,
-			"invalid options provided for operation",
-		},
-		{
-			"drop operation specified",
-			arguments{
-				name:    "testing",
-				migrate: false,
-				create:  false,
-				drop:    true,
 			},
 			false,
 			"",
@@ -154,6 +110,63 @@ func Test_validateArguments(t *testing.T) {
 			},
 			false,
 			"",
+		},
+		{
+			"create operation specified",
+			arguments{
+				name:   "testing",
+				create: true,
+			},
+			false,
+			"",
+		},
+		{
+			"create operation specified but with options",
+			arguments{
+				name:   "testing",
+				create: true,
+				fullUp: true,
+			},
+			true,
+			"invalid options provided for operation",
+		},
+		{
+			"drop operation specified",
+			arguments{
+				name: "testing",
+				drop: true,
+			},
+			false,
+			"",
+		},
+		{
+			"drop operation specified but with options",
+			arguments{
+				name:     "testing",
+				drop:     true,
+				fullDown: true,
+			},
+			true,
+			"invalid options provided for operation",
+		},
+		{
+			"truncate operation specified",
+			arguments{
+				name:     "testing",
+				truncate: true,
+			},
+			false,
+			"",
+		},
+		{
+			"truncate operation specified but with options",
+			arguments{
+				name:     "testing",
+				truncate: true,
+				fullDown: true,
+			},
+			true,
+			"invalid options provided for operation",
 		},
 	}
 
