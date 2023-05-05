@@ -13,10 +13,13 @@ import (
 const (
 	namespace = "apiserver/v1"
 
+	Url = "/api/v1/"
+
 	baseUrl            = "/"
 	pingUrl            = "/ping"
 	loginUrl           = "/login"
 	msLoginCallbackUrl = "/ms-login-callback"
+	protectedUrl       = "/protected"
 )
 
 type APIServerV1 struct {
@@ -33,6 +36,7 @@ func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux.HandleFunc(pingUrl, servers.AllowMethods(v.ping, http.MethodGet))
 	mux.HandleFunc(loginUrl, v.login)
 	mux.HandleFunc(msLoginCallbackUrl, servers.AllowMethods(v.msLoginCallback, http.MethodPost))
+	mux.HandleFunc(protectedUrl, servers.CheckAuthorised(v.protected))
 
 	mux.ServeHTTP(w, r)
 }

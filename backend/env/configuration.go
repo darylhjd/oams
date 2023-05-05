@@ -29,7 +29,8 @@ func verifyApiServerConfiguration() error {
 		apiServerAzureTenantId,
 		apiServerAzureClientId,
 		apiServerAzureClientSecret,
-		apiServerAzureLoginScope}
+		apiServerAzureLoginScope,
+		apiServerAzureLoginCallbackUrl}
 
 	baseErr := fmt.Errorf("%s - configuration verification failed for %s", namespace, ConfigurationApiServer)
 	if err := checkRequiredEnvs(envs...); err != nil {
