@@ -11,6 +11,7 @@ on:
 jobs:
   test-all:
     runs-on: ubuntu-latest
+    environment: integration-test
 
     services:
       postgres:
@@ -60,15 +61,6 @@ jobs:
           npm run build
 
       - name: Test backend
-        env:
-          APP_ENV: ${{ vars.APP_ENV }}
-          DATABASE_TYPE: ${{ vars.DATABASE_TYPE }}
-          DATABASE_NAME: ${{ vars.DATABASE_NAME }}
-          DATABASE_USER: ${{ vars.DATABASE_USER }}
-          DATABASE_PASSWORD: ${{ vars.DATABASE_PASSWORD }}
-          DATABASE_HOST: ${{ vars.DATABASE_HOST }}
-          DATABASE_PORT: ${{ vars.DATABASE_PORT }}
-          DATABASE_SSL_MODE: ${{ vars.DATABASE_SSL_MODE }}
         run: |
           cd backend
           go test ./...

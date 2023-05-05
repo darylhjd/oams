@@ -9,12 +9,7 @@ import (
 
 // parseFlags for the programme.
 func parseFlags() (*arguments, error) {
-	defaultDatabaseName, err := env.GetDatabaseName()
-	if err != nil {
-		return nil, err
-	}
-
-	name := flag.String("name", defaultDatabaseName,
+	name := flag.String("name", env.GetDatabaseName(),
 		"Name of the database to do operation on.\n"+
 			"It is always good to specify which database you need explicitly to avoid any mistakes.\n"+
 			"If no name is provided, then the default database will be used.")

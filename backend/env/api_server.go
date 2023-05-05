@@ -1,5 +1,7 @@
 package env
 
+import "os"
+
 const (
 	apiServerPort              = "API_SERVER_PORT"
 	apiServerAzureTenantId     = "API_SERVER_AZURE_TENANT_ID"
@@ -9,31 +11,26 @@ const (
 )
 
 // GetAPIServerPort returns the API_SERVER_PORT environment variable.
-// Note that this variable is required.
-func GetAPIServerPort() (string, error) {
-	return getRequiredEnv(apiServerPort)
+func GetAPIServerPort() string {
+	return os.Getenv(apiServerPort)
 }
 
 // GetAPIServerAzureTenantID returns the API_SERVER_AZURE_TENANT_ID environment variable.
-// Note that this variable is required.
-func GetAPIServerAzureTenantID() (string, error) {
-	return getRequiredEnv(apiServerAzureTenantId)
+func GetAPIServerAzureTenantID() string {
+	return os.Getenv(apiServerAzureTenantId)
 }
 
 // GetAPIServerAzureClientID returns the API_SERVER_AZURE_CLIENT_ID environment variable.
-// Note that this variable is required.
-func GetAPIServerAzureClientID() (string, error) {
-	return getRequiredEnv(apiServerAzureClientId)
+func GetAPIServerAzureClientID() string {
+	return os.Getenv(apiServerAzureClientId)
 }
 
 // GetAPIServerAzureClientSecret returns the API_SERVER_AZURE_CLIENT_SECRET environment variable.
-// Note that this variable is required.
-func GetAPIServerAzureClientSecret() (string, error) {
-	return getRequiredEnv(apiServerAzureClientSecret)
+func GetAPIServerAzureClientSecret() string {
+	return os.Getenv(apiServerAzureClientSecret)
 }
 
 // GetAPIServerAzureLoginScope returns the API_SERVER_AZURE_LOGIN_SCOPE environment variable.
-// Note that this variable is required.
-func GetAPIServerAzureLoginScope() (string, error) {
-	return getRequiredEnv(apiServerAzureLoginScope)
+func GetAPIServerAzureLoginScope() string {
+	return os.Getenv(apiServerAzureLoginScope)
 }

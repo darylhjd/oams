@@ -30,12 +30,7 @@ func (d *DB) Close() error {
 
 // Connect and return an interface to the OAMS database.
 func Connect() (*DB, error) {
-	name, err := env.GetDatabaseName()
-	if err != nil {
-		return nil, err
-	}
-
-	return ConnectDB(name)
+	return ConnectDB(env.GetDatabaseName())
 }
 
 // ConnectDB is similar to Connect but allows you to specify a specific database to use.
@@ -60,50 +55,17 @@ func ConnectDB(dbName string) (*DB, error) {
 
 // GetConnectionProperties returns the connection strings required to connect to a database.
 func GetConnectionProperties(dbName string) (driver, connString string, err error) {
-	driver, err = env.GetDatabaseType()
-	if err != nil {
-		return "", "", err
-	}
+	driver = env.GetDatabaseType()
 
-	user, err := env.GetDatabaseUser()
-	if err != nil {
-		return "", "", err
-	}
-
-	password, err := env.GetDatabasePassword()
-	if err != nil {
-		return "", "", err
-	}
-
-	host, err := env.GetDatabaseHost()
-	if err != nil {
-		return "", "", err
-	}
-
-	port, err := env.GetDatabasePort()
-	if err != nil {
-		return "", "", err
-	}
-
-	// Check SSL mode.
-	ssl, err := env.GetDatabaseSSLMode()
-	if err != nil {
-		return "", "", err
-	}
-
-	sslRootCertLoc, err := env.GetDatabaseSSLRootCertLocation()
-	if err != nil {
-		return "", "", err
-	}
-
+	// Set SSL mode.
 	params := url.Values{}
-	params.Set(sslMode, ssl)
-	params.Set(sslRootCert, sslRootCertLoc)
+	params.Set(sslMode, env.GetDatabaseSSLMode())
+	params.Set(sslRootCert, env.GetDatabaseSSLRootCertLocation())
 
 	return driver, (&url.URL{
 		Scheme:   driver,
-		User:     url.UserPassword(user, password),
-		Host:     fmt.Sprintf("%s:%s", host, port),
+		User:     url.UserPassword(env.GetDatabaseUser(), env.GetDatabasePassword()),
+		Host:     fmt.Sprintf("%s:%s", env.GetDatabaseHost(), env.GetDatabasePort()),
 		Path:     dbName,
 		RawQuery: params.Encode(),
 	}).String(), nil

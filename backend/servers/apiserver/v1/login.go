@@ -9,20 +9,8 @@ import (
 
 func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 	// https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
-	clientId, err := env.GetAPIServerAzureClientID()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	scope, err := env.GetAPIServerAzureLoginScope()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	redirectString, err := v.azure.AuthCodeURL(r.Context(), clientId,
-		"http://localhost:8080/api/v1/ms-login-callback", []string{scope})
+	redirectString, err := v.azure.AuthCodeURL(r.Context(), env.GetAPIServerAzureClientID(),
+		"http://localhost:8080/api/v1/ms-login-callback", []string{env.GetAPIServerAzureLoginScope()})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
