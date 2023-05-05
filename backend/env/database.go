@@ -1,6 +1,8 @@
 package env
 
-import "fmt"
+import (
+	"os"
+)
 
 const (
 	databaseType           = "DATABASE_TYPE"
@@ -19,78 +21,41 @@ const (
 )
 
 // GetDatabaseType returns the DATABASE_TYPE environment variable.
-// Note that this variable is required.
-func GetDatabaseType() (string, error) {
-	return getRequiredEnv(databaseType)
+func GetDatabaseType() string {
+	return os.Getenv(databaseType)
 }
 
 // GetDatabaseName returns the DATABASE_NAME environment variable.
-// Note that this variable is required.
-func GetDatabaseName() (string, error) {
-	return getRequiredEnv(databaseName)
+func GetDatabaseName() string {
+	return os.Getenv(databaseName)
 }
 
 // GetDatabaseUser returns the DATABASE_USER environment variable.
-// Note that this variable is required.
-func GetDatabaseUser() (string, error) {
-	return getRequiredEnv(databaseUser)
+func GetDatabaseUser() string {
+	return os.Getenv(databaseUser)
 }
 
 // GetDatabasePassword returns the DATABASE_PASSWORD environment variable.
-// Note that this variable is required.
-func GetDatabasePassword() (string, error) {
-	return getRequiredEnv(databasePassword)
+func GetDatabasePassword() string {
+	return os.Getenv(databasePassword)
 }
 
 // GetDatabaseHost returns the DATABASE_HOST environment variable.
-// Note that this variable is required.
-func GetDatabaseHost() (string, error) {
-	return getRequiredEnv(databaseHost)
+func GetDatabaseHost() string {
+	return os.Getenv(databaseHost)
 }
 
 // GetDatabasePort returns the DATABASE_PORT environment variable.
-// Note that this variable is required.
-func GetDatabasePort() (string, error) {
-	return getRequiredEnv(databasePort)
+func GetDatabasePort() string {
+	return os.Getenv(databasePort)
 }
 
 // GetDatabaseSSLMode returns the DATABASE_SSL_MODE environment variable.
-// Note that this variable is required.
-func GetDatabaseSSLMode() (string, error) {
-	mode, err := getRequiredEnv(databaseSslMode)
-	if err != nil {
-		return "", err
-	}
-
-	env, err := GetAppEnv()
-	if err != nil {
-		return "", err
-	}
-
-	switch mode {
-	case databaseSslModeDisable:
-		if env == AppEnvStaging {
-			return "", fmt.Errorf("%s - database connection ssl mode disabled for critical environment %q", namespace, env)
-		}
-		fallthrough
-	case databaseSslModeVerifyFull:
-		return mode, nil
-	default:
-		return "", fmt.Errorf("%s - invalid %s value %q", namespace, databaseSslMode, mode)
-	}
+func GetDatabaseSSLMode() string {
+	return os.Getenv(databaseSslMode)
 }
 
 // GetDatabaseSSLRootCertLocation returns the DATABASE_SSL_ROOT_CERT_LOC environment variable.
-// Note that this variable is required depending on whether SSL mode is enabled or disabled.
-func GetDatabaseSSLRootCertLocation() (string, error) {
-	sslMode, err := GetDatabaseSSLMode()
-	if err != nil {
-		return "", err
-	}
-
-	if sslMode == databaseSslModeDisable {
-		return "", nil
-	}
-
-	return getRequiredEnv(databaseSslRootCertLoc)
+func GetDatabaseSSLRootCertLocation() string {
+	return os.Getenv(databaseSslRootCertLoc)
 }

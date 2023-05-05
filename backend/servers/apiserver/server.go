@@ -34,11 +34,7 @@ type APIServer struct {
 func (s *APIServer) Start() error {
 	s.l.Info(fmt.Sprintf("%s - starting service...", Namespace))
 
-	port, err := env.GetAPIServerPort()
-	if err != nil {
-		return err
-	}
-
+	port := env.GetAPIServerPort()
 	s.l.Info(fmt.Sprintf("%s - service started", Namespace), zap.String("port", port))
 	return http.ListenAndServe(fmt.Sprintf(":%s", port), s)
 }
@@ -73,27 +69,15 @@ func New() (*APIServer, error) {
 		return nil, fmt.Errorf("%s - could not connect to database: %w", Namespace, err)
 	}
 
-	azureClientSecret, err := env.GetAPIServerAzureClientSecret()
-	if err != nil {
-		return nil, fmt.Errorf("%s - could not get azure client secret: %w", Namespace, err)
-	}
-
-	cred, err := confidential.NewCredFromSecret(azureClientSecret)
+	cred, err := confidential.NewCredFromSecret(env.GetAPIServerAzureClientSecret())
 	if err != nil {
 		return nil, fmt.Errorf("%s - could not create credential from client secret: %w", Namespace, err)
 	}
 
-	tenantId, err := env.GetAPIServerAzureTenantID()
-	if err != nil {
-		return nil, fmt.Errorf("%s - could not get tenant id: %w", Namespace, err)
-	}
-
-	clientId, err := env.GetAPIServerAzureClientID()
-	if err != nil {
-		return nil, fmt.Errorf("%s - could not get client id: %w", Namespace, err)
-	}
-
-	azureClient, err := confidential.New(fmt.Sprintf(microsoftAuthority, tenantId), clientId, cred)
+	azureClient, err := confidential.New(
+		fmt.Sprintf(microsoftAuthority, env.GetAPIServerAzureTenantID()),
+		env.GetAPIServerAzureClientID(),
+		cred)
 	if err != nil {
 		return nil, fmt.Errorf("%s - could not create azure client: %w", Namespace, err)
 	}

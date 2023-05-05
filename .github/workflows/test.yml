@@ -62,6 +62,12 @@ jobs:
       - name: Test backend
         env:
           APP_ENV: ${{ vars.APP_ENV }}
+          API_SERVER_PORT: ${{ vars.API_SERVER_PORT }}
+          API_SERVER_AZURE_TENANT_ID: ${{ vars.API_SERVER_AZURE_TENANT_ID }}
+          API_SERVER_AZURE_CLIENT_ID: ${{ vars.API_SERVER_AZURE_CLIENT_ID }}
+          API_SERVER_AZURE_CLIENT_SECRET: ${{ vars.API_SERVER_AZURE_CLIENT_SECRET }}
+          API_SERVER_AZURE_LOGIN_SCOPE: ${{ vars.API_SERVER_AZURE_LOGIN_SCOPE }}
+          WEB_SERVER_PORT: ${{vars.WEB_SERVER_PORT }}
           DATABASE_TYPE: ${{ vars.DATABASE_TYPE }}
           DATABASE_NAME: ${{ vars.DATABASE_NAME }}
           DATABASE_USER: ${{ vars.DATABASE_USER }}

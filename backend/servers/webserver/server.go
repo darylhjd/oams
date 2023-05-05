@@ -29,11 +29,7 @@ type WebServer struct {
 func (s *WebServer) Start() error {
 	s.l.Info(fmt.Sprintf("%s - starting service...", Namespace))
 
-	port, err := env.GetWebServerPort()
-	if err != nil {
-		return err
-	}
-
+	port := env.GetWebServerPort()
 	s.l.Info(fmt.Sprintf("%s - service started on port %s", Namespace, port))
 	return http.ListenAndServe(fmt.Sprintf(":%s", port), s)
 }
