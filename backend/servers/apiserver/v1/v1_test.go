@@ -30,5 +30,5 @@ func TestMain(m *testing.M) {
 
 func newTestAPIServerV1(t *testing.T) *httptest.Server {
 	t.Helper()
-	return httptest.NewServer(NewAPIServerV1(zap.NewNop(), testDb))
+	return httptest.NewServer(NewAPIServerV1(zap.NewNop(), testDb, nil))
 }

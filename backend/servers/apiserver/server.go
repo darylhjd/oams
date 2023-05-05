@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/database"
@@ -15,6 +16,8 @@ import (
 
 const (
 	Namespace = "apiserver"
+
+	microsoftAuthority = "https://login.microsoftonline.com/%s/"
 
 	v1Url = "/api/v1/"
 )
@@ -70,5 +73,30 @@ func New() (*APIServer, error) {
 		return nil, fmt.Errorf("%s - could not connect to database: %w", Namespace, err)
 	}
 
-	return &APIServer{l, db, v1.NewAPIServerV1(l, db)}, nil
+	azureClientSecret, err := env.GetAPIServerAzureClientSecret()
+	if err != nil {
+		return nil, fmt.Errorf("%s - could not get azure client secret: %w", Namespace, err)
+	}
+
+	cred, err := confidential.NewCredFromSecret(azureClientSecret)
+	if err != nil {
+		return nil, fmt.Errorf("%s - could not create credential from client secret: %w", Namespace, err)
+	}
+
+	tenantId, err := env.GetAPIServerAzureTenantID()
+	if err != nil {
+		return nil, fmt.Errorf("%s - could not get tenant id: %w", Namespace, err)
+	}
+
+	clientId, err := env.GetAPIServerAzureClientID()
+	if err != nil {
+		return nil, fmt.Errorf("%s - could not get client id: %w", Namespace, err)
+	}
+
+	azureClient, err := confidential.New(fmt.Sprintf(microsoftAuthority, tenantId), clientId, cred)
+	if err != nil {
+		return nil, fmt.Errorf("%s - could not create azure client: %w", Namespace, err)
+	}
+
+	return &APIServer{l, db, v1.NewAPIServerV1(l, db, &azureClient)}, nil
 }
