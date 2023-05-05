@@ -48,7 +48,6 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Referer", r.Referer())
 	if _, err = w.Write(body); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
