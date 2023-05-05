@@ -78,7 +78,7 @@ func checkRequiredEnvs(envs ...string) error {
 
 func checkVarEmpty(v string) error {
 	if strings.TrimSpace(v) == "" {
-		return fmt.Errorf("%s - %s not set, but is compulsory", namespace, v)
+		return fmt.Errorf("%s - empty variable", namespace)
 	}
 
 	return nil

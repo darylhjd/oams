@@ -62,5 +62,6 @@ jobs:
 
       - name: Test backend
         run: |
+          echo $APP_ENV
           cd backend
           go test ./...
