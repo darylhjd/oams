@@ -43,6 +43,5 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 
 	v.l.Debug(fmt.Sprintf("%s - redirecting to azure login url", namespace))
 
-	w.Header().Set("Referer", r.Referer())
 	http.Redirect(w, r, redirectString, http.StatusSeeOther)
 }

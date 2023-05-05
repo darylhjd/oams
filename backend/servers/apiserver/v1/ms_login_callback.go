@@ -1,12 +1,14 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/servers"
 )
 
 const (
@@ -26,10 +28,9 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	code := r.PostFormValue(postFormCodeParam)
-	_, err := v.azure.AcquireTokenByAuthCode(
+	res, err := v.azure.AcquireTokenByAuthCode(
 		r.Context(),
-		code,
+		r.PostFormValue(postFormCodeParam),
 		env.GetAPIServerAzureLoginCallbackURL(),
 		[]string{env.GetAPIServerAzureLoginScope()})
 	if err != nil {
@@ -38,8 +39,17 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := "Authentication successful!"
-	if _, err = w.Write([]byte(response)); err != nil {
+	body, err := json.Marshal(map[string]string{
+		servers.AuthFieldName: res.AccessToken,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		v.l.Error(fmt.Sprintf("%s - could not marshal body", namespace), zap.Error(err))
+		return
+	}
+
+	w.Header().Set("Referer", r.Referer())
+	if _, err = w.Write(body); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
 			zap.String("url", msLoginCallbackUrl),
