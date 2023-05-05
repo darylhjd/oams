@@ -18,8 +18,6 @@ const (
 	Namespace = "apiserver"
 
 	microsoftAuthority = "https://login.microsoftonline.com/%s/"
-
-	v1Url = "/api/v1/"
 )
 
 // APIServer defines the server structure for the OAMS API service.
@@ -48,7 +46,7 @@ func (s *APIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux := http.NewServeMux()
 
 	// To add more versions for this URL, simply add another handler for it.
-	mux.Handle(v1Url, http.StripPrefix(strings.TrimSuffix(v1Url, "/"), s.v1))
+	mux.Handle(v1.Url, http.StripPrefix(strings.TrimSuffix(v1.Url, "/"), s.v1))
 
 	mux.ServeHTTP(w, r)
 }

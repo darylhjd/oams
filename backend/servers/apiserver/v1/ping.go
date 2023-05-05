@@ -20,6 +20,7 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := w.Write([]byte(response)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
 			zap.String("url", pingUrl),
 			zap.Error(err))

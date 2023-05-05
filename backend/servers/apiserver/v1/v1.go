@@ -13,6 +13,7 @@ import (
 const (
 	namespace = "apiserver/v1"
 
+	Url                = "/api/v1/"
 	baseUrl            = "/"
 	pingUrl            = "/ping"
 	loginUrl           = "/login"
