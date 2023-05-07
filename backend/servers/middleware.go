@@ -26,14 +26,14 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 // CheckAuthorised checks if a request is authorised for a handler.
 func CheckAuthorised(handlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token, err := checkAzureToken(r)
+		claims, _, err := checkAzureToken(r)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
 		// Provide the handler with the token in case it needs it.
-		r = r.WithContext(context.WithValue(r.Context(), AuthFieldName, token))
+		r = r.WithContext(context.WithValue(r.Context(), "claims", claims))
 		handlerFunc(w, r)
 	}
 }

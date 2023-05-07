@@ -4,11 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 )
 
 func (v *APIServerV1) protected(w http.ResponseWriter, r *http.Request) {
 	v.l.Debug(fmt.Sprintf("%s - handling protected request", namespace))
+
+	if claims, ok := r.Context().Value("claims").(*jwt.MapClaims); ok {
+		v.l.Debug("found claims from context", zap.Any("claims", claims))
+	}
 
 	if _, err := w.Write([]byte("You are authenticated!")); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
