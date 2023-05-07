@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	AuthFieldName = "access_token"
+	AuthFieldName      = "access_token"
+	MicrosoftAuthority = "https://login.microsoftonline.com/%s/"
 
 	tokenKeySet = "https://login.microsoftonline.com/%s/discovery/v2.0/keys"
 )

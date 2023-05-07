@@ -3,7 +3,6 @@ package v1
 import (
 	"net/http"
 
-	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/database"
@@ -26,7 +25,7 @@ type APIServerV1 struct {
 	l  *zap.Logger
 	db *database.DB
 
-	azure *confidential.Client
+	azure servers.Authenticator
 }
 
 func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +42,6 @@ func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // NewAPIServerV1 creates a new APIServerV1. This is a sub-router and should not be used
 // as a base router.
-func NewAPIServerV1(l *zap.Logger, db *database.DB, azureClient *confidential.Client) *APIServerV1 {
+func NewAPIServerV1(l *zap.Logger, db *database.DB, azureClient servers.Authenticator) *APIServerV1 {
 	return &APIServerV1{l, db, azureClient}
 }

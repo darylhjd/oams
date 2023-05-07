@@ -18,8 +18,7 @@ func TestConnectDB(t *testing.T) {
 func TestGetConnectionProperties(t *testing.T) {
 	a := assert.New(t)
 
-	driver, connString, err := database.GetConnectionProperties(database.Namespace)
-	a.Nil(err)
+	driver, connString := database.GetConnectionProperties(database.Namespace)
 
 	u, err := url.Parse(connString)
 	if err != nil {

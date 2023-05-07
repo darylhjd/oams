@@ -11,13 +11,12 @@ import (
 	"github.com/darylhjd/oams/backend/database"
 	"github.com/darylhjd/oams/backend/env"
 	"github.com/darylhjd/oams/backend/logger"
+	"github.com/darylhjd/oams/backend/servers"
 	"github.com/darylhjd/oams/backend/servers/apiserver/v1"
 )
 
 const (
 	Namespace = "apiserver"
-
-	microsoftAuthority = "https://login.microsoftonline.com/%s/"
 )
 
 // APIServer defines the server structure for the OAMS API service.
@@ -73,7 +72,7 @@ func New() (*APIServer, error) {
 	}
 
 	azureClient, err := confidential.New(
-		fmt.Sprintf(microsoftAuthority, env.GetAPIServerAzureTenantID()),
+		fmt.Sprintf(servers.MicrosoftAuthority, env.GetAPIServerAzureTenantID()),
 		env.GetAPIServerAzureClientID(),
 		cred)
 	if err != nil {

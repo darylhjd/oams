@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 func TestWebServer(t *testing.T) {
@@ -31,6 +32,9 @@ func newTestWebServer(t *testing.T) *httptest.Server {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Disable logger for tests.
+	webServer.l = zap.NewNop()
 
 	return httptest.NewServer(webServer)
 }
