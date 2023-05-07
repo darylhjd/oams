@@ -35,10 +35,7 @@ func Connect() (*DB, error) {
 
 // ConnectDB is similar to Connect but allows you to specify a specific database to use.
 func ConnectDB(dbName string) (*DB, error) {
-	driver, connString, err := GetConnectionProperties(dbName)
-	if err != nil {
-		return nil, fmt.Errorf("%s - cannot parse connection properties: %w", Namespace, err)
-	}
+	driver, connString := GetConnectionProperties(dbName)
 
 	db, err := sql.Open(driver, connString)
 	if err != nil {
@@ -54,7 +51,7 @@ func ConnectDB(dbName string) (*DB, error) {
 }
 
 // GetConnectionProperties returns the connection strings required to connect to a database.
-func GetConnectionProperties(dbName string) (driver, connString string, err error) {
+func GetConnectionProperties(dbName string) (driver, connString string) {
 	driver = env.GetDatabaseType()
 
 	// Set SSL mode.
@@ -68,5 +65,5 @@ func GetConnectionProperties(dbName string) (driver, connString string, err erro
 		Host:     fmt.Sprintf("%s:%s", env.GetDatabaseHost(), env.GetDatabasePort()),
 		Path:     dbName,
 		RawQuery: params.Encode(),
-	}).String(), nil
+	}).String()
 }

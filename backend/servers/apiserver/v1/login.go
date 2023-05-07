@@ -31,6 +31,8 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	v.l.Debug(fmt.Sprintf("%s - generated login redirect url", namespace), zap.String("url", redirectString))
+
 	// Add extra parameters to the request.
 	redirectUrl, err := url.Parse(redirectString)
 	values := redirectUrl.Query()

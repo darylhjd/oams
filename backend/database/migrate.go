@@ -48,10 +48,7 @@ func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 		return migrate.NewWithInstance(MigrationNamespace, migrationSource, Namespace, instance)
 	}
 
-	_, connString, err := GetConnectionProperties(dbName)
-	if err != nil {
-		return nil, err
-	}
+	_, connString := GetConnectionProperties(dbName)
 
 	return migrate.NewWithSourceInstance(MigrationNamespace, migrationSource, connString)
 }
