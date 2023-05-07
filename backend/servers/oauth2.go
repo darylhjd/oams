@@ -2,11 +2,13 @@ package servers
 
 import (
 	"crypto/rsa"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 
@@ -21,30 +23,33 @@ const (
 )
 
 // checkAzureToken to make sure the token passes validation.
-func checkAzureToken(r *http.Request) (*jwt.Token, error) {
+func checkAzureToken(r *http.Request) (*jwt.MapClaims, *jwt.Token, error) {
+	// https://learn.microsoft.com/en-us/azure/active-directory/develop/access-tokens#validating-tokens
 	tokenHeader := r.Header.Get("Authorization")
 	split := strings.Split(tokenHeader, "Bearer ")
 	if len(split) < 2 {
-		return nil, fmt.Errorf("malformed authorization header")
+		return nil, nil, errors.New("malformed authorization header")
 	}
 
 	keySet, err := jwk.Fetch(r.Context(), fmt.Sprintf(tokenKeySet, env.GetAPIServerAzureTenantID()))
 	if err != nil {
-		return nil, fmt.Errorf("cannot fetch azure key set")
+		return nil, nil, errors.New("cannot fetch azure key set")
 	}
 
-	token, err := jwt.Parse(split[1], func(token *jwt.Token) (interface{}, error) {
-		if token.Header["typ"] != "JWT" {
-			return nil, fmt.Errorf("wrong token type")
-		}
+	claims := &jwt.MapClaims{}
+	issuer, err := url.JoinPath(fmt.Sprintf(MicrosoftAuthority, env.GetAPIServerAzureTenantID()), "v2.0")
+	if err != nil {
+		return nil, nil, errors.New("cannot build expected iss claim")
+	}
 
-		if token.Method.Alg() != jwa.RS256.String() {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+	token, err := jwt.ParseWithClaims(split[1], claims, func(token *jwt.Token) (interface{}, error) {
+		if token.Header["typ"] != "JWT" {
+			return nil, errors.New("wrong token type")
 		}
 
 		kid, ok := token.Header["kid"].(string)
 		if !ok {
-			return nil, fmt.Errorf("kid not found")
+			return nil, errors.New("kid not found")
 		}
 
 		keys, ok := keySet.LookupKeyID(kid)
@@ -54,14 +59,17 @@ func checkAzureToken(r *http.Request) (*jwt.Token, error) {
 
 		publicKey := &rsa.PublicKey{}
 		if err = keys.Raw(publicKey); err != nil {
-			return nil, fmt.Errorf("could not parse key")
+			return nil, errors.New("could not parse key")
 		}
 
 		return publicKey, nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("token check failed: %w", err)
+	},
+		jwt.WithValidMethods([]string{jwa.RS256.String()}),
+		jwt.WithAudience(env.GetAPIServerAzureClientID()),
+		jwt.WithIssuer(issuer))
+	if err != nil || !token.Valid {
+		return nil, nil, fmt.Errorf("token check failed: %w", err)
 	}
 
-	return token, nil
+	return claims, token, nil
 }

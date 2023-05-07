@@ -17,19 +17,16 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 		name     string
 		state    string
 		httpCode int
-		wantErr  bool
 	}{
 		{
 			"expected state, accepted callback",
 			namespace,
 			http.StatusOK,
-			false,
 		},
 		{
 			"unexpected state, rejecting callback",
 			"wrong-state",
 			http.StatusTeapot,
-			true,
 		},
 	}
 
@@ -57,7 +54,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			}
 
 			a.Equal(tt.httpCode, resp.StatusCode)
-			if tt.wantErr {
+			if tt.httpCode != http.StatusOK {
 				return
 			}
 
