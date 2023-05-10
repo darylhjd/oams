@@ -16,14 +16,21 @@ import (
 )
 
 const (
-	AuthFieldName      = "access_token"
 	MicrosoftAuthority = "https://login.microsoftonline.com/%s/"
+)
 
+const (
 	tokenKeySet = "https://login.microsoftonline.com/%s/discovery/v2.0/keys"
 )
 
+type AzureClaims struct {
+	jwt.RegisteredClaims
+	Scp   string
+	Roles []string
+}
+
 // checkAzureToken to make sure the token passes validation.
-func checkAzureToken(r *http.Request) (*jwt.MapClaims, *jwt.Token, error) {
+func checkAzureToken(r *http.Request) (*AzureClaims, *jwt.Token, error) {
 	// https://learn.microsoft.com/en-us/azure/active-directory/develop/access-tokens#validating-tokens
 	tokenHeader := r.Header.Get("Authorization")
 	split := strings.Split(tokenHeader, "Bearer ")
@@ -36,7 +43,7 @@ func checkAzureToken(r *http.Request) (*jwt.MapClaims, *jwt.Token, error) {
 		return nil, nil, errors.New("cannot fetch azure key set")
 	}
 
-	claims := &jwt.MapClaims{}
+	claims := &AzureClaims{}
 	issuer, err := url.JoinPath(fmt.Sprintf(MicrosoftAuthority, env.GetAPIServerAzureTenantID()), "v2.0")
 	if err != nil {
 		return nil, nil, errors.New("cannot build expected iss claim")

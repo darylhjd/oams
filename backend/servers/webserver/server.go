@@ -13,9 +13,9 @@ import (
 	"github.com/darylhjd/oams/backend/logger"
 )
 
-const (
-	Namespace = "webserver"
+const Namespace = "webserver"
 
+const (
 	homeUrl = "/"
 )
 

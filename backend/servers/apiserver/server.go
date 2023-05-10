@@ -15,9 +15,7 @@ import (
 	"github.com/darylhjd/oams/backend/servers/apiserver/v1"
 )
 
-const (
-	Namespace = "apiserver"
-)
+const Namespace = "apiserver"
 
 // APIServer defines the server structure for the OAMS API service.
 type APIServer struct {

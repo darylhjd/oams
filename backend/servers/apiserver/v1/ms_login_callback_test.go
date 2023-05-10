@@ -8,8 +8,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/darylhjd/oams/backend/servers"
 )
 
 func TestAPIServerV1_msLoginCallback(t *testing.T) {
@@ -58,13 +56,12 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				return
 			}
 
-			actualBody := map[string]string{}
+			var actualBody msLoginCallbackResponse
 			if err = json.Unmarshal(body, &actualBody); err != nil {
 				t.Fatal(err)
 			}
-			a.Equal(map[string]string{
-				servers.AuthFieldName: "mock-access-token",
-			}, actualBody)
+
+			a.Equal(msLoginCallbackResponse{AccessToken: "mock-access-token"}, actualBody)
 		})
 	}
 }
