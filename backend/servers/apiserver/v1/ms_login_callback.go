@@ -18,7 +18,6 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	v.l.Debug(fmt.Sprintf("%s - received login callback from azure", namespace),
 		zap.String("method", r.Method))
 
-	// Check that we only handle callbacks from appropriate API version.
 	var s state
 	err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s)
 	if err != nil {
@@ -27,6 +26,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check that we only handle callbacks from appropriate API version.
 	if s.Version != namespace {
 		w.WriteHeader(http.StatusTeapot)
 		v.l.Error(fmt.Sprintf("%s - received login callback of different version so ignoring", namespace),

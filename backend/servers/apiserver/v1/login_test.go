@@ -39,13 +39,6 @@ func TestAPIServerV1_login(t *testing.T) {
 	actualUrl, err := url.Parse(loginResp.RedirectUrl)
 	a.Nil(err)
 
-	expectedQueries := url.Values{}
-	expectedQueries.Set("client_id", env.GetAPIServerAzureClientID())
-	expectedQueries.Set("redirect_url", env.GetAPIServerAzureLoginCallbackURL())
-	expectedQueries.Set("response_type", "code")
-	expectedQueries.Set("scope", env.GetAPIServerAzureLoginScope())
-	expectedQueries.Set(callbackMethodParam, callbackMethodFormPost)
-
 	s, err := json.Marshal(state{
 		Version: namespace,
 	})
@@ -53,6 +46,12 @@ func TestAPIServerV1_login(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	expectedQueries := url.Values{}
+	expectedQueries.Set("client_id", env.GetAPIServerAzureClientID())
+	expectedQueries.Set("redirect_url", env.GetAPIServerAzureLoginCallbackURL())
+	expectedQueries.Set("response_type", "code")
+	expectedQueries.Set("scope", env.GetAPIServerAzureLoginScope())
+	expectedQueries.Set(callbackMethodParam, callbackMethodFormPost)
 	expectedQueries.Set(callbackStateParam, string(s))
 
 	// NOTE: We add "/" to the beginning of the path so the test passes, but this will not affect the result.

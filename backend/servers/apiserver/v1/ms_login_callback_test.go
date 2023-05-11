@@ -11,9 +11,10 @@ import (
 
 func TestAPIServerV1_msLoginCallback(t *testing.T) {
 	tests := []struct {
-		name     string
-		state    state
-		httpCode int
+		name        string
+		state       state
+		httpCode    int
+		redirectUrl string
 	}{
 		{
 			"expected state, accepted callback",
@@ -21,6 +22,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				Version: namespace,
 			},
 			http.StatusSeeOther,
+			Url,
 		},
 		{
 			"expected state with custom return url, accepted callback",
@@ -29,6 +31,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				ReturnTo: "/randomUrl",
 			},
 			http.StatusSeeOther,
+			"/randomUrl",
 		},
 		{
 			"unexpected state, rejected callback",
@@ -36,6 +39,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				Version: "wrong-state",
 			},
 			http.StatusTeapot,
+			"",
 		},
 	}
 
@@ -74,12 +78,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				return
 			}
 
-			expectedLocation := tt.state.ReturnTo
-			if expectedLocation == "" {
-				expectedLocation = Url
-			}
-
-			a.Equal(expectedLocation, resp.Header.Get("Location"))
+			a.Equal(tt.redirectUrl, resp.Header.Get("Location"))
 		})
 	}
 }
