@@ -2,7 +2,10 @@ package servers
 
 import (
 	"context"
+	"log"
 	"net/http"
+
+	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
 const (
@@ -28,10 +31,11 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 }
 
 // CheckAuthorised checks if a request is authorised for a handler.
-func CheckAuthorised(handlerFunc http.HandlerFunc) http.HandlerFunc {
+func CheckAuthorised(handlerFunc http.HandlerFunc, set jwk.Set) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		claims, _, err := checkAzureToken(r)
+		claims, _, err := checkAzureToken(r, set)
 		if err != nil {
+			log.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

@@ -31,5 +31,5 @@ func TestMain(m *testing.M) {
 
 func newTestAPIServerV1(t *testing.T) *httptest.Server {
 	t.Helper()
-	return httptest.NewServer(NewAPIServerV1(zap.NewNop(), testDb, &servers.MockAzureClient{}))
+	return httptest.NewServer(NewAPIServerV1(zap.NewNop(), testDb, servers.NewMockAzureAuthenticator()))
 }

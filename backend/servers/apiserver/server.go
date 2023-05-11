@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/database"
@@ -64,18 +63,10 @@ func New() (*APIServer, error) {
 		return nil, fmt.Errorf("%s - could not connect to database: %w", Namespace, err)
 	}
 
-	cred, err := confidential.NewCredFromSecret(env.GetAPIServerAzureClientSecret())
+	azureAuthenticator, err := servers.NewAzureAuthenticator()
 	if err != nil {
-		return nil, fmt.Errorf("%s - could not create credential from client secret: %w", Namespace, err)
+		return nil, fmt.Errorf("%s - could not create azure authenticator: %w", Namespace, err)
 	}
 
-	azureClient, err := confidential.New(
-		fmt.Sprintf(servers.MicrosoftAuthority, env.GetAPIServerAzureTenantID()),
-		env.GetAPIServerAzureClientID(),
-		cred)
-	if err != nil {
-		return nil, fmt.Errorf("%s - could not create azure client: %w", Namespace, err)
-	}
-
-	return &APIServer{l, db, v1.NewAPIServerV1(l, db, &azureClient)}, nil
+	return &APIServer{l, db, v1.NewAPIServerV1(l, db, azureAuthenticator)}, nil
 }
