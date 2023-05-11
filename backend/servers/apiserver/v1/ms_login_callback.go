@@ -14,24 +14,28 @@ const (
 	postFormCodeParam = "code"
 )
 
-type msLoginCallbackResponse struct {
-	AccessToken string `json:"access_token"`
-}
-
 func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	v.l.Debug(fmt.Sprintf("%s - received login callback from azure", namespace),
 		zap.String("method", r.Method))
 
-	// Check that we only handle callbacks from appropriate API version.
-	state := r.PostFormValue(callbackStateParam)
-	if state != namespace {
-		w.WriteHeader(http.StatusTeapot)
-		v.l.Error(fmt.Sprintf("%s - received login callback of different version so ignoring", namespace),
-			zap.String(callbackStateParam, state))
+	var s state
+	err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		v.l.Error(fmt.Sprintf("%s - cannot parse state from login callback", namespace), zap.Error(err))
 		return
 	}
 
-	res, err := v.azure.AcquireTokenByAuthCode(
+	// Check that we only handle callbacks from appropriate API version.
+	if s.Version != namespace {
+		w.WriteHeader(http.StatusTeapot)
+		v.l.Error(fmt.Sprintf("%s - received login callback of different version so ignoring", namespace),
+			zap.Any(callbackStateParam, s))
+		return
+	}
+
+	// TODO: Find proper way to return tokens.
+	_, err = v.azure.AcquireTokenByAuthCode(
 		r.Context(),
 		r.PostFormValue(postFormCodeParam),
 		env.GetAPIServerAzureLoginCallbackURL(),
@@ -42,17 +46,10 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := json.Marshal(&msLoginCallbackResponse{AccessToken: res.AccessToken})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - could not marshal body", namespace), zap.Error(err))
-		return
+	redirectUrl := s.ReturnTo
+	if redirectUrl == "" {
+		redirectUrl = Url
 	}
 
-	if _, err = w.Write(body); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
-			zap.String("url", msLoginCallbackUrl),
-			zap.Error(err))
-	}
+	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
 }
