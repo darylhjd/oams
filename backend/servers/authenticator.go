@@ -17,17 +17,17 @@ const authenticatorNamespace = "authenticator"
 type Authenticator interface {
 	AuthCodeURL(ctx context.Context, clientID, redirectURI string, scopes []string, opts ...confidential.AuthCodeURLOption) (string, error)
 	AcquireTokenByAuthCode(ctx context.Context, code string, redirectURI string, scopes []string, opts ...confidential.AcquireByAuthCodeOption) (confidential.AuthResult, error)
-	GetKeySet() jwk.Set
+	GetKeyCache() *jwk.Cache
 }
 
 // AzureAuthenticator is a wrapper around the Microsoft Azure AD client.
 type AzureAuthenticator struct {
 	*confidential.Client
-	keySet jwk.Set
+	keyCache *jwk.Cache
 }
 
-func (a *AzureAuthenticator) GetKeySet() jwk.Set {
-	return a.keySet
+func (a *AzureAuthenticator) GetKeyCache() *jwk.Cache {
+	return a.keyCache
 }
 
 // NewAzureAuthenticator creates a new Azure Authenticator.
@@ -42,15 +42,25 @@ func NewAzureAuthenticator() (*AzureAuthenticator, error) {
 		return nil, fmt.Errorf("%s - could not create azure client: %w", authenticatorNamespace, err)
 	}
 
+	cache := jwk.NewCache(context.Background())
+	if err = cache.Register(keySetSource); err != nil {
+		return nil, fmt.Errorf("%s - could not register jwt key set source: %w", authenticatorNamespace, err)
+	}
+
+	// Refresh once to fail early.
+	if _, err = cache.Refresh(context.Background(), keySetSource); err != nil {
+		return nil, fmt.Errorf("%s - cache source not reachable: %w", authenticatorNamespace, err)
+	}
+
 	return &AzureAuthenticator{
-		Client: &azureClient,
-		keySet: jwk.NewCachedSet(jwk.NewCache(context.Background()), keySetSource),
+		Client:   &azureClient,
+		keyCache: cache,
 	}, nil
 }
 
 // MockAzureAuthenticator allows us to mock the calls to Microsoft's Azure AD APIs.
 type MockAzureAuthenticator struct {
-	keySet jwk.Set
+	keyCache *jwk.Cache
 }
 
 func (m *MockAzureAuthenticator) AuthCodeURL(ctx context.Context, clientID, redirectURI string, scopes []string, opts ...confidential.AuthCodeURLOption) (string, error) {
@@ -86,11 +96,11 @@ func (m *MockAzureAuthenticator) AcquireTokenByAuthCode(
 	}, nil
 }
 
-func (m *MockAzureAuthenticator) GetKeySet() jwk.Set {
-	return m.keySet
+func (m *MockAzureAuthenticator) GetKeyCache() *jwk.Cache {
+	return m.keyCache
 }
 
 // NewMockAzureAuthenticator creates a new mock Azure Authenticator client, useful for tests.
 func NewMockAzureAuthenticator() *MockAzureAuthenticator {
-	return &MockAzureAuthenticator{keySet: jwk.NewSet()}
+	return &MockAzureAuthenticator{keyCache: jwk.NewCache(context.Background())}
 }
