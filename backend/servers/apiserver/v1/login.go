@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -15,6 +16,10 @@ const (
 	callbackMethodFormPost = "form_post"
 	callbackStateParam     = "state"
 )
+
+type loginResponse struct {
+	RedirectUrl string `json:"redirect_url"`
+}
 
 func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 	v.l.Debug(fmt.Sprintf("%s - handling login request", namespace))
@@ -31,8 +36,6 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v.l.Debug(fmt.Sprintf("%s - generated login redirect url", namespace), zap.String("url", redirectString))
-
 	// Add extra parameters to the request.
 	redirectUrl, err := url.Parse(redirectString)
 	values := redirectUrl.Query()
@@ -43,7 +46,19 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 	redirectUrl.RawQuery = values.Encode()
 	redirectString = redirectUrl.String()
 
-	v.l.Debug(fmt.Sprintf("%s - redirecting to azure login url", namespace))
+	v.l.Debug(fmt.Sprintf("%s - generated azure login url", namespace), zap.String("url", redirectString))
 
-	http.Redirect(w, r, redirectString, http.StatusSeeOther)
+	body, err := json.Marshal(loginResponse{RedirectUrl: redirectString})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		v.l.Error(fmt.Sprintf("%s - error marshalling url to body", namespace), zap.Error(err))
+		return
+	}
+
+	if _, err = w.Write(body); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
+			zap.String("url", loginUrl),
+			zap.Error(err))
+	}
 }
