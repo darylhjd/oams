@@ -2,7 +2,6 @@ package v1
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/url"
 	"testing"
@@ -13,17 +12,29 @@ import (
 func TestAPIServerV1_msLoginCallback(t *testing.T) {
 	tests := []struct {
 		name     string
-		state    string
+		state    state
 		httpCode int
 	}{
 		{
 			"expected state, accepted callback",
-			namespace,
-			http.StatusOK,
+			state{
+				Version: namespace,
+			},
+			http.StatusSeeOther,
 		},
 		{
-			"unexpected state, rejecting callback",
-			"wrong-state",
+			"expected state with custom return url, accepted callback",
+			state{
+				Version:  namespace,
+				ReturnTo: "/randomUrl",
+			},
+			http.StatusSeeOther,
+		},
+		{
+			"unexpected state, rejected callback",
+			state{
+				Version: "wrong-state",
+			},
 			http.StatusTeapot,
 		},
 	}
@@ -39,29 +50,36 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			postForm := url.Values{}
-			postForm.Set(callbackStateParam, tt.state)
-			postForm.Set(postFormCodeParam, "testing-code")
-
-			resp, err := http.PostForm(reqUrl, postForm)
-			a.Nil(err)
-
-			body, err := io.ReadAll(resp.Body)
+			s, err := json.Marshal(tt.state)
 			if err != nil {
 				t.Fatal(err)
 			}
 
+			postForm := url.Values{}
+			postForm.Set(callbackStateParam, string(s))
+			postForm.Set(postFormCodeParam, "testing-code")
+
+			// Use custom client to prevent redirect.
+			httpClient := http.Client{
+				CheckRedirect: func(req *http.Request, via []*http.Request) error {
+					return http.ErrUseLastResponse
+				},
+			}
+
+			resp, err := httpClient.PostForm(reqUrl, postForm)
+			a.Nil(err)
+
 			a.Equal(tt.httpCode, resp.StatusCode)
-			if tt.httpCode != http.StatusOK {
+			if tt.httpCode != http.StatusSeeOther {
 				return
 			}
 
-			var actualBody msLoginCallbackResponse
-			if err = json.Unmarshal(body, &actualBody); err != nil {
-				t.Fatal(err)
+			expectedLocation := tt.state.ReturnTo
+			if expectedLocation == "" {
+				expectedLocation = Url
 			}
 
-			a.Equal(msLoginCallbackResponse{AccessToken: "mock-access-token"}, actualBody)
+			a.Equal(expectedLocation, resp.Header.Get("Location"))
 		})
 	}
 }

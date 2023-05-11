@@ -15,7 +15,15 @@ const (
 	callbackMethodParam    = "response_mode"
 	callbackMethodFormPost = "form_post"
 	callbackStateParam     = "state"
+	stateReturnToParam     = "return_to"
 )
+
+// state stores the state from which the login was called.
+// This helps us store useful information such as the redirect URL to return the user to after login.
+type state struct {
+	Version  string `json:"version"`
+	ReturnTo string `json:"return_to"`
+}
 
 type loginResponse struct {
 	RedirectUrl string `json:"redirect_url"`
@@ -36,13 +44,21 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Add extra parameters to the request.
+	// Set up the auth code flow state.
+	s, err := json.Marshal(state{
+		Version:  namespace,
+		ReturnTo: r.URL.Query().Get(stateReturnToParam),
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		v.l.Error(fmt.Sprintf("%s - cannot create login state", namespace), zap.Error(err))
+		return
+	}
+
 	redirectUrl, err := url.Parse(redirectString)
 	values := redirectUrl.Query()
-
 	values.Set(callbackMethodParam, callbackMethodFormPost) // The callback is done through POST.
-	values.Set(callbackStateParam, namespace)               // Include information on which API version the request originated from.
-
+	values.Set(callbackStateParam, string(s))               // Include information on which API version the request originated from.
 	redirectUrl.RawQuery = values.Encode()
 	redirectString = redirectUrl.String()
 

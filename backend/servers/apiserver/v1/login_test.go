@@ -45,7 +45,15 @@ func TestAPIServerV1_login(t *testing.T) {
 	expectedQueries.Set("response_type", "code")
 	expectedQueries.Set("scope", env.GetAPIServerAzureLoginScope())
 	expectedQueries.Set(callbackMethodParam, callbackMethodFormPost)
-	expectedQueries.Set(callbackStateParam, namespace)
+
+	s, err := json.Marshal(state{
+		Version: namespace,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedQueries.Set(callbackStateParam, string(s))
 
 	// NOTE: We add "/" to the beginning of the path so the test passes, but this will not affect the result.
 	path, err := url.JoinPath("/", env.GetAPIServerAzureTenantID(), "oauth2", "v2.0", "authorize")
