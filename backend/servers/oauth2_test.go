@@ -18,27 +18,66 @@ import (
 
 func Test_checkAzureToken(t *testing.T) {
 	tests := []struct {
-		name      string
-		tokenFunc func(string) *jwt.Token
-		wantErr   bool
+		name        string
+		token       *jwt.Token
+		wantErr     bool
+		containsErr string
 	}{
 		{
 			"valid token",
-			func(keyId string) *jwt.Token {
-				token := jwt.NewWithClaims(jwt.SigningMethodRS256, AzureClaims{
-					RegisteredClaims: jwt.RegisteredClaims{
-						Issuer:    tokenIssuer,
-						Audience:  jwt.ClaimStrings{env.GetAPIServerAzureClientID()},
-						ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
-						NotBefore: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
-						IssuedAt:  jwt.NewNumericDate(time.Now()),
-					},
-				})
-
-				token.Header["kid"] = keyId
-				return token
-			},
+			jwt.NewWithClaims(jwt.SigningMethodRS256, AzureClaims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Issuer:    tokenIssuer,
+					Audience:  jwt.ClaimStrings{env.GetAPIServerAzureClientID()},
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+					NotBefore: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
+					IssuedAt:  jwt.NewNumericDate(time.Now()),
+				},
+			}),
 			false,
+			"",
+		},
+		{
+			"expired token",
+			jwt.NewWithClaims(jwt.SigningMethodRS256, AzureClaims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Issuer:    tokenIssuer,
+					Audience:  jwt.ClaimStrings{env.GetAPIServerAzureClientID()},
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
+					NotBefore: jwt.NewNumericDate(time.Now().Add(-2 * time.Hour)),
+					IssuedAt:  jwt.NewNumericDate(time.Now()),
+				},
+			}),
+			true,
+			"token is expired",
+		},
+		{
+			"token with wrong issuer",
+			jwt.NewWithClaims(jwt.SigningMethodRS256, AzureClaims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Issuer:    "bad issuer",
+					Audience:  jwt.ClaimStrings{env.GetAPIServerAzureClientID()},
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+					NotBefore: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
+					IssuedAt:  jwt.NewNumericDate(time.Now()),
+				},
+			}),
+			true,
+			"token has invalid issuer",
+		},
+		{
+			"token with wrong audience",
+			jwt.NewWithClaims(jwt.SigningMethodRS256, AzureClaims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Issuer:    tokenIssuer,
+					Audience:  jwt.ClaimStrings{"bad audience"},
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+					NotBefore: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
+					IssuedAt:  jwt.NewNumericDate(time.Now()),
+				},
+			}),
+			true,
+			"token has invalid audience",
 		},
 	}
 
@@ -55,7 +94,9 @@ func Test_checkAzureToken(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			accessToken, err := tt.tokenFunc(jwkKey.KeyID()).SignedString(privateKey)
+			tt.token.Header["kid"] = jwkKey.KeyID()
+
+			accessToken, err := tt.token.SignedString(privateKey)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -71,7 +112,10 @@ func Test_checkAzureToken(t *testing.T) {
 
 			// Create handler that checks OAuth.
 			_, _, err = checkAzureToken(req, keySet)
-			a.Nil(err)
+			a.Equal(tt.wantErr, err != nil)
+			if tt.wantErr {
+				a.ErrorContains(err, tt.containsErr)
+			}
 		})
 	}
 }

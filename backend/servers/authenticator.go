@@ -63,7 +63,7 @@ type MockAzureAuthenticator struct {
 	keyCache *jwk.Cache
 }
 
-func (m *MockAzureAuthenticator) AuthCodeURL(ctx context.Context, clientID, redirectURI string, scopes []string, opts ...confidential.AuthCodeURLOption) (string, error) {
+func (m *MockAzureAuthenticator) AuthCodeURL(context.Context, string, string, []string, ...confidential.AuthCodeURLOption) (string, error) {
 	path, err := url.JoinPath(env.GetAPIServerAzureTenantID(), "oauth2", "v2.0", "authorize")
 	if err != nil {
 		return "", err
@@ -85,12 +85,7 @@ func (m *MockAzureAuthenticator) AuthCodeURL(ctx context.Context, clientID, redi
 	return u.String(), nil
 }
 
-func (m *MockAzureAuthenticator) AcquireTokenByAuthCode(
-	ctx context.Context,
-	code string,
-	redirectURI string,
-	scopes []string,
-	opts ...confidential.AcquireByAuthCodeOption) (confidential.AuthResult, error) {
+func (m *MockAzureAuthenticator) AcquireTokenByAuthCode(context.Context, string, string, []string, ...confidential.AcquireByAuthCodeOption) (confidential.AuthResult, error) {
 	return confidential.AuthResult{
 		AccessToken: "mock-access-token",
 	}, nil
