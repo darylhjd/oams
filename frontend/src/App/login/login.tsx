@@ -11,7 +11,7 @@ function component() {
   let initAuthCodeFlow = async () => {
     let response = await fetch('http://localhost:8080/api/v1/login?' +
       new URLSearchParams({
-        redirect_url: 'http://localhost:3000/',
+        return_to: 'http://localhost:3000/',
       }), {
       method: 'GET',
     })
