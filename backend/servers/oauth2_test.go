@@ -18,10 +18,9 @@ import (
 
 func Test_checkAzureToken(t *testing.T) {
 	tests := []struct {
-		name        string
-		token       *jwt.Token
-		wantErr     bool
-		containsErr string
+		name    string
+		token   *jwt.Token
+		wantErr error
 	}{
 		{
 			"valid token",
@@ -34,8 +33,7 @@ func Test_checkAzureToken(t *testing.T) {
 					IssuedAt:  jwt.NewNumericDate(time.Now()),
 				},
 			}),
-			false,
-			"",
+			nil,
 		},
 		{
 			"expired token",
@@ -48,8 +46,7 @@ func Test_checkAzureToken(t *testing.T) {
 					IssuedAt:  jwt.NewNumericDate(time.Now()),
 				},
 			}),
-			true,
-			"token is expired",
+			jwt.ErrTokenExpired,
 		},
 		{
 			"token with wrong issuer",
@@ -62,8 +59,7 @@ func Test_checkAzureToken(t *testing.T) {
 					IssuedAt:  jwt.NewNumericDate(time.Now()),
 				},
 			}),
-			true,
-			"token has invalid issuer",
+			jwt.ErrTokenInvalidIssuer,
 		},
 		{
 			"token with wrong audience",
@@ -76,8 +72,20 @@ func Test_checkAzureToken(t *testing.T) {
 					IssuedAt:  jwt.NewNumericDate(time.Now()),
 				},
 			}),
-			true,
-			"token has invalid audience",
+			jwt.ErrTokenInvalidAudience,
+		},
+		{
+			"token with wrong signing method",
+			jwt.NewWithClaims(jwt.SigningMethodRS384, AzureClaims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Issuer:    tokenIssuer,
+					Audience:  jwt.ClaimStrings{env.GetAPIServerAzureClientID()},
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+					NotBefore: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
+					IssuedAt:  jwt.NewNumericDate(time.Now()),
+				},
+			}),
+			jwt.ErrTokenSignatureInvalid,
 		},
 	}
 
@@ -110,12 +118,8 @@ func Test_checkAzureToken(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			// Create handler that checks OAuth.
 			_, _, err = checkAzureToken(req, keySet)
-			a.Equal(tt.wantErr, err != nil)
-			if tt.wantErr {
-				a.ErrorContains(err, tt.containsErr)
-			}
+			a.ErrorIs(err, tt.wantErr)
 		})
 	}
 }
