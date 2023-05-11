@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/url"
 	"testing"
@@ -21,19 +23,21 @@ func TestAPIServerV1_login(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Allows us to check if a redirect was done (and prevent it, so we can test the handler).
-	httpClient := http.DefaultClient
-	httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
-
-	resp, err := httpClient.Get(reqUrl)
+	resp, err := http.Get(reqUrl)
 	a.Nil(err)
 
-	redirect, err := url.Parse(resp.Header.Get("Location"))
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	var loginResp loginResponse
+	if err = json.Unmarshal(body, &loginResp); err != nil {
+		t.Fatal(err)
+	}
+
+	actualUrl, err := url.Parse(loginResp.RedirectUrl)
+	a.Nil(err)
 
 	expectedQueries := url.Values{}
 	expectedQueries.Set("client_id", env.GetAPIServerAzureClientID())
@@ -49,11 +53,11 @@ func TestAPIServerV1_login(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	a.Equal(http.StatusSeeOther, resp.StatusCode)
+	a.Equal(http.StatusOK, resp.StatusCode)
 	a.Equal(url.URL{
 		Scheme:   "https",
 		Host:     "login.microsoftonline.com",
 		Path:     path,
 		RawQuery: expectedQueries.Encode(),
-	}, *redirect)
+	}, *actualUrl)
 }
