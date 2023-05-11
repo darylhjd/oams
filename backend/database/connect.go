@@ -10,9 +10,9 @@ import (
 	"github.com/darylhjd/oams/backend/env"
 )
 
-const (
-	Namespace = "database"
+const Namespace = "database"
 
+const (
 	sslMode     = "sslmode"
 	sslRootCert = "sslrootcert"
 )

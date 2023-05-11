@@ -8,12 +8,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/env"
-	"github.com/darylhjd/oams/backend/servers"
 )
 
 const (
 	postFormCodeParam = "code"
 )
+
+type msLoginCallbackResponse struct {
+	AccessToken string `json:"access_token"`
+}
 
 func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	v.l.Debug(fmt.Sprintf("%s - received login callback from azure", namespace),
@@ -39,9 +42,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := json.Marshal(map[string]string{
-		servers.AuthFieldName: res.AccessToken,
-	})
+	body, err := json.Marshal(&msLoginCallbackResponse{AccessToken: res.AccessToken})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not marshal body", namespace), zap.Error(err))

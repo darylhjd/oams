@@ -13,9 +13,9 @@ import (
 	_ "github.com/darylhjd/oams/backend/env/autoloader"
 )
 
-const (
-	MigrationNamespace = "database/migration"
+const MigrationNamespace = "database/migration"
 
+const (
 	migrationDir         = "config/migrations"
 	createDatabase       = "CREATE DATABASE"
 	dropDatabaseIfExists = "DROP DATABASE IF EXISTS"
