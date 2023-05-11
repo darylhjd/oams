@@ -5,7 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
+
+	"github.com/darylhjd/oams/backend/env"
 )
 
 const (
@@ -31,15 +33,36 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 }
 
 // CheckAuthorised checks if a request is authorised for a handler.
-func CheckAuthorised(handlerFunc http.HandlerFunc, cache *jwk.Cache) http.HandlerFunc {
+func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator Authenticator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		set, err := cache.Get(r.Context(), keySetSource)
+		set, err := authenticator.GetKeyCache().Get(r.Context(), keySetSource)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		claims, _, err := checkAzureToken(r, set)
+		// We will be using session cookies for authentication.
+		c, err := r.Cookie(SessionCookieIdent)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		acct, err := authenticator.Account(r.Context(), c.Value)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+		}
+
+		res, err := authenticator.AcquireTokenSilent(
+			r.Context(),
+			[]string{env.GetAPIServerAzureLoginScope()},
+			confidential.WithSilentAccount(acct))
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		claims, _, err := checkAzureToken(set, res.AccessToken)
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)

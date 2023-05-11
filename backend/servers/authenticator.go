@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
+	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 
 	"github.com/darylhjd/oams/backend/env"
@@ -15,8 +16,10 @@ const authenticatorNamespace = "authenticator"
 
 // Authenticator provides an interface which all authentication services for a server must implement.
 type Authenticator interface {
+	Account(ctx context.Context, accountID string) (confidential.Account, error)
 	AuthCodeURL(ctx context.Context, clientID, redirectURI string, scopes []string, opts ...confidential.AuthCodeURLOption) (string, error)
 	AcquireTokenByAuthCode(ctx context.Context, code string, redirectURI string, scopes []string, opts ...confidential.AcquireByAuthCodeOption) (confidential.AuthResult, error)
+	AcquireTokenSilent(ctx context.Context, scopes []string, opts ...confidential.AcquireSilentOption) (confidential.AuthResult, error)
 	GetKeyCache() *jwk.Cache
 }
 
@@ -63,6 +66,12 @@ type MockAzureAuthenticator struct {
 	keyCache *jwk.Cache
 }
 
+func (m *MockAzureAuthenticator) Account(_ context.Context, accountID string) (confidential.Account, error) {
+	return confidential.Account{
+		HomeAccountID: accountID,
+	}, nil
+}
+
 func (m *MockAzureAuthenticator) AuthCodeURL(context.Context, string, string, []string, ...confidential.AuthCodeURLOption) (string, error) {
 	path, err := url.JoinPath(env.GetAPIServerAzureTenantID(), "oauth2", "v2.0", "authorize")
 	if err != nil {
@@ -88,6 +97,18 @@ func (m *MockAzureAuthenticator) AuthCodeURL(context.Context, string, string, []
 func (m *MockAzureAuthenticator) AcquireTokenByAuthCode(context.Context, string, string, []string, ...confidential.AcquireByAuthCodeOption) (confidential.AuthResult, error) {
 	return confidential.AuthResult{
 		AccessToken: "mock-access-token",
+		Account: confidential.Account{
+			HomeAccountID: uuid.NewString(),
+		},
+	}, nil
+}
+
+func (m *MockAzureAuthenticator) AcquireTokenSilent(context.Context, []string, ...confidential.AcquireSilentOption) (confidential.AuthResult, error) {
+	return confidential.AuthResult{
+		AccessToken: "mock-access-token",
+		Account: confidential.Account{
+			HomeAccountID: uuid.NewString(),
+		},
 	}, nil
 }
 

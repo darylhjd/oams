@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/servers"
 )
 
 const (
@@ -34,8 +35,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Find proper way to return tokens.
-	_, err = v.azure.AcquireTokenByAuthCode(
+	res, err := v.azure.AcquireTokenByAuthCode(
 		r.Context(),
 		r.PostFormValue(postFormCodeParam),
 		env.GetAPIServerAzureLoginCallbackURL(),
@@ -45,6 +45,16 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		v.l.Error(fmt.Sprintf("%s - could not get tokens from auth code", namespace), zap.Error(err))
 		return
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     servers.SessionCookieIdent,
+		Value:    res.Account.HomeAccountID,
+		Path:     "/",
+		Expires:  res.ExpiresOn,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
 
 	redirectUrl := s.ReturnTo
 	if redirectUrl == "" {

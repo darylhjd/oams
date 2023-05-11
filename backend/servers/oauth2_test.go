@@ -118,7 +118,7 @@ func Test_checkAzureToken(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, _, err = checkAzureToken(req, keySet)
+			_, _, err = checkAzureToken(keySet, accessToken)
 			a.ErrorIs(err, tt.wantErr)
 		})
 	}
