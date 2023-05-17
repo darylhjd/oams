@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/darylhjd/oams/backend/servers"
 )
 
 func TestAPIServerV1_msLoginCallback(t *testing.T) {
@@ -79,6 +81,14 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			}
 
 			a.Equal(tt.redirectUrl, resp.Header.Get("Location"))
+
+			// Check that session cookie exists.
+			for _, cookie := range resp.Cookies() {
+				if cookie.Name == servers.SessionCookieIdent {
+					return
+				}
+			}
+			a.FailNow("could not detect expected session cookie")
 		})
 	}
 }

@@ -4,8 +4,6 @@ import (
 	"crypto/rsa"
 	"errors"
 	"fmt"
-	"net/http"
-	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -22,6 +20,10 @@ var (
 	keySetSource = fmt.Sprintf("https://login.microsoftonline.com/%s/discovery/v2.0/keys", env.GetAPIServerAzureTenantID())
 )
 
+const (
+	SessionCookieIdent = "oams_session_cookie"
+)
+
 // AzureClaims is a custom struct to hold the claims received from Microsoft Azure AD.
 type AzureClaims struct {
 	jwt.RegisteredClaims
@@ -30,16 +32,10 @@ type AzureClaims struct {
 }
 
 // checkAzureToken to make sure the token passes validation.
-func checkAzureToken(r *http.Request, set jwk.Set) (*AzureClaims, *jwt.Token, error) {
+func checkAzureToken(set jwk.Set, tokenString string) (*AzureClaims, *jwt.Token, error) {
 	// https://learn.microsoft.com/en-us/azure/active-directory/develop/access-tokens#validating-tokens
-	tokenHeader := r.Header.Get("Authorization")
-	split := strings.Split(tokenHeader, "Bearer ")
-	if len(split) < 2 {
-		return nil, nil, errors.New("malformed authorization header")
-	}
-
 	claims := &AzureClaims{}
-	token, err := jwt.ParseWithClaims(split[1], claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if token.Header["typ"] != "JWT" {
 			return nil, errors.New("wrong token type")
 		}
