@@ -42,6 +42,7 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator Authenticator) 
 		}
 
 		// We will be using session cookies for authentication.
+		// TODO: Redirect user to login if required credentials are not present.
 		c, err := r.Cookie(SessionCookieIdent)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -51,6 +52,7 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator Authenticator) 
 		acct, err := authenticator.Account(r.Context(), c.Value)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
+			return
 		}
 
 		res, err := authenticator.AcquireTokenSilent(
