@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/env"
-	_ "github.com/darylhjd/oams/backend/internal/env/autoloader"
 )
 
 func Test_checkAzureToken(t *testing.T) {
