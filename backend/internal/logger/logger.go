@@ -3,7 +3,7 @@ package logger
 import (
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/internal/env"
 )
 
 // NewLogger returns a logger with the specified logging LogLevel.

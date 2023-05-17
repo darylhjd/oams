@@ -1,4 +1,4 @@
-package servers
+package middleware
 
 import (
 	"context"
@@ -7,7 +7,8 @@ import (
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 
-	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/internal/env"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
 const (
@@ -33,9 +34,9 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 }
 
 // CheckAuthorised checks if a request is authorised for a handler.
-func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator Authenticator) http.HandlerFunc {
+func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		set, err := authenticator.GetKeyCache().Get(r.Context(), keySetSource)
+		set, err := authenticator.GetKeyCache().Get(r.Context(), oauth2.KeySetSource)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -43,7 +44,7 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator Authenticator) 
 
 		// We will be using session cookies for authentication.
 		// TODO: Redirect user to login if required credentials are not present.
-		c, err := r.Cookie(SessionCookieIdent)
+		c, err := r.Cookie(oauth2.SessionCookieIdent)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -64,7 +65,7 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator Authenticator) 
 			return
 		}
 
-		claims, _, err := checkAzureToken(set, res.AccessToken)
+		claims, _, err := oauth2.CheckAzureToken(set, res.AccessToken)
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)

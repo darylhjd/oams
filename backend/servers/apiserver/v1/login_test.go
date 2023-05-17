@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/internal/env"
 )
 
 func TestAPIServerV1_login(t *testing.T) {

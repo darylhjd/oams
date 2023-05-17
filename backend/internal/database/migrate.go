@@ -10,7 +10,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/lib/pq"
 
-	_ "github.com/darylhjd/oams/backend/env/autoloader"
+	_ "github.com/darylhjd/oams/backend/internal/env/autoloader"
 )
 
 const MigrationNamespace = "database/migration"

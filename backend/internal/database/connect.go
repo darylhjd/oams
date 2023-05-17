@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/internal/env"
 )
 
 const Namespace = "database"

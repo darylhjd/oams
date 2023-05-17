@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/darylhjd/oams/backend/database"
+	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/tests"
 )
 

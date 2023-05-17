@@ -7,8 +7,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oams/backend/env"
-	"github.com/darylhjd/oams/backend/servers"
+	"github.com/darylhjd/oams/backend/internal/env"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
 const (
@@ -47,7 +47,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     servers.SessionCookieIdent,
+		Name:     oauth2.SessionCookieIdent,
 		Value:    res.Account.HomeAccountID,
 		Path:     "/",
 		Expires:  res.ExpiresOn,

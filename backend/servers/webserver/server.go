@@ -9,8 +9,8 @@ import (
 
 	"github.com/darylhjd/oams/frontend"
 
-	"github.com/darylhjd/oams/backend/env"
-	"github.com/darylhjd/oams/backend/logger"
+	"github.com/darylhjd/oams/backend/internal/env"
+	"github.com/darylhjd/oams/backend/internal/logger"
 )
 
 const Namespace = "webserver"

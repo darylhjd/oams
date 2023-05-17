@@ -9,7 +9,7 @@ unnecessary calls to this function.
 package autoloader
 
 import (
-	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/internal/env"
 )
 
 var loaded bool

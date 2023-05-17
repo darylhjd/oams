@@ -1,4 +1,4 @@
-package servers
+package oauth2
 
 import (
 	"crypto/rand"
@@ -13,7 +13,8 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/darylhjd/oams/backend/env"
+	"github.com/darylhjd/oams/backend/internal/env"
+	_ "github.com/darylhjd/oams/backend/internal/env/autoloader"
 )
 
 func Test_checkAzureToken(t *testing.T) {
@@ -118,7 +119,7 @@ func Test_checkAzureToken(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, _, err = checkAzureToken(keySet, accessToken)
+			_, _, err = CheckAzureToken(keySet, accessToken)
 			a.ErrorIs(err, tt.wantErr)
 		})
 	}

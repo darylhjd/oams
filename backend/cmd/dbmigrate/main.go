@@ -7,8 +7,8 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 
-	"github.com/darylhjd/oams/backend/database"
-	_ "github.com/darylhjd/oams/backend/env/autoloader"
+	"github.com/darylhjd/oams/backend/internal/database"
+	_ "github.com/darylhjd/oams/backend/internal/env/autoloader"
 )
 
 type arguments struct {
