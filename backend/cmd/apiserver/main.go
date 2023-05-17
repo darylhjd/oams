@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	_ "github.com/darylhjd/oams/backend/env/autoloader"
 	"github.com/darylhjd/oams/backend/servers/apiserver"
 )
 

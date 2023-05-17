@@ -7,10 +7,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oams/backend/database"
-	"github.com/darylhjd/oams/backend/env"
-	"github.com/darylhjd/oams/backend/logger"
-	"github.com/darylhjd/oams/backend/servers"
+	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/env"
+	"github.com/darylhjd/oams/backend/internal/logger"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 	"github.com/darylhjd/oams/backend/servers/apiserver/v1"
 )
 
@@ -63,7 +63,7 @@ func New() (*APIServer, error) {
 		return nil, fmt.Errorf("%s - could not connect to database: %w", Namespace, err)
 	}
 
-	azureAuthenticator, err := servers.NewAzureAuthenticator()
+	azureAuthenticator, err := oauth2.NewAzureAuthenticator()
 	if err != nil {
 		return nil, fmt.Errorf("%s - could not create azure authenticator: %w", Namespace, err)
 	}

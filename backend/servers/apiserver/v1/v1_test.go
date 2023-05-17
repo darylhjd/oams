@@ -8,8 +8,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/darylhjd/oams/backend/database"
-	"github.com/darylhjd/oams/backend/servers"
+	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 	"github.com/darylhjd/oams/backend/tests"
 )
 
@@ -31,5 +31,5 @@ func TestMain(m *testing.M) {
 
 func newTestAPIServerV1(t *testing.T) *httptest.Server {
 	t.Helper()
-	return httptest.NewServer(NewAPIServerV1(zap.NewNop(), testDb, servers.NewMockAzureAuthenticator()))
+	return httptest.NewServer(NewAPIServerV1(zap.NewNop(), testDb, oauth2.NewMockAzureAuthenticator()))
 }

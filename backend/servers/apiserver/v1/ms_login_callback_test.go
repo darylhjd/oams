@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/darylhjd/oams/backend/servers"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
 func TestAPIServerV1_msLoginCallback(t *testing.T) {
@@ -84,7 +84,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 
 			// Check that session cookie exists.
 			for _, cookie := range resp.Cookies() {
-				if cookie.Name == servers.SessionCookieIdent {
+				if cookie.Name == oauth2.SessionCookieIdent {
 					return
 				}
 			}

@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/darylhjd/oams/backend/database"
+	"github.com/darylhjd/oams/backend/internal/database"
 )
 
 func TestSetUpTearDown(t *testing.T) {

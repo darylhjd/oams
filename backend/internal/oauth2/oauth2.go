@@ -1,4 +1,4 @@
-package servers
+package oauth2
 
 import (
 	"crypto/rsa"
@@ -8,20 +8,20 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 
-	"github.com/darylhjd/oams/backend/env"
-)
-
-var (
-	MicrosoftAuthority = fmt.Sprintf("https://login.microsoftonline.com/%s/", env.GetAPIServerAzureTenantID())
-)
-
-var (
-	tokenIssuer  = MicrosoftAuthority + "v2.0"
-	keySetSource = fmt.Sprintf("https://login.microsoftonline.com/%s/discovery/v2.0/keys", env.GetAPIServerAzureTenantID())
+	"github.com/darylhjd/oams/backend/internal/env"
 )
 
 const (
 	SessionCookieIdent = "oams_session_cookie"
+)
+
+var (
+	MicrosoftAuthority = fmt.Sprintf("https://login.microsoftonline.com/%s/", env.GetAPIServerAzureTenantID())
+	KeySetSource       = fmt.Sprintf("https://login.microsoftonline.com/%s/discovery/v2.0/keys", env.GetAPIServerAzureTenantID())
+)
+
+var (
+	tokenIssuer = MicrosoftAuthority + "v2.0"
 )
 
 // AzureClaims is a custom struct to hold the claims received from Microsoft Azure AD.
@@ -31,8 +31,8 @@ type AzureClaims struct {
 	Roles []string
 }
 
-// checkAzureToken to make sure the token passes validation.
-func checkAzureToken(set jwk.Set, tokenString string) (*AzureClaims, *jwt.Token, error) {
+// CheckAzureToken to make sure the token passes validation.
+func CheckAzureToken(set jwk.Set, tokenString string) (*AzureClaims, *jwt.Token, error) {
 	// https://learn.microsoft.com/en-us/azure/active-directory/develop/access-tokens#validating-tokens
 	claims := &AzureClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
