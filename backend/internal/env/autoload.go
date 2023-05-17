@@ -1,11 +1,10 @@
 package env
 
-var loaded bool
+import "log"
 
 // init helps to automatically load the environment variables for a programme.
+// This should be the only init function in the codebase!!!
 func init() {
-	if !loaded {
-		MustLoad()
-		loaded = !loaded
-	}
+	MustLoad()
+	log.Println("Loaded envs")
 }
