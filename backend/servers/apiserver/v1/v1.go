@@ -12,7 +12,7 @@ import (
 
 const (
 	namespace = "apiserver/v1"
-	Url       = "/api/v1/"
+	Url       = "/v1/"
 )
 
 const (
@@ -24,26 +24,29 @@ const (
 )
 
 type APIServerV1 struct {
-	l  *zap.Logger
-	db *database.DB
+	l   *zap.Logger
+	db  *database.DB
+	mux *http.ServeMux
 
 	azure oauth2.Authenticator
 }
 
-func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	mux := http.NewServeMux()
+// NewAPIServerV1 creates a new APIServerV1. This is a sub-router and should not be used as a base router.
+func NewAPIServerV1(l *zap.Logger, db *database.DB, azureClient oauth2.Authenticator) *APIServerV1 {
+	server := APIServerV1{l, db, http.NewServeMux(), azureClient}
+	server.registerHandlers()
 
-	mux.HandleFunc(baseUrl, middleware.AllowMethods(v.base, http.MethodGet))
-	mux.HandleFunc(pingUrl, middleware.AllowMethods(v.ping, http.MethodGet))
-	mux.HandleFunc(loginUrl, v.login)
-	mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	mux.HandleFunc(protectedUrl, middleware.CheckAuthorised(v.protected, v.azure))
-
-	mux.ServeHTTP(w, r)
+	return &server
 }
 
-// NewAPIServerV1 creates a new APIServerV1. This is a sub-router and should not be used
-// as a base router.
-func NewAPIServerV1(l *zap.Logger, db *database.DB, azureClient oauth2.Authenticator) *APIServerV1 {
-	return &APIServerV1{l, db, azureClient}
+func (v *APIServerV1) registerHandlers() {
+	v.mux.HandleFunc(baseUrl, middleware.AllowMethods(v.base, http.MethodGet))
+	v.mux.HandleFunc(pingUrl, middleware.AllowMethods(v.ping, http.MethodGet))
+	v.mux.HandleFunc(loginUrl, v.login)
+	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
+	v.mux.HandleFunc(protectedUrl, middleware.CheckAuthorised(v.protected, v.azure))
+}
+
+func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	v.mux.ServeHTTP(w, r)
 }

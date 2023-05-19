@@ -14,13 +14,13 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	response := "Pong~\n\n" +
 		"OAMS API Service is running normally!"
 
-	if v.db.C.Ping() != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+	if err := v.db.C.Ping(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		response = "Uh oh, not connected!"
 	}
 
 	if _, err := w.Write([]byte(response)); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
 			zap.String("url", pingUrl),
 			zap.Error(err))

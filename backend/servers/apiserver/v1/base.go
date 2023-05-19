@@ -11,7 +11,7 @@ import (
 func (v *APIServerV1) base(w http.ResponseWriter, r *http.Request) {
 	// Check if it is really the base URL.
 	if r.URL.Path != baseUrl {
-		w.WriteHeader(http.StatusNotFound)
+		http.Error(w, "Endpoint not implemented or is not supported!", http.StatusNotFound)
 		return
 	}
 
@@ -21,7 +21,7 @@ func (v *APIServerV1) base(w http.ResponseWriter, r *http.Request) {
 		"To get started, read the API docs."
 
 	if _, err := w.Write([]byte(response)); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
 			zap.String("url", baseUrl),
 			zap.Error(err))

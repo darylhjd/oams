@@ -71,7 +71,7 @@ func CheckAzureToken(set jwk.Set, tokenString string) (*AzureClaims, *jwt.Token,
 
 // SetSessionCookie to a response. Returns a copy of the session cookie that was set.
 func SetSessionCookie(w http.ResponseWriter, res confidential.AuthResult) http.Cookie {
-	// We use the account's home account iD as the key value identifier.
+	// We use the account's home account ID as the key value identifier.
 	cookie := &http.Cookie{
 		Name:     SessionCookieIdent,
 		Value:    res.Account.HomeAccountID,
