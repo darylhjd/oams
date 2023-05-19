@@ -41,7 +41,7 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		env.GetAPIServerAzureLoginCallbackURL(),
 		[]string{env.GetAPIServerAzureLoginScope()})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - error creating azure redirect url", namespace), zap.Error(err))
 		return
 	}
@@ -52,7 +52,7 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		ReturnTo: r.URL.Query().Get(stateReturnToQueryParam),
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - cannot create login state", namespace), zap.Error(err))
 		return
 	}
@@ -68,13 +68,13 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 
 	body, err := json.Marshal(loginResponse{RedirectUrl: redirectString})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - error marshalling url to body", namespace), zap.Error(err))
 		return
 	}
 
 	if _, err = w.Write(body); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
 			zap.String("url", loginUrl),
 			zap.Error(err))

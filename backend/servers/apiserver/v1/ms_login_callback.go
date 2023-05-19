@@ -22,14 +22,14 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	var s state
 	err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - cannot parse state from login callback", namespace), zap.Error(err))
 		return
 	}
 
 	// Check that we only handle callbacks from appropriate API version.
 	if s.Version != namespace {
-		w.WriteHeader(http.StatusTeapot)
+		http.Error(w, "wrong API version used for login callback", http.StatusTeapot)
 		v.l.Error(fmt.Sprintf("%s - received login callback of different version so ignoring", namespace),
 			zap.Any(callbackStateParam, s))
 		return
@@ -41,7 +41,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		env.GetAPIServerAzureLoginCallbackURL(),
 		[]string{env.GetAPIServerAzureLoginScope()})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not get tokens from auth code", namespace), zap.Error(err))
 		return
 	}

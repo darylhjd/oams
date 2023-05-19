@@ -18,37 +18,11 @@ const Namespace = "apiserver"
 
 // APIServer defines the server structure for the OAMS API service.
 type APIServer struct {
-	l  *zap.Logger
-	db *database.DB
+	l   *zap.Logger
+	db  *database.DB
+	mux *http.ServeMux
 
 	v1 *v1.APIServerV1
-}
-
-// Start the APIServer.
-func (s *APIServer) Start() error {
-	s.l.Info(fmt.Sprintf("%s - starting service...", Namespace))
-
-	port := env.GetAPIServerPort()
-	s.l.Info(fmt.Sprintf("%s - service started", Namespace), zap.String("port", port))
-	return http.ListenAndServe(fmt.Sprintf(":%s", port), s)
-}
-
-// Stop closes any external connections (e.g. database) and stops the server gracefully.
-func (s *APIServer) Stop() error {
-	return s.db.Close()
-}
-
-func (s *APIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	mux := http.NewServeMux()
-
-	// To add more versions for this URL, simply add another handler for it.
-	mux.Handle(v1.Url, http.StripPrefix(strings.TrimSuffix(v1.Url, "/"), s.v1))
-
-	mux.ServeHTTP(w, r)
-}
-
-func (s *APIServer) GetLogger() *zap.Logger {
-	return s.l
 }
 
 // New creates a new APIServer. Use Start() to start the server.
@@ -68,5 +42,30 @@ func New() (*APIServer, error) {
 		return nil, fmt.Errorf("%s - could not create azure authenticator: %w", Namespace, err)
 	}
 
-	return &APIServer{l, db, v1.NewAPIServerV1(l, db, azureAuthenticator)}, nil
+	return &APIServer{l, db, http.NewServeMux(), v1.NewAPIServerV1(l, db, azureAuthenticator)}, nil
+}
+
+// Start the APIServer.
+func (s *APIServer) Start() error {
+	s.l.Info(fmt.Sprintf("%s - starting service...", Namespace))
+
+	// To add more versions for this URL, simply add another handler for it.
+	s.mux.Handle(v1.Url, http.StripPrefix(strings.TrimSuffix(v1.Url, "/"), s.v1))
+
+	port := env.GetAPIServerPort()
+	s.l.Info(fmt.Sprintf("%s - service started", Namespace), zap.String("port", port))
+	return http.ListenAndServe(fmt.Sprintf(":%s", port), s)
+}
+
+func (s *APIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(w, r)
+}
+
+// Stop closes any external connections (e.g. database) and stops the server gracefully.
+func (s *APIServer) Stop() error {
+	return s.db.Close()
+}
+
+func (s *APIServer) GetLogger() *zap.Logger {
+	return s.l
 }
