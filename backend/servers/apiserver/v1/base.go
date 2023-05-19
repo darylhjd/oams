@@ -11,7 +11,7 @@ import (
 func (v *APIServerV1) base(w http.ResponseWriter, r *http.Request) {
 	// Check if it is really the base URL.
 	if r.URL.Path != baseUrl {
-		http.Error(w, "page not found", http.StatusNotFound)
+		http.Error(w, "Endpoint not implemented or is not supported!", http.StatusNotFound)
 		return
 	}
 
