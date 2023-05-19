@@ -37,14 +37,14 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 	return func(w http.ResponseWriter, r *http.Request) {
 		set, err := authenticator.GetKeyCache().Get(r.Context(), oauth2.KeySetSource)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		// We will be using session cookies for authentication.
 		c, err := r.Cookie(oauth2.SessionCookieIdent)
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
@@ -52,6 +52,7 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		// Instead, a zero-value Account is returned, so we check that.
 		acct, err := authenticator.Account(r.Context(), c.Value)
 		if err != nil || acct.IsZero() {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -62,13 +63,13 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 			[]string{env.GetAPIServerAzureLoginScope()},
 			confidential.WithSilentAccount(acct))
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		claims, _, err := oauth2.CheckAzureToken(set, res.AccessToken)
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
