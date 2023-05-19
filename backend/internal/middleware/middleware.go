@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
@@ -43,19 +42,21 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		}
 
 		// We will be using session cookies for authentication.
-		// TODO: Redirect user to login if required credentials are not present.
 		c, err := r.Cookie(oauth2.SessionCookieIdent)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
+		// NOTE: Microsoft's authenticator library does not return an error if the account is not found in cache.
+		// Instead, a zero-value Account is returned, so we check that.
 		acct, err := authenticator.Account(r.Context(), c.Value)
-		if err != nil {
+		if err != nil || acct.IsZero() {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
+		// NOTE: If the backend service is restarted, all cache is lost, and all users must log in again.
 		res, err := authenticator.AcquireTokenSilent(
 			r.Context(),
 			[]string{env.GetAPIServerAzureLoginScope()},
@@ -67,10 +68,12 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 
 		claims, _, err := oauth2.CheckAzureToken(set, res.AccessToken)
 		if err != nil {
-			log.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+
+		// Update the session cookie.
+		_ = oauth2.SetSessionCookie(w, res)
 
 		// Add the claims to the request context so other handlers/middleware can access it.
 		r = r.WithContext(context.WithValue(r.Context(), ClaimsContextKey, claims))

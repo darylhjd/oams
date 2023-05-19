@@ -46,15 +46,8 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     oauth2.SessionCookieIdent,
-		Value:    res.Account.HomeAccountID,
-		Path:     "/",
-		Expires:  res.ExpiresOn,
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	})
+	// Set session cookie.
+	_ = oauth2.SetSessionCookie(w, res)
 
 	redirectUrl := s.ReturnTo
 	if redirectUrl == "" {

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/tests"
+	"github.com/darylhjd/oams/backend/internal/tests"
 )
 
 var testDb *database.DB

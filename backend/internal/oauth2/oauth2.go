@@ -4,7 +4,9 @@ import (
 	"crypto/rsa"
 	"errors"
 	"fmt"
+	"net/http"
 
+	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 
@@ -65,4 +67,21 @@ func CheckAzureToken(set jwk.Set, tokenString string) (*AzureClaims, *jwt.Token,
 	}
 
 	return claims, token, nil
+}
+
+// SetSessionCookie to a response. Returns a copy of the session cookie that was set.
+func SetSessionCookie(w http.ResponseWriter, res confidential.AuthResult) http.Cookie {
+	// We use the account's home account iD as the key value identifier.
+	cookie := &http.Cookie{
+		Name:     SessionCookieIdent,
+		Value:    res.Account.HomeAccountID,
+		Path:     "/",
+		Expires:  res.ExpiresOn,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(w, cookie)
+	return *cookie
 }

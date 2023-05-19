@@ -10,7 +10,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
-	"github.com/darylhjd/oams/backend/tests"
+	"github.com/darylhjd/oams/backend/internal/tests"
 )
 
 // testDb provides a package-level sand-boxed database for testing.
