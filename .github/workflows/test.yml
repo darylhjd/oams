@@ -35,12 +35,13 @@ jobs:
           go-version-file: go.work
           cache-dependency-path: backend/go.sum
 
-      - name: Set up Node
-        uses: actions/setup-node@v3
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          node-version: 18.16.0
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          flutter-version: '3.10.1'
+          channel: 'stable'
+          cache: true
+      - run: flutter --version
 
       - name: Configuration for private dependencies
         env:
@@ -55,9 +56,8 @@ jobs:
 
       - name: Build frontend
         run: |
-          cd frontend
-          npm install
-          npm run build
+          flutter pub get
+          flutter build web
 
       - name: Test backend
         env:
