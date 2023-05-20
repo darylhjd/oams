@@ -56,6 +56,7 @@ jobs:
 
       - name: Build frontend
         run: |
+          cd frontend
           flutter pub get
           flutter build web
 
