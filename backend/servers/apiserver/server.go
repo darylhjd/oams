@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/rs/cors"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -42,19 +43,29 @@ func New() (*APIServer, error) {
 		return nil, fmt.Errorf("%s - could not create azure authenticator: %w", Namespace, err)
 	}
 
-	return &APIServer{l, db, http.NewServeMux(), v1.NewAPIServerV1(l, db, azureAuthenticator)}, nil
+	server := &APIServer{l, db, http.NewServeMux(), v1.NewAPIServerV1(l, db, azureAuthenticator)}
+	server.registerHandlers()
+
+	return server, nil
 }
 
 // Start the APIServer.
 func (s *APIServer) Start() error {
 	s.l.Info(fmt.Sprintf("%s - starting service...", Namespace))
 
-	// To add more versions for this URL, simply add another handler for it.
-	s.mux.Handle(v1.Url, http.StripPrefix(strings.TrimSuffix(v1.Url, "/"), s.v1))
+	// Set up CORS.
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8000"},
+		AllowCredentials: true})
 
 	port := env.GetAPIServerPort()
 	s.l.Info(fmt.Sprintf("%s - service started", Namespace), zap.String("port", port))
-	return http.ListenAndServe(fmt.Sprintf(":%s", port), s)
+	return http.ListenAndServe(fmt.Sprintf(":%s", port), c.Handler(s))
+}
+
+func (s *APIServer) registerHandlers() {
+	// To add more versions for this URL, simply add another handler for it.
+	s.mux.Handle(v1.Url, http.StripPrefix(strings.TrimSuffix(v1.Url, "/"), s.v1))
 }
 
 func (s *APIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {

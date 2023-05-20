@@ -10,9 +10,10 @@ import (
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
+const namespace = "apiserver/v1"
+
 const (
-	namespace = "apiserver/v1"
-	Url       = "/v1/"
+	Url = "/api/v1/"
 )
 
 const (
