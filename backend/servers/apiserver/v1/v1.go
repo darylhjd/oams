@@ -22,6 +22,7 @@ const (
 	loginUrl           = "/login"
 	msLoginCallbackUrl = "/ms-login-callback"
 	protectedUrl       = "/protected"
+	userUrl            = "/user"
 )
 
 type APIServerV1 struct {
@@ -46,6 +47,7 @@ func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
 	v.mux.HandleFunc(protectedUrl, middleware.CheckAuthorised(v.protected, v.azure))
+	v.mux.HandleFunc(userUrl, middleware.CheckAuthorised(v.user, v.azure))
 }
 
 func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {

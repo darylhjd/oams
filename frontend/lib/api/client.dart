@@ -1,18 +1,30 @@
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:http/http.dart' as http;
+import 'package:http/browser_client.dart';
 
+import 'models.dart';
+
+// APIClient helps to interface with the OAMS API.
 class APIClient {
-  static final client = http.Client();
+  static final client = () {
+    var client = BrowserClient();
+    client.withCredentials = true;
+    return client;
+  }();
+
+  // TODO: Use .env for this.
   static const String apiHost = "localhost";
   static const int apiPort = 8080;
 
-  static const String loginPath = "api/v1/login";
+  static const String defaultRedirectUrl = "http://localhost:8000/";
 
-  static Future<String> getLoginURL(Map<String, String> queryParams) async {
-    String returnUrl = "http://localhost:8000/";
-    if (queryParams.containsKey("return_to")) {
-      returnUrl = queryParams["return_to"]!;
+  static const String loginPath = "api/v1/login";
+  static const String userPath = "api/v1/user";
+
+  static Future<String> getLoginURL(String returnTo) async {
+    if (returnTo.isEmpty) {
+      returnTo = defaultRedirectUrl;
     }
 
     final uri = Uri(
@@ -21,23 +33,28 @@ class APIClient {
       port: apiPort,
       path: loginPath,
       queryParameters: {
-        "return_to": returnUrl,
+        "return_to": returnTo,
       },
     );
 
     final response = await client.get(uri);
-    final loginResponse = _LoginResponse.fromJson(jsonDecode(response.body));
+    if (response.statusCode != HttpStatus.ok) {
+      return Future.error(const HttpException("cannot get login url"));
+    }
 
+    final loginResponse = LoginResponse.fromJson(jsonDecode(response.body));
     return loginResponse.redirectUrl;
   }
-}
 
-// _LoginResponse is a data class modelling the response from a login API request.
-class _LoginResponse {
-  final String redirectUrl;
+  static Future<User> getUserInfo() async {
+    final uri =
+        Uri(scheme: "http", host: apiHost, port: apiPort, path: userPath);
 
-  _LoginResponse(this.redirectUrl);
+    final response = await client.get(uri);
+    if (response.statusCode != HttpStatus.ok) {
+      return Future.error(const HttpException("cannot get user details"));
+    }
 
-  _LoginResponse.fromJson(Map<String, dynamic> json)
-      : redirectUrl = json['redirect_url'];
+    return User.fromJson(jsonDecode(response.body));
+  }
 }
