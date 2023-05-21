@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/api/client.dart';
 import 'package:frontend/screens/screen_template.dart';
@@ -19,7 +17,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log(returnTo);
     return ScreenTemplate(
       Center(
         child: ConstrainedBox(

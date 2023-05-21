@@ -15,7 +15,7 @@ class CenteredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveBreakpoints.of(context).smallerThan(DESKTOP)
+    return ResponsiveBreakpoints.of(context).isMobile
         ? mobile(context)
         : desktop(context);
   }

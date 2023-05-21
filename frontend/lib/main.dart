@@ -34,7 +34,7 @@ class OAMSFrontend extends ConsumerWidget {
       future: ref.watch(userInfoProvider.future),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return _materialApp(router);
+          return _materialApp(ref.watch(routerProvider));
         }
         return _loading();
       },
