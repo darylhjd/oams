@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/centered_view/centered_view.dart';
-import '../widgets/nav_bar/nav_bar.dart';
+import '../widgets/centered_view.dart';
+import '../widgets/nav_bar.dart';
 
+// ScreenTemplate provides a template for all screen.
+// In general, a navigation bar is provided.
 class ScreenTemplate extends StatelessWidget {
   final Widget child;
 

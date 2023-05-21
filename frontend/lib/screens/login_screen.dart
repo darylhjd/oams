@@ -1,21 +1,30 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:frontend/api/client.dart';
 import 'package:frontend/screens/screen_template.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../api/client.dart';
-
+// LoginScreen shows the login screen.
 class LoginScreen extends StatelessWidget {
-  final Map<String, String> queryParams;
+  static const double loginButtonMaxHeight = 200;
+  static const String microsoftLogoPath = "assets/microsoft_logo.png";
+  static const double logoHeight = 150;
+  static const String buttonText = "SSO with Microsoft";
+  static const String urlLaunchMode = "_self";
 
-  const LoginScreen({Key? key, required this.queryParams}) : super(key: key);
+  final String returnTo;
+
+  const LoginScreen({Key? key, this.returnTo = ""}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    log(returnTo);
     return ScreenTemplate(
       Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(
-            maxHeight: 200,
+            maxHeight: loginButtonMaxHeight,
           ),
           child: ElevatedButton(
             style: ButtonStyle(
@@ -25,23 +34,25 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
             ),
-            onPressed: () async {
-              final redirectUrl = await APIClient.getLoginURL(queryParams);
-              if (!await launchUrl(Uri.parse(redirectUrl),
-                  webOnlyWindowName: "_self")) {
-                // TODO: Add handling here.
-              }
-            },
+            onPressed: loginAction,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset("assets/microsoft_logo.png", height: 150),
-                const Text("SSO with Microsoft"),
+                Image.asset(microsoftLogoPath, height: logoHeight),
+                const Text(buttonText),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> loginAction() async {
+    final redirectUrl = await APIClient.getLoginURL(returnTo);
+    if (!await launchUrl(Uri.parse(redirectUrl),
+        webOnlyWindowName: urlLaunchMode)) {
+      // TODO: Add handling here.
+    }
   }
 }

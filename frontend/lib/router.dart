@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:frontend/screens/about_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
@@ -6,43 +5,45 @@ import 'package:go_router/go_router.dart';
 
 typedef RouteInfo = ({String name, String path});
 
+// Routes stores the different routes in the frontend.
 class Routes {
   static const RouteInfo index = (name: "index", path: "/");
   static const RouteInfo about = (name: "about", path: "about");
   static const RouteInfo login = (name: "login", path: "login");
+  static const RouteInfo profile = (name: "profile", path: "profile");
 }
 
+// router helps to provide proper URL handling for the frontend.
 final router = GoRouter(
   routes: [
-    _noTransitionRoute(
-      Routes.index,
-      page: const HomeScreen(),
-      childRoutes: [
-        _noTransitionRoute(Routes.about, page: const AboutScreen()),
-        _noTransitionRoute(Routes.login, builder: (context, state) {
-          final queryParams = state.queryParameters;
-          return LoginScreen(queryParams: queryParams);
-        }),
+    GoRoute(
+      name: Routes.index.name,
+      path: Routes.index.path,
+      pageBuilder: (context, state) => NoTransitionPage(
+        key: state.pageKey,
+        child: const HomeScreen(),
+      ),
+      routes: [
+        GoRoute(
+          name: Routes.about.name,
+          path: Routes.about.path,
+          pageBuilder: (context, state) => NoTransitionPage(
+            key: state.pageKey,
+            child: const AboutScreen(),
+          ),
+        ),
+        GoRoute(
+          name: Routes.login.name,
+          path: Routes.login.path,
+          pageBuilder: (context, state) {
+            return NoTransitionPage(
+              key: state.pageKey,
+              child: LoginScreen(
+                  returnTo: state.queryParameters["return_to"] ?? ""),
+            );
+          },
+        )
       ],
     ),
   ],
 );
-
-// _noTransitionRoute is a helper function to build a transition-less route.
-// Be sure to provide at least one of page or builder.
-// If both are provided, then it defaults to using page.
-GoRoute _noTransitionRoute(RouteInfo info,
-    {Widget? page,
-    Widget Function(BuildContext, GoRouterState)? builder,
-    List<GoRoute> childRoutes = const []}) {
-  return GoRoute(
-    name: info.name,
-    path: info.path,
-    builder: builder,
-    pageBuilder: (context, state) => NoTransitionPage<void>(
-      key: state.pageKey,
-      child: page ?? builder!(context, state),
-    ),
-    routes: childRoutes,
-  );
-}

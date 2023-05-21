@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	ClaimsContextKey = "claims"
+	ClaimsContextKey  = "claims"
+	AccountContextKey = "account"
 )
 
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
@@ -76,8 +77,9 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		// Update the session cookie.
 		_ = oauth2.SetSessionCookie(w, res)
 
-		// Add the claims to the request context so other handlers/middleware can access it.
+		// Add relevant contexts to the request.
 		r = r.WithContext(context.WithValue(r.Context(), ClaimsContextKey, claims))
+		r = r.WithContext(context.WithValue(r.Context(), AccountContextKey, acct))
 		handlerFunc(w, r)
 	}
 }
