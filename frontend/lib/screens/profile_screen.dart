@@ -6,6 +6,7 @@ import 'package:frontend/screens/screen_template.dart';
 import 'package:frontend/widgets/dialogs.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
+// ProfileScreen shows the profile screen.
 class ProfileScreen extends ConsumerWidget {
   static const double mobilePadding = 10;
   static const double desktopPadding = 20;
@@ -48,6 +49,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
+// _PreferredUsername shows as a larger text the preferred username of a user.
 class _PreferredUsername extends StatelessWidget {
   static const double mobileTopPadding = 50;
   static const double mobileOtherPadding = 5;

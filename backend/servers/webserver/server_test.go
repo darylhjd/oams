@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -11,18 +12,30 @@ import (
 )
 
 func TestWebServer(t *testing.T) {
-	a := assert.New(t)
-
 	server := newTestWebServer(t)
 	defer server.Close()
 
-	reqUrl, err := url.JoinPath(server.URL, "/")
-	a.Nil(err)
+	tests := []string{
+		// For requests to pages (and not files), we expect StatusOK response.
+		// Let the frontend router handle the file!
+		"/",
+		"/about",
+		"/profile",
+		"/nested/pages",
+	}
 
-	resp, err := http.Get(reqUrl)
-	a.Nil(err)
+	a := assert.New(t)
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("with request path %+q", tt), func(t *testing.T) {
+			reqUrl, err := url.JoinPath(server.URL, tt)
+			a.Nil(err)
 
-	a.Equal(http.StatusOK, resp.StatusCode)
+			resp, err := http.Get(reqUrl)
+			a.Nil(err)
+
+			a.Equal(http.StatusOK, resp.StatusCode)
+		})
+	}
 }
 
 func newTestWebServer(t *testing.T) *httptest.Server {

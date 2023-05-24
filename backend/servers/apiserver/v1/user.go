@@ -11,6 +11,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/middleware"
 )
 
+// userResponse is a struct detailing the response body of the user endpoint.
 type userResponse struct {
 	HomeAccountID     string `json:"home_account_id"`
 	PreferredUsername string `json:"username"`
