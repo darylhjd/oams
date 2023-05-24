@@ -341,8 +341,6 @@ github.com/d2g/dhcp4 v0.0.0-20170904100407-a1d1b6c41b1c/go.mod h1:Ct2BUK8SB0YC1S
 github.com/d2g/dhcp4client v1.0.0/go.mod h1:j0hNfjhrt2SxUOw55nL0ATM/z4Yt3t2Kd1mW34z5W5s=
 github.com/d2g/dhcp4server v0.0.0-20181031114812-7d4a0a7f59a5/go.mod h1:Eo87+Kg/IX2hfWJfwxMzLyuSZyxSoAug2nGa1G2QAi8=
 github.com/d2g/hardwareaddr v0.0.0-20190221164911-e7d9fbe030e4/go.mod h1:bMl4RjIciD2oAxI7DmWRx6gbeqrkoLqv3MV0vzNad+I=
-github.com/darylhjd/oams/frontend v0.0.0-20230520203140-c42a9c9b9048 h1:FZAMheWeVSyx3MpIlOsEBfXaB+v6P2ypIADM2PuMF18=
-github.com/darylhjd/oams/frontend v0.0.0-20230520203140-c42a9c9b9048/go.mod h1:epQSemrv0YJEe092xq7zARb/2ywI9HEytGLg9irRegc=
 github.com/darylhjd/oams/frontend v0.0.0-20230521200224-6e4b6a7b3e77 h1:eySwEV6Gl4ARASGb2wS+hdk8NGn34MYmU+Jdrn4SsgI=
 github.com/darylhjd/oams/frontend v0.0.0-20230521200224-6e4b6a7b3e77/go.mod h1:epQSemrv0YJEe092xq7zARb/2ywI9HEytGLg9irRegc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
