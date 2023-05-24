@@ -20,6 +20,7 @@ class APIClient {
   static const String defaultRedirectUrl = "http://localhost:8000/";
 
   static const String loginPath = "api/v1/login";
+  static const String loginReturnToParam = "return_to";
   static const String userPath = "api/v1/user";
 
   static Future<String> getLoginURL(String returnTo) async {
@@ -33,7 +34,7 @@ class APIClient {
       port: apiPort,
       path: loginPath,
       queryParameters: {
-        "return_to": returnTo,
+        loginReturnToParam: returnTo,
       },
     );
 

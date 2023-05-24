@@ -10,40 +10,12 @@ class NavBar extends StatelessWidget {
   static const double height = 70;
   static const double padding = 10;
   static List<BoxShadow>? boxShadow = kElevationToShadow[8];
-
-  static const double desktopBorderRadius = 30;
+  static const double borderRadius = 10;
 
   const NavBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveBreakpoints.of(context).isMobile
-        ? mobile(context)
-        : desktop(context);
-  }
-
-  Widget mobile(BuildContext context) {
-    return SizedBox(
-      height: height,
-      child: Container(
-        padding: const EdgeInsets.all(padding),
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColorLight,
-          boxShadow: boxShadow,
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _Options(true),
-            _Logo(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget desktop(BuildContext context) {
     return SizedBox(
       height: height,
       child: Container(
@@ -52,15 +24,32 @@ class NavBar extends StatelessWidget {
             color: Theme.of(context).primaryColorLight,
             boxShadow: boxShadow,
             borderRadius:
-                const BorderRadius.all(Radius.circular(desktopBorderRadius))),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _Logo(),
-            _Options(false),
-          ],
-        ),
+                const BorderRadius.all(Radius.circular(borderRadius))),
+        child: ResponsiveBreakpoints.of(context).isMobile
+            ? mobile(context)
+            : desktop(context),
       ),
+    );
+  }
+
+  Widget mobile(BuildContext context) {
+    return const Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _Options(true),
+        _Logo(),
+      ],
+    );
+  }
+
+  Widget desktop(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _Logo(),
+        _Options(false),
+      ],
     );
   }
 }
@@ -104,6 +93,7 @@ class _Options extends ConsumerWidget {
   Widget mobile(BuildContext context, bool isLoggedIn) {
     var items = <PopupMenuItem<Widget>>[
       const PopupMenuItem(
+        padding: EdgeInsets.zero,
         child: _AboutItem(true),
       ),
     ];
@@ -111,10 +101,12 @@ class _Options extends ConsumerWidget {
     PopupMenuItem<Widget> newItem;
     if (isLoggedIn) {
       newItem = const PopupMenuItem(
+        padding: EdgeInsets.zero,
         child: _ProfileItem(true),
       );
     } else {
       newItem = const PopupMenuItem(
+        padding: EdgeInsets.zero,
         child: _LoginItem(true),
       );
     }
@@ -231,17 +223,15 @@ class _LoginItem extends StatelessWidget {
 
 // _NavBarText helps to standardise the text in the navigation bar.
 class _NavBarText extends StatelessWidget {
-  static const double fontSize = 18;
-
   final String text;
 
-  const _NavBarText(this.text, {super.key});
+  const _NavBarText(this.text, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(fontSize: fontSize),
+      style: Theme.of(context).textTheme.titleMedium,
     );
   }
 }

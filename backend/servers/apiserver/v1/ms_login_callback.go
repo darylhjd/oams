@@ -16,9 +16,6 @@ const (
 )
 
 func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
-	v.l.Debug(fmt.Sprintf("%s - received login callback from azure", namespace),
-		zap.String("method", r.Method))
-
 	var s state
 	err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s)
 	if err != nil {

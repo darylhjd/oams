@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/api/client.dart';
 import 'package:frontend/providers/session.dart';
 import 'package:frontend/screens/about_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
@@ -44,11 +45,13 @@ final routerProvider = Provider<GoRouter>(
                 return NoTransitionPage(
                   key: state.pageKey,
                   child: LoginScreen(
-                      returnTo: state.queryParameters["return_to"] ?? ""),
+                      returnTo:
+                          state.queryParameters[APIClient.loginReturnToParam] ??
+                              ""),
                 );
               },
               redirect: (context, state) =>
-                  isLoggedIn ? Routes.index.name : null,
+                  isLoggedIn ? state.namedLocation(Routes.index.name) : null,
             ),
             GoRoute(
               name: Routes.profile.name,
@@ -59,8 +62,15 @@ final routerProvider = Provider<GoRouter>(
                   child: const ProfileScreen(),
                 );
               },
-              redirect: (context, state) =>
-                  isLoggedIn ? null : Routes.index.path + Routes.login.path,
+              redirect: (context, state) {
+                var to = state.namedLocation(
+                  Routes.login.name,
+                  queryParameters: {
+                    APIClient.loginReturnToParam: state.fullPath!,
+                  },
+                );
+                return isLoggedIn ? null : to;
+              },
             ),
           ],
         ),

@@ -17,8 +17,6 @@ type userResponse struct {
 }
 
 func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
-	v.l.Debug(fmt.Sprintf("%s - received user request", namespace))
-
 	// Get user data.
 	acct, ok := r.Context().Value(middleware.AccountContextKey).(confidential.Account)
 	if !ok {

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -51,5 +52,7 @@ func (v *APIServerV1) registerHandlers() {
 }
 
 func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	v.l.Debug(fmt.Sprintf("%s - handling request", namespace), zap.String("endpoint", r.URL.Path))
+
 	v.mux.ServeHTTP(w, r)
 }
