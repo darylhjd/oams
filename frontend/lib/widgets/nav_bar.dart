@@ -1,50 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/providers/session.dart';
 import 'package:frontend/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-
-import '../providers/session.dart';
 
 // NavBar is a widget that shows the app's navigation bar.
 class NavBar extends StatelessWidget {
   static const double height = 70;
   static const double padding = 10;
   static List<BoxShadow>? boxShadow = kElevationToShadow[8];
-
-  static const double desktopBorderRadius = 30;
+  static const double borderRadius = 10;
 
   const NavBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveBreakpoints.of(context).smallerThan(DESKTOP)
-        ? mobile(context)
-        : desktop(context);
-  }
-
-  Widget mobile(BuildContext context) {
-    return SizedBox(
-      height: height,
-      child: Container(
-        padding: const EdgeInsets.all(padding),
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColorLight,
-          boxShadow: boxShadow,
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Options(true),
-            Logo(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget desktop(BuildContext context) {
     return SizedBox(
       height: height,
       child: Container(
@@ -53,27 +24,44 @@ class NavBar extends StatelessWidget {
             color: Theme.of(context).primaryColorLight,
             boxShadow: boxShadow,
             borderRadius:
-                const BorderRadius.all(Radius.circular(desktopBorderRadius))),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Logo(),
-            Options(false),
-          ],
-        ),
+                const BorderRadius.all(Radius.circular(borderRadius))),
+        child: ResponsiveBreakpoints.of(context).isMobile
+            ? mobile(context)
+            : desktop(context),
       ),
+    );
+  }
+
+  Widget mobile(BuildContext context) {
+    return const Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _Options(true),
+        _Logo(),
+      ],
+    );
+  }
+
+  Widget desktop(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _Logo(),
+        _Options(false),
+      ],
     );
   }
 }
 
-// Logo is a widget that shows the app logo on the navigation bar.
-class Logo extends StatelessWidget {
+// _Logo is a widget that shows the app logo on the navigation bar.
+class _Logo extends StatelessWidget {
   static const double width = 100;
   static const double height = double.infinity;
 
   static const String logoPath = "assets/logo.png";
 
-  const Logo({Key? key}) : super(key: key);
+  const _Logo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -88,11 +76,11 @@ class Logo extends StatelessWidget {
   }
 }
 
-// Options is a widget that stores all the navigation bar items except the logo.
-class Options extends ConsumerWidget {
+// _Options is a widget that stores all the navigation bar items except the logo.
+class _Options extends ConsumerWidget {
   final bool isMobile;
 
-  const Options(this.isMobile, {Key? key}) : super(key: key);
+  const _Options(this.isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -105,18 +93,21 @@ class Options extends ConsumerWidget {
   Widget mobile(BuildContext context, bool isLoggedIn) {
     var items = <PopupMenuItem<Widget>>[
       const PopupMenuItem(
-        child: AboutItem(true),
+        padding: EdgeInsets.zero,
+        child: _AboutItem(true),
       ),
     ];
 
     PopupMenuItem<Widget> newItem;
     if (isLoggedIn) {
       newItem = const PopupMenuItem(
-        child: ProfileItem(true),
+        padding: EdgeInsets.zero,
+        child: _ProfileItem(true),
       );
     } else {
       newItem = const PopupMenuItem(
-        child: LoginItem(true),
+        padding: EdgeInsets.zero,
+        child: _LoginItem(true),
       );
     }
 
@@ -130,14 +121,14 @@ class Options extends ConsumerWidget {
 
   Widget desktop(BuildContext context, bool isLoggedIn) {
     var children = <Widget>[
-      const AboutItem(false),
+      const _AboutItem(false),
     ];
 
     Widget newChild;
     if (isLoggedIn) {
-      newChild = const ProfileItem(false);
+      newChild = const _ProfileItem(false);
     } else {
-      newChild = const LoginItem(false);
+      newChild = const _LoginItem(false);
     }
 
     children.add(newChild);
@@ -149,12 +140,12 @@ class Options extends ConsumerWidget {
   }
 }
 
-// AboutItem is a widget that shows the About item on the navigation bar.
-class AboutItem extends StatelessWidget {
-  final Widget text = const NavBarText("About");
+// _AboutItem is a widget that shows the About item on the navigation bar.
+class _AboutItem extends StatelessWidget {
+  final Widget text = const _NavBarText("About");
   final bool isMobile;
 
-  const AboutItem(this.isMobile, {Key? key}) : super(key: key);
+  const _AboutItem(this.isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -176,12 +167,12 @@ class AboutItem extends StatelessWidget {
   }
 }
 
-// ProfileItem is a widget that shows the Profile item on the navigation bar.
-class ProfileItem extends StatelessWidget {
-  final Widget text = const NavBarText("Profile");
+// _ProfileItem is a widget that shows the Profile item on the navigation bar.
+class _ProfileItem extends StatelessWidget {
+  final Widget text = const _NavBarText("Profile");
   final bool isMobile;
 
-  const ProfileItem(this.isMobile, {Key? key}) : super(key: key);
+  const _ProfileItem(this.isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -203,12 +194,12 @@ class ProfileItem extends StatelessWidget {
   }
 }
 
-// LoginItem is a widget that shows the Login item on the navigation bar.
-class LoginItem extends StatelessWidget {
-  final Widget text = const NavBarText("Login");
+// _LoginItem is a widget that shows the Login item on the navigation bar.
+class _LoginItem extends StatelessWidget {
+  final Widget text = const _NavBarText("Login");
   final bool isMobile;
 
-  const LoginItem(this.isMobile, {Key? key}) : super(key: key);
+  const _LoginItem(this.isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -230,19 +221,17 @@ class LoginItem extends StatelessWidget {
   }
 }
 
-// NavBarText helps to standardise the text in the navigation bar.
-class NavBarText extends StatelessWidget {
-  static const double fontSize = 18;
-
+// _NavBarText helps to standardise the text in the navigation bar.
+class _NavBarText extends StatelessWidget {
   final String text;
 
-  const NavBarText(this.text, {super.key});
+  const _NavBarText(this.text, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(fontSize: fontSize),
+      style: Theme.of(context).textTheme.titleMedium,
     );
   }
 }

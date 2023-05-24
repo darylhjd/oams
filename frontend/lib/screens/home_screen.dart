@@ -7,9 +7,19 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ScreenTemplate(
-      Center(
-        child: Text("Welcome to Online Attendance Management System!"),
+    return ScreenTemplate(
+      ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+            ),
+            height: 300,
+            child:
+                const Text("Welcome to Online Attendance Management System!"),
+          ),
+        ],
       ),
     );
   }

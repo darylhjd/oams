@@ -4,12 +4,13 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 
@@ -109,10 +110,6 @@ func Test_checkAzureToken(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			// Build request with authorization header.
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
-
 			keySet := jwk.NewSet()
 			if err = keySet.AddKey(jwkKey); err != nil {
 				t.Fatal(err)
@@ -120,6 +117,29 @@ func Test_checkAzureToken(t *testing.T) {
 
 			_, _, err = CheckAzureToken(keySet, accessToken)
 			a.ErrorIs(err, tt.wantErr)
+		})
+	}
+}
+
+func TestSetSessionCookie(t *testing.T) {
+	// Create a few test cases.
+	var tests []string
+	for i := 0; i < 10; i++ {
+		tests = append(tests, uuid.NewString())
+	}
+
+	a := assert.New(t)
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("with home account id %+q", tt), func(t *testing.T) {
+			authResult := confidential.AuthResult{
+				Account: confidential.Account{
+					HomeAccountID: tt,
+				},
+			}
+
+			rr := httptest.NewRecorder()
+			a.Equal(tt, SetSessionCookie(rr, authResult).Value)
+			a.Contains(rr.Header().Get("Set-Cookie"), fmt.Sprintf("%s=%s", SessionCookieIdent, tt))
 		})
 	}
 }

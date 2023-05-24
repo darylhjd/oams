@@ -31,9 +31,8 @@ type loginResponse struct {
 	RedirectUrl string `json:"redirect_url"`
 }
 
+// login is the entrypoint to OAM's OAuth2 flow.
 func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
-	v.l.Debug(fmt.Sprintf("%s - handling login request", namespace))
-
 	// https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 	redirectString, err := v.azure.AuthCodeURL(
 		r.Context(),

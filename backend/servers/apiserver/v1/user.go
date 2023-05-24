@@ -11,14 +11,13 @@ import (
 	"github.com/darylhjd/oams/backend/internal/middleware"
 )
 
+// userResponse is a struct detailing the response body of the user endpoint.
 type userResponse struct {
 	HomeAccountID     string `json:"home_account_id"`
 	PreferredUsername string `json:"username"`
 }
 
 func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
-	v.l.Debug(fmt.Sprintf("%s - received user request", namespace))
-
 	// Get user data.
 	acct, ok := r.Context().Value(middleware.AccountContextKey).(confidential.Account)
 	if !ok {

@@ -15,10 +15,10 @@ const (
 	postFormCodeParam = "code"
 )
 
+// msLoginCallback handles the login callback from Microsoft Azure.
+// This endpoint receives the auth code in the OAuth2 flow and exchanges this for an access token.
+// TODO: Implement code challenge using PKCE.
 func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
-	v.l.Debug(fmt.Sprintf("%s - received login callback from azure", namespace),
-		zap.String("method", r.Method))
-
 	var s state
 	err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s)
 	if err != nil {

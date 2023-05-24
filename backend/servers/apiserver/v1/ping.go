@@ -7,10 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// ping is the handler for the pingUrl.
+// ping helps check the health of the API server. It also checks the database connection.
 func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
-	v.l.Debug(fmt.Sprintf("%s - handling ping request", namespace))
-
 	response := "Pong~\n\n" +
 		"OAMS API Service is running normally!"
 

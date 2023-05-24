@@ -1,3 +1,7 @@
+/*
+Package tests is the testing package for the database. We use a different package for the tests since the
+tests package requires helpers from the database package, which results in an import cycle.
+*/
 package tests
 
 import (

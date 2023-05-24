@@ -54,7 +54,6 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		acct, err := authenticator.Account(r.Context(), c.Value)
 		if err != nil || acct.IsZero() {
 			http.Error(w, "account not found in session cache", http.StatusUnauthorized)
-			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
