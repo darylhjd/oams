@@ -20,10 +20,7 @@ class AboutScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(mobilePadding),
       children: const [
-        Center(
-          child: Text("This is the about screen."),
-        ),
-        _MadeWithFlutter(true),
+        _PoweredByFlutter(true),
       ],
     );
   }
@@ -32,22 +29,19 @@ class AboutScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(desktopPadding),
       children: const [
-        Center(
-          child: Text("This is the about screen."),
-        ),
-        _MadeWithFlutter(false),
+        _PoweredByFlutter(false),
       ],
     );
   }
 }
 
-class _MadeWithFlutter extends StatelessWidget {
+class _PoweredByFlutter extends StatelessWidget {
   static const double mobileSize = 100;
   static const double desktopSize = 200;
   static const String tagline = "Powered by:";
   final bool isMobile;
 
-  const _MadeWithFlutter(this.isMobile, {Key? key}) : super(key: key);
+  const _PoweredByFlutter(this.isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -55,14 +49,12 @@ class _MadeWithFlutter extends StatelessWidget {
   }
 
   Widget mobile(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Center(
-          child: Text(
-            tagline,
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
+        Text(
+          tagline,
+          style: Theme.of(context).textTheme.labelLarge,
         ),
         const FlutterLogo(
           size: mobileSize,
