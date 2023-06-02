@@ -22,7 +22,7 @@ const (
 	pingUrl            = "/ping"
 	loginUrl           = "/login"
 	msLoginCallbackUrl = "/ms-login-callback"
-	protectedUrl       = "/protected"
+	signOutUrl         = "/sign-out"
 	userUrl            = "/user"
 )
 
@@ -47,7 +47,7 @@ func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(pingUrl, middleware.AllowMethods(v.ping, http.MethodGet))
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	v.mux.HandleFunc(protectedUrl, middleware.CheckAuthorised(v.protected, v.azure))
+	v.mux.HandleFunc(signOutUrl, middleware.CheckAuthorised(v.signOut, v.azure))
 	v.mux.HandleFunc(userUrl, middleware.CheckAuthorised(v.user, v.azure))
 }
 

@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"io"
 	"net/http"
-	"net/url"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,23 +10,12 @@ import (
 
 func TestAPIServerV1_ping(t *testing.T) {
 	a := assert.New(t)
+	v1 := newTestAPIServerV1(t)
 
-	server := newTestAPIServerV1(t)
-	defer server.Close()
+	req := httptest.NewRequest(http.MethodGet, pingUrl, nil)
+	rr := httptest.NewRecorder()
+	v1.ping(rr, req)
 
-	reqUrl, err := url.JoinPath(server.URL, pingUrl)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	resp, err := http.Get(reqUrl)
-	a.Nil(err)
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	a.Equal(http.StatusOK, resp.StatusCode)
-	a.Contains(string(body), "Pong~")
+	a.Equal(http.StatusOK, rr.Code)
+	a.Contains(string(rr.Body.Bytes()), "Pong~")
 }

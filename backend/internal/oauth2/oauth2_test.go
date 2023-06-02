@@ -143,3 +143,17 @@ func TestSetSessionCookie(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteSessionCookie(t *testing.T) {
+	a := assert.New(t)
+
+	rr := httptest.NewRecorder()
+	signOutCookie := DeleteSessionCookie(rr)
+
+	a.Empty(signOutCookie.Value)
+	a.Equal(time.Unix(0, 0), signOutCookie.Expires)
+	a.Equal(-1, signOutCookie.MaxAge)
+
+	a.Contains(rr.Header().Get("Set-Cookie"), SessionCookieIdent)
+	a.Contains(rr.Header().Get("Set-Cookie"), "Max-Age=0")
+}

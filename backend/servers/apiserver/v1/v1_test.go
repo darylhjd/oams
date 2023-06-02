@@ -2,7 +2,6 @@ package v1
 
 import (
 	"log"
-	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -29,7 +28,7 @@ func TestMain(m *testing.M) {
 	os.Exit(res)
 }
 
-func newTestAPIServerV1(t *testing.T) *httptest.Server {
+func newTestAPIServerV1(t *testing.T) *APIServerV1 {
 	t.Helper()
-	return httptest.NewServer(NewAPIServerV1(zap.NewNop(), testDb, oauth2.NewMockAzureAuthenticator()))
+	return NewAPIServerV1(zap.NewNop(), testDb, oauth2.NewMockAzureAuthenticator())
 }
