@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/api/client.dart';
 import 'package:frontend/providers/session.dart';
 import 'package:frontend/router.dart';
 import 'package:go_router/go_router.dart';
@@ -98,20 +99,27 @@ class _Options extends ConsumerWidget {
       ),
     ];
 
-    PopupMenuItem<Widget> newItem;
     if (isLoggedIn) {
-      newItem = const PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: _ProfileItem(true),
+      items.addAll(
+        [
+          const PopupMenuItem(
+            padding: EdgeInsets.zero,
+            child: _ProfileItem(true),
+          ),
+          const PopupMenuItem(
+            padding: EdgeInsets.zero,
+            child: _LogoutItem(true),
+          )
+        ],
       );
     } else {
-      newItem = const PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: _LoginItem(true),
+      items.add(
+        const PopupMenuItem(
+          padding: EdgeInsets.zero,
+          child: _LoginItem(true),
+        ),
       );
     }
-
-    items.add(newItem);
 
     return PopupMenuButton(
       icon: const Icon(Icons.menu),
@@ -187,9 +195,20 @@ class _ProfileItem extends StatelessWidget {
   }
 
   Widget desktop(BuildContext context) {
-    return TextButton(
-      child: text,
-      onPressed: () => context.goNamed(Routes.profile.name),
+    var items = <PopupMenuItem<Widget>>[
+      PopupMenuItem(
+        onTap: () => context.goNamed(Routes.profile.name),
+        child: text,
+      ),
+      const PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: _LogoutItem(false),
+      ),
+    ];
+
+    return PopupMenuButton(
+      icon: const Icon(Icons.account_circle_rounded),
+      itemBuilder: (context) => items,
     );
   }
 }
@@ -221,6 +240,48 @@ class _LoginItem extends StatelessWidget {
   }
 }
 
+// _LogoutItem is a widget that allows user to logout on click.
+class _LogoutItem extends ConsumerWidget {
+  static const String text = "Logout";
+  final bool isMobile;
+
+  const _LogoutItem(this.isMobile, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuItem(
+      onTap: () => logoutAction(context, ref),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            const WidgetSpan(
+              child: Icon(
+                Icons.logout,
+                color: Colors.red,
+              ),
+            ),
+            WidgetSpan(
+              child: Text(
+                text,
+                style: _navBarTextStyle(context)?.copyWith(color: Colors.red),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> logoutAction(BuildContext context, WidgetRef ref) async {
+    final ok = await APIClient.logout();
+    if (ok && context.mounted) {
+      ref.read(sessionProvider.notifier).update((_) => false);
+      ref.invalidate(userInfoProvider);
+      context.goNamed(Routes.index.name);
+    }
+  }
+}
+
 // _NavBarText helps to standardise the text in the navigation bar.
 class _NavBarText extends StatelessWidget {
   final String text;
@@ -231,7 +292,13 @@ class _NavBarText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: Theme.of(context).textTheme.titleMedium,
+      style: _navBarTextStyle(context),
     );
   }
+}
+
+// _navBarTextStyle is a helper function to return the default text style
+// for text in teh navigation bar.
+TextStyle? _navBarTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.titleMedium;
 }

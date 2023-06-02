@@ -21,6 +21,7 @@ class APIClient {
 
   static const String loginPath = "api/v1/login";
   static const String loginReturnToParam = "return_to";
+  static const String logoutPath = "api/v1/sign-out";
   static const String userPath = "api/v1/user";
 
   static Future<String> getLoginURL(String returnTo) async {
@@ -45,6 +46,18 @@ class APIClient {
 
     final loginResponse = LoginResponse.fromJson(jsonDecode(response.body));
     return loginResponse.redirectUrl;
+  }
+
+  static Future<bool> logout() async {
+    final uri = Uri(
+      scheme: "http",
+      host: apiHost,
+      port: apiPort,
+      path: logoutPath,
+    );
+
+    final response = await client.get(uri);
+    return response.statusCode == HttpStatus.ok;
   }
 
   static Future<User> getUserInfo() async {
