@@ -45,9 +45,10 @@ final routerProvider = Provider<GoRouter>(
                 return NoTransitionPage(
                   key: state.pageKey,
                   child: LoginScreen(
-                      returnTo:
-                          state.queryParameters[APIClient.loginReturnToParam] ??
-                              ""),
+                    returnTo:
+                        state.queryParameters[APIClient.loginReturnToParam] ??
+                            "",
+                  ),
                 );
               },
               redirect: (context, state) =>
@@ -66,6 +67,7 @@ final routerProvider = Provider<GoRouter>(
                 var to = state.namedLocation(
                   Routes.login.name,
                   queryParameters: {
+                    // TODO: Need to provide host as well.
                     APIClient.loginReturnToParam: state.fullPath!,
                   },
                 );
