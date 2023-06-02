@@ -2,8 +2,9 @@ package v1
 
 import (
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 
@@ -30,36 +31,17 @@ func TestAPIServerV1_login(t *testing.T) {
 	a := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := newTestAPIServerV1(t)
-			defer server.Close()
-
-			reqUrl, err := url.JoinPath(server.URL, loginUrl)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			req, err := url.Parse(reqUrl)
-			if err != nil {
-				t.Fatal(err)
-			}
+			v1 := newTestAPIServerV1(t)
 
 			loginQueries := url.Values{}
 			loginQueries.Set(stateReturnToQueryParam, tt.returnTo)
-			req.RawQuery = loginQueries.Encode()
-			reqUrl = req.String()
-
-			resp, err := http.Get(reqUrl)
-			a.Nil(err)
-
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				t.Fatal(err)
-			}
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s?%s", loginUrl, loginQueries.Encode()), nil)
+			rr := httptest.NewRecorder()
+			v1.login(rr, req)
 
 			var loginResp loginResponse
-			if err = json.Unmarshal(body, &loginResp); err != nil {
-				t.Fatal(err)
-			}
+			err := json.Unmarshal(rr.Body.Bytes(), &loginResp)
+			a.Nil(err)
 
 			actualUrl, err := url.Parse(loginResp.RedirectUrl)
 			a.Nil(err)
@@ -68,9 +50,7 @@ func TestAPIServerV1_login(t *testing.T) {
 				Version:  namespace,
 				ReturnTo: tt.returnTo,
 			})
-			if err != nil {
-				t.Fatal(err)
-			}
+			a.Nil(err)
 
 			expectedQueries := url.Values{}
 			expectedQueries.Set("client_id", env.GetAPIServerAzureClientID())
@@ -82,11 +62,9 @@ func TestAPIServerV1_login(t *testing.T) {
 
 			// NOTE: We add "/" to the beginning of the path so the test passes, but this will not affect the result.
 			path, err := url.JoinPath("/", env.GetAPIServerAzureTenantID(), "oauth2", "v2.0", "authorize")
-			if err != nil {
-				t.Fatal(err)
-			}
+			a.Nil(err)
 
-			a.Equal(http.StatusOK, resp.StatusCode)
+			a.Equal(http.StatusOK, rr.Code)
 			a.Equal(url.URL{
 				Scheme:   "https",
 				Host:     "login.microsoftonline.com",

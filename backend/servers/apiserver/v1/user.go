@@ -17,6 +17,7 @@ type userResponse struct {
 	PreferredUsername string `json:"username"`
 }
 
+// user endpoint returns useful information on a User.
 func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	// Get user data.
 	acct, ok := r.Context().Value(middleware.AccountContextKey).(confidential.Account)

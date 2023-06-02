@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/golang-jwt/jwt/v5"
@@ -77,6 +78,23 @@ func SetSessionCookie(w http.ResponseWriter, res confidential.AuthResult) http.C
 		Value:    res.Account.HomeAccountID,
 		Path:     "/",
 		Expires:  res.ExpiresOn,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(w, cookie)
+	return *cookie
+}
+
+// DeleteSessionCookie sets an expired OAMS session cookie to a response to request a browser to delete
+// the current session cookie.
+func DeleteSessionCookie(w http.ResponseWriter) http.Cookie {
+	cookie := &http.Cookie{
+		Name:     SessionCookieIdent,
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,

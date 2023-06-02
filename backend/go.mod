@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.0.0
-	github.com/darylhjd/oams/frontend v0.0.0-20230521200224-6e4b6a7b3e77
+	github.com/darylhjd/oams/frontend v0.0.0-20230524230436-b345cd8dbeea
 	github.com/golang-jwt/jwt/v5 v5.0.0
-	github.com/golang-migrate/migrate/v4 v4.15.2
+	github.com/golang-migrate/migrate/v4 v4.16.0
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/jwx/v2 v2.0.9

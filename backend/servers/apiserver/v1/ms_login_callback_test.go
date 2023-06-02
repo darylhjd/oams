@@ -3,7 +3,9 @@ package v1
 import (
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,10 +15,11 @@ import (
 
 func TestAPIServerV1_msLoginCallback(t *testing.T) {
 	tests := []struct {
-		name        string
-		state       state
-		httpCode    int
-		redirectUrl string
+		name            string
+		state           state
+		wantCode        int
+		wantBody        string
+		wantRedirectUrl string
 	}{
 		{
 			"expected state, accepted callback",
@@ -24,6 +27,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				Version: namespace,
 			},
 			http.StatusSeeOther,
+			"",
 			Url,
 		},
 		{
@@ -33,14 +37,16 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				ReturnTo: "/randomUrl",
 			},
 			http.StatusSeeOther,
+			"",
 			"/randomUrl",
 		},
 		{
-			"unexpected state, rejected callback",
+			"unexpected version in state, rejected callback",
 			state{
 				Version: "wrong-state",
 			},
 			http.StatusTeapot,
+			"wrong API version used for login callback",
 			"",
 		},
 	}
@@ -48,42 +54,28 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 	a := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := newTestAPIServerV1(t)
-			defer server.Close()
-
-			reqUrl, err := url.JoinPath(server.URL, msLoginCallbackUrl)
-			if err != nil {
-				t.Fatal(err)
-			}
+			v1 := newTestAPIServerV1(t)
 
 			s, err := json.Marshal(tt.state)
-			if err != nil {
-				t.Fatal(err)
-			}
+			a.Nil(err)
 
 			postForm := url.Values{}
 			postForm.Set(callbackStateParam, string(s))
 			postForm.Set(postFormCodeParam, "testing-code")
+			req := httptest.NewRequest(http.MethodPost, msLoginCallbackUrl, strings.NewReader(postForm.Encode()))
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			rr := httptest.NewRecorder()
+			v1.msLoginCallback(rr, req)
 
-			// Use custom client to prevent redirect.
-			httpClient := http.Client{
-				CheckRedirect: func(req *http.Request, via []*http.Request) error {
-					return http.ErrUseLastResponse
-				},
-			}
-
-			resp, err := httpClient.PostForm(reqUrl, postForm)
-			a.Nil(err)
-
-			a.Equal(tt.httpCode, resp.StatusCode)
-			if tt.httpCode != http.StatusSeeOther {
+			a.Equal(tt.wantCode, rr.Code)
+			a.Equal(tt.wantRedirectUrl, rr.Header().Get("Location"))
+			a.Contains(string(rr.Body.Bytes()), tt.wantBody)
+			if tt.wantCode != http.StatusSeeOther {
 				return
 			}
 
-			a.Equal(tt.redirectUrl, resp.Header.Get("Location"))
-
 			// Check that session cookie exists.
-			for _, cookie := range resp.Cookies() {
+			for _, cookie := range rr.Result().Cookies() {
 				if cookie.Name == oauth2.SessionCookieIdent {
 					return
 				}
