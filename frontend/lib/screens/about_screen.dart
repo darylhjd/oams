@@ -35,6 +35,7 @@ class AboutScreen extends StatelessWidget {
   }
 }
 
+// _PoweredByFlutter is the widget that shows the webpage is created with Flutter.
 class _PoweredByFlutter extends StatelessWidget {
   static const double mobileSize = 100;
   static const double desktopSize = 200;
