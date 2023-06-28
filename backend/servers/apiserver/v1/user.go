@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/internal/middleware"
@@ -20,15 +19,15 @@ type userResponse struct {
 // user endpoint returns useful information on a User.
 func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	// Get user data.
-	acct, ok := r.Context().Value(middleware.AccountContextKey).(confidential.Account)
+	authContext, ok := middleware.GetAuthContext(r)
 	if !ok {
 		http.Error(w, "unexpected account data type", http.StatusInternalServerError)
 		return
 	}
 
 	bytes, err := json.Marshal(&userResponse{
-		HomeAccountID:     acct.HomeAccountID,
-		PreferredUsername: acct.PreferredUsername,
+		HomeAccountID:     authContext.Account.HomeAccountID,
+		PreferredUsername: authContext.Account.PreferredUsername,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -11,9 +11,21 @@ import (
 )
 
 const (
-	ClaimsContextKey  = "claims"
-	AccountContextKey = "account"
+	AuthContextKey = "auth_context"
 )
+
+// AuthContext stores useful information regarding an authentication.
+type AuthContext struct {
+	Claims  *oauth2.AzureClaims
+	Account confidential.Account
+	Name    string
+}
+
+// GetAuthContext is a helper function to get the authentication context from a request context.
+func GetAuthContext(r *http.Request) (AuthContext, bool) {
+	authContext, ok := r.Context().Value(AuthContextKey).(AuthContext)
+	return authContext, ok
+}
 
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
 func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerFunc {
@@ -33,7 +45,8 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 	}
 }
 
-// CheckAuthorised checks if a request is authorised for a handler.
+// CheckAuthorised checks if a request is authorised for a handler and adds relevant authentication context
+// if check is successful.
 func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		set, err := authenticator.GetKeyCache().Get(r.Context(), oauth2.KeySetSource)
@@ -76,9 +89,12 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		// Update the session cookie.
 		_ = oauth2.SetSessionCookie(w, res)
 
-		// Add relevant contexts to the request.
-		r = r.WithContext(context.WithValue(r.Context(), ClaimsContextKey, claims))
-		r = r.WithContext(context.WithValue(r.Context(), AccountContextKey, acct))
+		// Add auth context to the request.
+		r = r.WithContext(context.WithValue(r.Context(), AuthContextKey, AuthContext{
+			Claims:  claims,
+			Account: acct,
+			Name:    res.IDToken.Name,
+		}))
 		handlerFunc(w, r)
 	}
 }
