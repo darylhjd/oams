@@ -67,16 +67,13 @@ func (s *WebServer) registerHandlers() {
 }
 
 func (s *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.l.Debug(fmt.Sprintf("%s - received request", Namespace),
-		zap.String("url", r.URL.String()))
-
 	// Check if a request refers to a page.
 	// It must meet the following condition:
 	// 1. No extension in file name.
 	path := strings.Trim(r.URL.Path, "/")
 
-	s.l.Debug(fmt.Sprintf("%s - url path trimmed", Namespace),
-		zap.String("original", r.URL.Path),
+	s.l.Debug(fmt.Sprintf("%s - received request", Namespace),
+		zap.String("url", r.URL.String()),
 		zap.String("cleaned", path))
 
 	if filepath.Ext(path) != "" {

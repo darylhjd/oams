@@ -15,6 +15,7 @@ const authenticatorNamespace = "authenticator"
 // Authenticator provides an interface which all authentication services for a server must implement.
 type Authenticator interface {
 	Account(ctx context.Context, accountID string) (confidential.Account, error)
+	RemoveAccount(ctx context.Context, account confidential.Account) error
 	AuthCodeURL(ctx context.Context, clientID, redirectURI string, scopes []string, opts ...confidential.AuthCodeURLOption) (string, error)
 	AcquireTokenByAuthCode(ctx context.Context, code string, redirectURI string, scopes []string, opts ...confidential.AcquireByAuthCodeOption) (confidential.AuthResult, error)
 	AcquireTokenSilent(ctx context.Context, scopes []string, opts ...confidential.AcquireSilentOption) (confidential.AuthResult, error)
