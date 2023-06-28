@@ -22,6 +22,10 @@ func (m *MockAzureAuthenticator) Account(_ context.Context, accountID string) (c
 	}, nil
 }
 
+func (m *MockAzureAuthenticator) RemoveAccount(_ context.Context, _ confidential.Account) error {
+	return nil
+}
+
 func (m *MockAzureAuthenticator) AuthCodeURL(context.Context, string, string, []string, ...confidential.AuthCodeURLOption) (string, error) {
 	path, err := url.JoinPath(env.GetAPIServerAzureTenantID(), "oauth2", "v2.0", "authorize")
 	if err != nil {
