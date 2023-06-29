@@ -23,7 +23,9 @@ class CenteredView extends StatelessWidget {
   Widget mobile(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: mobileHorizontalPadding, vertical: mobileVerticalPadding),
+        horizontal: mobileHorizontalPadding,
+        vertical: mobileVerticalPadding,
+      ),
       alignment: Alignment.center,
       child: child,
     );
@@ -32,8 +34,9 @@ class CenteredView extends StatelessWidget {
   Widget desktop(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: desktopHorizontalPadding,
-          vertical: desktopVerticalPadding),
+        horizontal: desktopHorizontalPadding,
+        vertical: desktopVerticalPadding,
+      ),
       alignment: Alignment.center,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: desktopMaxWidth),
