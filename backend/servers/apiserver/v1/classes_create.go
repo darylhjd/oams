@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"sync"
 
 	"go.uber.org/zap"
 
@@ -34,7 +35,7 @@ func (v *APIServerV1) classesCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	limiter := goroutines.NewLimiter(maxGoRoutines)
-	results := classesCreateResponse{}
+	safeRes := sync.Map{}
 	for _, header := range r.MultipartForm.File[multipartFormFileIdent] {
 		header := header // Required for go routine to point to different file for each loop.
 		limiter.Do(func() {
@@ -43,11 +44,22 @@ func (v *APIServerV1) classesCreate(w http.ResponseWriter, r *http.Request) {
 				res.Success = false
 				res.Error = err.Error()
 			}
-
-			results[header.Filename] = res
+			safeRes.Store(header.Filename, res)
 		})
 	}
 	limiter.Wait()
+
+	results := classesCreateResponse{}
+	safeRes.Range(func(key, value any) bool {
+		k, ok1 := key.(string)
+		val, ok2 := value.(fileResult)
+		if !ok1 || !ok2 {
+			return false
+		}
+
+		results[k] = val
+		return true
+	})
 
 	bytes, err := json.Marshal(results)
 	if err != nil {

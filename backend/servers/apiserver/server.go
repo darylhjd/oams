@@ -54,9 +54,8 @@ func (s *APIServer) Start() error {
 	s.l.Info(fmt.Sprintf("%s - starting service...", Namespace))
 
 	// Set up CORS.
-	// TODO: Set allowed origin as env.
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8000"},
+		AllowedOrigins:   []string{fmt.Sprintf("%s:%s", env.GetWebServerHost(), env.GetWebServerPort())},
 		AllowCredentials: true})
 
 	port := env.GetAPIServerPort()
