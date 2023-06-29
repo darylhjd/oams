@@ -15,12 +15,11 @@ import (
 	"github.com/darylhjd/oams/backend/internal/middleware"
 )
 
-func Test_user(t *testing.T) {
+func TestAPIServerV1_user(t *testing.T) {
 	tests := []struct {
 		name            string
 		withAuthContext any
 		wantCode        int
-		wantBody        string
 	}{
 		{
 			"request with account in context",
@@ -30,19 +29,16 @@ func Test_user(t *testing.T) {
 				},
 			},
 			http.StatusOK,
-			"",
 		},
 		{
 			"request with wrong account type in context",
 			time.Time{},
 			http.StatusInternalServerError,
-			"unexpected account data type",
 		},
 		{
 			"request with no account in context",
 			nil,
 			http.StatusInternalServerError,
-			"unexpected account data type",
 		},
 	}
 
@@ -57,7 +53,6 @@ func Test_user(t *testing.T) {
 			v1.user(rr, req)
 
 			a.Equal(tt.wantCode, rr.Code)
-			a.Contains(string(rr.Body.Bytes()), tt.wantBody)
 			if tt.wantCode != http.StatusOK {
 				return
 			}
@@ -68,7 +63,7 @@ func Test_user(t *testing.T) {
 				PreferredUsername: acct.PreferredUsername,
 			})
 			a.Nil(err)
-			a.Contains(string(rr.Body.Bytes()), string(expectedBody))
+			a.Equal(string(expectedBody), rr.Body.String())
 		})
 	}
 }

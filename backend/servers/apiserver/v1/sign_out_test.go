@@ -15,7 +15,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
-func Test_signOut(t *testing.T) {
+func TestAPIServerV1_signOut(t *testing.T) {
 	tests := []struct {
 		name            string
 		withAuthContext any

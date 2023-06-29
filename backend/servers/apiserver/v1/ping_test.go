@@ -17,5 +17,5 @@ func TestAPIServerV1_ping(t *testing.T) {
 	v1.ping(rr, req)
 
 	a.Equal(http.StatusOK, rr.Code)
-	a.Contains(string(rr.Body.Bytes()), "Pong~")
+	a.Contains(rr.Body.String(), "Pong~")
 }

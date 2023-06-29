@@ -10,10 +10,10 @@ import (
 
 func TestAPIServerV1_base(t *testing.T) {
 	tests := []struct {
-		name     string
-		path     string
-		wantCode int
-		wantBody string
+		name         string
+		path         string
+		wantCode     int
+		containsBody string
 	}{
 		{
 			"valid request to base url",
@@ -39,7 +39,7 @@ func TestAPIServerV1_base(t *testing.T) {
 			v1.base(rr, req)
 
 			a.Equal(tt.wantCode, rr.Code)
-			a.Contains(string(rr.Body.Bytes()), tt.wantBody)
+			a.Contains(rr.Body.String(), tt.containsBody)
 		})
 	}
 }
