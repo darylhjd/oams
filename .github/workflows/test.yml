@@ -56,9 +56,9 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          touch .env
+          touch env.json && echo "{}" > env.json
           flutter pub get
-          flutter build web
+          flutter build web --dart-define-from-file=env.json
 
       - name: Test backend
         env:

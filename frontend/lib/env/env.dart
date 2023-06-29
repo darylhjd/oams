@@ -1,22 +1,29 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 const _apiServerHost = "API_SERVER_HOST";
 const _apiServerPort = "API_SERVER_PORT";
 const _webServerHost = "WEB_SERVER_HOST";
 const _webServerPort = "WEB_SERVER_PORT";
 
+checkEnvVars() {
+  if (apiServerHost() == "" ||
+      apiServerPort() == "" ||
+      webServerHost() == "" ||
+      webServerPort() == "") {
+    throw Exception("environment variables not set up properly");
+  }
+}
+
 String apiServerHost() {
-  return dotenv.get(_apiServerHost);
+  return const String.fromEnvironment(_apiServerHost);
 }
 
 String apiServerPort() {
-  return dotenv.get(_apiServerPort);
+  return const String.fromEnvironment(_apiServerPort);
 }
 
 String webServerHost() {
-  return dotenv.get(_webServerHost);
+  return const String.fromEnvironment(_webServerHost);
 }
 
 String webServerPort() {
-  return dotenv.get(_webServerPort);
+  return const String.fromEnvironment(_webServerPort);
 }
