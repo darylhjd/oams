@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/api/client.dart';
+import 'package:frontend/env/env.dart';
 import 'package:frontend/providers/session.dart';
 import 'package:frontend/screens/about_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
@@ -67,8 +68,8 @@ final routerProvider = Provider<GoRouter>(
                 var to = state.namedLocation(
                   Routes.login.name,
                   queryParameters: {
-                    // TODO: Need to provide host as well.
-                    APIClient.loginReturnToParam: state.fullPath!,
+                    APIClient.loginReturnToParam:
+                        "${webServerHost()}:${webServerPort()}${state.fullPath!}",
                   },
                 );
                 return isLoggedIn ? null : to;
