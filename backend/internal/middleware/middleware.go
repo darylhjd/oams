@@ -16,9 +16,8 @@ const (
 
 // AuthContext stores useful information regarding an authentication.
 type AuthContext struct {
-	Claims  *oauth2.AzureClaims
-	Account confidential.Account
-	Name    string
+	Claims     *oauth2.AzureClaims
+	AuthResult confidential.AuthResult
 }
 
 // GetAuthContext is a helper function to get the authentication context from a request context.
@@ -91,9 +90,8 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 
 		// Add auth context to the request.
 		r = r.WithContext(context.WithValue(r.Context(), AuthContextKey, AuthContext{
-			Claims:  claims,
-			Account: acct,
-			Name:    res.IDToken.Name,
+			Claims:     claims,
+			AuthResult: res,
 		}))
 		handlerFunc(w, r)
 	}

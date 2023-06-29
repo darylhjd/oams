@@ -25,7 +25,9 @@ func Test_user(t *testing.T) {
 		{
 			"request with account in context",
 			middleware.AuthContext{
-				Account: confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
+				AuthResult: confidential.AuthResult{
+					Account: confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
+				},
 			},
 			http.StatusOK,
 			"",
@@ -60,7 +62,7 @@ func Test_user(t *testing.T) {
 				return
 			}
 
-			acct := tt.withAuthContext.(middleware.AuthContext).Account
+			acct := tt.withAuthContext.(middleware.AuthContext).AuthResult.Account
 			expectedBody, err := json.Marshal(userResponse{
 				HomeAccountID:     acct.HomeAccountID,
 				PreferredUsername: acct.PreferredUsername,

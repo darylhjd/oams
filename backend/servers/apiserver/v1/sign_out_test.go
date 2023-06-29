@@ -24,7 +24,9 @@ func Test_signOut(t *testing.T) {
 		{
 			"request with account in context",
 			middleware.AuthContext{
-				Account: confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
+				AuthResult: confidential.AuthResult{
+					Account: confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
+				},
 			},
 			http.StatusOK,
 		},

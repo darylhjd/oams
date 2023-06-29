@@ -25,9 +25,10 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	acct := authContext.AuthResult.Account
 	bytes, err := json.Marshal(&userResponse{
-		HomeAccountID:     authContext.Account.HomeAccountID,
-		PreferredUsername: authContext.Account.PreferredUsername,
+		HomeAccountID:     acct.HomeAccountID,
+		PreferredUsername: acct.PreferredUsername,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

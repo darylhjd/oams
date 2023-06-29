@@ -16,7 +16,7 @@ func (v *APIServerV1) signOut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := v.azure.RemoveAccount(r.Context(), authContext.Account); err != nil {
+	if err := v.azure.RemoveAccount(r.Context(), authContext.AuthResult.Account); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
