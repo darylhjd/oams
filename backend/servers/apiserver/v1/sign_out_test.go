@@ -17,13 +17,17 @@ import (
 
 func Test_signOut(t *testing.T) {
 	tests := []struct {
-		name        string
-		withAccount any
-		wantCode    int
+		name            string
+		withAuthContext any
+		wantCode        int
 	}{
 		{
 			"request with account in context",
-			confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
+			middleware.AuthContext{
+				AuthResult: confidential.AuthResult{
+					Account: confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
+				},
+			},
 			http.StatusOK,
 		},
 		{
@@ -44,7 +48,7 @@ func Test_signOut(t *testing.T) {
 			v1 := newTestAPIServerV1(t)
 
 			req := httptest.NewRequest(http.MethodGet, signOutUrl, nil)
-			req = req.WithContext(context.WithValue(req.Context(), middleware.AccountContextKey, tt.withAccount))
+			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
 			rr := httptest.NewRecorder()
 			v1.signOut(rr, req)
 

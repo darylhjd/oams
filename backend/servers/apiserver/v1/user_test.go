@@ -17,14 +17,18 @@ import (
 
 func Test_user(t *testing.T) {
 	tests := []struct {
-		name        string
-		withAccount any
-		wantCode    int
-		wantBody    string
+		name            string
+		withAuthContext any
+		wantCode        int
+		wantBody        string
 	}{
 		{
 			"request with account in context",
-			confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
+			middleware.AuthContext{
+				AuthResult: confidential.AuthResult{
+					Account: confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
+				},
+			},
 			http.StatusOK,
 			"",
 		},
@@ -48,7 +52,7 @@ func Test_user(t *testing.T) {
 			v1 := newTestAPIServerV1(t)
 
 			req := httptest.NewRequest(http.MethodGet, userUrl, nil)
-			req = req.WithContext(context.WithValue(req.Context(), middleware.AccountContextKey, tt.withAccount))
+			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
 			rr := httptest.NewRecorder()
 			v1.user(rr, req)
 
@@ -58,9 +62,10 @@ func Test_user(t *testing.T) {
 				return
 			}
 
+			acct := tt.withAuthContext.(middleware.AuthContext).AuthResult.Account
 			expectedBody, err := json.Marshal(userResponse{
-				HomeAccountID:     tt.withAccount.(confidential.Account).HomeAccountID,
-				PreferredUsername: tt.withAccount.(confidential.Account).PreferredUsername,
+				HomeAccountID:     acct.HomeAccountID,
+				PreferredUsername: acct.PreferredUsername,
 			})
 			a.Nil(err)
 			a.Contains(string(rr.Body.Bytes()), string(expectedBody))
