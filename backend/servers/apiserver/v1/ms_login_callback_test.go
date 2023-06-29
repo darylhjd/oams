@@ -18,7 +18,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 		name            string
 		state           state
 		wantCode        int
-		wantBody        string
+		containsBody    string
 		wantRedirectUrl string
 	}{
 		{
@@ -69,7 +69,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 
 			a.Equal(tt.wantCode, rr.Code)
 			a.Equal(tt.wantRedirectUrl, rr.Header().Get("Location"))
-			a.Contains(string(rr.Body.Bytes()), tt.wantBody)
+			a.Contains(rr.Body.String(), tt.containsBody)
 			if tt.wantCode != http.StatusSeeOther {
 				return
 			}

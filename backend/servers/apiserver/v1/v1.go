@@ -23,6 +23,7 @@ const (
 	loginUrl           = "/login"
 	msLoginCallbackUrl = "/ms-login-callback"
 	signOutUrl         = "/sign-out"
+	classesUrl         = "/classes"
 	userUrl            = "/user"
 )
 
@@ -45,9 +46,12 @@ func NewAPIServerV1(l *zap.Logger, db *database.DB, azureClient oauth2.Authentic
 func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(baseUrl, middleware.AllowMethods(v.base, http.MethodGet))
 	v.mux.HandleFunc(pingUrl, middleware.AllowMethods(v.ping, http.MethodGet))
+
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
 	v.mux.HandleFunc(signOutUrl, middleware.CheckAuthorised(v.signOut, v.azure))
+
+	v.mux.HandleFunc(classesUrl, middleware.CheckAuthorised(middleware.AllowMethods(v.classesCreate, http.MethodPost), v.azure))
 	v.mux.HandleFunc(userUrl, middleware.CheckAuthorised(v.user, v.azure))
 }
 
