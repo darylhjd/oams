@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:frontend/env/env.dart';
 import 'package:http/browser_client.dart';
 
 import 'models.dart';
@@ -13,26 +14,22 @@ class APIClient {
     return client;
   }();
 
-  // TODO: Use .env for this.
-  static const String apiHost = "localhost";
-  static const int apiPort = 8080;
+  static Uri apiUri = Uri.parse("${apiServerHost()}:${apiServerPort()}");
 
-  static const String defaultRedirectUrl = "http://localhost:8000/";
+  static String defaultRedirectUrl = "${webServerHost()}:${webServerPort()}";
 
   static const String loginPath = "api/v1/login";
   static const String loginReturnToParam = "return_to";
   static const String logoutPath = "api/v1/sign-out";
   static const String userPath = "api/v1/user";
 
+  // getLoginURL gets a login URL from the APIServer.
   static Future<String> getLoginURL(String returnTo) async {
     if (returnTo.isEmpty) {
       returnTo = defaultRedirectUrl;
     }
 
-    final uri = Uri(
-      scheme: "http",
-      host: apiHost,
-      port: apiPort,
+    final uri = apiUri.replace(
       path: loginPath,
       queryParameters: {
         loginReturnToParam: returnTo,
@@ -48,11 +45,9 @@ class APIClient {
     return loginResponse.redirectUrl;
   }
 
+  // logout removes the current logged in session.
   static Future<bool> logout() async {
-    final uri = Uri(
-      scheme: "http",
-      host: apiHost,
-      port: apiPort,
+    final uri = apiUri.replace(
       path: logoutPath,
     );
 
@@ -60,9 +55,11 @@ class APIClient {
     return response.statusCode == HttpStatus.ok;
   }
 
+  // getUserInfo returns the user info of the current logged in user.
   static Future<User> getUserInfo() async {
-    final uri =
-        Uri(scheme: "http", host: apiHost, port: apiPort, path: userPath);
+    final uri = apiUri.replace(
+      path: userPath,
+    );
 
     final response = await client.get(uri);
     if (response.statusCode != HttpStatus.ok) {

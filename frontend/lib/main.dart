@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:frontend/providers/session.dart';
@@ -8,8 +9,10 @@ import 'package:responsive_framework/breakpoint.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
 // main is the entry point to the app.
-void main() {
+void main() async {
   usePathUrlStrategy();
+  await dotenv.load();
+
   runApp(
     const ProviderScope(
       child: OAMSFrontend(),
