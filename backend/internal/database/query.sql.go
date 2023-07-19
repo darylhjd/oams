@@ -10,23 +10,23 @@ import (
 )
 
 const getStudent = `-- name: GetStudent :one
-SELECT matric_no, name, email
+SELECT id, name, email
 FROM Students
-WHERE matric_no = $1
+WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetStudent(ctx context.Context, matricNo string) (Student, error) {
-	row := q.db.QueryRowContext(ctx, getStudent, matricNo)
+func (q *Queries) GetStudent(ctx context.Context, id string) (Student, error) {
+	row := q.db.QueryRowContext(ctx, getStudent, id)
 	var i Student
-	err := row.Scan(&i.MatricNo, &i.Name, &i.Email)
+	err := row.Scan(&i.ID, &i.Name, &i.Email)
 	return i, err
 }
 
 const listStudents = `-- name: ListStudents :many
-SELECT matric_no, name, email
+SELECT id, name, email
 FROM Students
-ORDER BY matric_no
+ORDER BY id
 `
 
 func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
@@ -38,7 +38,7 @@ func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
 	var items []Student
 	for rows.Next() {
 		var i Student
-		if err := rows.Scan(&i.MatricNo, &i.Name, &i.Email); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.Email); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
