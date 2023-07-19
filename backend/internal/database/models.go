@@ -6,16 +6,31 @@ package database
 
 import (
 	"database/sql"
+	"time"
 )
 
-type Professor struct {
-	ID    int64
-	Name  string
-	Email sql.NullString
+type ClassGroup struct {
+	ID         int64
+	CourseCode string
+	Year       int32
+	Semester   string
+	GroupName  string
+}
+
+type ClassVenueSchedule struct {
+	ClassGroupID int64
+	Datetime     time.Time
+	Venue        string
+}
+
+type Course struct {
+	Code      string
+	Programme string
+	Au        int16
 }
 
 type Student struct {
-	MatricNo string
-	Name     string
-	Email    sql.NullString
+	ID    string
+	Name  string
+	Email sql.NullString
 }
