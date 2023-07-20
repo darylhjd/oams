@@ -12,7 +12,7 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	response := "Pong~\n\n" +
 		"OAMS API Service is running normally!"
 
-	if err := v.db.C.Ping(); err != nil {
+	if err := v.db.C.Ping(r.Context()); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		response = "Uh oh, not connected!"
 	}

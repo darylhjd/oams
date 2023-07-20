@@ -10,6 +10,7 @@ import (
 )
 
 func TestSetUpTearDown(t *testing.T) {
+	ctx := context.Background()
 	a := assert.New(t)
 
 	// Run setup.
@@ -17,7 +18,7 @@ func TestSetUpTearDown(t *testing.T) {
 	a.Nil(err)
 
 	// Check that the database is created.
-	a.Nil(testEnv.Db.C.Ping())
+	a.Nil(testEnv.Db.C.Ping(ctx))
 
 	// Check that the migration ran correctly.
 	_, err = testEnv.Db.Q.ListStudents(context.Background())
@@ -27,6 +28,6 @@ func TestSetUpTearDown(t *testing.T) {
 	TearDown(nil, testEnv, namespace)
 
 	// Check that the database no longer exists.
-	_, err = database.ConnectDB(namespace)
+	_, err = database.ConnectDB(ctx, namespace)
 	a.ErrorContains(err, "does not exist")
 }

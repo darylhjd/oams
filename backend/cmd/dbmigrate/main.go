@@ -42,7 +42,7 @@ func main() {
 		log.Fatalf("%s - invalid arguments provided to programme: %s", database.MigrationNamespace, err)
 	}
 
-	migrator, err := database.NewMigrate(args.name, nil)
+	migrator, err := database.NewMigrate(args.name)
 	if err != nil {
 		log.Fatal(err)
 	}

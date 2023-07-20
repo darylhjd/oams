@@ -2,12 +2,10 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"embed"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/lib/pq"
 )
@@ -24,28 +22,17 @@ const (
 //go:embed config/migrations/*.sql
 var migrations embed.FS
 
-// NewMigrate is a helper function to get a new migrator for a database using its name or database.
+// NewMigrate is a helper function to get a new migrator for a database using its name.
 // Either should be non-nil, if both are provided, the default is the db instance.
-func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
+func NewMigrate(dbName string) (*migrate.Migrate, error) {
 	// If both not provided.
-	if db == nil && dbName == "" {
-		return nil, fmt.Errorf("%s - database name or instance not provided", MigrationNamespace)
+	if dbName == "" {
+		return nil, fmt.Errorf("%s - database name not provided", MigrationNamespace)
 	}
 
 	migrationSource, err := iofs.New(migrations, migrationDir)
 	if err != nil {
 		return nil, err
-	}
-
-	// If database instance provided, use it.
-	if db != nil {
-		instance, err := pgx.WithInstance(db, &pgx.Config{})
-		if err != nil {
-			return nil, err
-		}
-
-		migrate.NewWithInstance()
-		return migrate.NewWithInstance(MigrationNamespace, migrationSource, Namespace, instance)
 	}
 
 	_, connString := GetConnectionProperties(dbName)

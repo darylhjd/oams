@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/darylhjd/oams/backend/servers/apiserver"
 )
 
 func main() {
-	apiServer, err := apiserver.New()
+	apiServer, err := apiserver.New(context.Background())
 	if err != nil {
 		log.Fatalf("%s - cannot start service: %s\n", apiserver.Namespace, err)
 	}
@@ -16,7 +17,5 @@ func main() {
 		apiServer.GetLogger().Error(err.Error())
 	}
 
-	if err = apiServer.Stop(); err != nil {
-		apiServer.GetLogger().Error(err.Error())
-	}
+	apiServer.Stop()
 }
