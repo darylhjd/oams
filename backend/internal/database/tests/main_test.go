@@ -5,7 +5,6 @@ tests package requires helpers from the database package, which results in an im
 package tests
 
 import (
-	"log"
 	"os"
 	"testing"
 
@@ -16,14 +15,10 @@ import (
 var testDb *database.DB
 
 func TestMain(m *testing.M) {
-	testEnv, err := tests.SetUp(m, database.Namespace)
-	if err != nil {
-		log.Fatal(err)
-	}
+	testDb = tests.SetUp(m, database.Namespace)
 
-	testDb = testEnv.Db
 	res := m.Run()
-	tests.TearDown(m, testEnv, database.Namespace)
+	tests.TearDown(m, testDb, database.Namespace)
 
 	os.Exit(res)
 }

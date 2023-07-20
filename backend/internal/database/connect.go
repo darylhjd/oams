@@ -6,7 +6,6 @@ import (
 	"net/url"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	_ "github.com/lib/pq"
 
 	"github.com/darylhjd/oams/backend/internal/env"
 )

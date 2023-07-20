@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"log"
 	"os"
 	"testing"
 
@@ -16,14 +15,10 @@ import (
 var testDb *database.DB
 
 func TestMain(m *testing.M) {
-	testEnv, err := tests.SetUp(m, namespace)
-	if err != nil {
-		log.Fatal(err)
-	}
+	testDb = tests.SetUp(m, namespace)
 
-	testDb = testEnv.Db
 	res := m.Run()
-	tests.TearDown(m, testEnv, namespace)
+	tests.TearDown(m, testDb, namespace)
 
 	os.Exit(res)
 }
