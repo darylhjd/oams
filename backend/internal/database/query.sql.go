@@ -17,7 +17,7 @@ LIMIT 1
 `
 
 func (q *Queries) GetStudent(ctx context.Context, id string) (Student, error) {
-	row := q.db.QueryRowContext(ctx, getStudent, id)
+	row := q.db.QueryRow(ctx, getStudent, id)
 	var i Student
 	err := row.Scan(&i.ID, &i.Name, &i.Email)
 	return i, err
@@ -30,7 +30,7 @@ ORDER BY id
 `
 
 func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
-	rows, err := q.db.QueryContext(ctx, listStudents)
+	rows, err := q.db.Query(ctx, listStudents)
 	if err != nil {
 		return nil, err
 	}
@@ -42,9 +42,6 @@ func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

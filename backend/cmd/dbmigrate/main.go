@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -46,13 +47,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	ctx := context.Background()
 	switch {
 	case args.migrate:
 		err = migrateOp(args, migrator)
 	case args.create:
-		err = createOp(args, migrator)
+		err = createOp(ctx, args)
 	case args.drop:
-		err = dropOp(args, migrator)
+		err = dropOp(ctx, args)
 	case args.truncate:
 		err = truncateOp(args, migrator)
 	default:
@@ -84,12 +86,12 @@ func migrateOp(args *arguments, migrator *migrate.Migrate) error {
 	return errors.Join(source, db, err)
 }
 
-func createOp(args *arguments, _ *migrate.Migrate) error {
-	return database.Create(args.name, false)
+func createOp(ctx context.Context, args *arguments) error {
+	return database.Create(ctx, args.name, false)
 }
 
-func dropOp(args *arguments, _ *migrate.Migrate) error {
-	return database.Drop(args.name, true)
+func dropOp(ctx context.Context, args *arguments) error {
+	return database.Drop(ctx, args.name, true)
 }
 
 func truncateOp(_ *arguments, migrator *migrate.Migrate) error {

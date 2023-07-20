@@ -1,12 +1,13 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"embed"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/lib/pq"
 )
@@ -38,11 +39,12 @@ func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 
 	// If database instance provided, use it.
 	if db != nil {
-		instance, err := postgres.WithInstance(db, &postgres.Config{})
+		instance, err := pgx.WithInstance(db, &pgx.Config{})
 		if err != nil {
 			return nil, err
 		}
 
+		migrate.NewWithInstance()
 		return migrate.NewWithInstance(MigrationNamespace, migrationSource, Namespace, instance)
 	}
 
@@ -54,42 +56,44 @@ func NewMigrate(dbName string, db *sql.DB) (*migrate.Migrate, error) {
 // Create creates a new database with the specified name.
 // Use truncate to specify if the operation deletes an existing database with the same name and creates a new one.
 // Warning, this is a high-risk operation!
-func Create(dbName string, truncate bool) error {
-	db, err := ConnectDB("")
+func Create(ctx context.Context, dbName string, truncate bool) error {
+	db, err := ConnectDB(ctx, "")
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	if truncate {
-		if _, err = db.C.Exec(dropDatabaseIfExists + pq.QuoteIdentifier(dbName)); err != nil {
+		if _, err = db.C.Exec(ctx, dropDatabaseIfExists+pq.QuoteIdentifier(dbName)); err != nil {
 			return err
 		}
 	}
 
-	if _, err = db.C.Exec(createDatabase + pq.QuoteIdentifier(dbName)); err != nil {
+	if _, err = db.C.Exec(ctx, createDatabase+pq.QuoteIdentifier(dbName)); err != nil {
 		return err
 	}
 
-	return db.Close()
+	return nil
 }
 
 // Drop drops a database of the specified name.
 // Use mustExist to specify if the operation fails if the database does not exist.
 // Warning, this is a high risk operation!
-func Drop(dbName string, mustExist bool) error {
-	db, err := ConnectDB("")
+func Drop(ctx context.Context, dbName string, mustExist bool) error {
+	db, err := ConnectDB(ctx, "")
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	statement := dropDatabaseIfExists
 	if mustExist {
 		statement = dropDatabase
 	}
 
-	if _, err = db.C.Exec(statement + pq.QuoteIdentifier(dbName)); err != nil {
+	if _, err = db.C.Exec(ctx, statement+pq.QuoteIdentifier(dbName)); err != nil {
 		return err
 	}
 
-	return db.Close()
+	return nil
 }

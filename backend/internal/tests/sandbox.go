@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"log"
 	"testing"
 
@@ -18,14 +19,16 @@ type TestEnv struct {
 // SetUp is a helper function to help set up a new test package.
 // This function is useful to create a sandbox database for testing a package.
 func SetUp(_ *testing.M, namespace string) (*TestEnv, error) {
+	ctx := context.Background()
+
 	// Setup.
 	// Create the test database.
-	err := database.Create(namespace, true)
+	err := database.Create(ctx, namespace, true)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	testDb, err := database.ConnectDB(namespace)
+	testDb, err := database.ConnectDB(ctx, namespace)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,7 +55,7 @@ func TearDown(_ *testing.M, testEnv *TestEnv, namespace string) {
 		log.Fatal(sErr, dErr)
 	}
 
-	if err := database.Drop(namespace, true); err != nil {
+	if err := database.Drop(context.Background(), namespace, true); err != nil {
 		log.Fatal(err)
 	}
 }

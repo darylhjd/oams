@@ -5,8 +5,7 @@
 package database
 
 import (
-	"database/sql"
-	"time"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type ClassGroup struct {
@@ -19,7 +18,7 @@ type ClassGroup struct {
 
 type ClassVenueSchedule struct {
 	ClassGroupID int64
-	Datetime     time.Time
+	Datetime     pgtype.Timestamp
 	Venue        string
 }
 
@@ -32,5 +31,5 @@ type Course struct {
 type Student struct {
 	ID    string
 	Name  string
-	Email sql.NullString
+	Email pgtype.Text
 }
