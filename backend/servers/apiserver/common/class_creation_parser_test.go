@@ -20,11 +20,13 @@ func TestParseClassCreationFile(t *testing.T) {
 	tests := []struct {
 		name         string
 		file         string
+		containsErr  string
 		expectedData ClassCreationData
 	}{
 		{
 			"sample class lab creation file",
 			"class_lab_test.xlsx",
+			"",
 			ClassCreationData{
 				2022,
 				"2",
@@ -62,6 +64,7 @@ func TestParseClassCreationFile(t *testing.T) {
 		{
 			"sample class lecture creation file",
 			"class_lec_test.xlsx",
+			"",
 			ClassCreationData{
 				2022,
 				"2",
@@ -83,6 +86,7 @@ func TestParseClassCreationFile(t *testing.T) {
 		{
 			"sample class tutorial creation file",
 			"class_tut_test.xlsx",
+			"",
 			ClassCreationData{
 				2022,
 				"2",
@@ -117,6 +121,54 @@ func TestParseClassCreationFile(t *testing.T) {
 				},
 			},
 		},
+		{
+			"empty class creation file",
+			"class_empty_test.xlsx",
+			"not enough rows for class metadata",
+			ClassCreationData{},
+		},
+		{
+			"too many class metadata rows",
+			"class_excessive_class_metadata_rows.xlsx",
+			"unexpected number of columns for class group row",
+			ClassCreationData{},
+		},
+		{
+			"missing class group enrollment list identifier",
+			"class_missing_enrollment_ident.xlsx",
+			"unexpected start of class group enrollment list",
+			ClassCreationData{},
+		},
+		{
+			"second class group missing enrollment list identifier",
+			"class_second_group_missing_enrollment_ident.xlsx",
+			"unexpected start of class group enrollment list",
+			ClassCreationData{},
+		},
+		{
+			"student row with wrong length",
+			"class_student_row_wrong_length.xlsx",
+			"unexpected number of columns for student enrollment row",
+			ClassCreationData{},
+		},
+		{
+			"class group with no enrollment",
+			"class_group_with_no_enrollment.xlsx",
+			"class group A21 has no enrollments",
+			ClassCreationData{},
+		},
+		{
+			"course with no class groups",
+			"class_with_no_groups.xlsx",
+			"class creation file has no valid class groups",
+			ClassCreationData{},
+		},
+		{
+			"invalid format for class group name",
+			"class_with_invalid_class_group_name.xlsx",
+			"could not parse class group",
+			ClassCreationData{},
+		},
 	}
 
 	a := assert.New(t)
@@ -126,7 +178,10 @@ func TestParseClassCreationFile(t *testing.T) {
 			a.Nil(err)
 
 			data, err := ParseClassCreationFile(file)
-			a.Nil(err)
+			if tt.containsErr != "" {
+				a.ErrorContains(err, tt.containsErr)
+				return
+			}
 
 			attributeTests := map[any]any{
 				tt.expectedData.Year:             data.Year,

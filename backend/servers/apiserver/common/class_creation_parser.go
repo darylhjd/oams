@@ -204,7 +204,7 @@ func parseClassGroups(classData *ClassCreationData, rows [][]string) error {
 		if index+1 > len(rows) ||
 			len(rows[index]) != expectedClassGroupEnrollmentIdentRowLength ||
 			rows[index][0] != classGroupEnrollmentListIdent {
-			return fmt.Errorf("%s - unable to parse enrollment list for class group", namespace)
+			return fmt.Errorf("%s - unexpected start of class group enrollment list", namespace)
 		}
 
 		index += 1
@@ -222,13 +222,17 @@ func parseClassGroups(classData *ClassCreationData, rows [][]string) error {
 			index += 1
 		}
 
+		if len(group.Students) == 0 {
+			return fmt.Errorf("%s - class group %s has no enrollments", namespace, group.Name)
+		}
+
 		classData.ClassGroups = append(classData.ClassGroups, group)
 
 		index += 1 // Skip blank row after end of enrollment list. Will also work if it is the last list.
 	}
 
 	if len(classData.ClassGroups) == 0 {
-		return fmt.Errorf("%s - class creation file does not specify any valid class groups", namespace)
+		return fmt.Errorf("%s - class creation file has no valid class groups", namespace)
 	}
 
 	return nil
