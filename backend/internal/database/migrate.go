@@ -24,7 +24,6 @@ const (
 var migrations embed.FS
 
 // NewMigrate is a helper function to get a new migrator for a database using its name.
-// Either should be non-nil, if both are provided, the default is the db instance.
 func NewMigrate(dbName string) (*migrate.Migrate, error) {
 	// If both not provided.
 	if dbName == "" {
