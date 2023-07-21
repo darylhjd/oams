@@ -1,12 +1,12 @@
 package common
 
 import (
-	"database/sql"
 	"fmt"
 	"io"
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/xuri/excelize/v2"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -216,7 +216,7 @@ func parseClassGroups(classData *ClassCreationData, rows [][]string) error {
 			group.Students = append(group.Students, database.Student{
 				ID:    rows[index][studentIdColumn],
 				Name:  rows[index][studentNameColumn],
-				Email: sql.NullString{},
+				Email: pgtype.Text{},
 			})
 
 			index += 1

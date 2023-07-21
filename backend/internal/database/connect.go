@@ -1,11 +1,11 @@
 package database
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"net/url"
 
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/darylhjd/oams/backend/internal/env"
 )
@@ -19,35 +19,35 @@ const (
 
 // DB contains the database connection pool and the query interface to the database.
 type DB struct {
-	C *sql.DB
+	C *pgxpool.Pool
 	Q *Queries
 }
 
 // Close the database connection.
-func (d *DB) Close() error {
-	return d.C.Close()
+func (d *DB) Close() {
+	d.C.Close()
 }
 
 // Connect and return an interface to the OAMS database.
-func Connect() (*DB, error) {
-	return ConnectDB(env.GetDatabaseName())
+func Connect(ctx context.Context) (*DB, error) {
+	return ConnectDB(ctx, env.GetDatabaseName())
 }
 
 // ConnectDB is similar to Connect but allows you to specify a specific database to use.
-func ConnectDB(dbName string) (*DB, error) {
-	driver, connString := GetConnectionProperties(dbName)
+func ConnectDB(ctx context.Context, dbName string) (*DB, error) {
+	_, connString := GetConnectionProperties(dbName)
 
-	db, err := sql.Open(driver, connString)
+	pool, err := pgxpool.New(ctx, connString)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check that connection is successful.
-	if err = db.Ping(); err != nil {
+	if err = pool.Ping(ctx); err != nil {
 		return nil, err
 	}
 
-	return &DB{db, New(db)}, nil
+	return &DB{pool, New(pool)}, nil
 }
 
 // GetConnectionProperties returns the connection strings required to connect to a database.

@@ -1,11 +1,11 @@
 package common
 
 import (
-	"database/sql"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -38,24 +38,24 @@ func TestParseClassCreationFile(t *testing.T) {
 						"A21",
 						[]database.ClassVenueSchedule{},
 						[]database.Student{
-							{"CHUL6789", "CHUA LI TING", sql.NullString{}},
-							{"YAPW9087", "YAP WEN LI", sql.NullString{}},
+							{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
+							{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
 						},
 					},
 					{
 						"A26",
 						[]database.ClassVenueSchedule{},
 						[]database.Student{
-							{"BENST129", "BENJAMIN SANTOS", sql.NullString{}},
-							{"YAPW9087", "YAP WEI LING", sql.NullString{}},
+							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
+							{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
 						},
 					},
 					{
 						"A32",
 						[]database.ClassVenueSchedule{},
 						[]database.Student{
-							{"PATELAR14", "ARJUN PATEL", sql.NullString{}},
-							{"YAPX9087", "YAP XIN TING", sql.NullString{}},
+							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
+							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
 						},
 					},
 				},
@@ -76,8 +76,8 @@ func TestParseClassCreationFile(t *testing.T) {
 						"L1",
 						[]database.ClassVenueSchedule{},
 						[]database.Student{
-							{"PATELAR14", "ARJUN PATEL", sql.NullString{}},
-							{"YAPX9087", "YAP XIN TING", sql.NullString{}},
+							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
+							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
 						},
 					},
 				},
@@ -98,24 +98,24 @@ func TestParseClassCreationFile(t *testing.T) {
 						"A21",
 						[]database.ClassVenueSchedule{},
 						[]database.Student{
-							{"CHUL6789", "CHUA LI TING", sql.NullString{}},
-							{"YAPW9087", "YAP WEN LI", sql.NullString{}},
+							{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
+							{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
 						},
 					},
 					{
 						"A26",
 						[]database.ClassVenueSchedule{},
 						[]database.Student{
-							{"BENST129", "BENJAMIN SANTOS", sql.NullString{}},
-							{"YAPW9087", "YAP WEI LING", sql.NullString{}},
+							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
+							{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
 						},
 					},
 					{
 						"A32",
 						[]database.ClassVenueSchedule{},
 						[]database.Student{
-							{"PATELAR14", "ARJUN PATEL", sql.NullString{}},
-							{"YAPX9087", "YAP XIN TING", sql.NullString{}},
+							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
+							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
 						},
 					},
 				},

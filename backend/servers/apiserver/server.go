@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -27,13 +28,13 @@ type APIServer struct {
 }
 
 // New creates a new APIServer. Use Start() to start the server.
-func New() (*APIServer, error) {
+func New(ctx context.Context) (*APIServer, error) {
 	l, err := logger.NewLogger()
 	if err != nil {
 		return nil, fmt.Errorf("%s - failed to initialise: %w", Namespace, err)
 	}
 
-	db, err := database.Connect()
+	db, err := database.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("%s - could not connect to database: %w", Namespace, err)
 	}
@@ -73,8 +74,8 @@ func (s *APIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // Stop closes any external connections (e.g. database) and stops the server gracefully.
-func (s *APIServer) Stop() error {
-	return s.db.Close()
+func (s *APIServer) Stop() {
+	s.db.Close()
 }
 
 func (s *APIServer) GetLogger() *zap.Logger {

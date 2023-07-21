@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"testing"
@@ -12,7 +13,7 @@ import (
 
 func TestConnectDB(t *testing.T) {
 	a := assert.New(t)
-	a.Nil(testDb.C.Ping())
+	a.Nil(testDb.C.Ping(context.Background()))
 }
 
 func TestGetConnectionProperties(t *testing.T) {
