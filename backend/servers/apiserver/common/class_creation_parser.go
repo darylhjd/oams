@@ -48,6 +48,7 @@ const (
 
 // ClassCreationData is a struct containing data for a class creation file.
 type ClassCreationData struct {
+	Filename         string
 	Year             int
 	Semester         string
 	FileCreationDate time.Time // Time of file generation by NTU systems.
@@ -64,7 +65,7 @@ type ClassGroup struct {
 }
 
 // ParseClassCreationFile parses a class create file.
-func ParseClassCreationFile(f io.Reader) (*ClassCreationData, error) {
+func ParseClassCreationFile(filename string, f io.Reader) (*ClassCreationData, error) {
 	file, err := excelize.OpenReader(f)
 	if err != nil {
 		return nil, err
@@ -84,6 +85,8 @@ func ParseClassCreationFile(f io.Reader) (*ClassCreationData, error) {
 	}
 
 	var classData ClassCreationData
+	classData.Filename = filename
+
 	if err := parseClassMetaData(&classData, rows); err != nil {
 		return nil, err
 	}

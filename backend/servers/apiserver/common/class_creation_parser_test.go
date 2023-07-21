@@ -28,6 +28,7 @@ func TestParseClassCreationFile(t *testing.T) {
 			"class_lab_test.xlsx",
 			"",
 			ClassCreationData{
+				"class_lab_test.xlsx",
 				2022,
 				"2",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
@@ -66,6 +67,7 @@ func TestParseClassCreationFile(t *testing.T) {
 			"class_lec_test.xlsx",
 			"",
 			ClassCreationData{
+				"class_lec_test.xlsx",
 				2022,
 				"2",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
@@ -88,6 +90,7 @@ func TestParseClassCreationFile(t *testing.T) {
 			"class_tut_test.xlsx",
 			"",
 			ClassCreationData{
+				"class_tut_test.xlsx",
 				2022,
 				"2",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
@@ -177,13 +180,14 @@ func TestParseClassCreationFile(t *testing.T) {
 			file, err := os.Open(tt.file)
 			a.Nil(err)
 
-			data, err := ParseClassCreationFile(file)
+			data, err := ParseClassCreationFile(tt.file, file)
 			if tt.containsErr != "" {
 				a.ErrorContains(err, tt.containsErr)
 				return
 			}
 
 			attributeTests := map[any]any{
+				tt.expectedData.Filename:         data.Filename,
 				tt.expectedData.Year:             data.Year,
 				tt.expectedData.Semester:         data.Semester,
 				tt.expectedData.FileCreationDate: data.FileCreationDate,
