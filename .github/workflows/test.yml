@@ -53,6 +53,13 @@ jobs:
           cd backend  
           go get ./...
 
+      - name: Generate sqlc
+        run: |
+          go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+          cd backend/internal/database/config
+          sqlc generate --experimental
+          exit $(git diff --exit-code --no-patch)
+
       - name: Build frontend
         run: |
           cd frontend
