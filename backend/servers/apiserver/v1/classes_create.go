@@ -40,8 +40,7 @@ func (v *APIServerV1) classesCreate(w http.ResponseWriter, r *http.Request) {
 	case strings.HasPrefix(contentType, "multipart"):
 		resp, err = v.processClassCreationFiles(r)
 	case contentType == "application/json":
-		// TODO
-		break
+		resp, err = v.processClassCreationJSON(r)
 	default:
 		v.l.Debug(fmt.Sprintf("%s - received classes create request with unacceptable content-type", namespace),
 			zap.String("content-type", contentType))
@@ -136,12 +135,12 @@ func (v *APIServerV1) processClassCreationFile(fileHeader *multipart.FileHeader)
 func (v *APIServerV1) processClassCreationJSON(r *http.Request) (classesCreateResponse, error) {
 	var b bytes.Buffer
 	if _, err := b.ReadFrom(r.Body); err != nil {
-		return classesCreateResponse{}, err
+		return nil, err
 	}
 
 	var request classesCreateRequest
 	if err := json.Unmarshal(b.Bytes(), &request); err != nil {
-		return classesCreateResponse{}, err
+		return nil, err
 	}
 
 	return v.processClasses(request.Classes)

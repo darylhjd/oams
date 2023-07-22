@@ -232,7 +232,7 @@ func TestParseClassCreationFile(t *testing.T) {
 				tt.expectedData.Filename:         data.Filename,
 				tt.expectedData.FileCreationDate: data.FileCreationDate,
 				tt.expectedData.Course:           data.Course,
-				tt.expectedData.classType:        data.classType,
+				tt.expectedData.ClassType:        data.ClassType,
 			}
 
 			for expected, actual := range attributeTests {

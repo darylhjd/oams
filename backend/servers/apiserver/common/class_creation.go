@@ -19,8 +19,8 @@ type ClassCreationData struct {
 	// Error provides an explanation for any failures while processing the creation data.
 	Error string `json:"error"`
 
-	// These private variables are helper fields for generating filled data.
-	classType database.ClassType
+	// These variables are helper fields for generating filled data.
+	ClassType database.ClassType `json:"-"`
 }
 
 // IsValid is a helper function to check if a ClassCreationData is valid for data processing.
