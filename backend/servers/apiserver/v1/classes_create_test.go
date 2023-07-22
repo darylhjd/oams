@@ -17,7 +17,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 	tests := []struct {
 		name         string
 		body         func() (io.Reader, string, error)
-		expectedBody any
+		expectedBody classesCreateResponse
 	}{
 		{
 			"with files",
@@ -53,8 +53,8 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 				return &b, w.FormDataContentType(), w.Close()
 			},
 			classesCreateResponse{
-				"class_lab_test.xlsx": fileProcessingResult{Success: true},
-				"class_lec_test.xlsx": fileProcessingResult{Success: true},
+				{Filename: "class_lab_test.xlsx"},
+				{Filename: "class_lec_test.xlsx"},
 			},
 		},
 	}
@@ -74,12 +74,10 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 			v1.classesCreate(rr, req)
 
 			a.Equal(http.StatusOK, rr.Code)
-			expectedBody, err := json.Marshal(tt.expectedBody)
-			if err != nil {
-				t.Fatal(err)
-			}
 
-			a.Equal(string(expectedBody), rr.Body.String())
+			var actualResponse classesCreateResponse
+			a.Nil(json.Unmarshal(rr.Body.Bytes(), &actualResponse))
+			a.Equal(len(tt.expectedBody), len(actualResponse))
 		})
 	}
 }

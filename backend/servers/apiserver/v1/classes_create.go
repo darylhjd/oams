@@ -27,13 +27,8 @@ type classesCreateRequest struct {
 }
 
 // classesCreateResponse is a data type detailing the result of the classes create endpoint.
-type classesCreateResponse map[string]fileProcessingResult
-
-// fileProcessingResult holds the result of processing a file.
-type fileProcessingResult struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error"`
-}
+// TODO: Use unified response type that does not depend on the filename.
+type classesCreateResponse []common.ClassCreationData
 
 // classesCreate is the handler for a request to create classes.
 func (v *APIServerV1) classesCreate(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +45,7 @@ func (v *APIServerV1) classesCreate(w http.ResponseWriter, r *http.Request) {
 	default:
 		v.l.Debug(fmt.Sprintf("%s - received classes create request with unacceptable content-type", namespace),
 			zap.String("content-type", contentType))
-		http.Error(w, "unacceptable content-type for classes creation request", http.StatusNotAcceptable)
+		http.Error(w, "unacceptable content-type for classes creation request", http.StatusUnsupportedMediaType)
 		return
 	}
 
@@ -80,47 +75,43 @@ func (v *APIServerV1) processClassCreationFiles(r *http.Request) (classesCreateR
 	for _, header := range r.MultipartForm.File[multipartFormFileIdent] {
 		header := header // Required for go routine to point to different file for each loop.
 		limiter.Do(func() {
-			saveRes.Store(v.processClassCreationFile(header))
+			creationData, err := v.processClassCreationFile(header)
+			saveRes.Store(&creationData, err)
 		})
 	}
 
 	limiter.Wait()
 
 	var (
-		resp      classesCreateResponse
-		err       error
 		toProcess []common.ClassCreationData
+		err       error
 	)
 	saveRes.Range(func(key, value any) bool {
-		data, ok1 := key.(common.ClassCreationData)
-		pErr, ok2 := value.(error)
-		if !ok1 || !ok2 {
-			err = errors.New("type assertion failed when processing class creation file")
+		data, ok := key.(*common.ClassCreationData)
+		if !ok {
+			err = errors.New("type assertion failed when processing class creation data")
 			return false
 		}
 
-		if pErr != nil {
-			resp[data.Filename] = fileProcessingResult{
-				Success: false,
-				Error:   pErr.Error(),
-			}
-		} else {
-			toProcess = append(toProcess, data)
+		if value != nil {
+			err = value.(error)
+			return false
 		}
 
+		toProcess = append(toProcess, *data)
 		return true
 	})
 
-	processingRes, err := v.processClasses(toProcess)
 	if err != nil {
 		return nil, err
 	}
 
-	for filename, res := range processingRes {
-		resp[filename] = res
+	processingResp, err := v.processClasses(toProcess)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, err
+	return processingResp, err
 }
 
 // processClassCreationFile processes a file to create a new class.
@@ -160,8 +151,12 @@ func (v *APIServerV1) processClassCreationJSON(r *http.Request) (classesCreateRe
 func (v *APIServerV1) processClasses(classes []common.ClassCreationData) (classesCreateResponse, error) {
 	var resp classesCreateResponse
 	for _, class := range classes {
+		resp = append(resp, class)
+		if !class.IsValid() {
+			continue
+		}
+
 		// TODO: Implement database action for upserting classes.
-		resp[class.Filename] = fileProcessingResult{Success: true}
 	}
 
 	return resp, nil

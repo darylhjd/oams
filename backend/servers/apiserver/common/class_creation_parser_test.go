@@ -20,157 +20,197 @@ func TestParseClassCreationFile(t *testing.T) {
 	tests := []struct {
 		name         string
 		file         string
-		containsErr  string
 		expectedData ClassCreationData
 	}{
 		{
 			"sample class lab creation file",
 			"class_lab_test.xlsx",
-			"",
 			ClassCreationData{
 				"class_lab_test.xlsx",
-				2022,
-				"2",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				"SC1015",
-				"LAB",
-				[]ClassGroup{
+				database.CreateCoursesParams{
+					Code:      "SC1015",
+					Year:      2022,
+					Semester:  "2",
+					Programme: "CSC  Full-Time",
+					Au:        3,
+				},
+				[]ClassGroupData{
 					{
-						"A21",
-						[]database.ClassVenueSchedule{},
-						[]database.Student{
+						database.CreateClassGroupsParams{
+							Name:      "A21",
+							ClassType: database.ClassTypeLAB,
+						},
+						[]database.CreateClassGroupSessionsParams{},
+						[]database.CreateStudentsParams{
 							{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
 							{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
 						},
 					},
 					{
-						"A26",
-						[]database.ClassVenueSchedule{},
-						[]database.Student{
+						database.CreateClassGroupsParams{
+							Name:      "A26",
+							ClassType: database.ClassTypeLAB,
+						},
+						[]database.CreateClassGroupSessionsParams{},
+						[]database.CreateStudentsParams{
 							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
 							{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
 						},
 					},
 					{
-						"A32",
-						[]database.ClassVenueSchedule{},
-						[]database.Student{
+						database.CreateClassGroupsParams{
+							Name:      "A32",
+							ClassType: database.ClassTypeLAB,
+						},
+						[]database.CreateClassGroupSessionsParams{},
+						[]database.CreateStudentsParams{
 							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
 							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
 						},
 					},
 				},
+				"",
+				database.ClassTypeLAB,
 			},
 		},
 		{
 			"sample class lecture creation file",
 			"class_lec_test.xlsx",
-			"",
 			ClassCreationData{
 				"class_lec_test.xlsx",
-				2022,
-				"2",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				"SC1015",
-				"LEC",
-				[]ClassGroup{
+				database.CreateCoursesParams{
+					Code:      "SC1015",
+					Year:      2022,
+					Semester:  "2",
+					Programme: "CSC  Full-Time",
+					Au:        3,
+				},
+				[]ClassGroupData{
 					{
-						"L1",
-						[]database.ClassVenueSchedule{},
-						[]database.Student{
+						database.CreateClassGroupsParams{
+							Name:      "L1",
+							ClassType: database.ClassTypeLEC,
+						},
+						[]database.CreateClassGroupSessionsParams{},
+						[]database.CreateStudentsParams{
 							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
 							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
 						},
 					},
 				},
+				"",
+				database.ClassTypeLEC,
 			},
 		},
 		{
 			"sample class tutorial creation file",
 			"class_tut_test.xlsx",
-			"",
 			ClassCreationData{
 				"class_tut_test.xlsx",
-				2022,
-				"2",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				"SC1015",
-				"TUT",
-				[]ClassGroup{
+				database.CreateCoursesParams{
+					Code:      "SC1015",
+					Year:      2022,
+					Semester:  "2",
+					Programme: "CSC  Full-Time",
+					Au:        3,
+				},
+				[]ClassGroupData{
 					{
-						"A21",
-						[]database.ClassVenueSchedule{},
-						[]database.Student{
+						database.CreateClassGroupsParams{
+							Name:      "A21",
+							ClassType: database.ClassTypeTUT,
+						},
+						[]database.CreateClassGroupSessionsParams{},
+						[]database.CreateStudentsParams{
 							{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
 							{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
 						},
 					},
 					{
-						"A26",
-						[]database.ClassVenueSchedule{},
-						[]database.Student{
+						database.CreateClassGroupsParams{
+							Name:      "A26",
+							ClassType: database.ClassTypeTUT,
+						},
+						[]database.CreateClassGroupSessionsParams{},
+						[]database.CreateStudentsParams{
 							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
 							{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
 						},
 					},
 					{
-						"A32",
-						[]database.ClassVenueSchedule{},
-						[]database.Student{
+						database.CreateClassGroupsParams{
+							Name:      "A32",
+							ClassType: database.ClassTypeTUT,
+						},
+						[]database.CreateClassGroupSessionsParams{},
+						[]database.CreateStudentsParams{
 							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
 							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
 						},
 					},
 				},
+				"",
+				database.ClassTypeTUT,
 			},
 		},
 		{
 			"empty class creation file",
 			"class_empty_test.xlsx",
-			"not enough rows for class metadata",
-			ClassCreationData{},
+			ClassCreationData{
+				Error: "not enough rows for class metadata",
+			},
 		},
 		{
 			"too many class metadata rows",
 			"class_excessive_class_metadata_rows.xlsx",
-			"unexpected number of columns for class group row",
-			ClassCreationData{},
+			ClassCreationData{
+				Error: "unexpected number of columns for class group row",
+			},
 		},
 		{
 			"missing class group enrollment list identifier",
 			"class_missing_enrollment_ident.xlsx",
-			"unexpected start of class group enrollment list",
-			ClassCreationData{},
+			ClassCreationData{
+				Error: "unexpected start of class group enrollment list",
+			},
 		},
 		{
 			"second class group missing enrollment list identifier",
 			"class_second_group_missing_enrollment_ident.xlsx",
-			"unexpected start of class group enrollment list",
-			ClassCreationData{},
+			ClassCreationData{
+				Error: "unexpected start of class group enrollment list",
+			},
 		},
 		{
 			"student row with wrong length",
 			"class_student_row_wrong_length.xlsx",
-			"unexpected number of columns for student enrollment row",
-			ClassCreationData{},
+			ClassCreationData{
+				Error: "unexpected number of columns for student enrollment row",
+			},
 		},
 		{
 			"class group with no enrollment",
 			"class_group_with_no_enrollment.xlsx",
-			"class group A21 has no enrollments",
-			ClassCreationData{},
+			ClassCreationData{
+				Error: "class group A21 has no enrollments",
+			},
 		},
 		{
 			"course with no class groups",
 			"class_with_no_groups.xlsx",
-			"class creation file has no valid class groups",
-			ClassCreationData{},
+			ClassCreationData{
+				Error: "class creation file has no valid class groups",
+			},
 		},
 		{
 			"invalid format for class group name",
 			"class_with_invalid_class_group_name.xlsx",
-			"could not parse class group",
-			ClassCreationData{},
+			ClassCreationData{
+				Error: "could not parse class group",
+			},
 		},
 	}
 
@@ -181,18 +221,18 @@ func TestParseClassCreationFile(t *testing.T) {
 			a.Nil(err)
 
 			data, err := ParseClassCreationFile(tt.file, file)
-			if tt.containsErr != "" {
-				a.ErrorContains(err, tt.containsErr)
+			a.Nil(err)
+
+			if tt.expectedData.Error != "" {
+				a.Contains(data.Error, tt.expectedData.Error)
 				return
 			}
 
 			attributeTests := map[any]any{
 				tt.expectedData.Filename:         data.Filename,
-				tt.expectedData.Year:             data.Year,
-				tt.expectedData.Semester:         data.Semester,
 				tt.expectedData.FileCreationDate: data.FileCreationDate,
-				tt.expectedData.CourseCode:       data.CourseCode,
-				tt.expectedData.ClassType:        data.ClassType,
+				tt.expectedData.Course:           data.Course,
+				tt.expectedData.classType:        data.classType,
 			}
 
 			for expected, actual := range attributeTests {
@@ -203,7 +243,8 @@ func TestParseClassCreationFile(t *testing.T) {
 			a.Equal(len(tt.expectedData.ClassGroups), len(data.ClassGroups))
 			for i := 0; i < len(tt.expectedData.ClassGroups); i++ {
 				a.Equal(tt.expectedData.ClassGroups[i].Name, data.ClassGroups[i].Name)
-				// TODO: Test for schedule.
+				a.Equal(tt.expectedData.ClassGroups[i].ClassType, data.ClassGroups[i].ClassType)
+				// TODO: Test for sessions.
 				for _, student := range tt.expectedData.ClassGroups[i].Students {
 					a.Contains(data.ClassGroups[i].Students, student)
 				}
