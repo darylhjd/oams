@@ -9,11 +9,6 @@ FROM students
 WHERE id = $1
 LIMIT 1;
 
--- name: Testing :one
-SELECT *
-FROM courses
-LIMIT 1;
-
 -- name: UpsertStudents :batchmany
 INSERT INTO students (id, name, email, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
