@@ -127,7 +127,7 @@ func (v *APIServerV1) processClassCreationFile(fileHeader *multipart.FileHeader)
 		return common.ClassCreationData{}, fmt.Errorf("%s - error parsing class creation file %s: %w", namespace, fileHeader.Filename, err)
 	}
 
-	return *creationData, file.Close()
+	return creationData, file.Close()
 }
 
 // processClassCreationJSON processes a request to create classes via JSON body.
@@ -148,7 +148,7 @@ func (v *APIServerV1) processClassCreationJSON(r *http.Request) (classesCreateRe
 // processClasses sequentially processes each class creation data provided.
 func (v *APIServerV1) processClasses(classes []common.ClassCreationData) (classesCreateResponse, error) {
 	var resp classesCreateResponse
-	for idx, _ := range classes {
+	for idx := range classes {
 		class := classes[idx]
 		resp = append(resp, class)
 		if !(&class).Validate() { // Defensively check for validity of creation data.

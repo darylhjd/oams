@@ -49,10 +49,10 @@ const (
 )
 
 // ParseClassCreationFile parses a class creation file.
-func ParseClassCreationFile(filename string, f io.Reader) (*ClassCreationData, error) {
+func ParseClassCreationFile(filename string, f io.Reader) (ClassCreationData, error) {
 	file, err := excelize.OpenReader(f)
 	if err != nil {
-		return nil, err
+		return ClassCreationData{}, err
 	}
 
 	var creationData ClassCreationData
@@ -61,31 +61,31 @@ func ParseClassCreationFile(filename string, f io.Reader) (*ClassCreationData, e
 	sheets := file.GetSheetList()
 	if len(sheets) != expectedSheetCount {
 		creationData.Error = fmt.Sprintf("%s - invalid class creation file format", namespace)
-		return &creationData, nil
+		return creationData, nil
 	}
 
 	rows, err := file.GetRows(sheets[expectedSheetCount-1])
 	if err != nil {
 		creationData.Error = fmt.Sprintf("%s - cannot get data rows", namespace)
-		return &creationData, nil
+		return creationData, nil
 	}
 
 	switch pErr, sysErr := parseClassMetaData(&creationData, rows); {
 	case pErr != nil:
 		creationData.Error = fmt.Errorf("%s - error while parsing class metadata: %w", namespace, pErr).Error()
-		return &creationData, nil
+		return creationData, nil
 	case sysErr != nil:
-		return nil, sysErr
+		return ClassCreationData{}, sysErr
 	}
 
 	if err = parseClassGroups(&creationData, rows); err != nil {
 		creationData.Error = fmt.Errorf("%s - error while parsing class groups: %w", namespace, err).Error()
-		return &creationData, nil
+		return creationData, nil
 	}
 
 	_ = creationData.Validate()
 
-	return &creationData, file.Close()
+	return creationData, file.Close()
 }
 
 // parseClassMetaData is a helper function to parse a class' metadata from a file.
