@@ -58,7 +58,7 @@ jobs:
           go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
           cd backend/internal/database/config
           sqlc generate --experimental
-          git status --porcelain >&2
+          exit $(git diff --exit-code --no-patch)
 
       - name: Build frontend
         run: |
