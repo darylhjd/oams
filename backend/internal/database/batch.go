@@ -293,25 +293,27 @@ func (b *CreateSessionEnrollmentsBatchResults) Close() error {
 	return b.br.Close()
 }
 
-const createStudents = `-- name: CreateStudents :batchmany
+const upsertStudents = `-- name: UpsertStudents :batchmany
 INSERT INTO students (id, name, email, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
+ON CONFLICT (id)
+DO UPDATE SET name = $2, email = $3, updated_at = NOW()
 RETURNING id
 `
 
-type CreateStudentsBatchResults struct {
+type UpsertStudentsBatchResults struct {
 	br     pgx.BatchResults
 	tot    int
 	closed bool
 }
 
-type CreateStudentsParams struct {
+type UpsertStudentsParams struct {
 	ID    string      `json:"id"`
 	Name  string      `json:"name"`
 	Email pgtype.Text `json:"email"`
 }
 
-func (q *Queries) CreateStudents(ctx context.Context, arg []CreateStudentsParams) *CreateStudentsBatchResults {
+func (q *Queries) UpsertStudents(ctx context.Context, arg []UpsertStudentsParams) *UpsertStudentsBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
 		vals := []interface{}{
@@ -319,13 +321,13 @@ func (q *Queries) CreateStudents(ctx context.Context, arg []CreateStudentsParams
 			a.Name,
 			a.Email,
 		}
-		batch.Queue(createStudents, vals...)
+		batch.Queue(upsertStudents, vals...)
 	}
 	br := q.db.SendBatch(ctx, batch)
-	return &CreateStudentsBatchResults{br, len(arg), false}
+	return &UpsertStudentsBatchResults{br, len(arg), false}
 }
 
-func (b *CreateStudentsBatchResults) Query(f func(int, []string, error)) {
+func (b *UpsertStudentsBatchResults) Query(f func(int, []string, error)) {
 	defer b.br.Close()
 	for t := 0; t < b.tot; t++ {
 		var items []string
@@ -356,7 +358,7 @@ func (b *CreateStudentsBatchResults) Query(f func(int, []string, error)) {
 	}
 }
 
-func (b *CreateStudentsBatchResults) Close() error {
+func (b *UpsertStudentsBatchResults) Close() error {
 	b.closed = true
 	return b.br.Close()
 }

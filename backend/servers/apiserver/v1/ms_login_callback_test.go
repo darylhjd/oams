@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/oauth2"
@@ -73,6 +75,20 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			if tt.wantCode != http.StatusSeeOther {
 				return
 			}
+
+			// Check that student exists in the database.
+			student, err := v1.db.Q.GetStudent(req.Context(), oauth2.MockIDTokenName)
+			a.Nil(err)
+			a.Equal(student, database.Student{
+				ID:   oauth2.MockIDTokenName,
+				Name: "",
+				Email: pgtype.Text{
+					String: oauth2.MockAccountPreferredUsername,
+					Valid:  true,
+				},
+				CreatedAt: student.CreatedAt,
+				UpdatedAt: student.UpdatedAt,
+			})
 
 			// Check that session cookie exists.
 			for _, cookie := range rr.Result().Cookies() {

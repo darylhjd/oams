@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/internal/env"
@@ -42,6 +44,22 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		v.l.Error(fmt.Sprintf("%s - could not get tokens from auth code", namespace), zap.Error(err))
+		return
+	}
+
+	// Upsert student into database.
+	err = v.db.Q.UpsertStudents(r.Context(), []database.UpsertStudentsParams{
+		{
+			ID: res.IDToken.Name,
+			Email: pgtype.Text{
+				String: res.Account.PreferredUsername,
+				Valid:  true,
+			},
+		},
+	}).Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		v.l.Error(fmt.Sprintf("%s - error upserting user info", namespace), zap.Error(err))
 		return
 	}
 
