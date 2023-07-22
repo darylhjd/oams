@@ -5,10 +5,17 @@ import (
 	"net/url"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
-	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 
 	"github.com/darylhjd/oams/backend/internal/env"
+)
+
+const (
+	mockAccessToken          = "mock-access-token"
+	mockAccountHomeAccountID = "mock-home-account-id"
+
+	MockAccountPreferredUsername = "NTU0001@e.ntu.edu.sg"
+	MockIDTokenName              = "TESTACC001"
 )
 
 // MockAzureAuthenticator allows us to mock the calls to Microsoft's Azure AD APIs.
@@ -17,9 +24,7 @@ type MockAzureAuthenticator struct {
 }
 
 func (m *MockAzureAuthenticator) Account(_ context.Context, accountID string) (confidential.Account, error) {
-	return confidential.Account{
-		HomeAccountID: accountID,
-	}, nil
+	return m.mockAccount(), nil
 }
 
 func (m *MockAzureAuthenticator) RemoveAccount(_ context.Context, _ confidential.Account) error {
@@ -49,25 +54,33 @@ func (m *MockAzureAuthenticator) AuthCodeURL(context.Context, string, string, []
 }
 
 func (m *MockAzureAuthenticator) AcquireTokenByAuthCode(context.Context, string, string, []string, ...confidential.AcquireByAuthCodeOption) (confidential.AuthResult, error) {
-	return confidential.AuthResult{
-		AccessToken: "mock-access-token",
-		Account: confidential.Account{
-			HomeAccountID: uuid.NewString(),
-		},
-	}, nil
+	return m.mockAuthResult(), nil
 }
 
 func (m *MockAzureAuthenticator) AcquireTokenSilent(context.Context, []string, ...confidential.AcquireSilentOption) (confidential.AuthResult, error) {
-	return confidential.AuthResult{
-		AccessToken: "mock-access-token",
-		Account: confidential.Account{
-			HomeAccountID: uuid.NewString(),
-		},
-	}, nil
+	return m.mockAuthResult(), nil
 }
 
 func (m *MockAzureAuthenticator) GetKeyCache() *jwk.Cache {
 	return m.keyCache
+}
+
+func (m *MockAzureAuthenticator) mockAuthResult() confidential.AuthResult {
+	// Do this because we cannot import IDToken type.
+	var result confidential.AuthResult
+
+	result.AccessToken = mockAccessToken
+	result.Account = m.mockAccount()
+	result.IDToken.Name = MockIDTokenName
+
+	return result
+}
+
+func (m *MockAzureAuthenticator) mockAccount() confidential.Account {
+	return confidential.Account{
+		HomeAccountID:     mockAccountHomeAccountID,
+		PreferredUsername: MockAccountPreferredUsername,
+	}
 }
 
 // NewMockAzureAuthenticator creates a new mock Azure Authenticator client, useful for tests.

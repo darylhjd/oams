@@ -55,5 +55,5 @@ func (c *ClassCreationData) Validate() bool {
 type ClassGroupData struct {
 	database.CreateClassGroupsParams
 	Sessions []database.CreateClassGroupSessionsParams `json:"sessions"`
-	Students []database.CreateStudentsParams           `json:"students"`
+	Students []database.UpsertStudentsParams           `json:"students"`
 }

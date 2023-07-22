@@ -212,7 +212,7 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 				return fmt.Errorf("%s - unexpected number of columns for student enrollment row", namespace)
 			}
 
-			group.Students = append(group.Students, database.CreateStudentsParams{
+			group.Students = append(group.Students, database.UpsertStudentsParams{
 				ID:    rows[index][studentIdColumn],
 				Name:  rows[index][studentNameColumn],
 				Email: pgtype.Text{},

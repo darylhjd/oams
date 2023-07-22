@@ -9,9 +9,11 @@ FROM students
 WHERE id = $1
 LIMIT 1;
 
--- name: CreateStudents :batchmany
+-- name: UpsertStudents :batchmany
 INSERT INTO students (id, name, email, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
+ON CONFLICT (id)
+DO UPDATE SET name = $2, email = $3, updated_at = NOW()
 RETURNING id;
 
 -- name: CreateCourses :batchmany
