@@ -85,8 +85,9 @@ type Course struct {
 }
 
 type SessionEnrollment struct {
-	SessionID int64  `json:"session_id"`
-	StudentID string `json:"student_id"`
+	SessionID int64            `json:"session_id"`
+	StudentID string           `json:"student_id"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
 type Student struct {

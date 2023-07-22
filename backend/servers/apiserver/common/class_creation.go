@@ -14,7 +14,7 @@ type ClassCreationData struct {
 	Filename         string    `json:"filename"`
 	FileCreationDate time.Time `json:"file_creation_date"`
 
-	Course      database.CreateCoursesParams `json:"course"`
+	Course      database.UpsertCoursesParams `json:"course"`
 	ClassGroups []ClassGroupData             `json:"class_groups"`
 
 	// Error provides an explanation for any failures while processing the creation data.

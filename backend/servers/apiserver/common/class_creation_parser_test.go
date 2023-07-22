@@ -28,7 +28,7 @@ func TestParseClassCreationFile(t *testing.T) {
 			ClassCreationData{
 				"class_lab_test.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				database.CreateCoursesParams{
+				database.UpsertCoursesParams{
 					Code:      "SC1015",
 					Year:      2022,
 					Semester:  "2",
@@ -80,7 +80,7 @@ func TestParseClassCreationFile(t *testing.T) {
 			ClassCreationData{
 				"class_lec_test.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				database.CreateCoursesParams{
+				database.UpsertCoursesParams{
 					Code:      "SC1015",
 					Year:      2022,
 					Semester:  "2",
@@ -110,7 +110,7 @@ func TestParseClassCreationFile(t *testing.T) {
 			ClassCreationData{
 				"class_tut_test.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				database.CreateCoursesParams{
+				database.UpsertCoursesParams{
 					Code:      "SC1015",
 					Year:      2022,
 					Semester:  "2",

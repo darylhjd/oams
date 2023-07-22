@@ -21,7 +21,8 @@ CREATE TABLE courses
     au         SMALLINT  NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    UNIQUE (code, year, semester)
+    CONSTRAINT ux_code_year_semester
+        UNIQUE (code, year, semester)
 );
 
 CREATE TABLE class_groups
@@ -32,7 +33,8 @@ CREATE TABLE class_groups
     class_type CLASS_TYPE NOT NULL,
     created_at TIMESTAMP  NOT NULL,
     updated_at TIMESTAMP  NOT NULL,
-    UNIQUE (course_id, name),
+    CONSTRAINT ux_course_id_name
+        UNIQUE (course_id, name),
     CONSTRAINT fk_course_id
         FOREIGN KEY (course_id)
             REFERENCES courses (id)
@@ -47,7 +49,8 @@ CREATE TABLE class_group_sessions
     venue          TEXT      NOT NULL,
     created_at     TIMESTAMP NOT NULL,
     updated_at     TIMESTAMP NOT NULL,
-    UNIQUE (class_group_id, start_time),
+    CONSTRAINT ux_class_group_id_start_time
+        UNIQUE (class_group_id, start_time),
     CONSTRAINT fk_class_group_id
         FOREIGN KEY (class_group_id)
             REFERENCES class_groups (id)
@@ -57,6 +60,7 @@ CREATE TABLE session_enrollments
 (
     session_id BIGSERIAL NOT NULL,
     student_id TEXT      NOT NULL,
+    created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (session_id, student_id),
     CONSTRAINT fk_session_id
         FOREIGN KEY (session_id)

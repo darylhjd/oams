@@ -69,7 +69,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 						{
 							"class_lab_test.xlsx",
 							time.Date(2023, time.June, 15, 13, 1, 0, 0, time.Local),
-							database.CreateCoursesParams{
+							database.UpsertCoursesParams{
 								Code:      "SC1015",
 								Year:      2022,
 								Semester:  "2",
@@ -125,7 +125,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 				return bytes.NewReader(b), "application/json", nil
 			},
 			expectedBody: classesCreateResponse{
-				{Course: database.CreateCoursesParams{}},
+				{Course: database.UpsertCoursesParams{}},
 			},
 		},
 	}
