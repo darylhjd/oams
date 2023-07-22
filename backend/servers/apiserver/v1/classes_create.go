@@ -118,6 +118,9 @@ func (v *APIServerV1) processClassCreationFile(fileHeader *multipart.FileHeader)
 	if err != nil {
 		return common.ClassCreationData{}, err
 	}
+	defer func() {
+		_ = file.Close()
+	}()
 
 	v.l.Debug(fmt.Sprintf("%s - processing class creation file", namespace),
 		zap.String("filename", fileHeader.Filename))
@@ -127,7 +130,7 @@ func (v *APIServerV1) processClassCreationFile(fileHeader *multipart.FileHeader)
 		return common.ClassCreationData{}, fmt.Errorf("%s - error parsing class creation file %s: %w", namespace, fileHeader.Filename, err)
 	}
 
-	return creationData, file.Close()
+	return creationData, nil
 }
 
 // processClassCreationJSON processes a request to create classes via JSON body.

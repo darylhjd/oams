@@ -54,6 +54,9 @@ func ParseClassCreationFile(filename string, f io.Reader) (ClassCreationData, er
 	if err != nil {
 		return ClassCreationData{}, err
 	}
+	defer func() {
+		_ = file.Close()
+	}()
 
 	var creationData ClassCreationData
 	creationData.Filename = filename
@@ -85,7 +88,7 @@ func ParseClassCreationFile(filename string, f io.Reader) (ClassCreationData, er
 
 	_ = creationData.Validate()
 
-	return creationData, file.Close()
+	return creationData, nil
 }
 
 // parseClassMetaData is a helper function to parse a class' metadata from a file.
