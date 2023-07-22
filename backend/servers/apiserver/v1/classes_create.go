@@ -27,7 +27,6 @@ type classesCreateRequest struct {
 }
 
 // classesCreateResponse is a data type detailing the result of the classes create endpoint.
-// TODO: Use unified response type that does not depend on the filename.
 type classesCreateResponse []common.ClassCreationData
 
 // classesCreate is the handler for a request to create classes.
@@ -149,13 +148,14 @@ func (v *APIServerV1) processClassCreationJSON(r *http.Request) (classesCreateRe
 // processClasses sequentially processes each class creation data provided.
 func (v *APIServerV1) processClasses(classes []common.ClassCreationData) (classesCreateResponse, error) {
 	var resp classesCreateResponse
-	for _, class := range classes {
+	for idx, _ := range classes {
+		class := classes[idx]
 		resp = append(resp, class)
-		if !class.IsValid() {
+		if !(&class).Validate() { // Defensively check for validity of creation data.
 			continue
 		}
 
-		// TODO: Implement database action for upserting classes.
+		// TODO: Implement database action for inserting classes.
 	}
 
 	return resp, nil

@@ -202,7 +202,7 @@ func TestParseClassCreationFile(t *testing.T) {
 			"course with no class groups",
 			"class_with_no_groups.xlsx",
 			ClassCreationData{
-				Error: "class creation file has no valid class groups",
+				Error: "creation data has no valid class groups",
 			},
 		},
 		{

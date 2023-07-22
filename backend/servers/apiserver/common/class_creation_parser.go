@@ -83,6 +83,8 @@ func ParseClassCreationFile(filename string, f io.Reader) (*ClassCreationData, e
 		return &creationData, nil
 	}
 
+	_ = creationData.Validate()
+
 	return &creationData, file.Close()
 }
 
@@ -192,10 +194,6 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 			index += expectedClassGroupSessionRows
 		}
 
-		if len(group.Sessions) == 0 {
-			return fmt.Errorf("%s - class group %s has no sessions", namespace, group.Name)
-		}
-
 		// Parse student enrollment list.
 		index += 1 // Skip one blank row after metadata.
 		// Perform sanity check.
@@ -220,16 +218,8 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 			index += 1
 		}
 
-		if len(group.Students) == 0 {
-			return fmt.Errorf("%s - class group %s has no enrollments", namespace, group.Name)
-		}
-
 		creationData.ClassGroups = append(creationData.ClassGroups, group)
 		index += 1 // Skip blank row after end of enrollment list. Will also work if it is the last list.
-	}
-
-	if len(creationData.ClassGroups) == 0 {
-		return fmt.Errorf("%s - class creation file has no valid class groups", namespace)
 	}
 
 	return nil
