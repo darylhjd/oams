@@ -59,7 +59,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	}).Close()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - error upserting user info", namespace), zap.Error(err))
+		v.l.Error(fmt.Sprintf("%s - error upserting users info", namespace), zap.Error(err))
 		return
 	}
 

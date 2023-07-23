@@ -33,7 +33,7 @@ class OAMSFrontend extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return FutureBuilder(
-      future: ref.watch(userInfoProvider.future),
+      future: ref.watch(sessionUserProvider.future),
       builder: (context, snapshot) {
         return snapshot.connectionState == ConnectionState.done
             ? _materialApp(ref.watch(routerProvider))

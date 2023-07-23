@@ -15,7 +15,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var userAsync = ref.watch(userInfoProvider);
+    var userAsync = ref.watch(sessionUserProvider);
 
     return ScreenTemplate(
       userAsync.when(
@@ -34,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(mobilePadding),
       children: [
-        _PreferredUsername(true, data.preferredUsername),
+        _PreferredUsername(true, data.id),
       ],
     );
   }
@@ -43,7 +43,7 @@ class ProfileScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(desktopPadding),
       children: [
-        _PreferredUsername(false, data.preferredUsername),
+        _PreferredUsername(false, data.id),
       ],
     );
   }

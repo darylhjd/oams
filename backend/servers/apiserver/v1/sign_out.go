@@ -1,18 +1,26 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
-// signOut endpoint invalidates a user session. This is done by requesting that the browser
+// signOut endpoint invalidates a users session. This is done by requesting that the browser
 // remove the cookie containing the session information.
 func (v *APIServerV1) signOut(w http.ResponseWriter, r *http.Request) {
-	authContext, ok := middleware.GetAuthContext(r)
-	if !ok {
-		http.Error(w, "unexpected account data type", http.StatusInternalServerError)
+	authContext, isSignedIn, err := middleware.GetAuthContext(r)
+	switch {
+	case err != nil:
+		break
+	case !isSignedIn:
+		err = fmt.Errorf("%s - sign out endpoint called with no user session", namespace)
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
