@@ -10,7 +10,7 @@ final sessionUserProvider = FutureProvider<User>((ref) async {
   try {
     var resp = await APIClient.getUsers();
     if (resp.sessionUser == null) {
-      throw Exception();
+      throw Exception("no session user");
     }
     ref.read(sessionProvider.notifier).update((_) => true);
     return resp.sessionUser!;
