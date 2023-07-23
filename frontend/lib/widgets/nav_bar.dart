@@ -276,7 +276,7 @@ class _LogoutItem extends ConsumerWidget {
     final ok = await APIClient.logout();
     if (ok && context.mounted) {
       ref.read(sessionProvider.notifier).update((_) => false);
-      ref.invalidate(userInfoProvider);
+      ref.invalidate(sessionUserProvider);
       context.goNamed(Routes.index.name);
     }
   }

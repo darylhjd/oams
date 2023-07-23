@@ -24,7 +24,7 @@ const (
 	msLoginCallbackUrl = "/ms-login-callback"
 	signOutUrl         = "/sign-out"
 	classesUrl         = "/classes"
-	userUrl            = "/user"
+	usersUrl           = "/users"
 )
 
 type APIServerV1 struct {
@@ -49,10 +49,10 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	v.mux.HandleFunc(signOutUrl, middleware.CheckAuthorised(v.signOut, v.azure))
+	v.mux.HandleFunc(signOutUrl, middleware.WithAuthContext(v.signOut, v.azure, true))
 
-	v.mux.HandleFunc(classesUrl, middleware.CheckAuthorised(middleware.AllowMethods(v.classesCreate, http.MethodPost), v.azure))
-	v.mux.HandleFunc(userUrl, middleware.CheckAuthorised(v.user, v.azure))
+	v.mux.HandleFunc(classesUrl, middleware.WithAuthContext(middleware.AllowMethods(v.classesCreate, http.MethodPost), v.azure, true))
+	v.mux.HandleFunc(usersUrl, middleware.WithAuthContext(v.users, v.azure, false))
 }
 
 func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {

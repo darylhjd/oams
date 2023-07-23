@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,24 +13,28 @@ import (
 
 func TestGetAuthContext(t *testing.T) {
 	tests := []struct {
-		name         string
-		contextValue any
-		wantOk       bool
+		name           string
+		contextValue   any
+		wantIsSignedIn bool
+		wantErr        error
 	}{
 		{
 			"with proper context value",
 			AuthContext{},
 			true,
+			nil,
 		},
 		{
 			"bad context value",
 			time.Time{},
 			false,
+			fmt.Errorf("%s - unexpected auth context type", namespace),
 		},
 		{
 			"no context value",
 			nil,
 			false,
+			nil,
 		},
 	}
 
@@ -39,8 +44,9 @@ func TestGetAuthContext(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req = req.WithContext(context.WithValue(req.Context(), AuthContextKey, tt.contextValue))
 
-			_, ok := GetAuthContext(req)
-			a.Equal(tt.wantOk, ok)
+			_, isSignedIn, err := GetAuthContext(req)
+			a.Equal(tt.wantIsSignedIn, isSignedIn)
+			a.Equal(tt.wantErr, err)
 		})
 	}
 }

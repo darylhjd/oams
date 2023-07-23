@@ -2,12 +2,17 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
+)
+
+const (
+	namespace = "middleware"
 )
 
 const (
@@ -21,9 +26,21 @@ type AuthContext struct {
 }
 
 // GetAuthContext is a helper function to get the authentication context from a request context.
-func GetAuthContext(r *http.Request) (AuthContext, bool) {
-	authContext, ok := r.Context().Value(AuthContextKey).(AuthContext)
-	return authContext, ok
+// If there is no AuthContext (i.e. there is no user session from request), then the boolean will be false and
+// AuthContext is empty. If there is an error while getting an AuthContext even with a user session, error will not be nil.
+// Callers should check for error first before checking for the boolean flag.
+func GetAuthContext(r *http.Request) (AuthContext, bool, error) {
+	val := r.Context().Value(AuthContextKey)
+	if val == nil {
+		return AuthContext{}, false, nil
+	}
+
+	authContext, ok := val.(AuthContext)
+	if !ok {
+		return AuthContext{}, false, fmt.Errorf("%s - unexpected auth context type", namespace)
+	}
+
+	return authContext, true, nil
 }
 
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
@@ -44,9 +61,9 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 	}
 }
 
-// CheckAuthorised checks if a request is authorised for a handler and adds relevant authentication context
-// if check is successful.
-func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) http.HandlerFunc {
+// WithAuthContext adds AuthContext for a handler and checks for authentication status if required by mustAuth.
+// If mustAuth is true and request is not authenticated, unauthorised response code is set.
+func WithAuthContext(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator, mustAuth bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		set, err := authenticator.GetKeyCache().Get(r.Context(), oauth2.KeySetSource)
 		if err != nil {
@@ -57,6 +74,11 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		// We will be using session cookies for authentication.
 		c, err := r.Cookie(oauth2.SessionCookieIdent)
 		if err != nil {
+			if !mustAuth {
+				handlerFunc(w, r)
+				return
+			}
+
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -65,7 +87,7 @@ func CheckAuthorised(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		// Instead, a zero-value Account is returned, so we check that.
 		acct, err := authenticator.Account(r.Context(), c.Value)
 		if err != nil || acct.IsZero() {
-			http.Error(w, "account not found in session cache", http.StatusUnauthorized)
+			http.Error(w, fmt.Sprintf("%s - account not found in session cache", namespace), http.StatusUnauthorized)
 			return
 		}
 

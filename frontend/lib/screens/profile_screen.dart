@@ -15,7 +15,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var userAsync = ref.watch(userInfoProvider);
+    var userAsync = ref.watch(sessionUserProvider);
 
     return ScreenTemplate(
       userAsync.when(
@@ -34,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(mobilePadding),
       children: [
-        _PreferredUsername(true, data.preferredUsername),
+        _Name(true, data.id),
       ],
     );
   }
@@ -43,22 +43,22 @@ class ProfileScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(desktopPadding),
       children: [
-        _PreferredUsername(false, data.preferredUsername),
+        _Name(false, data.id),
       ],
     );
   }
 }
 
-// _PreferredUsername shows as a larger text the preferred username of a user.
-class _PreferredUsername extends StatelessWidget {
+// _Name shows as a larger text the name of a User.
+class _Name extends StatelessWidget {
   static const double mobileTopPadding = 50;
   static const double mobileOtherPadding = 5;
   static const double desktopTopPadding = 100;
   static const double desktopOtherPadding = 10;
   final bool isMobile;
-  final String preferredUsername;
+  final String name;
 
-  const _PreferredUsername(this.isMobile, this.preferredUsername, {Key? key})
+  const _Name(this.isMobile, this.name, {Key? key})
       : super(key: key);
 
   @override
@@ -79,7 +79,7 @@ class _PreferredUsername extends StatelessWidget {
               desktopOtherPadding,
             ),
       child: Text(
-        preferredUsername,
+        name,
         style: Theme.of(context)
             .textTheme
             .bodyLarge

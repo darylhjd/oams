@@ -23,7 +23,7 @@ type MockAzureAuthenticator struct {
 	keyCache *jwk.Cache
 }
 
-func (m *MockAzureAuthenticator) Account(_ context.Context, accountID string) (confidential.Account, error) {
+func (m *MockAzureAuthenticator) Account(_ context.Context, _ string) (confidential.Account, error) {
 	return m.mockAccount(), nil
 }
 
@@ -54,18 +54,18 @@ func (m *MockAzureAuthenticator) AuthCodeURL(context.Context, string, string, []
 }
 
 func (m *MockAzureAuthenticator) AcquireTokenByAuthCode(context.Context, string, string, []string, ...confidential.AcquireByAuthCodeOption) (confidential.AuthResult, error) {
-	return m.mockAuthResult(), nil
+	return m.MockAuthResult(), nil
 }
 
 func (m *MockAzureAuthenticator) AcquireTokenSilent(context.Context, []string, ...confidential.AcquireSilentOption) (confidential.AuthResult, error) {
-	return m.mockAuthResult(), nil
+	return m.MockAuthResult(), nil
 }
 
 func (m *MockAzureAuthenticator) GetKeyCache() *jwk.Cache {
 	return m.keyCache
 }
 
-func (m *MockAzureAuthenticator) mockAuthResult() confidential.AuthResult {
+func (m *MockAzureAuthenticator) MockAuthResult() confidential.AuthResult {
 	// Do this because we cannot import IDToken type.
 	var result confidential.AuthResult
 
