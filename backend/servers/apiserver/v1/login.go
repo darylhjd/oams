@@ -19,7 +19,7 @@ const (
 )
 
 // state stores the state from which the login was called.
-// This helps us store useful information such as the redirect URL to return the users to after login
+// This helps us store useful information such as the redirect URL to return the user to after login
 // and the version of the API in which the auth code flow was initiated.
 type state struct {
 	Version  string `json:"version"`
