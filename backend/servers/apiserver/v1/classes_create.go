@@ -154,7 +154,7 @@ func (v *APIServerV1) processClasses(classes []common.ClassCreationData) (classe
 	for idx := range classes {
 		class := classes[idx]
 		resp = append(resp, class)
-		if !(&class).Validate() { // Defensively check for validity of creation data.
+		if class.IsValid() != nil { // Defensively check for validity of creation data.
 			continue
 		}
 
