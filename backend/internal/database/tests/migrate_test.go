@@ -4,12 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 )
-
-const migrationTest = "migration_test"
 
 func TestMigrations(t *testing.T) {
 	ctx := context.Background()
@@ -19,17 +18,18 @@ func TestMigrations(t *testing.T) {
 	// 2. Check creating new migrator
 	// 3. Delete
 	a := assert.New(t)
+	id := uuid.NewString()
 
 	// Make sure this database doesn't currently exist.
-	a.Nil(database.Drop(ctx, migrationTest, false))
+	a.Nil(database.Drop(ctx, id, false))
 
 	// Check Create.
-	a.Nil(database.Create(ctx, migrationTest, false))
-	a.Error(database.Create(ctx, migrationTest, false))
-	a.Nil(database.Create(ctx, migrationTest, true))
+	a.Nil(database.Create(ctx, id, false))
+	a.Error(database.Create(ctx, id, false))
+	a.Nil(database.Create(ctx, id, true))
 
 	// Check Migrator.
-	migrator, err := database.NewMigrate(database.Namespace)
+	migrator, err := database.NewMigrate(id)
 	a.Nil(err)
 
 	sErr, dbErr := migrator.Close()
@@ -42,7 +42,7 @@ func TestMigrations(t *testing.T) {
 	a.ErrorContains(err, "database name not provided")
 
 	// Check dropping.
-	a.Nil(database.Drop(ctx, migrationTest, true))
-	a.Nil(database.Drop(ctx, migrationTest, false))
-	a.Error(database.Drop(ctx, migrationTest, true))
+	a.Nil(database.Drop(ctx, id, true))
+	a.Nil(database.Drop(ctx, id, false))
+	a.Error(database.Drop(ctx, id, true))
 }

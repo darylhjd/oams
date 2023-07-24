@@ -8,13 +8,15 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/env"
 )
 
 func TestAPIServerV1_login(t *testing.T) {
-	tests := []struct {
+	tts := []struct {
 		name     string
 		returnTo string
 	}{
@@ -28,11 +30,13 @@ func TestAPIServerV1_login(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
+			id := uuid.NewString()
 
-			v1 := newTestAPIServerV1(t)
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
 
 			loginQueries := url.Values{}
 			loginQueries.Set(stateReturnToQueryParam, tt.returnTo)
@@ -40,11 +44,8 @@ func TestAPIServerV1_login(t *testing.T) {
 			rr := httptest.NewRecorder()
 			v1.login(rr, req)
 
-			var loginResp loginResponse
-			err := json.Unmarshal(rr.Body.Bytes(), &loginResp)
-			a.Nil(err)
-
-			actualUrl, err := url.Parse(loginResp.RedirectUrl)
+			var actualResp loginResponse
+			err := json.Unmarshal(rr.Body.Bytes(), &actualResp)
 			a.Nil(err)
 
 			s, err := json.Marshal(state{
@@ -65,13 +66,19 @@ func TestAPIServerV1_login(t *testing.T) {
 			path, err := url.JoinPath("/", env.GetAPIServerAzureTenantID(), "oauth2", "v2.0", "authorize")
 			a.Nil(err)
 
-			a.Equal(http.StatusOK, rr.Code)
-			a.Equal(url.URL{
-				Scheme:   "https",
-				Host:     "login.microsoftonline.com",
-				Path:     path,
-				RawQuery: expectedQueries.Encode(),
-			}, *actualUrl)
+			expectedResp := loginResponse{
+				newSuccessfulResponse(),
+				(&url.URL{
+					Scheme:   "https",
+					Host:     "login.microsoftonline.com",
+					Path:     path,
+					RawQuery: expectedQueries.Encode(),
+				}).String(),
+			}
+			bytes, err := json.Marshal(expectedResp)
+			a.Nil(err)
+
+			a.Equal(string(bytes), rr.Body.String())
 		})
 	}
 }

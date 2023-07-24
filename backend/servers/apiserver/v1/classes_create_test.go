@@ -12,16 +12,18 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/darylhjd/oams/backend/servers/apiserver/common"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAPIServerV1_classesCreate(t *testing.T) {
-	tests := []struct {
+	tts := []struct {
 		name         string
 		body         func() (io.Reader, string, error)
-		expectedBody classesCreateResponse
+		wantResponse classesCreateResponse
 	}{
 		{
 			"with files",
@@ -124,22 +126,25 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 
 				return bytes.NewReader(b), "application/json", nil
 			},
-			expectedBody: classesCreateResponse{
+			wantResponse: classesCreateResponse{
 				{Course: database.UpsertCoursesParams{}},
 			},
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
+			id := uuid.NewString()
 
 			body, contentType, err := tt.body()
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			v1 := newTestAPIServerV1(t)
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
 			req := httptest.NewRequest(http.MethodPost, classesUrl, body)
 			req.Header.Set("Content-Type", contentType)
 			rr := httptest.NewRecorder()
@@ -149,7 +154,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 
 			var actualResponse classesCreateResponse
 			a.Nil(json.Unmarshal(rr.Body.Bytes(), &actualResponse))
-			a.Equal(len(tt.expectedBody), len(actualResponse))
+			a.Equal(len(tt.wantResponse), len(actualResponse))
 		})
 	}
 }

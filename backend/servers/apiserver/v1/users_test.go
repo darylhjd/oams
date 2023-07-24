@@ -10,6 +10,8 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
+	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 
@@ -17,69 +19,86 @@ import (
 )
 
 func TestAPIServerV1_users(t *testing.T) {
-	tests := []struct {
+	tts := []struct {
 		name            string
 		withAuthContext any
-		wantCode        int
+		wantResponse    apiResponse
 	}{
 		{
 			"request with account in context",
 			middleware.AuthContext{
 				AuthResult: oauth2.NewMockAzureAuthenticator().MockAuthResult(),
 			},
-			http.StatusOK,
-		},
-		{
-			"request with wrong account type in context",
-			time.Time{},
-			http.StatusInternalServerError,
+			usersResponse{
+				response: newSuccessfulResponse(),
+				Users:    []database.Student{},
+			},
 		},
 		{
 			"request with no account in context",
 			nil,
-			http.StatusOK,
+			usersResponse{
+				response: newSuccessfulResponse(),
+				Users:    []database.Student{},
+			},
+		},
+		{
+			"request with wrong account type in context",
+			time.Time{},
+			newErrorResponse(http.StatusInternalServerError, middleware.ErrUnexpectedAuthContextType.Error()),
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
+			id := uuid.NewString()
 
-			v1 := newTestAPIServerV1(t)
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			err := v1.db.Q.UpsertStudents(context.Background(), []database.UpsertStudentsParams{
+				tests.MockUpsertStudentsParams(),
+			}).Close()
+			a.Nil(err)
 
 			req := httptest.NewRequest(http.MethodGet, usersUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
 			rr := httptest.NewRecorder()
 			v1.users(rr, req)
 
-			a.Equal(tt.wantCode, rr.Code)
-			if tt.wantCode != http.StatusOK {
-				return
-			}
+			a.Equal(tt.wantResponse.Code(), rr.Code)
 
-			var actualResp usersResponse
-			err := json.Unmarshal(rr.Body.Bytes(), &actualResp)
-			a.Nil(err)
+			var expectedResp apiResponse
+			if rr.Code != http.StatusOK {
+				expectedResp = tt.wantResponse
+			} else {
+				actualResp := usersResponse{}
+				a.Nil(json.Unmarshal(rr.Body.Bytes(), &actualResp))
 
-			var session *database.Student
-			if tt.withAuthContext != nil {
-				authResult := tt.withAuthContext.(middleware.AuthContext).AuthResult
-				session = &database.Student{
-					ID: authResult.IDToken.Name,
-					Email: pgtype.Text{
-						String: authResult.Account.PreferredUsername,
-						Valid:  true,
-					},
-					CreatedAt: actualResp.SessionUser.CreatedAt,
-					UpdatedAt: actualResp.SessionUser.UpdatedAt,
+				var sessionUser *database.Student
+				if tt.withAuthContext != nil {
+					t.Log(actualResp.SessionUser)
+					authResult := tt.withAuthContext.(middleware.AuthContext).AuthResult
+					sessionUser = &database.Student{
+						ID: authResult.IDToken.Name,
+						Email: pgtype.Text{
+							String: authResult.Account.PreferredUsername,
+							Valid:  true,
+						},
+						CreatedAt: actualResp.SessionUser.CreatedAt,
+						UpdatedAt: actualResp.SessionUser.UpdatedAt,
+					}
 				}
+
+				expected := tt.wantResponse.(usersResponse)
+				expected.SessionUser = sessionUser
+				expectedResp = expected
 			}
 
-			expectedResp := usersResponse{
-				SessionUser: session,
-				Users:       []database.Student{},
-			}
-			a.Equal(expectedResp, actualResp)
+			bytes, err := json.Marshal(expectedResp)
+			a.Nil(err)
+			a.Equal(string(bytes), rr.Body.String())
 		})
 	}
 }

@@ -19,6 +19,10 @@ const (
 	AuthContextKey = "auth_context"
 )
 
+var (
+	ErrUnexpectedAuthContextType = fmt.Errorf("%s - unexpected auth context type", namespace)
+)
+
 // AuthContext stores useful information regarding an authentication.
 type AuthContext struct {
 	Claims     *oauth2.AzureClaims
@@ -37,7 +41,7 @@ func GetAuthContext(r *http.Request) (AuthContext, bool, error) {
 
 	authContext, ok := val.(AuthContext)
 	if !ok {
-		return AuthContext{}, false, fmt.Errorf("%s - unexpected auth context type", namespace)
+		return AuthContext{}, false, ErrUnexpectedAuthContextType
 	}
 
 	return authContext, true, nil

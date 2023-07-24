@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -13,13 +15,22 @@ import (
 
 func TestConnectDB(t *testing.T) {
 	a := assert.New(t)
-	a.Nil(testDb.C.Ping(context.Background()))
+	id := uuid.NewString()
+
+	db := tests.SetUp(t, id)
+	defer tests.TearDown(t, db, id)
+
+	a.Nil(db.C.Ping(context.Background()))
 }
 
 func TestGetConnectionProperties(t *testing.T) {
 	a := assert.New(t)
+	id := uuid.NewString()
 
-	driver, connString := database.GetConnectionProperties(database.Namespace)
+	db := tests.SetUp(t, id)
+	defer tests.TearDown(t, db, id)
+
+	driver, connString := database.GetConnectionProperties(id)
 
 	u, err := url.Parse(connString)
 	if err != nil {
@@ -28,5 +39,5 @@ func TestGetConnectionProperties(t *testing.T) {
 
 	a.Equal("postgres", driver)
 	a.Equal(driver, u.Scheme)
-	a.Equal(fmt.Sprintf("/%s", database.Namespace), u.Path)
+	a.Equal(fmt.Sprintf("/%s", id), u.Path)
 }

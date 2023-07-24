@@ -8,15 +8,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
 func TestAPIServerV1_msLoginCallback(t *testing.T) {
-	tests := []struct {
+	tts := []struct {
 		name            string
 		state           state
 		wantCode        int
@@ -53,11 +53,13 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
+			id := uuid.NewString()
 
-			v1 := newTestAPIServerV1(t)
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
 
 			s, err := json.Marshal(tt.state)
 			a.Nil(err)
@@ -80,16 +82,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			// Check that student exists in the database.
 			student, err := v1.db.Q.GetStudent(req.Context(), oauth2.MockIDTokenName)
 			a.Nil(err)
-			a.Equal(student, database.Student{
-				ID:   oauth2.MockIDTokenName,
-				Name: "",
-				Email: pgtype.Text{
-					String: oauth2.MockAccountPreferredUsername,
-					Valid:  true,
-				},
-				CreatedAt: student.CreatedAt,
-				UpdatedAt: student.UpdatedAt,
-			})
+			a.Equal(student, tests.StubStudent(student.CreatedAt, student.UpdatedAt))
 
 			// Check that session cookie exists.
 			for _, cookie := range rr.Result().Cookies() {
