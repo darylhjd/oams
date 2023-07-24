@@ -26,13 +26,15 @@ type state struct {
 	ReturnTo string `json:"return_to"`
 }
 
-// loginResponse is a struct detailing the response body of the login endpoint.
 type loginResponse struct {
+	response
 	RedirectUrl string `json:"redirect_url"`
 }
 
 // login is the entrypoint to OAM's OAuth2 flow.
 func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
+	var resp apiResponse
+
 	// https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 	redirectString, err := v.azure.AuthCodeURL(
 		r.Context(),
@@ -40,8 +42,7 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		env.GetAPIServerAzureLoginCallbackURL(),
 		[]string{env.GetAPIServerAzureLoginScope()})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - error creating azure redirect url", namespace), zap.Error(err))
+		v.writeResponse(w, loginUrl, newErrorResponse(http.StatusInternalServerError, "cannot create auth code url"))
 		return
 	}
 
@@ -51,8 +52,7 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		ReturnTo: r.URL.Query().Get(stateReturnToQueryParam),
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - cannot create login state", namespace), zap.Error(err))
+		v.writeResponse(w, loginUrl, newErrorResponse(http.StatusInternalServerError, "cannot create oauth state"))
 		return
 	}
 
@@ -65,17 +65,9 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 
 	v.l.Debug(fmt.Sprintf("%s - generated azure login url", namespace), zap.String("url", redirectString))
 
-	body, err := json.Marshal(loginResponse{RedirectUrl: redirectString})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - error marshalling url to body", namespace), zap.Error(err))
-		return
+	resp = loginResponse{
+		newSuccessfulResponse(),
+		redirectString,
 	}
-
-	if _, err = w.Write(body); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
-			zap.String("url", loginUrl),
-			zap.Error(err))
-	}
+	v.writeResponse(w, loginUrl, resp)
 }

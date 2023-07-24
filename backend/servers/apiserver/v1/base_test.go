@@ -1,46 +1,56 @@
 package v1
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAPIServerV1_base(t *testing.T) {
-	tests := []struct {
+	t.Parallel()
+
+	tts := []struct {
 		name         string
 		path         string
-		wantCode     int
-		containsBody string
+		wantResponse apiResponse
 	}{
 		{
 			"valid request to base url",
 			baseUrl,
-			http.StatusOK,
-			"Welcome to OAMS API Service V1!",
+			baseResponse{
+				response: newSuccessfulResponse(),
+				Message:  "Welcome to OAMS API Service V1! To get started, read the API docs.",
+			},
 		},
 		{
 			"invalid endpoint",
 			"/bad-endpoint",
-			http.StatusNotFound,
-			"Endpoint not implemented or is not supported!",
+			newErrorResponse(http.StatusNotFound, "endpoint not implemented or is not supported"),
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			a := assert.New(t)
+			t.Parallel()
 
-			v1 := newTestAPIServerV1(t)
+			a := assert.New(t)
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
 
 			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
 			rr := httptest.NewRecorder()
 			v1.base(rr, req)
 
-			a.Equal(tt.wantCode, rr.Code)
-			a.Contains(rr.Body.String(), tt.containsBody)
+			bytes, err := json.Marshal(tt.wantResponse)
+			a.Nil(err)
+			a.Equal(string(bytes), rr.Body.String())
 		})
 	}
 }

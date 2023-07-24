@@ -2,12 +2,15 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
+	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
@@ -16,10 +19,12 @@ import (
 )
 
 func TestAPIServerV1_signOut(t *testing.T) {
-	tests := []struct {
+	t.Parallel()
+
+	tts := []struct {
 		name            string
 		withAuthContext any
-		wantCode        int
+		wantResponse    apiResponse
 	}{
 		{
 			"request with account in context",
@@ -28,36 +33,48 @@ func TestAPIServerV1_signOut(t *testing.T) {
 					Account: confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
 				},
 			},
-			http.StatusOK,
+			signOutResponse{newSuccessfulResponse()},
 		},
 		{
 			"request with wrong account type in context",
 			time.Time{},
-			http.StatusInternalServerError,
+			newErrorResponse(http.StatusInternalServerError, middleware.ErrUnexpectedAuthContextType.Error()),
 		},
 		{
 			"request with no account in context",
 			nil,
-			http.StatusInternalServerError,
+			newErrorResponse(http.StatusInternalServerError, "sign-out called but there is no session user"),
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
-			a := assert.New(t)
+			t.Parallel()
 
-			v1 := newTestAPIServerV1(t)
+			a := assert.New(t)
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			err := v1.db.Q.UpsertStudents(context.Background(), []database.UpsertStudentsParams{
+				tests.MockUpsertStudentsParams(),
+			}).Close()
+			a.Nil(err)
 
 			req := httptest.NewRequest(http.MethodGet, signOutUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
 			rr := httptest.NewRecorder()
 			v1.signOut(rr, req)
 
-			a.Equal(tt.wantCode, rr.Code)
-			if tt.wantCode != http.StatusOK {
+			bytes, err := json.Marshal(tt.wantResponse)
+			a.Nil(err)
+			a.Equal(string(bytes), rr.Body.String())
+			if rr.Code != http.StatusOK {
 				return
 			}
 
+			// Check for session deletion cookie.
 			for _, cookie := range rr.Result().Cookies() {
 				if cookie.Name == oauth2.SessionCookieIdent {
 					return

@@ -1,26 +1,25 @@
 package v1
 
 import (
-	"fmt"
 	"net/http"
-
-	"go.uber.org/zap"
 )
+
+type pingResponse struct {
+	response
+	Message string `json:"message"`
+}
 
 // ping helps check the health of the API server. It also checks the database connection.
 func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
-	response := "Pong~\n\n" +
-		"OAMS API Service is running normally!"
+	var resp apiResponse
+	resp = pingResponse{
+		response: newSuccessfulResponse(),
+		Message:  "Pong~ OAMS API Service is running normally!",
+	}
 
 	if err := v.db.C.Ping(r.Context()); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		response = "Uh oh, not connected!"
+		resp = newErrorResponse(http.StatusInternalServerError, "database cannot be contacted")
 	}
 
-	if _, err := w.Write([]byte(response)); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
-			zap.String("url", pingUrl),
-			zap.Error(err))
-	}
+	v.writeResponse(w, pingUrl, resp)
 }
