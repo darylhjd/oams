@@ -16,6 +16,8 @@ import (
 )
 
 func TestAPIServerV1_msLoginCallback(t *testing.T) {
+	t.Parallel()
+
 	tts := []struct {
 		name            string
 		state           state
@@ -55,6 +57,8 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			a := assert.New(t)
 			id := uuid.NewString()
 

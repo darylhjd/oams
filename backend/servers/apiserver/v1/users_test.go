@@ -19,6 +19,8 @@ import (
 )
 
 func TestAPIServerV1_users(t *testing.T) {
+	t.Parallel()
+
 	tts := []struct {
 		name            string
 		withAuthContext any
@@ -51,6 +53,8 @@ func TestAPIServerV1_users(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			a := assert.New(t)
 			id := uuid.NewString()
 

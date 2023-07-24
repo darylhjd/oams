@@ -16,6 +16,8 @@ import (
 )
 
 func TestAPIServerV1_login(t *testing.T) {
+	t.Parallel()
+
 	tts := []struct {
 		name     string
 		returnTo string
@@ -32,6 +34,8 @@ func TestAPIServerV1_login(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			a := assert.New(t)
 			id := uuid.NewString()
 

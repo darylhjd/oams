@@ -12,6 +12,8 @@ import (
 )
 
 func TestAPIServerV1_ping(t *testing.T) {
+	t.Parallel()
+
 	a := assert.New(t)
 	id := uuid.NewString()
 	v1 := newTestAPIServerV1(t, id)

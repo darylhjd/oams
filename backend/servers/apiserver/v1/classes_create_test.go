@@ -20,6 +20,8 @@ import (
 )
 
 func TestAPIServerV1_classesCreate(t *testing.T) {
+	t.Parallel()
+
 	tts := []struct {
 		name         string
 		body         func() (io.Reader, string, error)
@@ -134,6 +136,8 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 
 	for _, tt := range tts {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			a := assert.New(t)
 			id := uuid.NewString()
 
