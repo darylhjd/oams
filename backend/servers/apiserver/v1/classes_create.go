@@ -41,23 +41,34 @@ func (r classesCreateRequest) isValid() error {
 
 type classesCreateResponse struct {
 	response
-	Classes []common.ClassCreationData `json:"classes"`
+	Classes            int `json:"classes"`
+	ClassGroups        int `json:"class_groups"`
+	ClassGroupSessions int `json:"class_group_sessions"`
+	Students           int `json:"students"`
+	SessionEnrollments int `json:"session_enrollments"`
 }
 
 // classesCreate is the handler for a request to create classes.
 func (v *APIServerV1) classesCreate(w http.ResponseWriter, r *http.Request) {
 	var (
+		req  classesCreateRequest
 		resp apiResponse
 		err  error
 	)
 
 	switch contentType := r.Header.Get("Content-Type"); {
 	case strings.HasPrefix(contentType, "multipart"):
-		resp, err = v.processClassCreationFiles(r)
+		req, err = v.fromClassCreationFiles(r)
 	case contentType == "application/json":
-		resp, err = v.processClassCreationJSON(r)
+		req, err = v.fromClassCreationJSON(r)
 	default:
 		resp = newErrorResponse(http.StatusUnsupportedMediaType, fmt.Sprintf("%s is unsupported", contentType))
+		v.writeResponse(w, classesUrl, resp)
+		return
+	}
+
+	if err == nil {
+		resp, err = v.processClassesCreateRequest(r.Context(), req)
 	}
 
 	if err != nil {
@@ -67,12 +78,12 @@ func (v *APIServerV1) classesCreate(w http.ResponseWriter, r *http.Request) {
 	v.writeResponse(w, classesUrl, resp)
 }
 
-// processClassCreationFiles processes a request to create classes via file uploads.
-func (v *APIServerV1) processClassCreationFiles(r *http.Request) (apiResponse, error) {
-	var resp apiResponse
+// fromClassCreationFiles creates a request struct from uploaded files.
+func (v *APIServerV1) fromClassCreationFiles(r *http.Request) (classesCreateRequest, error) {
+	var req classesCreateRequest
 
 	if err := r.ParseMultipartForm(maxParseMemory); err != nil {
-		return resp, err
+		return req, err
 	}
 
 	limiter := goroutines.NewLimiter(maxGoRoutines)
@@ -81,17 +92,14 @@ func (v *APIServerV1) processClassCreationFiles(r *http.Request) (apiResponse, e
 	for _, header := range r.MultipartForm.File[multipartFormFileIdent] {
 		header := header // Required for go routine to point to different file for each loop.
 		limiter.Do(func() {
-			creationData, err := v.processClassCreationFile(header)
+			creationData, err := v.fromClassCreationFile(header)
 			saveRes.Store(&creationData, err)
 		})
 	}
 
 	limiter.Wait()
 
-	var (
-		request classesCreateRequest
-		err     error
-	)
+	var err error
 	saveRes.Range(func(key, value any) bool {
 		data, ok := key.(*common.ClassCreationData)
 		if !ok {
@@ -104,26 +112,20 @@ func (v *APIServerV1) processClassCreationFiles(r *http.Request) (apiResponse, e
 			return false
 		}
 
-		request.Classes = append(request.Classes, *data)
+		req.Classes = append(req.Classes, *data)
 		return true
 	})
 
-	if err != nil {
-		return resp, err
-	}
-
-	if resp, err = v.processClassesCreateRequest(r.Context(), request); err != nil {
-		return resp, err
-	}
-
-	return resp, nil
+	return req, err
 }
 
-// processClassCreationFile processes a file to create a new class.
-func (v *APIServerV1) processClassCreationFile(fileHeader *multipart.FileHeader) (common.ClassCreationData, error) {
+// fromClassCreationFile processes a file to create new class creation data.
+func (v *APIServerV1) fromClassCreationFile(fileHeader *multipart.FileHeader) (common.ClassCreationData, error) {
+	var data common.ClassCreationData
+
 	file, err := fileHeader.Open()
 	if err != nil {
-		return common.ClassCreationData{}, err
+		return data, err
 	}
 	defer func() {
 		_ = file.Close()
@@ -132,121 +134,142 @@ func (v *APIServerV1) processClassCreationFile(fileHeader *multipart.FileHeader)
 	v.l.Debug(fmt.Sprintf("%s - processing class creation file", namespace),
 		zap.String("filename", fileHeader.Filename))
 
-	creationData, err := common.ParseClassCreationFile(fileHeader.Filename, file)
+	data, err = common.ParseClassCreationFile(fileHeader.Filename, file)
 	if err != nil {
-		return creationData, fmt.Errorf("%s - error parsing class creation file %s: %w", namespace, fileHeader.Filename, err)
+		return data, fmt.Errorf("%s - error parsing class creation file %s: %w", namespace, fileHeader.Filename, err)
 	}
 
-	return creationData, nil
+	return data, nil
 }
 
-// processClassCreationJSON processes a request to create classes via JSON body.
-func (v *APIServerV1) processClassCreationJSON(r *http.Request) (apiResponse, error) {
+// fromClassCreationJSON creates a request struct from JSON body.
+func (v *APIServerV1) fromClassCreationJSON(r *http.Request) (classesCreateRequest, error) {
 	var (
-		resp apiResponse
-		b    bytes.Buffer
+		req classesCreateRequest
+		b   bytes.Buffer
 	)
 
 	if _, err := b.ReadFrom(r.Body); err != nil {
-		return resp, err
+		return req, err
 	}
 
-	var request classesCreateRequest
-	if err := json.Unmarshal(b.Bytes(), &request); err != nil {
-		return resp, err
-	}
+	err := json.Unmarshal(b.Bytes(), &req)
+	return req, err
+}
 
-	resp, err := v.processClassesCreateRequest(r.Context(), request)
-	if err != nil {
-		return resp, err
-	}
+type classGroupsParamsWithClassGroup struct {
+	classGroupsParams []database.UpsertClassGroupsParams
+	classGroups       []*common.ClassGroupData
+}
 
-	return resp, nil
+type classGroupSessionsParamsWithStudents struct {
+	classGroupSessionsParams []database.UpsertClassGroupSessionsParams
+	students                 [][]database.UpsertStudentsParams
 }
 
 // processClassesCreateRequest and return a classesCreateResponse and error if encountered.
-func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, request classesCreateRequest) (apiResponse, error) {
-	var resp apiResponse
-
-	if err := request.isValid(); err != nil {
+func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req classesCreateRequest) (apiResponse, error) {
+	if err := req.isValid(); err != nil {
 		return newErrorResponse(http.StatusBadRequest, err.Error()), nil
 	}
 
 	tx, err := v.db.C.Begin(ctx)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
 
 	q := v.db.Q.WithTx(tx)
 
-	var coursesParams []database.UpsertCoursesParams
-	for _, class := range request.Classes {
+	var (
+		dbErr         error
+		coursesParams []database.UpsertCoursesParams
+	)
+	for _, class := range req.Classes {
 		coursesParams = append(coursesParams, class.Course)
 	}
 
-	q.UpsertCourses(ctx, coursesParams).QueryRow(v.upsertClassGroups(ctx, q, &resp))
-
-	if !resp.wasSuccessful() {
-		return resp, tx.Rollback(ctx)
-	} else if err = tx.Commit(ctx); err != nil {
-		return resp, errors.Join(err, tx.Rollback(ctx))
-	}
-
-	return resp, nil
-}
-
-func (v *APIServerV1) upsertClassGroups(ctx context.Context, q *database.Queries, resp *classesCreateResponse) func(i int, course database.Course, err error) {
-	return func(i int, course database.Course, err error) {
-		if !resp.wasSuccessful() {
+	// Insert courses.
+	// Then, for each course, update its class group's course_id foreign key.
+	// Then insert the class groups.
+	// Then for each class group, for each of its sessions, update its class_group_id.
+	// Then insert the sessions.
+	// Then insert the students. <-- We are here.
+	// Then for each of the sessions, insert an enrollment for each student.
+	var classGroupsHelper classGroupsParamsWithClassGroup
+	q.UpsertCourses(ctx, coursesParams).QueryRow(func(i int, course database.Course, err error) {
+		if dbErr != nil {
+			return
+		} else if err != nil {
+			dbErr = err
 			return
 		}
 
-		class := &resp.Classes[i]
-
-		if err != nil {
-			class.Error = err.Error()
-			return
-		}
-
-		var classGroupsParams []database.UpsertClassGroupsParams
+		class := req.Classes[i]
 		for idx := range class.ClassGroups {
 			class.ClassGroups[idx].UpsertClassGroupsParams.CourseID = course.ID
-			classGroupsParams = append(classGroupsParams, class.ClassGroups[idx].UpsertClassGroupsParams)
+			classGroupsHelper.classGroupsParams = append(classGroupsHelper.classGroupsParams, class.ClassGroups[idx].UpsertClassGroupsParams)
+			classGroupsHelper.classGroups = append(classGroupsHelper.classGroups, &class.ClassGroups[idx])
 		}
+	})
 
-		q.UpsertClassGroups(ctx, classGroupsParams).QueryRow(v.upsertSessionsAndUsers(ctx, q, resp, class))
-	}
-}
-
-func (v *APIServerV1) upsertSessionsAndUsers(
-	ctx context.Context,
-	q *database.Queries,
-	resp *classesCreateResponse,
-	class *common.ClassCreationData,
-) func(i int, group database.ClassGroup, err error) {
-	return func(i int, group database.ClassGroup, err error) {
-		if !resp.wasSuccessful() {
+	var classGroupSessionsHelper classGroupSessionsParamsWithStudents
+	q.UpsertClassGroups(ctx, classGroupsHelper.classGroupsParams).QueryRow(func(i int, group database.ClassGroup, err error) {
+		if dbErr != nil {
+			return
+		} else if err != nil {
+			dbErr = err
 			return
 		}
 
-		classGroup := class.ClassGroups[i] // Do not take pointer to avoid editing.
+		for idx := range classGroupsHelper.classGroups[i].Sessions {
+			classGroupsHelper.classGroups[i].Sessions[idx].ClassGroupID = group.ID
+			classGroupSessionsHelper.classGroupSessionsParams = append(classGroupSessionsHelper.classGroupSessionsParams, classGroupsHelper.classGroups[i].Sessions[idx].UpsertClassGroupSessionsParams)
+			classGroupSessionsHelper.students = append(classGroupSessionsHelper.students, classGroupsHelper.classGroups[i].Students)
+		}
+	})
 
-		if err != nil {
-			class.Error = err.Error()
+	var (
+		studentsParams    []database.UpsertStudentsParams
+		enrollmentsParams []database.CreateSessionEnrollmentsParams
+	)
+	q.UpsertClassGroupSessions(ctx, classGroupSessionsHelper.classGroupSessionsParams).QueryRow(func(i int, session database.ClassGroupSession, err error) {
+		if dbErr != nil {
+			return
+		} else if err != nil {
+			dbErr = err
 			return
 		}
 
-		for idx := range classGroup.Sessions {
-			session := &classGroup.Sessions[idx]
-			session.ClassGroupID = group.ID
+		for idx := range classGroupSessionsHelper.students[i] {
+			studentsParams = append(studentsParams, classGroupSessionsHelper.students[i][idx])
+			enrollmentsParams = append(enrollmentsParams, database.CreateSessionEnrollmentsParams{
+				SessionID: session.ID,
+				StudentID: classGroupSessionsHelper.students[i][idx].ID,
+			})
 		}
+	})
 
-		// Insert the sessions for this class group.
-		q.UpsertClassGroupSessions(ctx, classGroup.Sessions).QueryRow(func(i int, session database.ClassGroupSession, err error) {
-			if err != nil {
-				(&resp.Classes[i]).Error = err.Error()
-				return
-			}
-		})
+	if dbErr == nil && len(studentsParams) != 0 {
+		dbErr = q.UpsertStudents(ctx, studentsParams).Close()
 	}
+
+	if dbErr == nil && len(enrollmentsParams) != 0 {
+		dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close()
+	}
+
+	if dbErr != nil {
+		if err = tx.Rollback(ctx); err != nil {
+			return nil, err
+		}
+		return nil, dbErr
+	}
+
+	return classesCreateResponse{
+		response:           newSuccessfulResponse(),
+		Classes:            len(coursesParams),
+		ClassGroups:        len(classGroupsHelper.classGroups),
+		ClassGroupSessions: len(classGroupSessionsHelper.classGroupSessionsParams),
+		Students:           len(studentsParams),
+		SessionEnrollments: len(enrollmentsParams),
+	}, tx.Commit(ctx)
 }
