@@ -24,9 +24,10 @@ func TestWebServer(t *testing.T) {
 		"/nested/pages",
 	}
 
-	a := assert.New(t)
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("with request path %+q", tt), func(t *testing.T) {
+			a := assert.New(t)
+
 			reqUrl, err := url.JoinPath(server.URL, tt)
 			a.Nil(err)
 
