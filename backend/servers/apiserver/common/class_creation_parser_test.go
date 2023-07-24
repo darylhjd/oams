@@ -20,12 +20,14 @@ func TestParseClassCreationFile(t *testing.T) {
 	tests := []struct {
 		name         string
 		file         string
-		expectedData ClassCreationData
+		wantErr      string
+		expectedData *ClassCreationData
 	}{
 		{
 			"sample class lab creation file",
 			"class_lab_test.xlsx",
-			ClassCreationData{
+			"",
+			&ClassCreationData{
 				"class_lab_test.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
 				database.UpsertCoursesParams{
@@ -70,14 +72,14 @@ func TestParseClassCreationFile(t *testing.T) {
 						},
 					},
 				},
-				"",
 				database.ClassTypeLAB,
 			},
 		},
 		{
 			"sample class lecture creation file",
 			"class_lec_test.xlsx",
-			ClassCreationData{
+			"",
+			&ClassCreationData{
 				"class_lec_test.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
 				database.UpsertCoursesParams{
@@ -100,14 +102,14 @@ func TestParseClassCreationFile(t *testing.T) {
 						},
 					},
 				},
-				"",
 				database.ClassTypeLEC,
 			},
 		},
 		{
 			"sample class tutorial creation file",
 			"class_tut_test.xlsx",
-			ClassCreationData{
+			"",
+			&ClassCreationData{
 				"class_tut_test.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
 				database.UpsertCoursesParams{
@@ -152,65 +154,56 @@ func TestParseClassCreationFile(t *testing.T) {
 						},
 					},
 				},
-				"",
 				database.ClassTypeTUT,
 			},
 		},
 		{
 			"empty class creation file",
 			"class_empty_test.xlsx",
-			ClassCreationData{
-				Error: "not enough rows for class metadata",
-			},
+			"not enough rows for class metadata",
+			nil,
 		},
 		{
 			"too many class metadata rows",
 			"class_excessive_class_metadata_rows.xlsx",
-			ClassCreationData{
-				Error: "unexpected number of columns for class group row",
-			},
+			"unexpected number of columns for class group row",
+			nil,
 		},
 		{
 			"missing class group enrollment list identifier",
 			"class_missing_enrollment_ident.xlsx",
-			ClassCreationData{
-				Error: "unexpected start of class group enrollment list",
-			},
+			"unexpected start of class group enrollment list",
+			nil,
 		},
 		{
 			"second class group missing enrollment list identifier",
 			"class_second_group_missing_enrollment_ident.xlsx",
-			ClassCreationData{
-				Error: "unexpected start of class group enrollment list",
-			},
+			"unexpected start of class group enrollment list",
+			nil,
 		},
 		{
 			"student row with wrong length",
 			"class_student_row_wrong_length.xlsx",
-			ClassCreationData{
-				Error: "unexpected number of columns for student enrollment row",
-			},
+			"unexpected number of columns for student enrollment row",
+			nil,
 		},
 		{
 			"class group with no enrollment",
 			"class_group_with_no_enrollment.xlsx",
-			ClassCreationData{
-				Error: "class group A21 has no enrollments",
-			},
+			"class group A21 has no enrollments",
+			nil,
 		},
 		{
 			"course with no class groups",
 			"class_with_no_groups.xlsx",
-			ClassCreationData{
-				Error: "creation data has no valid class groups",
-			},
+			"creation data has no valid class groups",
+			nil,
 		},
 		{
 			"invalid format for class group name",
 			"class_with_invalid_class_group_name.xlsx",
-			ClassCreationData{
-				Error: "could not parse class group",
-			},
+			"could not parse class group",
+			nil,
 		},
 	}
 
@@ -222,10 +215,8 @@ func TestParseClassCreationFile(t *testing.T) {
 			a.Nil(err)
 
 			data, err := ParseClassCreationFile(tt.file, file)
-			a.Nil(err)
-
-			if tt.expectedData.Error != "" {
-				a.Contains(data.Error, tt.expectedData.Error)
+			if tt.wantErr != "" {
+				a.Contains(err.Error(), tt.wantErr)
 				return
 			}
 

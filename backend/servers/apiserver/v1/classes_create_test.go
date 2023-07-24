@@ -115,7 +115,6 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 									},
 								},
 							},
-							"",
 							database.ClassTypeLAB,
 						},
 					},

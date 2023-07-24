@@ -63,45 +63,36 @@ func ParseClassCreationFile(filename string, f io.Reader) (ClassCreationData, er
 
 	sheets := file.GetSheetList()
 	if len(sheets) != expectedSheetCount {
-		creationData.Error = fmt.Sprintf("%s - invalid class creation file format", namespace)
-		return creationData, nil
+		return creationData, fmt.Errorf("%s - invalid class creation file format", namespace)
 	}
 
 	rows, err := file.GetRows(sheets[expectedSheetCount-1])
 	if err != nil {
-		creationData.Error = fmt.Sprintf("%s - cannot get data rows", namespace)
-		return creationData, nil
+		return creationData, fmt.Errorf("%s - cannot get data rows", namespace)
 	}
 
-	switch pErr, sysErr := parseClassMetaData(&creationData, rows); {
-	case pErr != nil:
-		creationData.Error = fmt.Errorf("%s - error while parsing class metadata: %w", namespace, pErr).Error()
-		return creationData, nil
-	case sysErr != nil:
-		return ClassCreationData{}, sysErr
+	if err = parseClassMetaData(&creationData, rows); err != nil {
+		return creationData, fmt.Errorf("%s - error while parsing class metadata: %w", namespace, err)
 	}
 
 	if err = parseClassGroups(&creationData, rows); err != nil {
-		creationData.Error = fmt.Errorf("%s - error while parsing class groups: %w", namespace, err).Error()
-		return creationData, nil
+		return creationData, fmt.Errorf("%s - error while parsing class groups: %w", namespace, err)
 	}
 
-	_ = creationData.Validate()
-
-	return creationData, nil
+	return creationData, creationData.IsValid()
 }
 
 // parseClassMetaData is a helper function to parse a class' metadata from a file.
-func parseClassMetaData(creationData *ClassCreationData, rows [][]string) (error, error) {
+func parseClassMetaData(creationData *ClassCreationData, rows [][]string) error {
 	// The first few rows in the sheet should be the course metadata.
 	if len(rows) < expectedClassMetaDataRows {
-		return fmt.Errorf("%s - not enough rows for class metadata", namespace), nil
+		return fmt.Errorf("%s - not enough rows for class metadata", namespace)
 	}
 
 	// Each metadata row has an expected number of filled columns.
 	for i := 0; i < expectedClassMetaDataRows; i++ {
 		if len(rows[i]) != expectedClassMetaDataRowLength {
-			return fmt.Errorf("%s - unexpected number of columns for class metadata row %d", namespace, i+1), nil
+			return fmt.Errorf("%s - unexpected number of columns for class metadata row %d", namespace, i+1)
 		}
 	}
 
@@ -112,17 +103,17 @@ func parseClassMetaData(creationData *ClassCreationData, rows [][]string) (error
 	)
 	if _, err := fmt.Sscanf(rows[yearSemesterDateRow][expectedClassMetaDataRowLength-1], yearSemesterDateFormat,
 		&creationData.Course.Year, &creationData.Course.Semester, &d, &t); err != nil {
-		return fmt.Errorf("%s - could not parse class year and semester: %w", namespace, err), nil
+		return fmt.Errorf("%s - could not parse class year and semester: %w", namespace, err)
 	}
 
 	loc, err := time.LoadLocation(timezoneLocation)
 	if err != nil {
-		return nil, fmt.Errorf("%s - invalid timezone name when parsing class creation file creation date: %w", namespace, err)
+		return fmt.Errorf("%s - invalid timezone name when parsing class creation file creation date: %w", namespace, err)
 	}
 
 	date, err := time.ParseInLocation(creationDateFormat, fmt.Sprintf("%s %s", d, t), loc)
 	if err != nil {
-		return fmt.Errorf("%s - could not parse class creation file creation date: %w", namespace, err), nil
+		return fmt.Errorf("%s - could not parse class creation file creation date: %w", namespace, err)
 	}
 
 	creationData.FileCreationDate = date
@@ -133,16 +124,16 @@ func parseClassMetaData(creationData *ClassCreationData, rows [][]string) (error
 	// Parse class course code.
 	if _, err = fmt.Sscanf(rows[courseCodeRow][expectedClassMetaDataRowLength-1], courseCodeFormat,
 		&creationData.Course.Code, &creationData.Course.Au); err != nil {
-		return fmt.Errorf("%s - could not parse course code and au count: %w", namespace, err), nil
+		return fmt.Errorf("%s - could not parse course code and au count: %w", namespace, err)
 	}
 
 	// Parse class type.
 	if _, err = fmt.Sscanf(rows[classTypeRow][expectedClassMetaDataRowLength-1], classTypeFormat,
 		&creationData.ClassType); err != nil {
-		return fmt.Errorf("%s - could not parse class type: %w", namespace, err), nil
+		return fmt.Errorf("%s - could not parse class type: %w", namespace, err)
 	}
 
-	return nil, nil
+	return nil
 }
 
 // parseClassGroups is a helper function to parse a class' groups.
