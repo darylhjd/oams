@@ -53,7 +53,7 @@ func (c *ClassCreationData) Validate() bool {
 
 // ClassGroupData is a struct containing data for creating a class group and its associated sessions.
 type ClassGroupData struct {
-	database.CreateClassGroupsParams
-	Sessions []database.CreateClassGroupSessionsParams `json:"sessions"`
+	database.UpsertClassGroupsParams
+	Sessions []database.UpsertClassGroupSessionsParams `json:"sessions"`
 	Students []database.UpsertStudentsParams           `json:"students"`
 }

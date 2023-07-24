@@ -82,33 +82,33 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 							},
 							[]common.ClassGroupData{
 								{
-									database.CreateClassGroupsParams{
+									database.UpsertClassGroupsParams{
 										Name:      "A21",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]database.CreateClassGroupSessionsParams{},
+									[]database.UpsertClassGroupSessionsParams{},
 									[]database.UpsertStudentsParams{
 										{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
 										{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
 									},
 								},
 								{
-									database.CreateClassGroupsParams{
+									database.UpsertClassGroupsParams{
 										Name:      "A26",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]database.CreateClassGroupSessionsParams{},
+									[]database.UpsertClassGroupSessionsParams{},
 									[]database.UpsertStudentsParams{
 										{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
 										{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
 									},
 								},
 								{
-									database.CreateClassGroupsParams{
+									database.UpsertClassGroupsParams{
 										Name:      "A32",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]database.CreateClassGroupSessionsParams{},
+									[]database.UpsertClassGroupSessionsParams{},
 									[]database.UpsertStudentsParams{
 										{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
 										{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
