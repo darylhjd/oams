@@ -90,9 +90,10 @@ func Test_checkAzureToken(t *testing.T) {
 		},
 	}
 
-	a := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
 			privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
 			if err != nil {
 				t.Fatal(err)
@@ -128,9 +129,10 @@ func TestSetSessionCookie(t *testing.T) {
 		tests = append(tests, uuid.NewString())
 	}
 
-	a := assert.New(t)
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("with home account id %+q", tt), func(t *testing.T) {
+			a := assert.New(t)
+
 			authResult := confidential.AuthResult{
 				Account: confidential.Account{
 					HomeAccountID: tt,

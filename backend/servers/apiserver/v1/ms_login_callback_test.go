@@ -53,9 +53,10 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 		},
 	}
 
-	a := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
 			v1 := newTestAPIServerV1(t)
 
 			s, err := json.Marshal(tt.state)

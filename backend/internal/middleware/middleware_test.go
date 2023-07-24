@@ -38,9 +38,10 @@ func TestGetAuthContext(t *testing.T) {
 		},
 	}
 
-	a := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req = req.WithContext(context.WithValue(req.Context(), AuthContextKey, tt.contextValue))
 
@@ -91,9 +92,10 @@ func TestAllowMethods(t *testing.T) {
 		},
 	}
 
-	a := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
 			for _, method := range tt.testMethods {
 				req, err := http.NewRequest(method, "", nil)
 				if err != nil {
