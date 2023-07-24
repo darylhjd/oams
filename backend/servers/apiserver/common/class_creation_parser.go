@@ -166,7 +166,7 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 		index += expectedClassGroupIDRows
 		for index+expectedClassGroupSessionRows <= len(rows) && len(rows[index]) != 0 { // For each session for a class group.
 			var (
-				session   database.CreateClassGroupSessionsParams
+				session   database.UpsertClassGroupSessionsParams
 				dayOfWeek string
 				from      string
 				to        string

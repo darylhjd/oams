@@ -17,170 +17,9 @@ var (
 	ErrBatchAlreadyClosed = errors.New("batch already closed")
 )
 
-const createClassGroupSessions = `-- name: CreateClassGroupSessions :batchmany
-INSERT INTO class_group_sessions (class_group_id, start_time, end_time, venue, created_at, updated_at)
-VALUES ($1, $2, $3, $4, NOW(), NOW())
-ON CONFLICT ON CONSTRAINT ux_class_group_id_start_time
-    DO UPDATE SET end_time   = $3,
-                  venue      = $4,
-                  updated_at = NOW()
-RETURNING id, class_group_id, start_time, end_time, venue, created_at, updated_at
-`
-
-type CreateClassGroupSessionsBatchResults struct {
-	br     pgx.BatchResults
-	tot    int
-	closed bool
-}
-
-type CreateClassGroupSessionsParams struct {
-	ClassGroupID int64            `json:"class_group_id"`
-	StartTime    pgtype.Timestamp `json:"start_time"`
-	EndTime      pgtype.Timestamp `json:"end_time"`
-	Venue        string           `json:"venue"`
-}
-
-func (q *Queries) CreateClassGroupSessions(ctx context.Context, arg []CreateClassGroupSessionsParams) *CreateClassGroupSessionsBatchResults {
-	batch := &pgx.Batch{}
-	for _, a := range arg {
-		vals := []interface{}{
-			a.ClassGroupID,
-			a.StartTime,
-			a.EndTime,
-			a.Venue,
-		}
-		batch.Queue(createClassGroupSessions, vals...)
-	}
-	br := q.db.SendBatch(ctx, batch)
-	return &CreateClassGroupSessionsBatchResults{br, len(arg), false}
-}
-
-func (b *CreateClassGroupSessionsBatchResults) Query(f func(int, []ClassGroupSession, error)) {
-	defer b.br.Close()
-	for t := 0; t < b.tot; t++ {
-		var items []ClassGroupSession
-		if b.closed {
-			if f != nil {
-				f(t, items, ErrBatchAlreadyClosed)
-			}
-			continue
-		}
-		err := func() error {
-			rows, err := b.br.Query()
-			if err != nil {
-				return err
-			}
-			defer rows.Close()
-			for rows.Next() {
-				var i ClassGroupSession
-				if err := rows.Scan(
-					&i.ID,
-					&i.ClassGroupID,
-					&i.StartTime,
-					&i.EndTime,
-					&i.Venue,
-					&i.CreatedAt,
-					&i.UpdatedAt,
-				); err != nil {
-					return err
-				}
-				items = append(items, i)
-			}
-			return rows.Err()
-		}()
-		if f != nil {
-			f(t, items, err)
-		}
-	}
-}
-
-func (b *CreateClassGroupSessionsBatchResults) Close() error {
-	b.closed = true
-	return b.br.Close()
-}
-
-const createClassGroups = `-- name: CreateClassGroups :batchmany
-INSERT INTO class_groups (course_id, name, class_type, created_at, updated_at)
-VALUES ($1, $2, $3, NOW(), NOW())
-ON CONFLICT ON CONSTRAINT ux_course_id_name
-    DO UPDATE SET class_type = $3,
-                  updated_at = NOW()
-RETURNING id, course_id, name, class_type, created_at, updated_at
-`
-
-type CreateClassGroupsBatchResults struct {
-	br     pgx.BatchResults
-	tot    int
-	closed bool
-}
-
-type CreateClassGroupsParams struct {
-	CourseID  int64     `json:"course_id"`
-	Name      string    `json:"name"`
-	ClassType ClassType `json:"class_type"`
-}
-
-func (q *Queries) CreateClassGroups(ctx context.Context, arg []CreateClassGroupsParams) *CreateClassGroupsBatchResults {
-	batch := &pgx.Batch{}
-	for _, a := range arg {
-		vals := []interface{}{
-			a.CourseID,
-			a.Name,
-			a.ClassType,
-		}
-		batch.Queue(createClassGroups, vals...)
-	}
-	br := q.db.SendBatch(ctx, batch)
-	return &CreateClassGroupsBatchResults{br, len(arg), false}
-}
-
-func (b *CreateClassGroupsBatchResults) Query(f func(int, []ClassGroup, error)) {
-	defer b.br.Close()
-	for t := 0; t < b.tot; t++ {
-		var items []ClassGroup
-		if b.closed {
-			if f != nil {
-				f(t, items, ErrBatchAlreadyClosed)
-			}
-			continue
-		}
-		err := func() error {
-			rows, err := b.br.Query()
-			if err != nil {
-				return err
-			}
-			defer rows.Close()
-			for rows.Next() {
-				var i ClassGroup
-				if err := rows.Scan(
-					&i.ID,
-					&i.CourseID,
-					&i.Name,
-					&i.ClassType,
-					&i.CreatedAt,
-					&i.UpdatedAt,
-				); err != nil {
-					return err
-				}
-				items = append(items, i)
-			}
-			return rows.Err()
-		}()
-		if f != nil {
-			f(t, items, err)
-		}
-	}
-}
-
-func (b *CreateClassGroupsBatchResults) Close() error {
-	b.closed = true
-	return b.br.Close()
-}
-
-const createSessionEnrollments = `-- name: CreateSessionEnrollments :batchmany
+const createSessionEnrollments = `-- name: CreateSessionEnrollments :batchone
 INSERT INTO session_enrollments (session_id, student_id, created_at)
 VALUES ($1, $2, NOW())
-ON CONFLICT DO NOTHING
 RETURNING session_id, student_id, created_at
 `
 
@@ -208,33 +47,20 @@ func (q *Queries) CreateSessionEnrollments(ctx context.Context, arg []CreateSess
 	return &CreateSessionEnrollmentsBatchResults{br, len(arg), false}
 }
 
-func (b *CreateSessionEnrollmentsBatchResults) Query(f func(int, []SessionEnrollment, error)) {
+func (b *CreateSessionEnrollmentsBatchResults) QueryRow(f func(int, SessionEnrollment, error)) {
 	defer b.br.Close()
 	for t := 0; t < b.tot; t++ {
-		var items []SessionEnrollment
+		var i SessionEnrollment
 		if b.closed {
 			if f != nil {
-				f(t, items, ErrBatchAlreadyClosed)
+				f(t, i, ErrBatchAlreadyClosed)
 			}
 			continue
 		}
-		err := func() error {
-			rows, err := b.br.Query()
-			if err != nil {
-				return err
-			}
-			defer rows.Close()
-			for rows.Next() {
-				var i SessionEnrollment
-				if err := rows.Scan(&i.SessionID, &i.StudentID, &i.CreatedAt); err != nil {
-					return err
-				}
-				items = append(items, i)
-			}
-			return rows.Err()
-		}()
+		row := b.br.QueryRow()
+		err := row.Scan(&i.SessionID, &i.StudentID, &i.CreatedAt)
 		if f != nil {
-			f(t, items, err)
+			f(t, i, err)
 		}
 	}
 }
@@ -244,7 +70,141 @@ func (b *CreateSessionEnrollmentsBatchResults) Close() error {
 	return b.br.Close()
 }
 
-const upsertCourses = `-- name: UpsertCourses :batchmany
+const upsertClassGroupSessions = `-- name: UpsertClassGroupSessions :batchone
+INSERT INTO class_group_sessions (class_group_id, start_time, end_time, venue, created_at, updated_at)
+VALUES ($1, $2, $3, $4, NOW(), NOW())
+ON CONFLICT ON CONSTRAINT ux_class_group_id_start_time
+    DO UPDATE SET end_time   = $3,
+                  venue      = $4,
+                  updated_at = NOW()
+RETURNING id, class_group_id, start_time, end_time, venue, created_at, updated_at
+`
+
+type UpsertClassGroupSessionsBatchResults struct {
+	br     pgx.BatchResults
+	tot    int
+	closed bool
+}
+
+type UpsertClassGroupSessionsParams struct {
+	ClassGroupID int64            `json:"class_group_id"`
+	StartTime    pgtype.Timestamp `json:"start_time"`
+	EndTime      pgtype.Timestamp `json:"end_time"`
+	Venue        string           `json:"venue"`
+}
+
+func (q *Queries) UpsertClassGroupSessions(ctx context.Context, arg []UpsertClassGroupSessionsParams) *UpsertClassGroupSessionsBatchResults {
+	batch := &pgx.Batch{}
+	for _, a := range arg {
+		vals := []interface{}{
+			a.ClassGroupID,
+			a.StartTime,
+			a.EndTime,
+			a.Venue,
+		}
+		batch.Queue(upsertClassGroupSessions, vals...)
+	}
+	br := q.db.SendBatch(ctx, batch)
+	return &UpsertClassGroupSessionsBatchResults{br, len(arg), false}
+}
+
+func (b *UpsertClassGroupSessionsBatchResults) QueryRow(f func(int, ClassGroupSession, error)) {
+	defer b.br.Close()
+	for t := 0; t < b.tot; t++ {
+		var i ClassGroupSession
+		if b.closed {
+			if f != nil {
+				f(t, i, ErrBatchAlreadyClosed)
+			}
+			continue
+		}
+		row := b.br.QueryRow()
+		err := row.Scan(
+			&i.ID,
+			&i.ClassGroupID,
+			&i.StartTime,
+			&i.EndTime,
+			&i.Venue,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		)
+		if f != nil {
+			f(t, i, err)
+		}
+	}
+}
+
+func (b *UpsertClassGroupSessionsBatchResults) Close() error {
+	b.closed = true
+	return b.br.Close()
+}
+
+const upsertClassGroups = `-- name: UpsertClassGroups :batchone
+INSERT INTO class_groups (course_id, name, class_type, created_at, updated_at)
+VALUES ($1, $2, $3, NOW(), NOW())
+ON CONFLICT ON CONSTRAINT ux_course_id_name
+    DO UPDATE SET class_type = $3,
+                  updated_at = NOW()
+RETURNING id, course_id, name, class_type, created_at, updated_at
+`
+
+type UpsertClassGroupsBatchResults struct {
+	br     pgx.BatchResults
+	tot    int
+	closed bool
+}
+
+type UpsertClassGroupsParams struct {
+	CourseID  int64     `json:"course_id"`
+	Name      string    `json:"name"`
+	ClassType ClassType `json:"class_type"`
+}
+
+func (q *Queries) UpsertClassGroups(ctx context.Context, arg []UpsertClassGroupsParams) *UpsertClassGroupsBatchResults {
+	batch := &pgx.Batch{}
+	for _, a := range arg {
+		vals := []interface{}{
+			a.CourseID,
+			a.Name,
+			a.ClassType,
+		}
+		batch.Queue(upsertClassGroups, vals...)
+	}
+	br := q.db.SendBatch(ctx, batch)
+	return &UpsertClassGroupsBatchResults{br, len(arg), false}
+}
+
+func (b *UpsertClassGroupsBatchResults) QueryRow(f func(int, ClassGroup, error)) {
+	defer b.br.Close()
+	for t := 0; t < b.tot; t++ {
+		var i ClassGroup
+		if b.closed {
+			if f != nil {
+				f(t, i, ErrBatchAlreadyClosed)
+			}
+			continue
+		}
+		row := b.br.QueryRow()
+		err := row.Scan(
+			&i.ID,
+			&i.CourseID,
+			&i.Name,
+			&i.ClassType,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		)
+		if f != nil {
+			f(t, i, err)
+		}
+	}
+}
+
+func (b *UpsertClassGroupsBatchResults) Close() error {
+	b.closed = true
+	return b.br.Close()
+}
+
+const upsertCourses = `-- name: UpsertCourses :batchone
 INSERT INTO courses (code, year, semester, programme, au, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 ON CONFLICT ON CONSTRAINT ux_code_year_semester
@@ -284,42 +244,29 @@ func (q *Queries) UpsertCourses(ctx context.Context, arg []UpsertCoursesParams) 
 	return &UpsertCoursesBatchResults{br, len(arg), false}
 }
 
-func (b *UpsertCoursesBatchResults) Query(f func(int, []Course, error)) {
+func (b *UpsertCoursesBatchResults) QueryRow(f func(int, Course, error)) {
 	defer b.br.Close()
 	for t := 0; t < b.tot; t++ {
-		var items []Course
+		var i Course
 		if b.closed {
 			if f != nil {
-				f(t, items, ErrBatchAlreadyClosed)
+				f(t, i, ErrBatchAlreadyClosed)
 			}
 			continue
 		}
-		err := func() error {
-			rows, err := b.br.Query()
-			if err != nil {
-				return err
-			}
-			defer rows.Close()
-			for rows.Next() {
-				var i Course
-				if err := rows.Scan(
-					&i.ID,
-					&i.Code,
-					&i.Year,
-					&i.Semester,
-					&i.Programme,
-					&i.Au,
-					&i.CreatedAt,
-					&i.UpdatedAt,
-				); err != nil {
-					return err
-				}
-				items = append(items, i)
-			}
-			return rows.Err()
-		}()
+		row := b.br.QueryRow()
+		err := row.Scan(
+			&i.ID,
+			&i.Code,
+			&i.Year,
+			&i.Semester,
+			&i.Programme,
+			&i.Au,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		)
 		if f != nil {
-			f(t, items, err)
+			f(t, i, err)
 		}
 	}
 }
@@ -329,7 +276,7 @@ func (b *UpsertCoursesBatchResults) Close() error {
 	return b.br.Close()
 }
 
-const upsertStudents = `-- name: UpsertStudents :batchmany
+const upsertStudents = `-- name: UpsertStudents :batchone
 INSERT INTO students (id, name, email, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
 ON CONFLICT (id)
@@ -365,39 +312,26 @@ func (q *Queries) UpsertStudents(ctx context.Context, arg []UpsertStudentsParams
 	return &UpsertStudentsBatchResults{br, len(arg), false}
 }
 
-func (b *UpsertStudentsBatchResults) Query(f func(int, []Student, error)) {
+func (b *UpsertStudentsBatchResults) QueryRow(f func(int, Student, error)) {
 	defer b.br.Close()
 	for t := 0; t < b.tot; t++ {
-		var items []Student
+		var i Student
 		if b.closed {
 			if f != nil {
-				f(t, items, ErrBatchAlreadyClosed)
+				f(t, i, ErrBatchAlreadyClosed)
 			}
 			continue
 		}
-		err := func() error {
-			rows, err := b.br.Query()
-			if err != nil {
-				return err
-			}
-			defer rows.Close()
-			for rows.Next() {
-				var i Student
-				if err := rows.Scan(
-					&i.ID,
-					&i.Name,
-					&i.Email,
-					&i.CreatedAt,
-					&i.UpdatedAt,
-				); err != nil {
-					return err
-				}
-				items = append(items, i)
-			}
-			return rows.Err()
-		}()
+		row := b.br.QueryRow()
+		err := row.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		)
 		if f != nil {
-			f(t, items, err)
+			f(t, i, err)
 		}
 	}
 }
