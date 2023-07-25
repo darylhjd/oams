@@ -14,6 +14,8 @@ import (
 )
 
 func TestConnectDB(t *testing.T) {
+	t.Parallel()
+
 	a := assert.New(t)
 	id := uuid.NewString()
 
@@ -24,6 +26,8 @@ func TestConnectDB(t *testing.T) {
 }
 
 func TestGetConnectionProperties(t *testing.T) {
+	t.Parallel()
+
 	a := assert.New(t)
 	id := uuid.NewString()
 

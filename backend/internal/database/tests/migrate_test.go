@@ -11,6 +11,8 @@ import (
 )
 
 func TestMigrations(t *testing.T) {
+	t.Parallel()
+
 	ctx := context.Background()
 
 	// We need to test in order.
