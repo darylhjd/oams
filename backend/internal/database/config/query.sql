@@ -1,36 +1,37 @@
--- name: ListStudents :many
+-- name: ListUsers :many
 SELECT *
-FROM students
+FROM users
 ORDER BY id;
 
--- name: GetStudent :one
+-- name: GetUser :one
 SELECT *
-FROM students
+FROM users
 WHERE id = $1
 LIMIT 1;
 
--- name: GetStudentsByIDs :many
+-- name: GetUsersByIDs :many
 SELECT *
-FROM students
+FROM users
 WHERE id = ANY (sqlc.arg(ids)::TEXT[])
 ORDER BY id;
 
--- name: UpsertStudents :batchone
-INSERT INTO students (id, name, email, created_at, updated_at)
-VALUES ($1, $2, $3, NOW(), NOW())
+-- name: UpsertUsers :batchone
+INSERT INTO users (id, name, email, role, created_at, updated_at)
+VALUES ($1, $2, $3, $4, NOW(), NOW())
 ON CONFLICT (id)
     DO UPDATE SET name       = $2,
                   email      = $3,
+                  role       = $4,
                   updated_at = NOW()
 RETURNING *;
 
--- name: ListCourses :many
+-- name: ListClasses :many
 SELECT *
-FROM courses
+FROM classes
 ORDER BY code, year, semester;
 
--- name: UpsertCourses :batchone
-INSERT INTO courses (code, year, semester, programme, au, created_at, updated_at)
+-- name: UpsertClasses :batchone
+INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 ON CONFLICT ON CONSTRAINT ux_code_year_semester
     DO UPDATE SET programme  = $4,
@@ -41,12 +42,12 @@ RETURNING *;
 -- name: ListClassGroups :many
 SELECT *
 FROM class_groups
-ORDER BY course_id, name;
+ORDER BY class_id, name;
 
 -- name: UpsertClassGroups :batchone
-INSERT INTO class_groups (course_id, name, class_type, created_at, updated_at)
+INSERT INTO class_groups (class_id, name, class_type, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
-ON CONFLICT ON CONSTRAINT ux_course_id_name
+ON CONFLICT ON CONSTRAINT ux_class_id_name
     DO UPDATE SET class_type = $3,
                   updated_at = NOW()
 RETURNING *;
@@ -68,9 +69,9 @@ RETURNING *;
 -- name: ListSessionEnrollments :many
 SELECT *
 FROM session_enrollments
-ORDER BY session_id, student_id;
+ORDER BY session_id, user_id;
 
 -- name: CreateSessionEnrollments :batchone
-INSERT INTO session_enrollments (session_id, student_id, created_at)
+INSERT INTO session_enrollments (session_id, user_id, created_at)
 VALUES ($1, $2, NOW())
 RETURNING *;

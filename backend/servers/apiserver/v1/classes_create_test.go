@@ -22,7 +22,6 @@ import (
 
 func TestAPIServerV1_classesCreate(t *testing.T) {
 	t.Parallel()
-	ctx := context.Background()
 
 	tts := []struct {
 		name         string
@@ -32,7 +31,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 		{
 			"with file upload",
 			func() (io.Reader, string, error) {
-				file := "class_lab_test.xlsx"
+				file := "../common/class_file_test.xlsx"
 
 				var b bytes.Buffer
 				w := multipart.NewWriter(&b)
@@ -75,7 +74,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 				body := classesCreateRequest{
 					[]common.ClassCreationData{
 						{
-							Course: database.UpsertCoursesParams{
+							Course: database.UpsertClassesParams{
 								Code:      "SC1015",
 								Year:      2022,
 								Semester:  "2",
@@ -103,9 +102,9 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 											},
 										},
 									},
-									[]database.UpsertStudentsParams{
-										{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
-										{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
+									[]database.UpsertUsersParams{
+										{"CHUL6789", "CHUA LI TING", pgtype.Text{}, database.UserRoleSTUDENT},
+										{"YAPW9087", "YAP WEN LI", pgtype.Text{}, database.UserRoleSTUDENT},
 									},
 								},
 								{
@@ -128,9 +127,9 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 											},
 										},
 									},
-									[]database.UpsertStudentsParams{
-										{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
-										{"YAPW9088", "YAP WEI LING", pgtype.Text{}},
+									[]database.UpsertUsersParams{
+										{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}, database.UserRoleSTUDENT},
+										{"YAPW9088", "YAP WEI LING", pgtype.Text{}, database.UserRoleSTUDENT},
 									},
 								},
 								{
@@ -153,9 +152,9 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 											},
 										},
 									},
-									[]database.UpsertStudentsParams{
-										{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
-										{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
+									[]database.UpsertUsersParams{
+										{"PATELAR14", "ARJUN PATEL", pgtype.Text{}, database.UserRoleSTUDENT},
+										{"YAPX9087", "YAP XIN TING", pgtype.Text{}, database.UserRoleSTUDENT},
 									},
 								},
 							},
@@ -187,6 +186,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
+			ctx := context.Background()
 			id := uuid.NewString()
 
 			body, contentType, err := tt.body()
@@ -207,7 +207,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 			a.Equal(string(b), rr.Body.String())
 
 			// Check correct number of inputs in database.
-			courses, err := v1.db.Q.ListCourses(ctx)
+			courses, err := v1.db.Q.ListClasses(ctx)
 			a.Nil(err)
 			a.Equal(tt.wantResponse.Classes, len(courses))
 
@@ -219,7 +219,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 			a.Nil(err)
 			a.Equal(tt.wantResponse.ClassGroupSessions, len(classGroupSessions))
 
-			students, err := v1.db.Q.ListStudents(ctx)
+			students, err := v1.db.Q.ListClasses(ctx)
 			a.Nil(err)
 			a.Equal(tt.wantResponse.Students, len(students))
 

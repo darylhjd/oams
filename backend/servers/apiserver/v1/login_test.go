@@ -49,13 +49,9 @@ func TestAPIServerV1_login(t *testing.T) {
 			rr := httptest.NewRecorder()
 			v1.login(rr, req)
 
-			var actualResp loginResponse
-			err := json.Unmarshal(rr.Body.Bytes(), &actualResp)
-			a.Nil(err)
-
 			s, err := json.Marshal(state{
-				Version:  namespace,
-				ReturnTo: tt.returnTo,
+				Version:     namespace,
+				RedirectUrl: tt.returnTo,
 			})
 			a.Nil(err)
 
@@ -80,10 +76,10 @@ func TestAPIServerV1_login(t *testing.T) {
 					RawQuery: expectedQueries.Encode(),
 				}).String(),
 			}
-			bytes, err := json.Marshal(expectedResp)
-			a.Nil(err)
 
-			a.Equal(string(bytes), rr.Body.String())
+			expectedBytes, err := json.Marshal(expectedResp)
+			a.Nil(err)
+			a.Equal(string(expectedBytes), rr.Body.String())
 		})
 	}
 }

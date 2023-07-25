@@ -9,46 +9,48 @@ import (
 	"context"
 )
 
-const getStudent = `-- name: GetStudent :one
-SELECT id, name, email, created_at, updated_at
-FROM students
+const getUser = `-- name: GetUser :one
+SELECT id, name, email, role, created_at, updated_at
+FROM users
 WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetStudent(ctx context.Context, id string) (Student, error) {
-	row := q.db.QueryRow(ctx, getStudent, id)
-	var i Student
+func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, getUser, id)
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Email,
+		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const getStudentsByIDs = `-- name: GetStudentsByIDs :many
-SELECT id, name, email, created_at, updated_at
-FROM students
+const getUsersByIDs = `-- name: GetUsersByIDs :many
+SELECT id, name, email, role, created_at, updated_at
+FROM users
 WHERE id = ANY ($1::TEXT[])
 ORDER BY id
 `
 
-func (q *Queries) GetStudentsByIDs(ctx context.Context, ids []string) ([]Student, error) {
-	rows, err := q.db.Query(ctx, getStudentsByIDs, ids)
+func (q *Queries) GetUsersByIDs(ctx context.Context, ids []string) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUsersByIDs, ids)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Student
+	var items []User
 	for rows.Next() {
-		var i Student
+		var i User
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.Email,
+			&i.Role,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -97,9 +99,9 @@ func (q *Queries) ListClassGroupSessions(ctx context.Context) ([]ClassGroupSessi
 }
 
 const listClassGroups = `-- name: ListClassGroups :many
-SELECT id, course_id, name, class_type, created_at, updated_at
+SELECT id, class_id, name, class_type, created_at, updated_at
 FROM class_groups
-ORDER BY course_id, name
+ORDER BY class_id, name
 `
 
 func (q *Queries) ListClassGroups(ctx context.Context) ([]ClassGroup, error) {
@@ -113,7 +115,7 @@ func (q *Queries) ListClassGroups(ctx context.Context) ([]ClassGroup, error) {
 		var i ClassGroup
 		if err := rows.Scan(
 			&i.ID,
-			&i.CourseID,
+			&i.ClassID,
 			&i.Name,
 			&i.ClassType,
 			&i.CreatedAt,
@@ -129,21 +131,21 @@ func (q *Queries) ListClassGroups(ctx context.Context) ([]ClassGroup, error) {
 	return items, nil
 }
 
-const listCourses = `-- name: ListCourses :many
+const listClasses = `-- name: ListClasses :many
 SELECT id, code, year, semester, programme, au, created_at, updated_at
-FROM courses
+FROM classes
 ORDER BY code, year, semester
 `
 
-func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
-	rows, err := q.db.Query(ctx, listCourses)
+func (q *Queries) ListClasses(ctx context.Context) ([]Class, error) {
+	rows, err := q.db.Query(ctx, listClasses)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Course
+	var items []Class
 	for rows.Next() {
-		var i Course
+		var i Class
 		if err := rows.Scan(
 			&i.ID,
 			&i.Code,
@@ -165,9 +167,9 @@ func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
 }
 
 const listSessionEnrollments = `-- name: ListSessionEnrollments :many
-SELECT session_id, student_id, created_at
+SELECT session_id, user_id, created_at
 FROM session_enrollments
-ORDER BY session_id, student_id
+ORDER BY session_id, user_id
 `
 
 func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollment, error) {
@@ -179,7 +181,7 @@ func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollme
 	var items []SessionEnrollment
 	for rows.Next() {
 		var i SessionEnrollment
-		if err := rows.Scan(&i.SessionID, &i.StudentID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(&i.SessionID, &i.UserID, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -190,25 +192,26 @@ func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollme
 	return items, nil
 }
 
-const listStudents = `-- name: ListStudents :many
-SELECT id, name, email, created_at, updated_at
-FROM students
+const listUsers = `-- name: ListUsers :many
+SELECT id, name, email, role, created_at, updated_at
+FROM users
 ORDER BY id
 `
 
-func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
-	rows, err := q.db.Query(ctx, listStudents)
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Student
+	var items []User
 	for rows.Next() {
-		var i Student
+		var i User
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.Email,
+			&i.Role,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {

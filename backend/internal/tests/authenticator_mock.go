@@ -1,4 +1,4 @@
-package oauth2
+package tests
 
 import (
 	"context"
@@ -8,14 +8,6 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 
 	"github.com/darylhjd/oams/backend/internal/env"
-)
-
-const (
-	mockAccessToken          = "mock-access-token"
-	mockAccountHomeAccountID = "mock-home-account-id"
-
-	MockAccountPreferredUsername = "NTU0001@e.ntu.edu.sg"
-	MockIDTokenName              = "TESTACC001"
 )
 
 // MockAzureAuthenticator allows us to mock the calls to Microsoft's Azure AD APIs.
@@ -69,17 +61,17 @@ func (m *MockAzureAuthenticator) MockAuthResult() confidential.AuthResult {
 	// Do this because we cannot import IDToken type.
 	var result confidential.AuthResult
 
-	result.AccessToken = mockAccessToken
+	result.AccessToken = MockAuthenticatorAccessToken
 	result.Account = m.mockAccount()
-	result.IDToken.Name = MockIDTokenName
+	result.IDToken.Name = MockAuthenticatorIDTokenName
 
 	return result
 }
 
 func (m *MockAzureAuthenticator) mockAccount() confidential.Account {
 	return confidential.Account{
-		HomeAccountID:     mockAccountHomeAccountID,
-		PreferredUsername: MockAccountPreferredUsername,
+		HomeAccountID:     MockAuthenticatorAccountHomeAccountID,
+		PreferredUsername: MockAuthenticatorAccountPreferredUsername,
 	}
 }
 

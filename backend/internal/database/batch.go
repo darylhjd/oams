@@ -18,9 +18,9 @@ var (
 )
 
 const createSessionEnrollments = `-- name: CreateSessionEnrollments :batchone
-INSERT INTO session_enrollments (session_id, student_id, created_at)
+INSERT INTO session_enrollments (session_id, user_id, created_at)
 VALUES ($1, $2, NOW())
-RETURNING session_id, student_id, created_at
+RETURNING session_id, user_id, created_at
 `
 
 type CreateSessionEnrollmentsBatchResults struct {
@@ -31,7 +31,7 @@ type CreateSessionEnrollmentsBatchResults struct {
 
 type CreateSessionEnrollmentsParams struct {
 	SessionID int64  `json:"session_id"`
-	StudentID string `json:"student_id"`
+	UserID    string `json:"user_id"`
 }
 
 func (q *Queries) CreateSessionEnrollments(ctx context.Context, arg []CreateSessionEnrollmentsParams) *CreateSessionEnrollmentsBatchResults {
@@ -39,7 +39,7 @@ func (q *Queries) CreateSessionEnrollments(ctx context.Context, arg []CreateSess
 	for _, a := range arg {
 		vals := []interface{}{
 			a.SessionID,
-			a.StudentID,
+			a.UserID,
 		}
 		batch.Queue(createSessionEnrollments, vals...)
 	}
@@ -58,7 +58,7 @@ func (b *CreateSessionEnrollmentsBatchResults) QueryRow(f func(int, SessionEnrol
 			continue
 		}
 		row := b.br.QueryRow()
-		err := row.Scan(&i.SessionID, &i.StudentID, &i.CreatedAt)
+		err := row.Scan(&i.SessionID, &i.UserID, &i.CreatedAt)
 		if f != nil {
 			f(t, i, err)
 		}
@@ -140,12 +140,12 @@ func (b *UpsertClassGroupSessionsBatchResults) Close() error {
 }
 
 const upsertClassGroups = `-- name: UpsertClassGroups :batchone
-INSERT INTO class_groups (course_id, name, class_type, created_at, updated_at)
+INSERT INTO class_groups (class_id, name, class_type, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
-ON CONFLICT ON CONSTRAINT ux_course_id_name
+ON CONFLICT ON CONSTRAINT ux_class_id_name
     DO UPDATE SET class_type = $3,
                   updated_at = NOW()
-RETURNING id, course_id, name, class_type, created_at, updated_at
+RETURNING id, class_id, name, class_type, created_at, updated_at
 `
 
 type UpsertClassGroupsBatchResults struct {
@@ -155,7 +155,7 @@ type UpsertClassGroupsBatchResults struct {
 }
 
 type UpsertClassGroupsParams struct {
-	CourseID  int64     `json:"course_id"`
+	ClassID   int64     `json:"class_id"`
 	Name      string    `json:"name"`
 	ClassType ClassType `json:"class_type"`
 }
@@ -164,7 +164,7 @@ func (q *Queries) UpsertClassGroups(ctx context.Context, arg []UpsertClassGroups
 	batch := &pgx.Batch{}
 	for _, a := range arg {
 		vals := []interface{}{
-			a.CourseID,
+			a.ClassID,
 			a.Name,
 			a.ClassType,
 		}
@@ -187,7 +187,7 @@ func (b *UpsertClassGroupsBatchResults) QueryRow(f func(int, ClassGroup, error))
 		row := b.br.QueryRow()
 		err := row.Scan(
 			&i.ID,
-			&i.CourseID,
+			&i.ClassID,
 			&i.Name,
 			&i.ClassType,
 			&i.CreatedAt,
@@ -204,8 +204,8 @@ func (b *UpsertClassGroupsBatchResults) Close() error {
 	return b.br.Close()
 }
 
-const upsertCourses = `-- name: UpsertCourses :batchone
-INSERT INTO courses (code, year, semester, programme, au, created_at, updated_at)
+const upsertClasses = `-- name: UpsertClasses :batchone
+INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 ON CONFLICT ON CONSTRAINT ux_code_year_semester
     DO UPDATE SET programme  = $4,
@@ -214,13 +214,13 @@ ON CONFLICT ON CONSTRAINT ux_code_year_semester
 RETURNING id, code, year, semester, programme, au, created_at, updated_at
 `
 
-type UpsertCoursesBatchResults struct {
+type UpsertClassesBatchResults struct {
 	br     pgx.BatchResults
 	tot    int
 	closed bool
 }
 
-type UpsertCoursesParams struct {
+type UpsertClassesParams struct {
 	Code      string `json:"code"`
 	Year      int32  `json:"year"`
 	Semester  string `json:"semester"`
@@ -228,7 +228,7 @@ type UpsertCoursesParams struct {
 	Au        int16  `json:"au"`
 }
 
-func (q *Queries) UpsertCourses(ctx context.Context, arg []UpsertCoursesParams) *UpsertCoursesBatchResults {
+func (q *Queries) UpsertClasses(ctx context.Context, arg []UpsertClassesParams) *UpsertClassesBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
 		vals := []interface{}{
@@ -238,16 +238,16 @@ func (q *Queries) UpsertCourses(ctx context.Context, arg []UpsertCoursesParams) 
 			a.Programme,
 			a.Au,
 		}
-		batch.Queue(upsertCourses, vals...)
+		batch.Queue(upsertClasses, vals...)
 	}
 	br := q.db.SendBatch(ctx, batch)
-	return &UpsertCoursesBatchResults{br, len(arg), false}
+	return &UpsertClassesBatchResults{br, len(arg), false}
 }
 
-func (b *UpsertCoursesBatchResults) QueryRow(f func(int, Course, error)) {
+func (b *UpsertClassesBatchResults) QueryRow(f func(int, Class, error)) {
 	defer b.br.Close()
 	for t := 0; t < b.tot; t++ {
-		var i Course
+		var i Class
 		if b.closed {
 			if f != nil {
 				f(t, i, ErrBatchAlreadyClosed)
@@ -271,51 +271,54 @@ func (b *UpsertCoursesBatchResults) QueryRow(f func(int, Course, error)) {
 	}
 }
 
-func (b *UpsertCoursesBatchResults) Close() error {
+func (b *UpsertClassesBatchResults) Close() error {
 	b.closed = true
 	return b.br.Close()
 }
 
-const upsertStudents = `-- name: UpsertStudents :batchone
-INSERT INTO students (id, name, email, created_at, updated_at)
-VALUES ($1, $2, $3, NOW(), NOW())
+const upsertUsers = `-- name: UpsertUsers :batchone
+INSERT INTO users (id, name, email, role, created_at, updated_at)
+VALUES ($1, $2, $3, $4, NOW(), NOW())
 ON CONFLICT (id)
     DO UPDATE SET name       = $2,
                   email      = $3,
+                  role       = $4,
                   updated_at = NOW()
-RETURNING id, name, email, created_at, updated_at
+RETURNING id, name, email, role, created_at, updated_at
 `
 
-type UpsertStudentsBatchResults struct {
+type UpsertUsersBatchResults struct {
 	br     pgx.BatchResults
 	tot    int
 	closed bool
 }
 
-type UpsertStudentsParams struct {
+type UpsertUsersParams struct {
 	ID    string      `json:"id"`
 	Name  string      `json:"name"`
 	Email pgtype.Text `json:"email"`
+	Role  UserRole    `json:"role"`
 }
 
-func (q *Queries) UpsertStudents(ctx context.Context, arg []UpsertStudentsParams) *UpsertStudentsBatchResults {
+func (q *Queries) UpsertUsers(ctx context.Context, arg []UpsertUsersParams) *UpsertUsersBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
 		vals := []interface{}{
 			a.ID,
 			a.Name,
 			a.Email,
+			a.Role,
 		}
-		batch.Queue(upsertStudents, vals...)
+		batch.Queue(upsertUsers, vals...)
 	}
 	br := q.db.SendBatch(ctx, batch)
-	return &UpsertStudentsBatchResults{br, len(arg), false}
+	return &UpsertUsersBatchResults{br, len(arg), false}
 }
 
-func (b *UpsertStudentsBatchResults) QueryRow(f func(int, Student, error)) {
+func (b *UpsertUsersBatchResults) QueryRow(f func(int, User, error)) {
 	defer b.br.Close()
 	for t := 0; t < b.tot; t++ {
-		var i Student
+		var i User
 		if b.closed {
 			if f != nil {
 				f(t, i, ErrBatchAlreadyClosed)
@@ -327,6 +330,7 @@ func (b *UpsertStudentsBatchResults) QueryRow(f func(int, Student, error)) {
 			&i.ID,
 			&i.Name,
 			&i.Email,
+			&i.Role,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		)
@@ -336,7 +340,7 @@ func (b *UpsertStudentsBatchResults) QueryRow(f func(int, Student, error)) {
 	}
 }
 
-func (b *UpsertStudentsBatchResults) Close() error {
+func (b *UpsertUsersBatchResults) Close() error {
 	b.closed = true
 	return b.br.Close()
 }

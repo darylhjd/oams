@@ -8,8 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
-	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -28,11 +26,7 @@ func TestAPIServerV1_signOut(t *testing.T) {
 	}{
 		{
 			"request with account in context",
-			middleware.AuthContext{
-				AuthResult: confidential.AuthResult{
-					Account: confidential.Account{HomeAccountID: uuid.NewString(), PreferredUsername: uuid.NewString()},
-				},
-			},
+			tests.NewMockAuthContext(),
 			signOutResponse{newSuccessfulResponse()},
 		},
 		{
@@ -53,25 +47,24 @@ func TestAPIServerV1_signOut(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
+			ctx := context.Background()
 			id := uuid.NewString()
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			err := v1.db.Q.UpsertStudents(context.Background(), []database.UpsertStudentsParams{
-				tests.MockUpsertStudentsParams(),
-			}).Close()
-			a.Nil(err)
+			tests.StubAuthContextUser(t, ctx, v1.db.Q)
 
 			req := httptest.NewRequest(http.MethodGet, signOutUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
 			rr := httptest.NewRecorder()
 			v1.signOut(rr, req)
 
-			bytes, err := json.Marshal(tt.wantResponse)
+			expectedBytes, err := json.Marshal(tt.wantResponse)
 			a.Nil(err)
-			a.Equal(string(bytes), rr.Body.String())
-			if rr.Code != http.StatusOK {
+			a.Equal(string(expectedBytes), rr.Body.String())
+
+			if tt.wantResponse.Code() != http.StatusOK {
 				return
 			}
 
@@ -81,7 +74,7 @@ func TestAPIServerV1_signOut(t *testing.T) {
 					return
 				}
 			}
-			a.FailNow("could not detect expected session cookie")
+			a.FailNow("could not detect expected session deletion cookie")
 		})
 	}
 }

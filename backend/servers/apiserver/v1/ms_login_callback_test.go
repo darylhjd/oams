@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -20,9 +21,9 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 
 	tts := []struct {
 		name            string
-		state           state
+		withState       state
 		wantCode        int
-		containsBody    string
+		wantBody        apiResponse
 		wantRedirectUrl string
 	}{
 		{
@@ -31,26 +32,26 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				Version: namespace,
 			},
 			http.StatusSeeOther,
-			"",
+			nil,
 			Url,
 		},
 		{
 			"expected state with custom return url, accepted callback",
 			state{
-				Version:  namespace,
-				ReturnTo: "/randomUrl",
+				Version:     namespace,
+				RedirectUrl: "/randomUrl",
 			},
 			http.StatusSeeOther,
-			"",
+			nil,
 			"/randomUrl",
 		},
 		{
 			"unexpected version in state, rejected callback",
 			state{
-				Version: "wrong-state",
+				Version: "wrong-version",
 			},
 			http.StatusTeapot,
-			"wrong API version used for login callback",
+			newErrorResponse(http.StatusInternalServerError, "wrong api version handling"),
 			"",
 		},
 	}
@@ -66,12 +67,12 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			s, err := json.Marshal(tt.state)
+			stateBytes, err := json.Marshal(tt.withState)
 			a.Nil(err)
 
 			postForm := url.Values{}
-			postForm.Set(callbackStateParam, string(s))
-			postForm.Set(postFormCodeParam, "testing-code")
+			postForm.Set(callbackStateParam, string(stateBytes))
+			postForm.Set(postFormCodeParam, uuid.NewString())
 			req := httptest.NewRequest(http.MethodPost, msLoginCallbackUrl, strings.NewReader(postForm.Encode()))
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			rr := httptest.NewRecorder()
@@ -79,15 +80,16 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 
 			a.Equal(tt.wantCode, rr.Code)
 			a.Equal(tt.wantRedirectUrl, rr.Header().Get("Location"))
-			a.Contains(rr.Body.String(), tt.containsBody)
+
 			if tt.wantCode != http.StatusSeeOther {
+				expectedBytes, err := json.Marshal(tt.wantBody)
+				a.Nil(err)
+				a.Equal(string(expectedBytes), rr.Body.String())
 				return
 			}
 
-			// Check that student exists in the database.
-			student, err := v1.db.Q.GetStudent(req.Context(), oauth2.MockIDTokenName)
-			a.Nil(err)
-			a.Equal(student, tests.StubStudent(student.CreatedAt, student.UpdatedAt))
+			// Check that user that logged in exists in the database.
+			tests.CheckUserExists(a, context.Background(), v1.db.Q, tests.MockAuthenticatorIDTokenName)
 
 			// Check that session cookie exists.
 			for _, cookie := range rr.Result().Cookies() {
