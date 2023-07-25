@@ -53,7 +53,11 @@ func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(signOutUrl, middleware.WithAuthContext(v.signOut, v.azure, true))
 
 	v.mux.HandleFunc(classesUrl, middleware.WithAuthContext(middleware.AllowMethods(v.classesCreate, http.MethodPost), v.azure, true))
-	v.mux.HandleFunc(usersUrl, middleware.WithAuthContext(v.users, v.azure, false))
+	v.mux.HandleFunc(usersUrl, middleware.WithAuthContext(
+		middleware.AllowMethods(v.users, http.MethodGet, http.MethodPut, http.MethodDelete),
+		v.azure,
+		false,
+	))
 }
 
 func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {

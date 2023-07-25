@@ -29,6 +29,39 @@ func (q *Queries) GetStudent(ctx context.Context, id string) (Student, error) {
 	return i, err
 }
 
+const getStudentsByIDs = `-- name: GetStudentsByIDs :many
+SELECT id, name, email, created_at, updated_at
+FROM students
+WHERE id = ANY ($1::TEXT[])
+ORDER BY id
+`
+
+func (q *Queries) GetStudentsByIDs(ctx context.Context, ids []string) ([]Student, error) {
+	rows, err := q.db.Query(ctx, getStudentsByIDs, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Student
+	for rows.Next() {
+		var i Student
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listClassGroupSessions = `-- name: ListClassGroupSessions :many
 SELECT id, class_group_id, start_time, end_time, venue, created_at, updated_at
 FROM class_group_sessions
