@@ -53,7 +53,7 @@ func Test_usersGet(t *testing.T) {
 			"",
 		},
 		{
-			"request with wrong account type in context",
+			"request with wrong auth context type",
 			time.Time{},
 			usersGetResponse{},
 			middleware.ErrUnexpectedAuthContextType.Error(),
