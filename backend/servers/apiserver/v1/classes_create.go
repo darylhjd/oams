@@ -280,7 +280,7 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 		return nil, dbErr
 	}
 
-	if dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close(); err != nil {
+	if dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close(); dbErr != nil {
 		return nil, dbErr
 	}
 

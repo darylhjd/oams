@@ -61,9 +61,9 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 				newSuccessfulResponse(),
 				1,
 				3,
-				3,
+				4,
 				58,
-				66,
+				94,
 			},
 		},
 		{
@@ -219,7 +219,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 			a.Nil(err)
 			a.Equal(tt.wantResponse.ClassGroupSessions, len(classGroupSessions))
 
-			students, err := v1.db.Q.ListClasses(ctx)
+			students, err := v1.db.Q.ListUsers(ctx)
 			a.Nil(err)
 			a.Equal(tt.wantResponse.Students, len(students))
 
