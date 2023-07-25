@@ -9,6 +9,12 @@ FROM students
 WHERE id = $1
 LIMIT 1;
 
+-- name: GetStudentsByIDs :many
+SELECT *
+FROM students
+WHERE id = ANY (sqlc.arg(ids)::TEXT[])
+ORDER BY id;
+
 -- name: UpsertStudents :batchone
 INSERT INTO students (id, name, email, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
