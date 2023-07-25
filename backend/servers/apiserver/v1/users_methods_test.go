@@ -9,7 +9,6 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/middleware"
-	"github.com/darylhjd/oams/backend/internal/oauth2"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,19 +26,17 @@ func Test_usersGet(t *testing.T) {
 	}{
 		{
 			"request with account in context",
-			middleware.AuthContext{
-				AuthResult: oauth2.NewMockAzureAuthenticator().MockAuthResult(),
-			},
+			tests.NewMockAuthContext(),
 			usersGetResponse{
 				response: newSuccessfulResponse(),
-				SessionUser: &database.Student{
-					ID: oauth2.MockIDTokenName,
+				SessionUser: &database.User{
+					ID: tests.MockAuthenticatorIDTokenName,
 					Email: pgtype.Text{
-						String: oauth2.MockAccountPreferredUsername,
+						String: tests.MockAuthenticatorAccountPreferredUsername,
 						Valid:  true,
 					},
 				},
-				Users: []database.Student{},
+				Users: []database.User{},
 			},
 			"",
 		},
@@ -48,7 +45,7 @@ func Test_usersGet(t *testing.T) {
 			nil,
 			usersGetResponse{
 				response: newSuccessfulResponse(),
-				Users:    []database.Student{},
+				Users:    []database.User{},
 			},
 			"",
 		},
@@ -72,10 +69,7 @@ func Test_usersGet(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			// Insert mock session user.
-			a.Nil(v1.db.Q.UpsertStudents(ctx, []database.UpsertStudentsParams{
-				tests.MockUpsertStudentsParams(),
-			}).Close())
+			tests.StubAuthContextUser(t, ctx, v1.db.Q)
 
 			req := httptest.NewRequest(http.MethodGet, usersUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))

@@ -19,7 +19,7 @@ class APIClient {
   static String defaultRedirectUrl = "${webServerHost()}:${webServerPort()}";
 
   static const String loginPath = "api/v1/login";
-  static const String loginReturnToParam = "return_to";
+  static const String loginRedirectUrlParam = "redirect_url";
   static const String logoutPath = "api/v1/sign-out";
   static const String usersPath = "api/v1/users";
 
@@ -32,7 +32,7 @@ class APIClient {
     final uri = apiUri.replace(
       path: loginPath,
       queryParameters: {
-        loginReturnToParam: returnTo,
+        loginRedirectUrlParam: returnTo,
       },
     );
 

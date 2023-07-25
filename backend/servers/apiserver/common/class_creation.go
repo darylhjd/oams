@@ -14,7 +14,7 @@ type ClassCreationData struct {
 	Filename         string    `json:"filename"`
 	FileCreationDate time.Time `json:"file_creation_date"`
 
-	Course      database.UpsertCoursesParams `json:"course"`
+	Course      database.UpsertClassesParams `json:"course"`
 	ClassGroups []ClassGroupData             `json:"class_groups"`
 
 	// These variables are helper fields for generating filled data.
@@ -24,8 +24,8 @@ type ClassCreationData struct {
 // ClassGroupData is a struct containing data for creating a class group and its associated sessions.
 type ClassGroupData struct {
 	database.UpsertClassGroupsParams
-	Sessions []SessionData                   `json:"sessions"`
-	Students []database.UpsertStudentsParams `json:"students"`
+	Sessions []SessionData                `json:"sessions"`
+	Students []database.UpsertUsersParams `json:"students"`
 }
 
 type SessionData struct {

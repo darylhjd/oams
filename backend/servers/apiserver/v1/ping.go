@@ -12,6 +12,7 @@ type pingResponse struct {
 // ping helps check the health of the API server. It also checks the database connection.
 func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
+
 	resp = pingResponse{
 		response: newSuccessfulResponse(),
 		Message:  "Pong~ OAMS API Service is running normally!",

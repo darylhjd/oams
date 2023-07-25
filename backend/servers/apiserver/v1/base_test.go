@@ -49,9 +49,9 @@ func TestAPIServerV1_base(t *testing.T) {
 			rr := httptest.NewRecorder()
 			v1.base(rr, req)
 
-			bytes, err := json.Marshal(tt.wantResponse)
+			expectedBytes, err := json.Marshal(tt.wantResponse)
 			a.Nil(err)
-			a.Equal(string(bytes), rr.Body.String())
+			a.Equal(string(expectedBytes), rr.Body.String())
 		})
 	}
 }

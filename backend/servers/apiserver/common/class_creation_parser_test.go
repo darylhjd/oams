@@ -24,95 +24,13 @@ func TestParseClassCreationFile(t *testing.T) {
 		expectedData *ClassCreationData
 	}{
 		{
-			"sample class lab creation file",
-			"class_lab_test.xlsx",
+			"sample class creation file",
+			"class_file_test.xlsx",
 			"",
 			&ClassCreationData{
-				"class_lab_test.xlsx",
+				"class_file_test.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				database.UpsertCoursesParams{
-					Code:      "SC1015",
-					Year:      2022,
-					Semester:  "2",
-					Programme: "CSC  Full-Time",
-					Au:        3,
-				},
-				[]ClassGroupData{
-					{
-						database.UpsertClassGroupsParams{
-							Name:      "A21",
-							ClassType: database.ClassTypeLAB,
-						},
-						[]SessionData{},
-						[]database.UpsertStudentsParams{
-							{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
-							{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
-						},
-					},
-					{
-						database.UpsertClassGroupsParams{
-							Name:      "A26",
-							ClassType: database.ClassTypeLAB,
-						},
-						[]SessionData{},
-						[]database.UpsertStudentsParams{
-							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
-							{"YAPW9088", "YAP WEI LING", pgtype.Text{}},
-						},
-					},
-					{
-						database.UpsertClassGroupsParams{
-							Name:      "A32",
-							ClassType: database.ClassTypeLAB,
-						},
-						[]SessionData{},
-						[]database.UpsertStudentsParams{
-							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
-							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
-						},
-					},
-				},
-				database.ClassTypeLAB,
-			},
-		},
-		{
-			"sample class lecture creation file",
-			"class_lec_test.xlsx",
-			"",
-			&ClassCreationData{
-				"class_lec_test.xlsx",
-				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				database.UpsertCoursesParams{
-					Code:      "SC1015",
-					Year:      2022,
-					Semester:  "2",
-					Programme: "CSC  Full-Time",
-					Au:        3,
-				},
-				[]ClassGroupData{
-					{
-						database.UpsertClassGroupsParams{
-							Name:      "L1",
-							ClassType: database.ClassTypeLEC,
-						},
-						[]SessionData{},
-						[]database.UpsertStudentsParams{
-							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
-							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
-						},
-					},
-				},
-				database.ClassTypeLEC,
-			},
-		},
-		{
-			"sample class tutorial creation file",
-			"class_tut_test.xlsx",
-			"",
-			&ClassCreationData{
-				"class_tut_test.xlsx",
-				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
-				database.UpsertCoursesParams{
+				database.UpsertClassesParams{
 					Code:      "SC1015",
 					Year:      2022,
 					Semester:  "2",
@@ -126,9 +44,9 @@ func TestParseClassCreationFile(t *testing.T) {
 							ClassType: database.ClassTypeTUT,
 						},
 						[]SessionData{},
-						[]database.UpsertStudentsParams{
-							{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
-							{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
+						[]database.UpsertUsersParams{
+							{"CHUL6789", "CHUA LI TING", pgtype.Text{}, database.UserRoleSTUDENT},
+							{"YAPW9087", "YAP WEN LI", pgtype.Text{}, database.UserRoleSTUDENT},
 						},
 					},
 					{
@@ -137,9 +55,9 @@ func TestParseClassCreationFile(t *testing.T) {
 							ClassType: database.ClassTypeTUT,
 						},
 						[]SessionData{},
-						[]database.UpsertStudentsParams{
-							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
-							{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
+						[]database.UpsertUsersParams{
+							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}, database.UserRoleSTUDENT},
+							{"YAPW9088", "YAP WEI LING", pgtype.Text{}, database.UserRoleSTUDENT},
 						},
 					},
 					{
@@ -148,9 +66,9 @@ func TestParseClassCreationFile(t *testing.T) {
 							ClassType: database.ClassTypeTUT,
 						},
 						[]SessionData{},
-						[]database.UpsertStudentsParams{
-							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
-							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
+						[]database.UpsertUsersParams{
+							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}, database.UserRoleSTUDENT},
+							{"YAPX9087", "YAP XIN TING", pgtype.Text{}, database.UserRoleSTUDENT},
 						},
 					},
 				},

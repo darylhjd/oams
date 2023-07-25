@@ -21,40 +21,38 @@ const (
 // This endpoint receives the auth code in the OAuth2 flow and exchanges this for an access token.
 func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	var s state
-	err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - cannot parse state from login callback", namespace), zap.Error(err))
+	if err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s); err != nil {
+		v.writeResponse(w, msLoginCallbackUrl, newErrorResponse(http.StatusInternalServerError, "cannot parse state from login callback"))
 		return
 	}
 
 	// Check that we only handle callbacks from appropriate API version.
 	if s.Version != namespace {
-		http.Error(w, "wrong API version used for login callback", http.StatusTeapot)
-		v.l.Error(fmt.Sprintf("%s - received login callback of different version so ignoring", namespace),
-			zap.Any(callbackStateParam, s))
+		v.writeResponse(w, msLoginCallbackUrl, newErrorResponse(http.StatusTeapot, "wrong api version handling"))
 		return
 	}
 
-	res, err := v.azure.AcquireTokenByAuthCode(
+	authResult, err := v.azure.AcquireTokenByAuthCode(
 		r.Context(),
 		r.PostFormValue(postFormCodeParam),
 		env.GetAPIServerAzureLoginCallbackURL(),
-		[]string{env.GetAPIServerAzureLoginScope()})
+		[]string{env.GetAPIServerAzureLoginScope()},
+	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - could not get tokens from auth code", namespace), zap.Error(err))
+		v.writeResponse(w, msLoginCallbackUrl, newErrorResponse(http.StatusInternalServerError, "cannot get auth tokens from code"))
 		return
 	}
 
-	// Upsert student into database.
-	err = v.db.Q.UpsertStudents(r.Context(), []database.UpsertStudentsParams{
+	// Upsert user into database.
+	err = v.db.Q.UpsertUsers(r.Context(), []database.UpsertUsersParams{
 		{
-			ID: res.IDToken.Name,
+			ID: authResult.IDToken.Name,
 			Email: pgtype.Text{
-				String: res.Account.PreferredUsername,
+				String: authResult.Account.PreferredUsername,
 				Valid:  true,
 			},
+			// TODO: Set correct role based on auth result.
+			Role: database.UserRoleSTUDENT,
 		},
 	}).Close()
 	if err != nil {
@@ -64,12 +62,11 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set session cookie.
-	_ = oauth2.SetSessionCookie(w, res)
+	_ = oauth2.SetSessionCookie(w, authResult)
 
-	redirectUrl := s.ReturnTo
-	if redirectUrl == "" {
-		redirectUrl = Url
+	if s.RedirectUrl == "" {
+		s.RedirectUrl = Url
 	}
 
-	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
+	http.Redirect(w, r, s.RedirectUrl, http.StatusSeeOther)
 }

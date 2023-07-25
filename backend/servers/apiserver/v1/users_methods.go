@@ -9,8 +9,8 @@ import (
 
 type usersGetResponse struct {
 	response
-	SessionUser *database.Student  `json:"session_user"`
-	Users       []database.Student `json:"users"`
+	SessionUser *database.User  `json:"session_user"`
+	Users       []database.User `json:"users"`
 }
 
 type usersGetQueries struct {
@@ -24,7 +24,7 @@ const (
 func (v *APIServerV1) usersGet(r *http.Request) (usersGetResponse, error) {
 	resp := usersGetResponse{
 		response: newSuccessfulResponse(),
-		Users:    []database.Student{},
+		Users:    []database.User{},
 	}
 
 	// Fill session user.
@@ -33,7 +33,7 @@ func (v *APIServerV1) usersGet(r *http.Request) (usersGetResponse, error) {
 	case err != nil:
 		return resp, err
 	case isSignedIn:
-		student, err := v.db.Q.GetStudent(r.Context(), authContext.AuthResult.IDToken.Name)
+		student, err := v.db.Q.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
 		if err != nil {
 			return resp, err
 		}
@@ -48,7 +48,7 @@ func (v *APIServerV1) usersGet(r *http.Request) (usersGetResponse, error) {
 		queries.ids = q[usersGetQueriesIdKey]
 	}
 
-	students, err := v.db.Q.GetStudentsByIDs(r.Context(), queries.ids)
+	students, err := v.db.Q.GetUsersByIDs(r.Context(), queries.ids)
 	if err != nil {
 		return resp, err
 	}

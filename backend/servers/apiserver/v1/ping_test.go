@@ -16,6 +16,7 @@ func TestAPIServerV1_ping(t *testing.T) {
 
 	a := assert.New(t)
 	id := uuid.NewString()
+
 	v1 := newTestAPIServerV1(t, id)
 	defer tests.TearDown(t, v1.db, id)
 
@@ -23,12 +24,10 @@ func TestAPIServerV1_ping(t *testing.T) {
 	rr := httptest.NewRecorder()
 	v1.ping(rr, req)
 
-	expectedResp := pingResponse{
+	expectedBytes, err := json.Marshal(pingResponse{
 		response: newSuccessfulResponse(),
 		Message:  "Pong~ OAMS API Service is running normally!",
-	}
-
-	bytes, err := json.Marshal(expectedResp)
+	})
 	a.Nil(err)
-	a.Equal(string(bytes), rr.Body.String())
+	a.Equal(string(expectedBytes), rr.Body.String())
 }

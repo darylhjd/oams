@@ -12,18 +12,18 @@ import (
 )
 
 const (
-	callbackMethodParam     = "response_mode"
-	callbackMethodFormPost  = "form_post"
-	callbackStateParam      = "state"
-	stateReturnToQueryParam = "return_to"
+	callbackMethodParam        = "response_mode"
+	callbackMethodFormPost     = "form_post"
+	callbackStateParam         = "state"
+	stateRedirectUrlQueryParam = "redirect_url"
 )
 
 // state stores the state from which the login was called.
 // This helps us store useful information such as the redirect URL to return the user to after login
 // and the version of the API in which the auth code flow was initiated.
 type state struct {
-	Version  string `json:"version"`
-	ReturnTo string `json:"return_to"`
+	Version     string `json:"version"`
+	RedirectUrl string `json:"redirect_url"`
 }
 
 type loginResponse struct {
@@ -33,8 +33,6 @@ type loginResponse struct {
 
 // login is the entrypoint to OAM's OAuth2 flow.
 func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
-	var resp apiResponse
-
 	// https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 	redirectString, err := v.azure.AuthCodeURL(
 		r.Context(),
@@ -48,8 +46,8 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 
 	// Set up the auth code flow state.
 	s, err := json.Marshal(state{
-		Version:  namespace,
-		ReturnTo: r.URL.Query().Get(stateReturnToQueryParam),
+		Version:     namespace,
+		RedirectUrl: r.URL.Query().Get(stateRedirectUrlQueryParam),
 	})
 	if err != nil {
 		v.writeResponse(w, loginUrl, newErrorResponse(http.StatusInternalServerError, "cannot create oauth state"))
@@ -65,9 +63,8 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 
 	v.l.Debug(fmt.Sprintf("%s - generated azure login url", namespace), zap.String("url", redirectString))
 
-	resp = loginResponse{
+	v.writeResponse(w, loginUrl, loginResponse{
 		newSuccessfulResponse(),
 		redirectString,
-	}
-	v.writeResponse(w, loginUrl, resp)
+	})
 }

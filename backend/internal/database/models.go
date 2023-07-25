@@ -54,9 +54,63 @@ func (ns NullClassType) Value() (driver.Value, error) {
 	return string(ns.ClassType), nil
 }
 
+type UserRole string
+
+const (
+	UserRoleSTUDENT           UserRole = "STUDENT"
+	UserRoleCOURSECOORDINATOR UserRole = "COURSE_COORDINATOR"
+	UserRoleADMIN             UserRole = "ADMIN"
+)
+
+func (e *UserRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserRole(s)
+	case string:
+		*e = UserRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserRole: %T", src)
+	}
+	return nil
+}
+
+type NullUserRole struct {
+	UserRole UserRole `json:"user_role"`
+	Valid    bool     `json:"valid"` // Valid is true if UserRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserRole), nil
+}
+
+type Class struct {
+	ID        int64            `json:"id"`
+	Code      string           `json:"code"`
+	Year      int32            `json:"year"`
+	Semester  string           `json:"semester"`
+	Programme string           `json:"programme"`
+	Au        int16            `json:"au"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+}
+
 type ClassGroup struct {
 	ID        int64            `json:"id"`
-	CourseID  int64            `json:"course_id"`
+	ClassID   int64            `json:"class_id"`
 	Name      string           `json:"name"`
 	ClassType ClassType        `json:"class_type"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
@@ -73,27 +127,17 @@ type ClassGroupSession struct {
 	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
 }
 
-type Course struct {
-	ID        int64            `json:"id"`
-	Code      string           `json:"code"`
-	Year      int32            `json:"year"`
-	Semester  string           `json:"semester"`
-	Programme string           `json:"programme"`
-	Au        int16            `json:"au"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
-}
-
 type SessionEnrollment struct {
 	SessionID int64            `json:"session_id"`
-	StudentID string           `json:"student_id"`
+	UserID    string           `json:"user_id"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
-type Student struct {
+type User struct {
 	ID        string           `json:"id"`
 	Name      string           `json:"name"`
 	Email     pgtype.Text      `json:"email"`
+	Role      UserRole         `json:"role"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 	UpdatedAt pgtype.Timestamp `json:"updated_at"`
 }
