@@ -193,7 +193,7 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 	// Then insert the class groups.
 	// Then for each class group, for each of its sessions, update its class_group_id.
 	// Then insert the sessions.
-	// Then insert the students. <-- We are here.
+	// Then insert the students.
 	// Then for each of the sessions, insert an enrollment for each student.
 	var classGroupsHelper classGroupsParamsWithClassGroup
 	q.UpsertCourses(ctx, coursesParams).QueryRow(func(i int, course database.Course, err error) {

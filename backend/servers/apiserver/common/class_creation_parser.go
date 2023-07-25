@@ -129,7 +129,7 @@ func parseClassMetaData(creationData *ClassCreationData, rows [][]string) error 
 
 	// Parse class type.
 	if _, err = fmt.Sscanf(rows[classTypeRow][expectedClassMetaDataRowLength-1], classTypeFormat,
-		&creationData.ClassType); err != nil {
+		&creationData.classType); err != nil {
 		return fmt.Errorf("%s - could not parse class type: %w", namespace, err)
 	}
 
@@ -141,7 +141,7 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 	index := expectedClassMetaDataRows + 1            // Skip one blank row after metadata.
 	for index+expectedClassGroupIDRows <= len(rows) { // For each class group.
 		var group ClassGroupData
-		group.ClassType = creationData.ClassType
+		group.ClassType = creationData.classType
 
 		// Parse class group ID.
 		if len(rows[index]) != expectedClassGroupMetaDataRowLength {

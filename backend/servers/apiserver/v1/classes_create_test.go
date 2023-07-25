@@ -20,6 +20,8 @@ import (
 )
 
 func TestAPIServerV1_classesCreate(t *testing.T) {
+	t.Parallel()
+
 	tts := []struct {
 		name         string
 		body         func() (io.Reader, string, error)
@@ -28,31 +30,28 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 		{
 			"with file upload",
 			func() (io.Reader, string, error) {
-				files := []string{
-					"class_lab_test.xlsx",
-				}
+				file := "class_lab_test.xlsx"
 
 				var b bytes.Buffer
 				w := multipart.NewWriter(&b)
-				for _, file := range files {
-					f, err := os.Open(file)
-					if err != nil {
-						return nil, "", err
-					}
 
-					ww, err := w.CreateFormFile(multipartFormFileIdent, file)
-					if err != nil {
-						return nil, "", err
-					}
+				f, err := os.Open(file)
+				if err != nil {
+					return nil, "", err
+				}
 
-					_, err = io.Copy(ww, f)
-					if err != nil {
-						return nil, "", err
-					}
+				ww, err := w.CreateFormFile(multipartFormFileIdent, file)
+				if err != nil {
+					return nil, "", err
+				}
 
-					if err = f.Close(); err != nil {
-						return nil, "", err
-					}
+				_, err = io.Copy(ww, f)
+				if err != nil {
+					return nil, "", err
+				}
+
+				if err = f.Close(); err != nil {
+					return nil, "", err
 				}
 
 				return &b, w.FormDataContentType(), w.Close()
@@ -69,25 +68,39 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 		{
 			name: "with json body",
 			body: func() (io.Reader, string, error) {
+				now := time.Now()
+
 				body := classesCreateRequest{
 					[]common.ClassCreationData{
 						{
-							"class_lab_test.xlsx",
-							time.Date(2023, time.June, 15, 13, 1, 0, 0, time.Local),
-							database.UpsertCoursesParams{
+							Course: database.UpsertCoursesParams{
 								Code:      "SC1015",
 								Year:      2022,
 								Semester:  "2",
 								Programme: "CSC  Full-Time",
 								Au:        3,
 							},
-							[]common.ClassGroupData{
+							ClassGroups: []common.ClassGroupData{
 								{
 									database.UpsertClassGroupsParams{
 										Name:      "A21",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{},
+									[]common.SessionData{
+										{
+											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
+												StartTime: pgtype.Timestamp{
+													Time:  now,
+													Valid: true,
+												},
+												EndTime: pgtype.Timestamp{
+													Time:  now.Add(2 * time.Hour),
+													Valid: true,
+												},
+												Venue: "",
+											},
+										},
+									},
 									[]database.UpsertStudentsParams{
 										{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
 										{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
@@ -98,7 +111,21 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 										Name:      "A26",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{},
+									[]common.SessionData{
+										{
+											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
+												StartTime: pgtype.Timestamp{
+													Time:  now,
+													Valid: true,
+												},
+												EndTime: pgtype.Timestamp{
+													Time:  now.Add(2 * time.Hour),
+													Valid: true,
+												},
+												Venue: "",
+											},
+										},
+									},
 									[]database.UpsertStudentsParams{
 										{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
 										{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
@@ -109,14 +136,27 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 										Name:      "A32",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{},
+									[]common.SessionData{
+										{
+											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
+												StartTime: pgtype.Timestamp{
+													Time:  now,
+													Valid: true,
+												},
+												EndTime: pgtype.Timestamp{
+													Time:  now.Add(2 * time.Hour),
+													Valid: true,
+												},
+												Venue: "",
+											},
+										},
+									},
 									[]database.UpsertStudentsParams{
 										{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
 										{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
 									},
 								},
 							},
-							database.ClassTypeLAB,
 						},
 					},
 				}
@@ -129,16 +169,23 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 				return bytes.NewReader(b), "application/json", nil
 			},
 			wantResponse: classesCreateResponse{
-				response: newSuccessfulResponse(),
+				response:           newSuccessfulResponse(),
+				Classes:            1,
+				ClassGroups:        3,
+				ClassGroupSessions: 3,
+				Students:           6,
+				SessionEnrollments: 6,
 			},
 		},
 	}
 
 	for _, tt := range tts {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			a := assert.New(t)
 			id := uuid.NewString()
-			t.Log(tt.name)
 
 			body, contentType, err := tt.body()
 			if err != nil {
