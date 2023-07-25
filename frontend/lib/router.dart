@@ -47,7 +47,7 @@ final routerProvider = Provider<GoRouter>(
                   key: state.pageKey,
                   child: LoginScreen(
                     returnTo:
-                        state.queryParameters[APIClient.loginReturnToParam] ??
+                        state.queryParameters[APIClient.loginRedirectUrlParam] ??
                             "",
                   ),
                 );
@@ -68,7 +68,7 @@ final routerProvider = Provider<GoRouter>(
                 var to = state.namedLocation(
                   Routes.login.name,
                   queryParameters: {
-                    APIClient.loginReturnToParam:
+                    APIClient.loginRedirectUrlParam:
                         "${webServerHost()}:${webServerPort()}${state.fullPath!}",
                   },
                 );

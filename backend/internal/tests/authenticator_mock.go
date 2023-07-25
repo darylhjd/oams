@@ -10,6 +10,13 @@ import (
 	"github.com/darylhjd/oams/backend/internal/env"
 )
 
+const (
+	MockAuthenticatorAccessToken              = "mock-access-token"
+	MockAuthenticatorAccountHomeAccountID     = "mock-home-account-id"
+	MockAuthenticatorAccountPreferredUsername = "NTU0001@e.ntu.edu.sg"
+	MockAuthenticatorIDTokenName              = "TESTACC001"
+)
+
 // MockAzureAuthenticator allows us to mock the calls to Microsoft's Azure AD APIs.
 type MockAzureAuthenticator struct {
 	keyCache *jwk.Cache

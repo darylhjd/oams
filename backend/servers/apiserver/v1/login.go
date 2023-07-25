@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	callbackMethodParam     = "response_mode"
-	callbackMethodFormPost  = "form_post"
-	callbackStateParam      = "state"
-	stateReturnToQueryParam = "redirect_url"
+	callbackMethodParam        = "response_mode"
+	callbackMethodFormPost     = "form_post"
+	callbackStateParam         = "state"
+	stateRedirectUrlQueryParam = "redirect_url"
 )
 
 // state stores the state from which the login was called.
@@ -47,7 +47,7 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 	// Set up the auth code flow state.
 	s, err := json.Marshal(state{
 		Version:     namespace,
-		RedirectUrl: r.URL.Query().Get(stateReturnToQueryParam),
+		RedirectUrl: r.URL.Query().Get(stateRedirectUrlQueryParam),
 	})
 	if err != nil {
 		v.writeResponse(w, loginUrl, newErrorResponse(http.StatusInternalServerError, "cannot create oauth state"))

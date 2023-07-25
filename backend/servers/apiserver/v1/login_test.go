@@ -44,7 +44,7 @@ func TestAPIServerV1_login(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			loginQueries := url.Values{}
-			loginQueries.Set(stateReturnToQueryParam, tt.returnTo)
+			loginQueries.Set(stateRedirectUrlQueryParam, tt.returnTo)
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s?%s", loginUrl, loginQueries.Encode()), nil)
 			rr := httptest.NewRecorder()
 			v1.login(rr, req)
