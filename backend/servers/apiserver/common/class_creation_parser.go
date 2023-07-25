@@ -129,7 +129,7 @@ func parseClassMetaData(creationData *ClassCreationData, rows [][]string) error 
 
 	// Parse class type.
 	if _, err = fmt.Sscanf(rows[classTypeRow][expectedClassMetaDataRowLength-1], classTypeFormat,
-		&creationData.ClassType); err != nil {
+		&creationData.classType); err != nil {
 		return fmt.Errorf("%s - could not parse class type: %w", namespace, err)
 	}
 
@@ -141,7 +141,7 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 	index := expectedClassMetaDataRows + 1            // Skip one blank row after metadata.
 	for index+expectedClassGroupIDRows <= len(rows) { // For each class group.
 		var group ClassGroupData
-		group.ClassType = creationData.ClassType
+		group.ClassType = creationData.classType
 
 		// Parse class group ID.
 		if len(rows[index]) != expectedClassGroupMetaDataRowLength {
@@ -157,7 +157,7 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 		index += expectedClassGroupIDRows
 		for index+expectedClassGroupSessionRows <= len(rows) && len(rows[index]) != 0 { // For each session for a class group.
 			var (
-				session   database.UpsertClassGroupSessionsParams
+				session   SessionData
 				dayOfWeek string
 				from      string
 				to        string
@@ -171,14 +171,24 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 			}
 
 			// TODO: Store actual date with the time.
-			_, err := time.Parse(classGroupSessionTimeFormat, from)
+			startTime, err := time.Parse(classGroupSessionTimeFormat, from)
 			if err != nil {
 				return fmt.Errorf("%s - could not parse class group session start time: %w", namespace, err)
 			}
 
-			_, err = time.Parse(classGroupSessionTimeFormat, to)
+			session.StartTime = pgtype.Timestamp{
+				Time:  startTime,
+				Valid: true,
+			}
+
+			endTime, err := time.Parse(classGroupSessionTimeFormat, to)
 			if err != nil {
 				return fmt.Errorf("%s - could not parse class group session end time: %w", namespace, err)
+			}
+
+			session.EndTime = pgtype.Timestamp{
+				Time:  endTime,
+				Valid: true,
 			}
 
 			// Parse session venue.

@@ -43,7 +43,7 @@ func TestParseClassCreationFile(t *testing.T) {
 							Name:      "A21",
 							ClassType: database.ClassTypeLAB,
 						},
-						[]database.UpsertClassGroupSessionsParams{},
+						[]SessionData{},
 						[]database.UpsertStudentsParams{
 							{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
 							{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
@@ -54,10 +54,10 @@ func TestParseClassCreationFile(t *testing.T) {
 							Name:      "A26",
 							ClassType: database.ClassTypeLAB,
 						},
-						[]database.UpsertClassGroupSessionsParams{},
+						[]SessionData{},
 						[]database.UpsertStudentsParams{
 							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
-							{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
+							{"YAPW9088", "YAP WEI LING", pgtype.Text{}},
 						},
 					},
 					{
@@ -65,7 +65,7 @@ func TestParseClassCreationFile(t *testing.T) {
 							Name:      "A32",
 							ClassType: database.ClassTypeLAB,
 						},
-						[]database.UpsertClassGroupSessionsParams{},
+						[]SessionData{},
 						[]database.UpsertStudentsParams{
 							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
 							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
@@ -95,7 +95,7 @@ func TestParseClassCreationFile(t *testing.T) {
 							Name:      "L1",
 							ClassType: database.ClassTypeLEC,
 						},
-						[]database.UpsertClassGroupSessionsParams{},
+						[]SessionData{},
 						[]database.UpsertStudentsParams{
 							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
 							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
@@ -125,7 +125,7 @@ func TestParseClassCreationFile(t *testing.T) {
 							Name:      "A21",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]database.UpsertClassGroupSessionsParams{},
+						[]SessionData{},
 						[]database.UpsertStudentsParams{
 							{"CHUL6789", "CHUA LI TING", pgtype.Text{}},
 							{"YAPW9087", "YAP WEN LI", pgtype.Text{}},
@@ -136,7 +136,7 @@ func TestParseClassCreationFile(t *testing.T) {
 							Name:      "A26",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]database.UpsertClassGroupSessionsParams{},
+						[]SessionData{},
 						[]database.UpsertStudentsParams{
 							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
 							{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
@@ -147,7 +147,7 @@ func TestParseClassCreationFile(t *testing.T) {
 							Name:      "A32",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]database.UpsertClassGroupSessionsParams{},
+						[]SessionData{},
 						[]database.UpsertStudentsParams{
 							{"PATELAR14", "ARJUN PATEL", pgtype.Text{}},
 							{"YAPX9087", "YAP XIN TING", pgtype.Text{}},
@@ -224,7 +224,7 @@ func TestParseClassCreationFile(t *testing.T) {
 				tt.expectedData.Filename:         data.Filename,
 				tt.expectedData.FileCreationDate: data.FileCreationDate,
 				tt.expectedData.Course:           data.Course,
-				tt.expectedData.ClassType:        data.ClassType,
+				tt.expectedData.classType:        data.classType,
 			}
 
 			for expected, actual := range attributeTests {

@@ -18,14 +18,19 @@ type ClassCreationData struct {
 	ClassGroups []ClassGroupData             `json:"class_groups"`
 
 	// These variables are helper fields for generating filled data.
-	ClassType database.ClassType `json:"-"`
+	classType database.ClassType
 }
 
 // ClassGroupData is a struct containing data for creating a class group and its associated sessions.
 type ClassGroupData struct {
 	database.UpsertClassGroupsParams
-	Sessions []database.UpsertClassGroupSessionsParams `json:"sessions"`
-	Students []database.UpsertStudentsParams           `json:"students"`
+	Sessions []SessionData                   `json:"sessions"`
+	Students []database.UpsertStudentsParams `json:"students"`
+}
+
+type SessionData struct {
+	Course *ClassCreationData `json:"-"`
+	database.UpsertClassGroupSessionsParams
 }
 
 // IsValid is a helper function to check if a ClassCreationData is valid and returns an error if it is not.
