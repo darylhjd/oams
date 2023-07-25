@@ -48,6 +48,7 @@ func TestAPIServerV1_signOut(t *testing.T) {
 	}
 
 	for _, tt := range tts {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
