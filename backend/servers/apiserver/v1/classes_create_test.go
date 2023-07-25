@@ -2,6 +2,7 @@ package v1
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"mime/multipart"
@@ -21,6 +22,7 @@ import (
 
 func TestAPIServerV1_classesCreate(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	tts := []struct {
 		name         string
@@ -61,7 +63,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 				1,
 				3,
 				3,
-				66,
+				58,
 				66,
 			},
 		},
@@ -128,7 +130,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 									},
 									[]database.UpsertStudentsParams{
 										{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
-										{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
+										{"YAPW9088", "YAP WEI LING", pgtype.Text{}},
 									},
 								},
 								{
@@ -203,6 +205,27 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 			b, err := json.Marshal(tt.wantResponse)
 			a.Nil(err)
 			a.Equal(string(b), rr.Body.String())
+
+			// Check correct number of inputs in database.
+			courses, err := v1.db.Q.ListCourses(ctx)
+			a.Nil(err)
+			a.Equal(tt.wantResponse.Classes, len(courses))
+
+			classGroups, err := v1.db.Q.ListClassGroups(ctx)
+			a.Nil(err)
+			a.Equal(tt.wantResponse.ClassGroups, len(classGroups))
+
+			classGroupSessions, err := v1.db.Q.ListClassGroupSessions(ctx)
+			a.Nil(err)
+			a.Equal(tt.wantResponse.ClassGroupSessions, len(classGroupSessions))
+
+			students, err := v1.db.Q.ListStudents(ctx)
+			a.Nil(err)
+			a.Equal(tt.wantResponse.Students, len(students))
+
+			sessionEnrollments, err := v1.db.Q.ListSessionEnrollments(ctx)
+			a.Nil(err)
+			a.Equal(tt.wantResponse.SessionEnrollments, len(sessionEnrollments))
 		})
 	}
 }

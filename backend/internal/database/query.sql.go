@@ -29,6 +29,134 @@ func (q *Queries) GetStudent(ctx context.Context, id string) (Student, error) {
 	return i, err
 }
 
+const listClassGroupSessions = `-- name: ListClassGroupSessions :many
+SELECT id, class_group_id, start_time, end_time, venue, created_at, updated_at
+FROM class_group_sessions
+ORDER BY class_group_id, start_time, end_time
+`
+
+func (q *Queries) ListClassGroupSessions(ctx context.Context) ([]ClassGroupSession, error) {
+	rows, err := q.db.Query(ctx, listClassGroupSessions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ClassGroupSession
+	for rows.Next() {
+		var i ClassGroupSession
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClassGroupID,
+			&i.StartTime,
+			&i.EndTime,
+			&i.Venue,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listClassGroups = `-- name: ListClassGroups :many
+SELECT id, course_id, name, class_type, created_at, updated_at
+FROM class_groups
+ORDER BY course_id, name
+`
+
+func (q *Queries) ListClassGroups(ctx context.Context) ([]ClassGroup, error) {
+	rows, err := q.db.Query(ctx, listClassGroups)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ClassGroup
+	for rows.Next() {
+		var i ClassGroup
+		if err := rows.Scan(
+			&i.ID,
+			&i.CourseID,
+			&i.Name,
+			&i.ClassType,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCourses = `-- name: ListCourses :many
+SELECT id, code, year, semester, programme, au, created_at, updated_at
+FROM courses
+ORDER BY code, year, semester
+`
+
+func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
+	rows, err := q.db.Query(ctx, listCourses)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Course
+	for rows.Next() {
+		var i Course
+		if err := rows.Scan(
+			&i.ID,
+			&i.Code,
+			&i.Year,
+			&i.Semester,
+			&i.Programme,
+			&i.Au,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSessionEnrollments = `-- name: ListSessionEnrollments :many
+SELECT session_id, student_id, created_at
+FROM session_enrollments
+ORDER BY session_id, student_id
+`
+
+func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollment, error) {
+	rows, err := q.db.Query(ctx, listSessionEnrollments)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SessionEnrollment
+	for rows.Next() {
+		var i SessionEnrollment
+		if err := rows.Scan(&i.SessionID, &i.StudentID, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listStudents = `-- name: ListStudents :many
 SELECT id, name, email, created_at, updated_at
 FROM students

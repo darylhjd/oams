@@ -184,6 +184,18 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 		dbErr         error
 		coursesParams []database.UpsertCoursesParams
 	)
+	resp := classesCreateResponse{
+		response: newSuccessfulResponse(),
+	}
+
+	defer func() {
+		if dbErr != nil {
+			txErr := tx.Rollback(ctx)
+			v.l.Debug(fmt.Sprintf("%s - error while doing classes create action", namespace),
+				zap.Error(errors.Join(dbErr, txErr)))
+		}
+	}()
+
 	for _, class := range req.Classes {
 		coursesParams = append(coursesParams, class.Course)
 	}
@@ -204,6 +216,8 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 			return
 		}
 
+		resp.Classes++
+
 		class := req.Classes[i]
 		for idx := range class.ClassGroups {
 			class.ClassGroups[idx].UpsertClassGroupsParams.CourseID = course.ID
@@ -211,6 +225,9 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 			classGroupsHelper.classGroups = append(classGroupsHelper.classGroups, &class.ClassGroups[idx])
 		}
 	})
+	if dbErr != nil {
+		return nil, dbErr
+	}
 
 	var classGroupSessionsHelper classGroupSessionsParamsWithStudents
 	q.UpsertClassGroups(ctx, classGroupsHelper.classGroupsParams).QueryRow(func(i int, group database.ClassGroup, err error) {
@@ -221,12 +238,17 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 			return
 		}
 
+		resp.ClassGroups++
+
 		for idx := range classGroupsHelper.classGroups[i].Sessions {
 			classGroupsHelper.classGroups[i].Sessions[idx].ClassGroupID = group.ID
 			classGroupSessionsHelper.classGroupSessionsParams = append(classGroupSessionsHelper.classGroupSessionsParams, classGroupsHelper.classGroups[i].Sessions[idx].UpsertClassGroupSessionsParams)
 			classGroupSessionsHelper.students = append(classGroupSessionsHelper.students, classGroupsHelper.classGroups[i].Students)
 		}
 	})
+	if dbErr != nil {
+		return nil, dbErr
+	}
 
 	var (
 		studentsParams    []database.UpsertStudentsParams
@@ -240,6 +262,8 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 			return
 		}
 
+		resp.ClassGroupSessions++
+
 		for idx := range classGroupSessionsHelper.students[i] {
 			studentsParams = append(studentsParams, classGroupSessionsHelper.students[i][idx])
 			enrollmentsParams = append(enrollmentsParams, database.CreateSessionEnrollmentsParams{
@@ -248,28 +272,30 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 			})
 		}
 	})
-
-	if dbErr == nil && len(studentsParams) != 0 {
-		dbErr = q.UpsertStudents(ctx, studentsParams).Close()
-	}
-
-	if dbErr == nil && len(enrollmentsParams) != 0 {
-		dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close()
-	}
-
 	if dbErr != nil {
-		if err = tx.Rollback(ctx); err != nil {
-			return nil, err
-		}
 		return nil, dbErr
 	}
 
-	return classesCreateResponse{
-		response:           newSuccessfulResponse(),
-		Classes:            len(coursesParams),
-		ClassGroups:        len(classGroupsHelper.classGroups),
-		ClassGroupSessions: len(classGroupSessionsHelper.classGroupSessionsParams),
-		Students:           len(studentsParams),
-		SessionEnrollments: len(enrollmentsParams),
-	}, tx.Commit(ctx)
+	if dbErr = q.UpsertStudents(ctx, studentsParams).Close(); dbErr != nil {
+		return nil, dbErr
+	}
+
+	if dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close(); err != nil {
+		return nil, dbErr
+	}
+
+	students, dbErr := q.ListStudents(ctx)
+	if dbErr != nil {
+		return nil, dbErr
+	}
+
+	resp.Students = len(students)
+
+	sessionEnrollments, dbErr := q.ListSessionEnrollments(ctx)
+	if dbErr != nil {
+		return nil, dbErr
+	}
+
+	resp.SessionEnrollments = len(sessionEnrollments)
+	return resp, tx.Commit(ctx)
 }

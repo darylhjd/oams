@@ -57,7 +57,7 @@ func TestParseClassCreationFile(t *testing.T) {
 						[]SessionData{},
 						[]database.UpsertStudentsParams{
 							{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}},
-							{"YAPW9087", "YAP WEI LING", pgtype.Text{}},
+							{"YAPW9088", "YAP WEI LING", pgtype.Text{}},
 						},
 					},
 					{
