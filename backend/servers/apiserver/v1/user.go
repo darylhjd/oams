@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -16,9 +17,10 @@ import (
 func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
+	userId := strings.TrimPrefix(r.URL.Path, userUrl)
 	switch r.Method {
 	case http.MethodGet:
-		resp = v.userGet(r)
+		resp = v.userGet(r, userId)
 	case http.MethodPut:
 		resp = v.userPut(r)
 	case http.MethodDelete:
@@ -30,53 +32,26 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	v.writeResponse(w, userUrl, resp)
 }
 
-type userGetQueries struct {
-	ids []string
-}
-
-const (
-	userGetQueriesIdKey = "ids"
-)
-
 type userGetResponse struct {
 	response
-	SessionUser *database.User  `json:"session_user"`
-	Users       []database.User `json:"users"`
+	User database.User `json:"user"`
 }
 
-func (v *APIServerV1) userGet(r *http.Request) apiResponse {
+func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
 	resp := userGetResponse{
 		response: newSuccessResponse(),
-		Users:    []database.User{},
 	}
 
-	// Fill session user.
-	authContext, isSignedIn, err := middleware.GetAuthContext(r)
-	switch {
-	case err != nil:
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	case isSignedIn:
-		student, err := v.db.Q.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
-		if err != nil {
-			return newErrorResponse(http.StatusInternalServerError, err.Error())
+	user, err := v.db.Q.GetUser(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "the requested user does not exist")
 		}
 
-		resp.SessionUser = &student
-	}
-
-	// Parse queries
-	var queries userGetQueries
-	{
-		q := r.URL.Query()
-		queries.ids = q[userGetQueriesIdKey]
-	}
-
-	students, err := v.db.Q.GetUsersByIDs(r.Context(), queries.ids)
-	if err != nil {
 		return newErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 
-	resp.Users = append(resp.Users, students...)
+	resp.User = user
 	return resp
 }
 

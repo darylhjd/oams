@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -28,7 +27,7 @@ func TestAPIServerV1_user(t *testing.T) {
 		{
 			"with GET method",
 			http.MethodGet,
-			http.StatusOK,
+			http.StatusNotFound,
 		},
 		{
 			"with PUT method",
@@ -67,45 +66,26 @@ func TestAPIServerV1_user(t *testing.T) {
 	}
 }
 
-func Test_userGet(t *testing.T) {
+func TestAPIServerV1_userGet(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name            string
-		withAuthContext any
-		wantResponse    userGetResponse
-		wantErr         string
+		name           string
+		withUserId     string
+		wantStatusCode int
+		wantErr        string
 	}{
 		{
-			"request with account in context",
-			tests.NewMockAuthContext(),
-			userGetResponse{
-				response: newSuccessResponse(),
-				SessionUser: &database.User{
-					ID: tests.MockAuthenticatorIDTokenName,
-					Email: pgtype.Text{
-						String: tests.MockAuthenticatorAccountPreferredUsername,
-						Valid:  true,
-					},
-				},
-				Users: []database.User{},
-			},
+			"request with user in database",
+			uuid.NewString(),
+			http.StatusOK,
 			"",
 		},
 		{
-			"request with no account in context",
-			nil,
-			userGetResponse{
-				response: newSuccessResponse(),
-				Users:    []database.User{},
-			},
-			"",
-		},
-		{
-			"request with wrong auth context type",
-			time.Time{},
-			userGetResponse{},
-			middleware.ErrUnexpectedAuthContextType.Error(),
+			"request with user not in database",
+			uuid.NewString(),
+			http.StatusNotFound,
+			"the requested user does not exist",
 		},
 	}
 
@@ -121,26 +101,23 @@ func Test_userGet(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			tests.StubAuthContextUser(t, ctx, v1.db.Q)
+			if tt.wantErr == "" {
+				tests.StubUser(t, ctx, v1.db.Q, tt.withUserId)
+			}
 
-			req := httptest.NewRequest(http.MethodGet, userUrl, nil)
-			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
-			actualResp := v1.userGet(req)
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, tt.withUserId), nil)
+			resp := v1.userGet(req, tt.withUserId)
+			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
 			case tt.wantErr != "":
-				err, ok := actualResp.(errorResponse)
+				actualResp, ok := resp.(errorResponse)
 				a.True(ok)
-				a.Contains(err.Error, tt.wantErr)
-				return
-			case tt.withAuthContext != nil:
-				resp, ok := actualResp.(userGetResponse)
-				a.True(ok)
-				a.Equal(tt.wantResponse.SessionUser.ID, resp.SessionUser.ID)
-				tt.wantResponse.SessionUser = resp.SessionUser
-				fallthrough
+				a.Contains(actualResp.Error, tt.wantErr)
 			default:
-				a.Equal(tt.wantResponse, actualResp)
+				actualResp, ok := resp.(userGetResponse)
+				a.True(ok)
+				a.Equal(tt.withUserId, actualResp.User.ID)
 			}
 		})
 	}
