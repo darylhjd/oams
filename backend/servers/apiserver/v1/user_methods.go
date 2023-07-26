@@ -11,22 +11,22 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type usersGetResponse struct {
+type userGetQueries struct {
+	ids []string
+}
+
+const (
+	userGetQueriesIdKey = "ids"
+)
+
+type userGetResponse struct {
 	response
 	SessionUser *database.User  `json:"session_user"`
 	Users       []database.User `json:"users"`
 }
 
-type usersGetQueries struct {
-	ids []string
-}
-
-const (
-	usersGetQueriesIdKey = "ids"
-)
-
-func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
-	resp := usersGetResponse{
+func (v *APIServerV1) userGet(r *http.Request) apiResponse {
+	resp := userGetResponse{
 		response: newSuccessResponse(),
 		Users:    []database.User{},
 	}
@@ -46,10 +46,10 @@ func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 	}
 
 	// Parse queries
-	var queries usersGetQueries
+	var queries userGetQueries
 	{
 		q := r.URL.Query()
-		queries.ids = q[usersGetQueriesIdKey]
+		queries.ids = q[userGetQueriesIdKey]
 	}
 
 	students, err := v.db.Q.GetUsersByIDs(r.Context(), queries.ids)
@@ -61,21 +61,21 @@ func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 	return resp
 }
 
-type usersPutRequest struct {
+type userPutRequest struct {
 	Users []database.UpsertUsersParams `json:"users"`
 }
 
-type usersPutResponse struct {
+type userPutResponse struct {
 	response
 	Users []database.User `json:"users"`
 }
 
-func (v *APIServerV1) usersPut(r *http.Request) apiResponse {
+func (v *APIServerV1) userPut(r *http.Request) apiResponse {
 	var (
 		b   bytes.Buffer
-		req usersPutRequest
+		req userPutRequest
 	)
-	resp := usersPutResponse{
+	resp := userPutResponse{
 		newSuccessResponse(),
 		[]database.User{},
 	}

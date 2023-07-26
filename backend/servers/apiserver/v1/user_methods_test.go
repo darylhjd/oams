@@ -17,19 +17,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_usersGet(t *testing.T) {
+func Test_userGet(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
 		name            string
 		withAuthContext any
-		wantResponse    usersGetResponse
+		wantResponse    userGetResponse
 		wantErr         string
 	}{
 		{
 			"request with account in context",
 			tests.NewMockAuthContext(),
-			usersGetResponse{
+			userGetResponse{
 				response: newSuccessResponse(),
 				SessionUser: &database.User{
 					ID: tests.MockAuthenticatorIDTokenName,
@@ -45,7 +45,7 @@ func Test_usersGet(t *testing.T) {
 		{
 			"request with no account in context",
 			nil,
-			usersGetResponse{
+			userGetResponse{
 				response: newSuccessResponse(),
 				Users:    []database.User{},
 			},
@@ -54,7 +54,7 @@ func Test_usersGet(t *testing.T) {
 		{
 			"request with wrong auth context type",
 			time.Time{},
-			usersGetResponse{},
+			userGetResponse{},
 			middleware.ErrUnexpectedAuthContextType.Error(),
 		},
 	}
@@ -73,9 +73,9 @@ func Test_usersGet(t *testing.T) {
 
 			tests.StubAuthContextUser(t, ctx, v1.db.Q)
 
-			req := httptest.NewRequest(http.MethodGet, usersUrl, nil)
+			req := httptest.NewRequest(http.MethodGet, userUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
-			actualResp := v1.usersGet(req)
+			actualResp := v1.userGet(req)
 
 			switch {
 			case tt.wantErr != "":
@@ -84,7 +84,7 @@ func Test_usersGet(t *testing.T) {
 				a.Contains(err.Error, tt.wantErr)
 				return
 			case tt.withAuthContext != nil:
-				resp, ok := actualResp.(usersGetResponse)
+				resp, ok := actualResp.(userGetResponse)
 				a.True(ok)
 				a.Equal(tt.wantResponse.SessionUser.ID, resp.SessionUser.ID)
 				tt.wantResponse.SessionUser = resp.SessionUser
@@ -96,18 +96,18 @@ func Test_usersGet(t *testing.T) {
 	}
 }
 
-func Test_usersPut(t *testing.T) {
+func Test_userPut(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
 		name         string
 		withRequest  any
-		wantResponse usersPutResponse
+		wantResponse userPutResponse
 		wantErr      string
 	}{
 		{
 			"good request",
-			usersPutRequest{
+			userPutRequest{
 				[]database.UpsertUsersParams{
 					{
 						ID:   tests.MockAuthenticatorIDTokenName,
@@ -120,7 +120,7 @@ func Test_usersPut(t *testing.T) {
 					},
 				},
 			},
-			usersPutResponse{
+			userPutResponse{
 				newSuccessResponse(),
 				[]database.User{
 					{
@@ -139,7 +139,7 @@ func Test_usersPut(t *testing.T) {
 		{
 			"bad request",
 			[]string{},
-			usersPutResponse{},
+			userPutResponse{},
 			"could not parse request body",
 		},
 	}
@@ -158,8 +158,8 @@ func Test_usersPut(t *testing.T) {
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
 			a.Nil(err)
 
-			req := httptest.NewRequest(http.MethodPut, usersUrl, bytes.NewReader(reqBodyBytes))
-			actualResp := v1.usersPut(req)
+			req := httptest.NewRequest(http.MethodPut, userUrl, bytes.NewReader(reqBodyBytes))
+			actualResp := v1.userPut(req)
 
 			switch {
 			case tt.wantErr != "":
@@ -167,7 +167,7 @@ func Test_usersPut(t *testing.T) {
 				a.True(ok)
 				a.Contains(err.Error, tt.wantErr)
 			default:
-				resp, ok := actualResp.(usersPutResponse)
+				resp, ok := actualResp.(userPutResponse)
 				a.True(ok)
 				a.Equal(len(tt.wantResponse.Users), len(resp.Users))
 				for idx, respUser := range resp.Users {
