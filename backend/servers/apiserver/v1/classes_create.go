@@ -276,20 +276,16 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 		return nil, dbErr
 	}
 
-	if dbErr = q.UpsertUsers(ctx, studentsParams).Close(); dbErr != nil {
-		return nil, dbErr
-	}
-
-	if dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close(); dbErr != nil {
-		return nil, dbErr
-	}
-
-	students, dbErr := q.ListUsers(ctx)
+	students, dbErr := upsertUsers(ctx, v.db, tx, studentsParams)
 	if dbErr != nil {
 		return nil, dbErr
 	}
 
 	resp.Students = len(students)
+
+	if dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close(); dbErr != nil {
+		return nil, dbErr
+	}
 
 	sessionEnrollments, dbErr := q.ListSessionEnrollments(ctx)
 	if dbErr != nil {

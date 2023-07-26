@@ -13,7 +13,7 @@ func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		resp = v.usersGet(r)
 	case http.MethodPut:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.usersPut(r)
 	case http.MethodDelete:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
