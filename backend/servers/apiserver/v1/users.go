@@ -1,24 +1,42 @@
 package v1
 
 import (
-	"fmt"
 	"net/http"
+
+	"github.com/darylhjd/oams/backend/internal/database"
 )
 
-// users endpoint returns useful information on the current session user and information on any requested users.
 func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
 	switch r.Method {
 	case http.MethodGet:
 		resp = v.usersGet(r)
-	case http.MethodPut:
-		resp = v.usersPut(r)
-	case http.MethodDelete:
+	case http.MethodPost:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
-		resp = newErrorResponse(http.StatusMethodNotAllowed, fmt.Sprintf("method %s is not allowed", r.Method))
+		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
 	v.writeResponse(w, usersUrl, resp)
+}
+
+type usersGetResponse struct {
+	response
+	Users []database.User `json:"users"`
+}
+
+func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
+	resp := usersGetResponse{
+		newSuccessResponse(),
+		[]database.User{},
+	}
+
+	students, err := v.db.Q.ListUsers(r.Context())
+	if err != nil {
+		return newErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+
+	resp.Users = append(resp.Users, students...)
+	return resp
 }
