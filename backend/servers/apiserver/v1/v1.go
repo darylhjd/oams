@@ -24,8 +24,8 @@ const (
 	loginUrl           = "/login"
 	msLoginCallbackUrl = "/ms-login-callback"
 	signOutUrl         = "/sign-out"
-	classesUrl         = "/classes"
-	usersUrl           = "/users"
+	classesUrl         = "/classes/"
+	usersUrl           = "/users/"
 )
 
 type APIServerV1 struct {
@@ -36,8 +36,8 @@ type APIServerV1 struct {
 	azure oauth2.Authenticator
 }
 
-// NewAPIServerV1 creates a new APIServerV1. This is a sub-router and should not be used as a base router.
-func NewAPIServerV1(l *zap.Logger, db *database.DB, azureClient oauth2.Authenticator) *APIServerV1 {
+// New creates a new APIServerV1. This is a sub-router and should not be used as a base router.
+func New(l *zap.Logger, db *database.DB, azureClient oauth2.Authenticator) *APIServerV1 {
 	server := APIServerV1{l, db, http.NewServeMux(), azureClient}
 	server.registerHandlers()
 
