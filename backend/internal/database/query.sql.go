@@ -9,61 +9,6 @@ import (
 	"context"
 )
 
-const getUser = `-- name: GetUser :one
-SELECT id, name, email, role, created_at, updated_at
-FROM users
-WHERE id = $1
-LIMIT 1
-`
-
-func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
-	row := q.db.QueryRow(ctx, getUser, id)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Email,
-		&i.Role,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getUsersByIDs = `-- name: GetUsersByIDs :many
-SELECT id, name, email, role, created_at, updated_at
-FROM users
-WHERE id = ANY ($1::TEXT[])
-ORDER BY id
-`
-
-func (q *Queries) GetUsersByIDs(ctx context.Context, ids []string) ([]User, error) {
-	rows, err := q.db.Query(ctx, getUsersByIDs, ids)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []User
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Email,
-			&i.Role,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listClassGroupSessions = `-- name: ListClassGroupSessions :many
 SELECT id, class_group_id, start_time, end_time, venue, created_at, updated_at
 FROM class_group_sessions
@@ -182,39 +127,6 @@ func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollme
 	for rows.Next() {
 		var i SessionEnrollment
 		if err := rows.Scan(&i.SessionID, &i.UserID, &i.CreatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listUsers = `-- name: ListUsers :many
-SELECT id, name, email, role, created_at, updated_at
-FROM users
-ORDER BY id
-`
-
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, listUsers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []User
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Email,
-			&i.Role,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
