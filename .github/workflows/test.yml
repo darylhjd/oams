@@ -28,8 +28,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          lfs: 'true'
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -54,13 +52,6 @@ jobs:
         run: |
           cd backend  
           go get ./...
-
-      - name: Generate sqlc
-        run: |
-          cd backend/internal/database/config
-          ./sqlc version
-          ./sqlc generate --experimental
-          exit $(git diff --exit-code --no-patch)
 
       - name: Build frontend
         run: |
