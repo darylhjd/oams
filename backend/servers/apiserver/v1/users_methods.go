@@ -8,6 +8,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/middleware"
+	"github.com/jackc/pgx/v5"
 )
 
 type usersGetResponse struct {
@@ -96,9 +97,17 @@ func (v *APIServerV1) usersPut(r *http.Request) apiResponse {
 	return resp
 }
 
-// upsertUsers inserts the provided usersParams into the specified database.
-func upsertUsers(ctx context.Context, db *database.DB, q *database.Queries, usersParams []database.UpsertUsersParams) ([]database.User, error) {
-	tx, q, err := db.NewTx(ctx, q)
+// upsertUsers inserts the provided usersParams into the specified database. If tx is nil, a new transaction is started.
+// Otherwise, a nested transaction (using save points) is used.
+func upsertUsers(ctx context.Context, db *database.DB, tx pgx.Tx, usersParams []database.UpsertUsersParams) ([]database.User, error) {
+	var err error
+
+	if tx != nil {
+		tx, err = tx.Begin(ctx)
+	} else {
+		tx, err = db.C.Begin(ctx)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -106,21 +115,20 @@ func upsertUsers(ctx context.Context, db *database.DB, q *database.Queries, user
 		_ = tx.Rollback(ctx)
 	}()
 
-	var dbErr error
-	users := make([]database.User, 0, len(usersParams))
-	q.UpsertUsers(ctx, usersParams).QueryRow(func(i int, user database.User, err error) {
-		if dbErr != nil {
-			return
-		} else if err != nil {
-			dbErr = err
-			return
-		}
+	q := db.Q.WithTx(tx)
 
-		users = append(users, user)
-	})
+	if err = q.UpsertUsers(ctx, usersParams).Close(); err != nil {
+		return nil, err
+	}
 
-	if dbErr != nil {
-		return nil, dbErr
+	ids := make([]string, 0, len(usersParams))
+	for _, param := range usersParams {
+		ids = append(ids, param.ID)
+	}
+
+	users, err := q.GetUsersByIDs(ctx, ids)
+	if err != nil {
+		return nil, err
 	}
 
 	return users, tx.Commit(ctx)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/darylhjd/oams/backend/internal/env"
@@ -20,24 +19,6 @@ const (
 type DB struct {
 	C *pgxpool.Pool
 	Q *Queries
-}
-
-// NewTx creates a new transaction with corresponding Tx and Queries object.
-// The caller is responsible for committing or rolling back the transaction.
-// For nested transactions (save points), caller may provide an existing Queries object.
-// Else, a normal transaction is created from the database connection pool.
-func (d *DB) NewTx(ctx context.Context, q *Queries) (pgx.Tx, *Queries, error) {
-	tx, err := d.C.Begin(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	txq := d.Q.WithTx(tx)
-	if q != nil {
-		txq = q.WithTx(tx)
-	}
-
-	return tx, txq, nil
 }
 
 // Close the database connection.
