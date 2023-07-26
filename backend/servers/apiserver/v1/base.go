@@ -18,7 +18,7 @@ func (v *APIServerV1) base(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusNotFound, "endpoint not implemented or is not supported")
 	} else {
 		resp = baseResponse{
-			newSuccessfulResponse(),
+			newSuccessResponse(),
 			"Welcome to OAMS API Service V1! To get started, read the API docs.",
 		}
 	}

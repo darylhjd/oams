@@ -64,7 +64,7 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 	v.l.Debug(fmt.Sprintf("%s - generated azure login url", namespace), zap.String("url", redirectString))
 
 	v.writeResponse(w, loginUrl, loginResponse{
-		newSuccessfulResponse(),
+		newSuccessResponse(),
 		redirectString,
 	})
 }

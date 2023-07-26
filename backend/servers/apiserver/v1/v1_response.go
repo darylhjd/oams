@@ -24,15 +24,15 @@ func (r response) Code() int {
 	return r.statusCode
 }
 
-// newSuccessfulResponse creates a new response struct with true result and StatusOK status code.
-func newSuccessfulResponse() response {
+// newSuccessResponse creates a new response struct with true result and StatusOK status code.
+func newSuccessResponse() response {
 	return response{true, http.StatusOK}
 }
 
 // errorResponse struct contains fields that all error responses from the API must have.
 type errorResponse struct {
 	response
-	Error *string `json:"error,omitempty"`
+	Error string `json:"error"`
 }
 
 // newErrorResponse creates a new errorResponse. Caller may specify the status code and the error message.
@@ -42,6 +42,6 @@ func newErrorResponse(code int, err string) errorResponse {
 		response{
 			false, code,
 		},
-		&err,
+		err,
 	}
 }

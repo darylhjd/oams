@@ -27,7 +27,7 @@ func TestAPIServerV1_signOut(t *testing.T) {
 		{
 			"request with account in context",
 			tests.NewMockAuthContext(),
-			signOutResponse{newSuccessfulResponse()},
+			signOutResponse{newSuccessResponse()},
 		},
 		{
 			"request with wrong account type in context",

@@ -185,7 +185,7 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 		coursesParams []database.UpsertClassesParams
 	)
 	resp := classesCreateResponse{
-		response: newSuccessfulResponse(),
+		response: newSuccessResponse(),
 	}
 
 	defer func() {

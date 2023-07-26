@@ -14,7 +14,7 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
 	resp = pingResponse{
-		response: newSuccessfulResponse(),
+		response: newSuccessResponse(),
 		Message:  "Pong~ OAMS API Service is running normally!",
 	}
 

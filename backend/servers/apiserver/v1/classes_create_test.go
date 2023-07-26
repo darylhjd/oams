@@ -58,7 +58,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 				return &b, w.FormDataContentType(), w.Close()
 			},
 			classesCreateResponse{
-				newSuccessfulResponse(),
+				newSuccessResponse(),
 				1,
 				3,
 				4,
@@ -170,7 +170,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 				return bytes.NewReader(b), "application/json", nil
 			},
 			wantResponse: classesCreateResponse{
-				response:           newSuccessfulResponse(),
+				response:           newSuccessResponse(),
 				Classes:            1,
 				ClassGroups:        3,
 				ClassGroupSessions: 3,
