@@ -28,7 +28,7 @@ func Test_usersGet(t *testing.T) {
 			"request with account in context",
 			tests.NewMockAuthContext(),
 			usersGetResponse{
-				response: newSuccessfulResponse(),
+				response: newSuccessResponse(),
 				SessionUser: &database.User{
 					ID: tests.MockAuthenticatorIDTokenName,
 					Email: pgtype.Text{
@@ -44,7 +44,7 @@ func Test_usersGet(t *testing.T) {
 			"request with no account in context",
 			nil,
 			usersGetResponse{
-				response: newSuccessfulResponse(),
+				response: newSuccessResponse(),
 				Users:    []database.User{},
 			},
 			"",
@@ -73,19 +73,23 @@ func Test_usersGet(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, usersUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
-			actualResp, err := v1.usersGet(req)
+			actualResp := v1.usersGet(req)
 
 			switch {
 			case tt.wantErr != "":
-				a.NotNil(err)
-				a.Contains(err.Error(), tt.wantErr)
+				err, ok := actualResp.(errorResponse)
+				a.True(ok)
+				a.Contains(err.Error, tt.wantErr)
 				return
 			case tt.withAuthContext != nil:
-				a.Equal(tt.wantResponse.SessionUser.ID, actualResp.SessionUser.ID)
-				tt.wantResponse.SessionUser = actualResp.SessionUser
+				resp, ok := actualResp.(usersGetResponse)
+				a.True(ok)
+				a.Equal(tt.wantResponse.SessionUser.ID, resp.SessionUser.ID)
+				tt.wantResponse.SessionUser = resp.SessionUser
+				fallthrough
+			default:
+				a.Equal(tt.wantResponse, actualResp)
 			}
-
-			a.Equal(tt.wantResponse, actualResp)
 		})
 	}
 }

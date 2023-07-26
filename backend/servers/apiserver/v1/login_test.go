@@ -68,7 +68,7 @@ func TestAPIServerV1_login(t *testing.T) {
 			a.Nil(err)
 
 			expectedResp := loginResponse{
-				newSuccessfulResponse(),
+				newSuccessResponse(),
 				(&url.URL{
 					Scheme:   "https",
 					Host:     "login.microsoftonline.com",

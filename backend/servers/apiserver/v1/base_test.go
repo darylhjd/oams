@@ -23,7 +23,7 @@ func TestAPIServerV1_base(t *testing.T) {
 			"valid request to base url",
 			baseUrl,
 			baseResponse{
-				response: newSuccessfulResponse(),
+				response: newSuccessResponse(),
 				Message:  "Welcome to OAMS API Service V1! To get started, read the API docs.",
 			},
 		},

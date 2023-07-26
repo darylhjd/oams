@@ -25,7 +25,7 @@ func TestAPIServerV1_ping(t *testing.T) {
 	v1.ping(rr, req)
 
 	expectedBytes, err := json.Marshal(pingResponse{
-		response: newSuccessfulResponse(),
+		response: newSuccessResponse(),
 		Message:  "Pong~ OAMS API Service is running normally!",
 	})
 	a.Nil(err)

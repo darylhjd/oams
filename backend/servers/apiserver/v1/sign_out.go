@@ -25,7 +25,7 @@ func (v *APIServerV1) signOut(w http.ResponseWriter, r *http.Request) {
 	case err != nil:
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 	default:
-		resp = signOutResponse{newSuccessfulResponse()}
+		resp = signOutResponse{newSuccessResponse()}
 		if err = v.azure.RemoveAccount(r.Context(), authContext.AuthResult.Account); err != nil {
 			resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 		}

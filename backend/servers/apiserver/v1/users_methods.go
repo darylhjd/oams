@@ -21,9 +21,9 @@ const (
 	usersGetQueriesIdKey = "ids"
 )
 
-func (v *APIServerV1) usersGet(r *http.Request) (usersGetResponse, error) {
+func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 	resp := usersGetResponse{
-		response: newSuccessfulResponse(),
+		response: newSuccessResponse(),
 		Users:    []database.User{},
 	}
 
@@ -31,11 +31,11 @@ func (v *APIServerV1) usersGet(r *http.Request) (usersGetResponse, error) {
 	authContext, isSignedIn, err := middleware.GetAuthContext(r)
 	switch {
 	case err != nil:
-		return resp, err
+		return newErrorResponse(http.StatusInternalServerError, err.Error())
 	case isSignedIn:
 		student, err := v.db.Q.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
 		if err != nil {
-			return resp, err
+			return newErrorResponse(http.StatusInternalServerError, err.Error())
 		}
 
 		resp.SessionUser = &student
@@ -50,9 +50,9 @@ func (v *APIServerV1) usersGet(r *http.Request) (usersGetResponse, error) {
 
 	students, err := v.db.Q.GetUsersByIDs(r.Context(), queries.ids)
 	if err != nil {
-		return resp, err
+		return newErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 
 	resp.Users = append(resp.Users, students...)
-	return resp, err
+	return resp
 }
