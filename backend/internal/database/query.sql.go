@@ -76,41 +76,6 @@ func (q *Queries) ListClassGroups(ctx context.Context) ([]ClassGroup, error) {
 	return items, nil
 }
 
-const listClasses = `-- name: ListClasses :many
-SELECT id, code, year, semester, programme, au, created_at, updated_at
-FROM classes
-ORDER BY code, year, semester
-`
-
-func (q *Queries) ListClasses(ctx context.Context) ([]Class, error) {
-	rows, err := q.db.Query(ctx, listClasses)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Class
-	for rows.Next() {
-		var i Class
-		if err := rows.Scan(
-			&i.ID,
-			&i.Code,
-			&i.Year,
-			&i.Semester,
-			&i.Programme,
-			&i.Au,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listSessionEnrollments = `-- name: ListSessionEnrollments :many
 SELECT session_id, user_id, created_at
 FROM session_enrollments

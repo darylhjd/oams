@@ -1,17 +1,3 @@
--- name: ListClasses :many
-SELECT *
-FROM classes
-ORDER BY code, year, semester;
-
--- name: UpsertClasses :batchone
-INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-ON CONFLICT ON CONSTRAINT ux_code_year_semester
-    DO UPDATE SET programme  = $4,
-                  au         = $5,
-                  updated_at = NOW()
-RETURNING *;
-
 -- name: ListClassGroups :many
 SELECT *
 FROM class_groups
