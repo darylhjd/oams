@@ -12,7 +12,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -123,51 +122,77 @@ func TestAPIServerV1_userGet(t *testing.T) {
 	}
 }
 
-func Test_userPut(t *testing.T) {
+func TestAPIServerV1_userPut(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name         string
-		withRequest  any
-		wantResponse userPutResponse
-		wantErr      string
+		name             string
+		withRequest      userPutRequest
+		withExistingUser bool
+		wantResponse     userPutResponse
+		wantStatusCode   int
+		wantErr          string
 	}{
 		{
-			"good request",
+			"request with all fields set",
 			userPutRequest{
-				[]database.UpsertUsersParams{
-					{
-						ID:   tests.MockAuthenticatorIDTokenName,
-						Name: "",
-						Email: pgtype.Text{
-							String: tests.MockAuthenticatorAccountPreferredUsername,
-							Valid:  true,
-						},
-						Role: database.UserRoleSTUDENT,
-					},
+				userPutUserRequestFields{
+					"NEW_ID",
+					ptr("NEW NAME"),
+					ptr("NEW EMAIL"),
+					ptr(database.UserRoleSTUDENT),
 				},
 			},
+			true,
 			userPutResponse{
 				newSuccessResponse(),
-				[]database.User{
-					{
-						ID:   tests.MockAuthenticatorIDTokenName,
-						Name: "",
-						Email: pgtype.Text{
-							String: tests.MockAuthenticatorAccountPreferredUsername,
-							Valid:  true,
-						},
-						Role: database.UserRoleSTUDENT,
-					},
+				userPutUserResponseFields{
+					ID:    "NEW_ID",
+					Name:  "NEW NAME",
+					Email: ptr("NEW EMAIL"),
+					Role:  database.UserRoleSTUDENT,
 				},
 			},
+			http.StatusOK,
 			"",
 		},
 		{
-			"bad request",
-			[]string{},
+			"request with optional fields not set",
+			userPutRequest{
+				userPutUserRequestFields{
+					"NEW_ID",
+					nil,
+					nil,
+					nil,
+				},
+			},
+			true,
+			userPutResponse{
+				newSuccessResponse(),
+				userPutUserResponseFields{
+					ID:    "NEW_ID",
+					Name:  "",
+					Email: nil,
+					Role:  database.UserRoleSTUDENT,
+				},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request updating non-existent user",
+			userPutRequest{
+				userPutUserRequestFields{
+					ID:    "NON_EXISTENT_USER",
+					Name:  ptr("NEW NAME"),
+					Email: nil,
+					Role:  nil,
+				},
+			},
+			false,
 			userPutResponse{},
-			"could not parse request body",
+			http.StatusNotFound,
+			"user to update does not exist",
 		},
 	}
 
@@ -177,31 +202,34 @@ func Test_userPut(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
+			ctx := context.Background()
 			id := uuid.NewString()
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
+			if tt.withExistingUser {
+				tests.StubUser(t, ctx, v1.db.Q, tt.withRequest.User.ID)
+			}
+
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
 			a.Nil(err)
 
 			req := httptest.NewRequest(http.MethodPut, userUrl, bytes.NewReader(reqBodyBytes))
-			actualResp := v1.userPut(req)
+			resp := v1.userPut(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
 			case tt.wantErr != "":
-				err, ok := actualResp.(errorResponse)
+				actualResp, ok := resp.(errorResponse)
 				a.True(ok)
-				a.Contains(err.Error, tt.wantErr)
+				a.Contains(actualResp.Error, tt.wantErr)
 			default:
-				resp, ok := actualResp.(userPutResponse)
+				actualResp, ok := resp.(userPutResponse)
 				a.True(ok)
-				a.Equal(len(tt.wantResponse.Users), len(resp.Users))
-				for idx, respUser := range resp.Users {
-					tt.wantResponse.Users[idx].CreatedAt, tt.wantResponse.Users[idx].UpdatedAt = respUser.CreatedAt, respUser.UpdatedAt
-				}
 
-				a.Equal(tt.wantResponse, resp)
+				tt.wantResponse.User.UpdatedAt = actualResp.User.UpdatedAt
+				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
 	}
