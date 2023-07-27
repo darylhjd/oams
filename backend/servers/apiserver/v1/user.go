@@ -24,7 +24,7 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		resp = v.userGet(r, userId)
 	case http.MethodPut:
-		resp = v.userPut(r)
+		resp = v.userPut(r, userId)
 	case http.MethodDelete:
 		resp = v.userDelete(r, userId)
 	default:
@@ -81,14 +81,13 @@ type userPutRequest struct {
 }
 
 type userPutUserRequestFields struct {
-	ID    string             `json:"id"`
 	Name  *string            `json:"name"`
 	Email *string            `json:"email"`
 	Role  *database.UserRole `json:"role"`
 }
 
-func (r userPutRequest) updateUserParams() database.UpdateUserParams {
-	params := database.UpdateUserParams{ID: r.User.ID}
+func (r userPutRequest) updateUserParams(userId string) database.UpdateUserParams {
+	params := database.UpdateUserParams{ID: userId}
 
 	// Parse request.
 	if r.User.Name != nil {
@@ -137,7 +136,7 @@ func (r userPutResponse) fromDatabaseUser(user database.User) userPutResponse {
 	return resp
 }
 
-func (v *APIServerV1) userPut(r *http.Request) apiResponse {
+func (v *APIServerV1) userPut(r *http.Request, id string) apiResponse {
 	var (
 		b   bytes.Buffer
 		req userPutRequest
@@ -151,7 +150,7 @@ func (v *APIServerV1) userPut(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
 	}
 
-	user, err := v.db.Q.UpdateUser(r.Context(), req.updateUserParams())
+	user, err := v.db.Q.UpdateUser(r.Context(), req.updateUserParams(id))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "user to update does not exist")

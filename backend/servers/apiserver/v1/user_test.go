@@ -146,7 +146,6 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			"request with all fields set",
 			userPutRequest{
 				userPutUserRequestFields{
-					"NEW_ID",
 					ptr("NEW NAME"),
 					ptr("NEW EMAIL"),
 					ptr(database.UserRoleSTUDENT),
@@ -168,9 +167,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 		{
 			"request with optional fields not set",
 			userPutRequest{
-				userPutUserRequestFields{
-					ID: "NEW_ID",
-				},
+				userPutUserRequestFields{},
 			},
 			true,
 			userPutResponse{
@@ -186,9 +183,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 		{
 			"request updating non-existent user",
 			userPutRequest{
-				userPutUserRequestFields{
-					ID: "NON_EXISTENT_USER",
-				},
+				userPutUserRequestFields{},
 			},
 			false,
 			userPutResponse{},
@@ -209,15 +204,16 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
+			userId := tt.wantResponse.User.ID
 			if tt.withExistingUser {
-				tests.StubUser(t, ctx, v1.db.Q, tt.withRequest.User.ID)
+				tests.StubUser(t, ctx, v1.db.Q, userId)
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
 			a.Nil(err)
 
-			req := httptest.NewRequest(http.MethodPut, userUrl, bytes.NewReader(reqBodyBytes))
-			resp := v1.userPut(req)
+			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), bytes.NewReader(reqBodyBytes))
+			resp := v1.userPut(req, userId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
@@ -231,6 +227,11 @@ func TestAPIServerV1_userPut(t *testing.T) {
 
 				tt.wantResponse.User.UpdatedAt = actualResp.User.UpdatedAt
 				a.Equal(tt.wantResponse, actualResp)
+
+				// Check that successive updates do not change the updated_at field.
+				req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), bytes.NewReader(reqBodyBytes))
+				successiveResp := v1.userPut(req, userId).(userPutResponse)
+				a.Equal(actualResp.User.UpdatedAt, successiveResp.User.UpdatedAt)
 			}
 		})
 	}

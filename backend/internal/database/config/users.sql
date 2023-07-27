@@ -25,7 +25,14 @@ UPDATE users
 SET name       = COALESCE(sqlc.narg('name'), name),
     email      = COALESCE(sqlc.narg('email'), email),
     role       = COALESCE(sqlc.narg('role'), role),
-    updated_at = NOW()
+    updated_at = CASE
+                     WHEN (NOT (sqlc.narg('name')::TEXT IS NULL AND
+                                sqlc.narg('email')::TEXT IS NULL AND
+                                sqlc.narg('role')::USER_ROLE IS NULL)) AND
+                          (COALESCE(sqlc.narg('name'), name) <> name OR
+                           COALESCE(sqlc.narg('email'), email) <> email OR
+                           COALESCE(sqlc.narg('role'), role) <> role) THEN NOW()
+                     ELSE updated_at END
 WHERE id = $1
 RETURNING *;
 
