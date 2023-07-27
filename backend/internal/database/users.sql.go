@@ -18,16 +18,16 @@ RETURNING id, name, email, role, created_at
 `
 
 type CreateUserParams struct {
-	ID    string      `json:"id"`
-	Name  string      `json:"name"`
-	Email pgtype.Text `json:"email"`
-	Role  UserRole    `json:"role"`
+	ID    string   `json:"id"`
+	Name  string   `json:"name"`
+	Email string   `json:"email"`
+	Role  UserRole `json:"role"`
 }
 
 type CreateUserRow struct {
 	ID        string           `json:"id"`
 	Name      string           `json:"name"`
-	Email     pgtype.Text      `json:"email"`
+	Email     string           `json:"email"`
 	Role      UserRole         `json:"role"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 }

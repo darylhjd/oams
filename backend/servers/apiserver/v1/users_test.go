@@ -72,11 +72,10 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			true,
 			usersGetResponse{
 				newSuccessResponse(),
-				[]usersGetUserResponseFields{
+				[]database.User{
 					{
-						ID:    "EXISTING_USER",
-						Email: nil,
-						Role:  database.UserRoleSTUDENT,
+						ID:   "EXISTING_USER",
+						Role: database.UserRoleSTUDENT,
 					},
 				},
 			},
@@ -86,7 +85,7 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			false,
 			usersGetResponse{
 				response: newSuccessResponse(),
-				Users:    []usersGetUserResponseFields{},
+				Users:    []database.User{},
 			},
 		},
 	}

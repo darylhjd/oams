@@ -214,10 +214,9 @@ func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
 			}
 
 			group.Students = append(group.Students, database.UpsertUsersParams{
-				ID:    rows[index][studentIdColumn],
-				Name:  rows[index][studentNameColumn],
-				Email: pgtype.Text{},
-				Role:  database.UserRoleSTUDENT,
+				ID:   rows[index][studentIdColumn],
+				Name: rows[index][studentNameColumn],
+				Role: database.UserRoleSTUDENT,
 			})
 
 			index += 1

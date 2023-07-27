@@ -103,8 +103,8 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 										},
 									},
 									[]database.UpsertUsersParams{
-										{"CHUL6789", "CHUA LI TING", pgtype.Text{}, database.UserRoleSTUDENT},
-										{"YAPW9087", "YAP WEN LI", pgtype.Text{}, database.UserRoleSTUDENT},
+										{"CHUL6789", "CHUA LI TING", "", database.UserRoleSTUDENT},
+										{"YAPW9087", "YAP WEN LI", "", database.UserRoleSTUDENT},
 									},
 								},
 								{
@@ -128,8 +128,8 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 										},
 									},
 									[]database.UpsertUsersParams{
-										{"BENST129", "BENJAMIN SANTOS", pgtype.Text{}, database.UserRoleSTUDENT},
-										{"YAPW9088", "YAP WEI LING", pgtype.Text{}, database.UserRoleSTUDENT},
+										{"BENST129", "BENJAMIN SANTOS", "", database.UserRoleSTUDENT},
+										{"YAPW9088", "YAP WEI LING", "", database.UserRoleSTUDENT},
 									},
 								},
 								{
@@ -153,8 +153,8 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 										},
 									},
 									[]database.UpsertUsersParams{
-										{"PATELAR14", "ARJUN PATEL", pgtype.Text{}, database.UserRoleSTUDENT},
-										{"YAPX9087", "YAP XIN TING", pgtype.Text{}, database.UserRoleSTUDENT},
+										{"PATELAR14", "ARJUN PATEL", "", database.UserRoleSTUDENT},
+										{"YAPX9087", "YAP XIN TING", "", database.UserRoleSTUDENT},
 									},
 								},
 							},

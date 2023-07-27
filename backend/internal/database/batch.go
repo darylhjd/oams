@@ -294,10 +294,10 @@ type UpsertUsersBatchResults struct {
 }
 
 type UpsertUsersParams struct {
-	ID    string      `json:"id"`
-	Name  string      `json:"name"`
-	Email pgtype.Text `json:"email"`
-	Role  UserRole    `json:"role"`
+	ID    string   `json:"id"`
+	Name  string   `json:"name"`
+	Email string   `json:"email"`
+	Role  UserRole `json:"role"`
 }
 
 func (q *Queries) UpsertUsers(ctx context.Context, arg []UpsertUsersParams) *UpsertUsersBatchResults {

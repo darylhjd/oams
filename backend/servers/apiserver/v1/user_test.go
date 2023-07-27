@@ -157,7 +157,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 				userPutUserResponseFields{
 					ID:    "NEW_ID",
 					Name:  "NEW NAME",
-					Email: ptr("NEW EMAIL"),
+					Email: "NEW EMAIL",
 					Role:  database.UserRoleSTUDENT,
 				},
 			},

@@ -42,25 +42,20 @@ type userGetResponse struct {
 type userGetUserResponseFields struct {
 	ID    string            `json:"id"`
 	Name  string            `json:"name"`
-	Email *string           `json:"email"`
+	Email string            `json:"email"`
 	Role  database.UserRole `json:"role"`
 }
 
 func (r userGetResponse) fromDatabaseUser(user database.User) userGetResponse {
-	resp := userGetResponse{
+	return userGetResponse{
 		newSuccessResponse(),
 		userGetUserResponseFields{
-			ID:   user.ID,
-			Name: user.Name,
-			Role: user.Role,
+			user.ID,
+			user.Name,
+			user.Email,
+			user.Role,
 		},
 	}
-
-	if user.Email.Valid {
-		resp.User.Email = &user.Email.String
-	}
-
-	return resp
 }
 
 func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
@@ -113,27 +108,22 @@ type userPutResponse struct {
 type userPutUserResponseFields struct {
 	ID        string            `json:"id"`
 	Name      string            `json:"name"`
-	Email     *string           `json:"email"`
+	Email     string            `json:"email"`
 	Role      database.UserRole `json:"role"`
 	UpdatedAt time.Time         `json:"updated_at"`
 }
 
 func (r userPutResponse) fromDatabaseUser(user database.User) userPutResponse {
-	resp := userPutResponse{
+	return userPutResponse{
 		newSuccessResponse(),
 		userPutUserResponseFields{
 			ID:        user.ID,
 			Name:      user.Name,
+			Email:     user.Email,
 			Role:      user.Role,
 			UpdatedAt: user.UpdatedAt.Time,
 		},
 	}
-
-	if user.Email.Valid {
-		resp.User.Email = &user.Email.String
-	}
-
-	return resp
 }
 
 func (v *APIServerV1) userPut(r *http.Request, id string) apiResponse {
