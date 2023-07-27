@@ -137,3 +137,39 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	}
 	return items, nil
 }
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+    SET name = COALESCE($2, name),
+        email = COALESCE($3, email),
+        role = COALESCE($4, role),
+        updated_at = NOW()
+WHERE id = $1
+RETURNING id, name, email, role, created_at, updated_at
+`
+
+type UpdateUserParams struct {
+	ID    string       `json:"id"`
+	Name  pgtype.Text  `json:"name"`
+	Email pgtype.Text  `json:"email"`
+	Role  NullUserRole `json:"role"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.ID,
+		arg.Name,
+		arg.Email,
+		arg.Role,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
