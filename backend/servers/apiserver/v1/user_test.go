@@ -227,6 +227,11 @@ func TestAPIServerV1_userPut(t *testing.T) {
 
 				tt.wantResponse.User.UpdatedAt = actualResp.User.UpdatedAt
 				a.Equal(tt.wantResponse, actualResp)
+
+				// Check that successive updates do not change the updated_at field.
+				req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), bytes.NewReader(reqBodyBytes))
+				successiveResp := v1.userPut(req, userId).(userPutResponse)
+				a.Equal(actualResp.User.UpdatedAt, successiveResp.User.UpdatedAt)
 			}
 		})
 	}
