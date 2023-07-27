@@ -22,10 +22,16 @@ RETURNING id, name, email, role, created_at;
 
 -- name: UpdateUser :one
 UPDATE users
-    SET name = COALESCE(sqlc.narg('name'), name),
-        email = COALESCE(sqlc.narg('email'), email),
-        role = COALESCE(sqlc.narg('role'), role),
-        updated_at = NOW()
+SET name       = COALESCE(sqlc.narg('name'), name),
+    email      = COALESCE(sqlc.narg('email'), email),
+    role       = COALESCE(sqlc.narg('role'), role),
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
+-- name: DeleteUser :one
+DELETE
+FROM users
 WHERE id = $1
 RETURNING *;
 

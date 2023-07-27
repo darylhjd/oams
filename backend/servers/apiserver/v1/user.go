@@ -26,7 +26,7 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 		resp = v.userPut(r)
 	case http.MethodDelete:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.userDelete(r, userId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, fmt.Sprintf("method %s is not allowed", r.Method))
 	}
@@ -161,6 +161,23 @@ func (v *APIServerV1) userPut(r *http.Request) apiResponse {
 	}
 
 	return userPutResponse{}.fromDatabaseUser(user)
+}
+
+type userDeleteResponse struct {
+	response
+}
+
+func (v *APIServerV1) userDelete(r *http.Request, id string) apiResponse {
+	_, err := v.db.Q.DeleteUser(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "user to delete does not exist")
+		}
+
+		return newErrorResponse(http.StatusInternalServerError, "could not process user delete database action")
+	}
+
+	return userDeleteResponse{newSuccessResponse()}
 }
 
 // upsertUsers inserts the provided usersParams into the specified database. If tx is nil, a new transaction is started.

@@ -36,7 +36,7 @@ func TestAPIServerV1_user(t *testing.T) {
 		{
 			"with DELETE method",
 			http.MethodDelete,
-			http.StatusNotImplemented,
+			http.StatusNotFound,
 		},
 		{
 			"with PATCH method",
@@ -230,6 +230,67 @@ func TestAPIServerV1_userPut(t *testing.T) {
 				a.True(ok)
 
 				tt.wantResponse.User.UpdatedAt = actualResp.User.UpdatedAt
+				a.Equal(tt.wantResponse, actualResp)
+			}
+		})
+	}
+}
+
+func TestAPIServerV1_userDelete(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name             string
+		withExistingUser bool
+		wantResponse     userDeleteResponse
+		wantStatusCode   int
+		wantErr          string
+	}{
+		{
+			"request with existing user",
+			true,
+			userDeleteResponse{newSuccessResponse()},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with non-existent user",
+			false,
+			userDeleteResponse{},
+			http.StatusNotFound,
+			"user to delete does not exist",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			userId := uuid.NewString()
+			if tt.withExistingUser {
+				tests.StubUser(t, ctx, v1.db.Q, userId)
+			}
+
+			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), nil)
+			resp := v1.userDelete(req, userId)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(userDeleteResponse)
+				a.True(ok)
 				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
