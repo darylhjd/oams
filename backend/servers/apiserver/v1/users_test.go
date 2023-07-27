@@ -103,8 +103,10 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				for _, user := range tt.wantResponse.Users {
-					tests.StubUser(t, ctx, v1.db.Q, user.ID)
+				for idx, user := range tt.wantResponse.Users {
+					createdUser := tests.StubUser(t, ctx, v1.db.Q, user.ID, user.Role)
+					userPtr := &tt.wantResponse.Users[idx]
+					userPtr.CreatedAt, userPtr.UpdatedAt = createdUser.CreatedAt, createdUser.CreatedAt
 				}
 			}
 
@@ -113,10 +115,6 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			a.True(ok)
 
 			a.Equal(len(tt.wantResponse.Users), len(actualResp.Users))
-			for idx, actualUser := range actualResp.Users {
-				tt.wantResponse.Users[idx].CreatedAt, tt.wantResponse.Users[idx].UpdatedAt = actualUser.CreatedAt, actualUser.UpdatedAt
-			}
-
 			a.Equal(tt.wantResponse, actualResp)
 		})
 	}
@@ -180,7 +178,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				tests.StubUser(t, ctx, v1.db.Q, tt.withRequest.User.ID)
+				_ = tests.StubUser(t, ctx, v1.db.Q, tt.withRequest.User.ID, tt.withRequest.User.Role)
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
