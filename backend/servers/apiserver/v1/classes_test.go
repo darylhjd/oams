@@ -1,7 +1,9 @@
 package v1
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -28,7 +30,7 @@ func TestAPIServerV1_classes(t *testing.T) {
 		{
 			"with POST method",
 			http.MethodPost,
-			http.StatusNotImplemented,
+			http.StatusBadRequest,
 		},
 		{
 			"with DELETE method",
@@ -114,6 +116,99 @@ func TestAPIServerV1_classesGet(t *testing.T) {
 			actualResp, ok := v1.classesGet(req).(classesGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
+		})
+	}
+}
+
+func TestAPIServerV1_classesPost(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name              string
+		withRequest       classesPostRequest
+		withExistingClass bool
+		wantResponse      classesPostResponse
+		wantStatusCode    int
+		wantErr           string
+	}{
+		{
+			"request with no existing class",
+			classesPostRequest{
+				database.CreateClassParams{
+					Code:     "CZ1115",
+					Year:     2023,
+					Semester: "2",
+				},
+			},
+			false,
+			classesPostResponse{
+				newSuccessResponse(),
+				database.CreateClassRow{
+					Code:     "CZ1115",
+					Year:     2023,
+					Semester: "2",
+				},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with existing class",
+			classesPostRequest{
+				database.CreateClassParams{
+					Code:     "CZ1115",
+					Year:     2023,
+					Semester: "2",
+				},
+			},
+			true,
+			classesPostResponse{},
+			http.StatusConflict,
+			"class with same code, year, and semester already exists",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			if tt.withExistingClass {
+				_ = tests.StubClass(
+					t, ctx, v1.db.Q,
+					tt.withRequest.Class.Code,
+					tt.withRequest.Class.Year,
+					tt.withRequest.Class.Semester,
+				)
+			}
+
+			reqBodyBytes, err := json.Marshal(tt.withRequest)
+			a.Nil(err)
+
+			req := httptest.NewRequest(http.MethodPost, classesUrl, bytes.NewReader(reqBodyBytes))
+			resp := v1.classesPost(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(classesPostResponse)
+				a.True(ok)
+
+				tt.wantResponse.Class.ID = actualResp.Class.ID
+				tt.wantResponse.Class.CreatedAt = actualResp.Class.CreatedAt
+				a.Equal(tt.wantResponse, actualResp)
+			}
 		})
 	}
 }
