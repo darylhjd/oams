@@ -27,6 +27,7 @@ const (
 	batchUrl           = "/batch"
 	usersUrl           = "/users"
 	userUrl            = "/users/"
+	classesUrl         = "/classes"
 )
 
 type APIServerV1 struct {
@@ -67,6 +68,12 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(userUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.user, http.MethodGet, http.MethodPut, http.MethodDelete),
+		v.azure,
+		false,
+	))
+
+	v.mux.HandleFunc(classesUrl, middleware.WithAuthContext(
+		middleware.AllowMethods(v.classes, http.MethodGet, http.MethodPost),
 		v.azure,
 		false,
 	))

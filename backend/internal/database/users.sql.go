@@ -164,14 +164,18 @@ UPDATE users
 SET name       = COALESCE($2, name),
     email      = COALESCE($3, email),
     role       = COALESCE($4, role),
-    updated_at = CASE
-                     WHEN (NOT ($2::TEXT IS NULL AND
-                                $3::TEXT IS NULL AND
-                                $4::USER_ROLE IS NULL)) AND
-                          (COALESCE($2, name) <> name OR
-                           COALESCE($3, email) <> email OR
-                           COALESCE($4, role) <> role) THEN NOW()
-                     ELSE updated_at END
+    updated_at =
+        CASE
+            WHEN (NOT ($2::TEXT IS NULL AND
+                       $3::TEXT IS NULL AND
+                       $4::USER_ROLE IS NULL))
+                AND
+                 (COALESCE($2, name) <> name OR
+                  COALESCE($3, email) <> email OR
+                  COALESCE($4, role) <> role)
+                THEN NOW()
+            ELSE updated_at
+            END
 WHERE id = $1
 RETURNING id, name, email, role, updated_at
 `

@@ -205,9 +205,11 @@ func (b *UpsertClassGroupsBatchResults) Close() error {
 }
 
 const upsertClasses = `-- name: UpsertClasses :batchone
-INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
+INSERT
+INTO classes (code, year, semester, programme, au, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-ON CONFLICT ON CONSTRAINT ux_code_year_semester
+ON CONFLICT
+    ON CONSTRAINT ux_code_year_semester
     DO UPDATE SET programme  = $4,
                   au         = $5,
                   updated_at = NOW()
