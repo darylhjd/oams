@@ -195,7 +195,9 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				tests.StubUser(t, ctx, v1.db.Q, tt.wantResponse.User.ID)
+				createdUser := tests.StubUser(t, ctx, v1.db.Q, tt.wantResponse.User.ID, tt.wantResponse.User.Role)
+				tt.wantResponse.User.CreatedAt = createdUser.CreatedAt
+				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
 			}
 
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, tt.wantResponse.User.ID), nil)
@@ -210,8 +212,6 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			default:
 				actualResp, ok := resp.(userGetResponse)
 				a.True(ok)
-
-				tt.wantResponse.User.CreatedAt, tt.wantResponse.User.UpdatedAt = actualResp.User.CreatedAt, actualResp.User.UpdatedAt
 				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
@@ -293,7 +293,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 
 			userId := tt.wantResponse.User.ID
 			if tt.withExistingUser {
-				tests.StubUser(t, ctx, v1.db.Q, userId)
+				_ = tests.StubUser(t, ctx, v1.db.Q, userId, tt.wantResponse.User.Role)
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
@@ -364,7 +364,7 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 
 			userId := uuid.NewString()
 			if tt.withExistingUser {
-				tests.StubUser(t, ctx, v1.db.Q, userId)
+				_ = tests.StubUser(t, ctx, v1.db.Q, userId, database.UserRoleSTUDENT)
 			}
 
 			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), nil)
