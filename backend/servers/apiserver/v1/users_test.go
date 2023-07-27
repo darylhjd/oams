@@ -125,22 +125,22 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 
 	tts := []struct {
 		name             string
-		withRequest      usersCreateRequest
+		withRequest      usersPostRequest
 		withExistingUser bool
-		wantResponse     usersCreateResponse
+		wantResponse     usersPostResponse
 		wantStatusCode   int
 		wantErr          string
 	}{
 		{
 			"request with no existing user",
-			usersCreateRequest{
+			usersPostRequest{
 				database.CreateUserParams{
 					ID:   "NEW_USER",
 					Role: database.UserRoleSTUDENT,
 				},
 			},
 			false,
-			usersCreateResponse{
+			usersPostResponse{
 				newSuccessResponse(),
 				database.CreateUserRow{
 					ID:   "NEW_USER",
@@ -152,14 +152,14 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 		},
 		{
 			"request with existing user",
-			usersCreateRequest{
+			usersPostRequest{
 				database.CreateUserParams{
 					ID:   "EXISTING_USER",
 					Role: database.UserRoleSTUDENT,
 				},
 			},
 			true,
-			usersCreateResponse{},
+			usersPostResponse{},
 			http.StatusConflict,
 			"user with same id already exists",
 		},
@@ -185,7 +185,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			a.Nil(err)
 
 			req := httptest.NewRequest(http.MethodPost, usersUrl, bytes.NewReader(reqBodyBytes))
-			resp := v1.usersCreate(req)
+			resp := v1.usersPost(req)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
@@ -194,7 +194,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 				a.True(ok)
 				a.Contains(actualResp.Error, tt.wantErr)
 			default:
-				actualResp, ok := resp.(usersCreateResponse)
+				actualResp, ok := resp.(usersPostResponse)
 				a.True(ok)
 
 				tt.wantResponse.User.CreatedAt = actualResp.User.CreatedAt

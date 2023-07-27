@@ -3,11 +3,9 @@ package v1
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
@@ -17,7 +15,7 @@ func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		resp = v.usersGet(r)
 	case http.MethodPost:
-		resp = v.usersCreate(r)
+		resp = v.usersPost(r)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -45,19 +43,19 @@ func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 	return resp
 }
 
-type usersCreateRequest struct {
+type usersPostRequest struct {
 	User database.CreateUserParams `json:"user"`
 }
 
-type usersCreateResponse struct {
+type usersPostResponse struct {
 	response
 	User database.CreateUserRow `json:"user"`
 }
 
-func (v *APIServerV1) usersCreate(r *http.Request) apiResponse {
+func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 	var (
 		b   bytes.Buffer
-		req usersCreateRequest
+		req usersPostRequest
 	)
 
 	if _, err := b.ReadFrom(r.Body); err != nil {
@@ -70,15 +68,15 @@ func (v *APIServerV1) usersCreate(r *http.Request) apiResponse {
 
 	user, err := v.db.Q.CreateUser(r.Context(), req.User)
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.SQLState() == database.SQLStateDuplicateKeyOrIndex {
+		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
 			return newErrorResponse(http.StatusConflict, "user with same id already exists")
+
 		}
 
 		return newErrorResponse(http.StatusInternalServerError, "could not process users post database action")
 	}
 
-	return usersCreateResponse{
+	return usersPostResponse{
 		newSuccessResponse(),
 		user,
 	}
