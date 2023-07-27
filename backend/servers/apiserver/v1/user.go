@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -19,7 +18,6 @@ const (
 	sessionUserId = "me"
 )
 
-// users endpoint returns useful information on the current session user and information on any requested users.
 func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
@@ -34,7 +32,7 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	case m == http.MethodDelete:
 		resp = v.userDelete(r, userId)
 	default:
-		resp = newErrorResponse(http.StatusMethodNotAllowed, fmt.Sprintf("method %s is not allowed", r.Method))
+		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
 	v.writeResponse(w, userUrl, resp)
