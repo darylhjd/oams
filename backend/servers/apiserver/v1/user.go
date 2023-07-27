@@ -36,14 +36,34 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 
 type userGetResponse struct {
 	response
-	User database.User `json:"user"`
+	User userGetUserResponseFields `json:"user"`
+}
+
+type userGetUserResponseFields struct {
+	ID    string            `json:"id"`
+	Name  string            `json:"name"`
+	Email *string           `json:"email"`
+	Role  database.UserRole `json:"role"`
+}
+
+func (r userGetResponse) fromDatabaseUser(user database.User) userGetResponse {
+	resp := userGetResponse{
+		newSuccessResponse(),
+		userGetUserResponseFields{
+			ID:   user.ID,
+			Name: user.Name,
+			Role: user.Role,
+		},
+	}
+
+	if user.Email.Valid {
+		resp.User.Email = &user.Email.String
+	}
+
+	return resp
 }
 
 func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
-	resp := userGetResponse{
-		response: newSuccessResponse(),
-	}
-
 	user, err := v.db.Q.GetUser(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -53,8 +73,7 @@ func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process user get database action")
 	}
 
-	resp.User = user
-	return resp
+	return userGetResponse{}.fromDatabaseUser(user)
 }
 
 type userPutRequest struct {
@@ -101,20 +120,20 @@ type userPutUserResponseFields struct {
 }
 
 func (r userPutResponse) fromDatabaseUser(user database.User) userPutResponse {
-	resp := userPutResponse{response: newSuccessResponse()}
-
-	respUser := userPutUserResponseFields{
-		ID:        user.ID,
-		Name:      user.Name,
-		Role:      user.Role,
-		UpdatedAt: user.UpdatedAt.Time,
+	resp := userPutResponse{
+		newSuccessResponse(),
+		userPutUserResponseFields{
+			ID:        user.ID,
+			Name:      user.Name,
+			Role:      user.Role,
+			UpdatedAt: user.UpdatedAt.Time,
+		},
 	}
 
 	if user.Email.Valid {
-		respUser.Email = &user.Email.String
+		resp.User.Email = &user.Email.String
 	}
 
-	resp.User = respUser
 	return resp
 }
 

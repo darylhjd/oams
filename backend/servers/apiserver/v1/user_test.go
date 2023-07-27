@@ -69,20 +69,29 @@ func TestAPIServerV1_userGet(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name           string
-		withUserId     string
-		wantStatusCode int
-		wantErr        string
+		name             string
+		withExistingUser bool
+		wantResponse     userGetResponse
+		wantStatusCode   int
+		wantErr          string
 	}{
 		{
 			"request with user in database",
-			uuid.NewString(),
+			true,
+			userGetResponse{
+				newSuccessResponse(),
+				userGetUserResponseFields{
+					ID:   "EXISTING_USER",
+					Role: database.UserRoleSTUDENT,
+				},
+			},
 			http.StatusOK,
 			"",
 		},
 		{
 			"request with user not in database",
-			uuid.NewString(),
+			false,
+			userGetResponse{},
 			http.StatusNotFound,
 			"the requested user does not exist",
 		},
@@ -100,12 +109,12 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			if tt.wantErr == "" {
-				tests.StubUser(t, ctx, v1.db.Q, tt.withUserId)
+			if tt.withExistingUser {
+				tests.StubUser(t, ctx, v1.db.Q, tt.wantResponse.User.ID)
 			}
 
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, tt.withUserId), nil)
-			resp := v1.userGet(req, tt.withUserId)
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, tt.wantResponse.User.ID), nil)
+			resp := v1.userGet(req, tt.wantResponse.User.ID)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
@@ -116,7 +125,7 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			default:
 				actualResp, ok := resp.(userGetResponse)
 				a.True(ok)
-				a.Equal(tt.withUserId, actualResp.User.ID)
+				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
 	}
@@ -160,20 +169,15 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			"request with optional fields not set",
 			userPutRequest{
 				userPutUserRequestFields{
-					"NEW_ID",
-					nil,
-					nil,
-					nil,
+					ID: "NEW_ID",
 				},
 			},
 			true,
 			userPutResponse{
 				newSuccessResponse(),
 				userPutUserResponseFields{
-					ID:    "NEW_ID",
-					Name:  "",
-					Email: nil,
-					Role:  database.UserRoleSTUDENT,
+					ID:   "NEW_ID",
+					Role: database.UserRoleSTUDENT,
 				},
 			},
 			http.StatusOK,
@@ -183,10 +187,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			"request updating non-existent user",
 			userPutRequest{
 				userPutUserRequestFields{
-					ID:    "NON_EXISTENT_USER",
-					Name:  ptr("NEW NAME"),
-					Email: nil,
-					Role:  nil,
+					ID: "NON_EXISTENT_USER",
 				},
 			},
 			false,
