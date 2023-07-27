@@ -80,7 +80,7 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			true,
 			userGetResponse{
 				newSuccessResponse(),
-				userGetUserResponseFields{
+				database.User{
 					ID:   "EXISTING_USER",
 					Role: database.UserRoleSTUDENT,
 				},
@@ -125,6 +125,8 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			default:
 				actualResp, ok := resp.(userGetResponse)
 				a.True(ok)
+
+				tt.wantResponse.User.CreatedAt, tt.wantResponse.User.UpdatedAt = actualResp.User.CreatedAt, actualResp.User.UpdatedAt
 				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
@@ -154,10 +156,10 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			true,
 			userPutResponse{
 				newSuccessResponse(),
-				userPutUserResponseFields{
+				database.UpdateUserRow{
 					ID:    "NEW_ID",
 					Name:  "NEW NAME",
-					Email: ptr("NEW EMAIL"),
+					Email: "NEW EMAIL",
 					Role:  database.UserRoleSTUDENT,
 				},
 			},
@@ -172,7 +174,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			true,
 			userPutResponse{
 				newSuccessResponse(),
-				userPutUserResponseFields{
+				database.UpdateUserRow{
 					ID:   "NEW_ID",
 					Role: database.UserRoleSTUDENT,
 				},

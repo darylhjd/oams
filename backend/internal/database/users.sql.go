@@ -18,16 +18,16 @@ RETURNING id, name, email, role, created_at
 `
 
 type CreateUserParams struct {
-	ID    string      `json:"id"`
-	Name  string      `json:"name"`
-	Email pgtype.Text `json:"email"`
-	Role  UserRole    `json:"role"`
+	ID    string   `json:"id"`
+	Name  string   `json:"name"`
+	Email string   `json:"email"`
+	Role  UserRole `json:"role"`
 }
 
 type CreateUserRow struct {
 	ID        string           `json:"id"`
 	Name      string           `json:"name"`
-	Email     pgtype.Text      `json:"email"`
+	Email     string           `json:"email"`
 	Role      UserRole         `json:"role"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
@@ -173,7 +173,7 @@ SET name       = COALESCE($2, name),
                            COALESCE($4, role) <> role) THEN NOW()
                      ELSE updated_at END
 WHERE id = $1
-RETURNING id, name, email, role, created_at, updated_at
+RETURNING id, name, email, role, updated_at
 `
 
 type UpdateUserParams struct {
@@ -183,20 +183,27 @@ type UpdateUserParams struct {
 	Role  NullUserRole `json:"role"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+type UpdateUserRow struct {
+	ID        string           `json:"id"`
+	Name      string           `json:"name"`
+	Email     string           `json:"email"`
+	Role      UserRole         `json:"role"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
 	row := q.db.QueryRow(ctx, updateUser,
 		arg.ID,
 		arg.Name,
 		arg.Email,
 		arg.Role,
 	)
-	var i User
+	var i UpdateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Email,
 		&i.Role,
-		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err

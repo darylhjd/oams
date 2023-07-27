@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/internal/env"
@@ -46,11 +45,8 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	// Upsert user into database.
 	err = v.db.Q.UpsertUsers(r.Context(), []database.UpsertUsersParams{
 		{
-			ID: authResult.IDToken.Name,
-			Email: pgtype.Text{
-				String: authResult.Account.PreferredUsername,
-				Valid:  true,
-			},
+			ID:    authResult.IDToken.Name,
+			Email: authResult.Account.PreferredUsername,
 			// TODO: Set correct role based on auth result.
 			Role: database.UserRoleSTUDENT,
 		},

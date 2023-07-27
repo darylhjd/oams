@@ -136,7 +136,7 @@ type SessionEnrollment struct {
 type User struct {
 	ID        string           `json:"id"`
 	Name      string           `json:"name"`
-	Email     pgtype.Text      `json:"email"`
+	Email     string           `json:"email"`
 	Role      UserRole         `json:"role"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 	UpdatedAt pgtype.Timestamp `json:"updated_at"`
