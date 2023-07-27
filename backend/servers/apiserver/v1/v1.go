@@ -23,7 +23,7 @@ const (
 	pingUrl            = "/ping"
 	loginUrl           = "/login"
 	msLoginCallbackUrl = "/ms-login-callback"
-	signOutUrl         = "/sign-out"
+	logoutUrl          = "/logout"
 	classesUrl         = "/classes/"
 	usersUrl           = "/users"
 	userUrl            = "/users/"
@@ -51,7 +51,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	v.mux.HandleFunc(signOutUrl, middleware.WithAuthContext(v.signOut, v.azure, true))
+	v.mux.HandleFunc(logoutUrl, middleware.WithAuthContext(v.logout, v.azure, true))
 
 	v.mux.HandleFunc(classesUrl, middleware.WithAuthContext(middleware.AllowMethods(v.classesCreate, http.MethodPost), v.azure, true))
 

@@ -8,7 +8,7 @@ import 'package:frontend/api/models.dart';
 // the required auth codes and so we cannot read it directly.
 final sessionUserProvider = FutureProvider<User>((ref) async {
   try {
-    var resp = await APIClient.getUsers();
+    var resp = await APIClient.getSessionUserInfo();
     if (resp.sessionUser == null) {
       throw Exception("no session user");
     }
