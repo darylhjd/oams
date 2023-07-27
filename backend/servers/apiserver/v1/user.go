@@ -50,7 +50,7 @@ func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "the requested user does not exist")
 		}
 
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
+		return newErrorResponse(http.StatusInternalServerError, "could not process user get database action")
 	}
 
 	resp.User = user
@@ -138,7 +138,7 @@ func (v *APIServerV1) userPut(r *http.Request) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "user to update does not exist")
 		}
 
-		return newErrorResponse(http.StatusInternalServerError, "could not process users database action")
+		return newErrorResponse(http.StatusInternalServerError, "could not process user put database action")
 	}
 
 	return userPutResponse{}.fromDatabaseUser(user)
