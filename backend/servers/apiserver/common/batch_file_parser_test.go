@@ -10,7 +10,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 )
 
-func TestParseClassCreationFile(t *testing.T) {
+func TestParseBatchFile(t *testing.T) {
 	loc, err := time.LoadLocation(timezoneLocation)
 	if err != nil {
 		t.Fatal(err)
@@ -20,14 +20,14 @@ func TestParseClassCreationFile(t *testing.T) {
 		name         string
 		file         string
 		wantErr      string
-		expectedData *ClassCreationData
+		expectedData *BatchData
 	}{
 		{
 			"sample class creation file",
-			"class_file_test.xlsx",
+			"batch_file_well_formatted.xlsx",
 			"",
-			&ClassCreationData{
-				"class_file_test.xlsx",
+			&BatchData{
+				"batch_file_well_formatted.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
 				database.UpsertClassesParams{
 					Code:      "SC1015",
@@ -76,49 +76,49 @@ func TestParseClassCreationFile(t *testing.T) {
 		},
 		{
 			"empty class creation file",
-			"class_empty_test.xlsx",
+			"batch_file_empty_test.xlsx",
 			"not enough rows for class metadata",
 			nil,
 		},
 		{
 			"too many class metadata rows",
-			"class_excessive_class_metadata_rows.xlsx",
+			"batch_file_excessive_class_metadata_rows.xlsx",
 			"unexpected number of columns for class group row",
 			nil,
 		},
 		{
 			"missing class group enrollment list identifier",
-			"class_missing_enrollment_ident.xlsx",
+			"batch_file_no_enrollment_list_ident.xlsx",
 			"unexpected start of class group enrollment list",
 			nil,
 		},
 		{
 			"second class group missing enrollment list identifier",
-			"class_second_group_missing_enrollment_ident.xlsx",
+			"batch_file_no_enrollment_list_ident_2.xlsx",
 			"unexpected start of class group enrollment list",
 			nil,
 		},
 		{
 			"student row with wrong length",
-			"class_student_row_wrong_length.xlsx",
+			"batch_file_student_row_wrong_length.xlsx",
 			"unexpected number of columns for student enrollment row",
 			nil,
 		},
 		{
 			"class group with no enrollment",
-			"class_group_with_no_enrollment.xlsx",
+			"batch_file_class_group_no_enrollment.xlsx",
 			"class group A21 has no enrollments",
 			nil,
 		},
 		{
 			"course with no class groups",
-			"class_with_no_groups.xlsx",
+			"batch_file_no_class_groups.xlsx",
 			"creation data has no valid class groups",
 			nil,
 		},
 		{
 			"invalid format for class group name",
-			"class_with_invalid_class_group_name.xlsx",
+			"batch_file_invalid_class_group_name.xlsx",
 			"could not parse class group",
 			nil,
 		},
@@ -131,7 +131,7 @@ func TestParseClassCreationFile(t *testing.T) {
 			file, err := os.Open(tt.file)
 			a.Nil(err)
 
-			data, err := ParseClassCreationFile(tt.file, file)
+			data, err := ParseBatchFile(tt.file, file)
 			if tt.wantErr != "" {
 				a.Contains(err.Error(), tt.wantErr)
 				return

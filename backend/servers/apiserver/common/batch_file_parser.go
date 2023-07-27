@@ -48,17 +48,17 @@ const (
 	classGroupEnrollmentListIdent  = "No."
 )
 
-// ParseClassCreationFile parses a class creation file.
-func ParseClassCreationFile(filename string, f io.Reader) (ClassCreationData, error) {
+// ParseBatchFile parses a class creation file.
+func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 	file, err := excelize.OpenReader(f)
 	if err != nil {
-		return ClassCreationData{}, err
+		return BatchData{}, err
 	}
 	defer func() {
 		_ = file.Close()
 	}()
 
-	var creationData ClassCreationData
+	var creationData BatchData
 	creationData.Filename = filename
 
 	sheets := file.GetSheetList()
@@ -83,7 +83,7 @@ func ParseClassCreationFile(filename string, f io.Reader) (ClassCreationData, er
 }
 
 // parseClassMetaData is a helper function to parse a class' metadata from a file.
-func parseClassMetaData(creationData *ClassCreationData, rows [][]string) error {
+func parseClassMetaData(creationData *BatchData, rows [][]string) error {
 	// The first few rows in the sheet should be the course metadata.
 	if len(rows) < expectedClassMetaDataRows {
 		return fmt.Errorf("%s - not enough rows for class metadata", namespace)
@@ -137,7 +137,7 @@ func parseClassMetaData(creationData *ClassCreationData, rows [][]string) error 
 }
 
 // parseClassGroups is a helper function to parse a class' groups.
-func parseClassGroups(creationData *ClassCreationData, rows [][]string) error {
+func parseClassGroups(creationData *BatchData, rows [][]string) error {
 	index := expectedClassMetaDataRows + 1            // Skip one blank row after metadata.
 	for index+expectedClassGroupIDRows <= len(rows) { // For each class group.
 		var group ClassGroupData
