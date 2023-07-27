@@ -10,8 +10,13 @@ import (
 	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+)
+
+const (
+	sessionUserId = "me"
 )
 
 // users endpoint returns useful information on the current session user and information on any requested users.
@@ -19,18 +24,47 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
 	userId := strings.TrimPrefix(r.URL.Path, userUrl)
-	switch r.Method {
-	case http.MethodGet:
+	switch m := r.Method; {
+	case userId == sessionUserId:
+		resp = v.userMe(r)
+	case m == http.MethodGet:
 		resp = v.userGet(r, userId)
-	case http.MethodPut:
+	case m == http.MethodPut:
 		resp = v.userPut(r, userId)
-	case http.MethodDelete:
+	case m == http.MethodDelete:
 		resp = v.userDelete(r, userId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, fmt.Sprintf("method %s is not allowed", r.Method))
 	}
 
 	v.writeResponse(w, userUrl, resp)
+}
+
+type userMeResponse struct {
+	response
+	SessionUser database.User `json:"session_user"`
+}
+
+func (v *APIServerV1) userMe(r *http.Request) apiResponse {
+	resp := userMeResponse{response: newSuccessResponse()}
+
+	// Fill session user.
+	authContext, isSignedIn, err := middleware.GetAuthContext(r)
+	switch {
+	case err != nil:
+		return newErrorResponse(http.StatusInternalServerError, err.Error())
+	case isSignedIn:
+		user, err := v.db.Q.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
+		if err != nil {
+			return newErrorResponse(http.StatusInternalServerError, "could get session user from database")
+		}
+
+		resp.SessionUser = user
+	default:
+		return newErrorResponse(http.StatusUnauthorized, "client lacks authentication credentials")
+	}
+
+	return resp
 }
 
 type userGetResponse struct {

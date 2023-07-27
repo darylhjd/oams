@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -61,6 +63,89 @@ func TestAPIServerV1_user(t *testing.T) {
 			v1.user(rr, req)
 
 			a.Equal(tt.wantStatusCode, rr.Code)
+		})
+	}
+}
+
+func TestAPIServerV1_userMe(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name             string
+		withAuthContext  any
+		withStubAuthUser bool
+		wantResponse     userMeResponse
+		wantStatusCode   int
+		wantErr          string
+	}{
+		{
+			"request with valid auth context and auth context user in database",
+			tests.NewMockAuthContext(),
+			true,
+			userMeResponse{
+				newSuccessResponse(),
+				database.User{
+					ID:    tests.MockAuthenticatorIDTokenName,
+					Name:  "",
+					Email: tests.MockAuthenticatorAccountPreferredUsername,
+					Role:  database.UserRoleSTUDENT,
+				},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with invalid auth context",
+			time.Time{},
+			true,
+			userMeResponse{},
+			http.StatusInternalServerError,
+			"unexpected auth context type",
+		},
+		{
+			"request with valid auth context but non-existent user in database",
+			tests.NewMockAuthContext(),
+			false,
+			userMeResponse{},
+			http.StatusInternalServerError,
+			"could get session user from database",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			if tt.withStubAuthUser {
+				tests.StubAuthContextUser(t, ctx, v1.db.Q)
+			}
+
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, sessionUserId), nil)
+			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
+			resp := v1.userMe(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(userMeResponse)
+				a.True(ok)
+
+				tt.wantResponse.SessionUser.CreatedAt = actualResp.SessionUser.CreatedAt
+				tt.wantResponse.SessionUser.UpdatedAt = actualResp.SessionUser.UpdatedAt
+				a.Equal(tt.wantResponse, actualResp)
+			}
 		})
 	}
 }

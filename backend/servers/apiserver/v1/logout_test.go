@@ -27,7 +27,7 @@ func TestAPIServerV1_signOut(t *testing.T) {
 		{
 			"request with account in context",
 			tests.NewMockAuthContext(),
-			signOutResponse{newSuccessResponse()},
+			logoutResponse{newSuccessResponse()},
 		},
 		{
 			"request with wrong account type in context",
@@ -55,10 +55,10 @@ func TestAPIServerV1_signOut(t *testing.T) {
 
 			tests.StubAuthContextUser(t, ctx, v1.db.Q)
 
-			req := httptest.NewRequest(http.MethodGet, signOutUrl, nil)
+			req := httptest.NewRequest(http.MethodGet, logoutUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
 			rr := httptest.NewRecorder()
-			v1.signOut(rr, req)
+			v1.logout(rr, req)
 
 			expectedBytes, err := json.Marshal(tt.wantResponse)
 			a.Nil(err)

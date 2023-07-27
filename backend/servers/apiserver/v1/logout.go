@@ -8,13 +8,13 @@ import (
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
-type signOutResponse struct {
+type logoutResponse struct {
 	response
 }
 
-// signOut endpoint invalidates a user session. This is done by requesting that the browser
+// logout endpoint invalidates a user session. This is done by requesting that the browser
 // remove the cookie containing the session information.
-func (v *APIServerV1) signOut(w http.ResponseWriter, r *http.Request) {
+func (v *APIServerV1) logout(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
 	authContext, isSignedIn, err := middleware.GetAuthContext(r)
@@ -25,12 +25,12 @@ func (v *APIServerV1) signOut(w http.ResponseWriter, r *http.Request) {
 	case err != nil:
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 	default:
-		resp = signOutResponse{newSuccessResponse()}
+		resp = logoutResponse{newSuccessResponse()}
 		if err = v.azure.RemoveAccount(r.Context(), authContext.AuthResult.Account); err != nil {
 			resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 		}
 	}
 
 	_ = oauth2.DeleteSessionCookie(w)
-	v.writeResponse(w, signOutUrl, resp)
+	v.writeResponse(w, logoutUrl, resp)
 }

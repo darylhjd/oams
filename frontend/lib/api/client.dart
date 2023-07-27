@@ -20,8 +20,8 @@ class APIClient {
 
   static const String loginPath = "api/v1/login";
   static const String loginRedirectUrlParam = "redirect_url";
-  static const String logoutPath = "api/v1/sign-out";
-  static const String usersPath = "api/v1/users";
+  static const String logoutPath = "api/v1/logout";
+  static const String userMePath = "api/v1/users/me";
 
   // getLoginURL gets a login URL from the APIServer.
   static Future<String> getLoginURL(String returnTo) async {
@@ -55,10 +55,10 @@ class APIClient {
     return response.statusCode == HttpStatus.ok;
   }
 
-  // getUserInfo returns the user info of the current logged in user.
-  static Future<UsersResponse> getUsers() async {
+  // getSessionUserInfo gets the session user info.
+  static Future<SessionUserInfoResponse> getSessionUserInfo() async {
     final uri = apiUri.replace(
-      path: usersPath,
+      path: userMePath,
     );
 
     final response = await client.get(uri);
@@ -66,6 +66,6 @@ class APIClient {
       return Future.error(const HttpException("cannot get user details"));
     }
 
-    return UsersResponse.fromJson(jsonDecode(response.body));
+    return SessionUserInfoResponse.fromJson(jsonDecode(response.body));
   }
 }
