@@ -20,18 +20,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAPIServerV1_classesCreate(t *testing.T) {
+func TestAPIServerV1_batchPost(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
 		name         string
 		body         func() (io.Reader, string, error)
-		wantResponse classesCreateResponse
+		wantResponse batchPostResponse
 	}{
 		{
 			"with file upload",
 			func() (io.Reader, string, error) {
-				file := "../common/class_file_test.xlsx"
+				file := "../common/batch_file_well_formatted.xlsx"
 
 				var b bytes.Buffer
 				w := multipart.NewWriter(&b)
@@ -57,7 +57,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 
 				return &b, w.FormDataContentType(), w.Close()
 			},
-			classesCreateResponse{
+			batchPostResponse{
 				newSuccessResponse(),
 				1,
 				3,
@@ -71,8 +71,8 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 			body: func() (io.Reader, string, error) {
 				now := time.Now()
 
-				body := classesCreateRequest{
-					[]common.ClassCreationData{
+				body := batchPostRequest{
+					[]common.BatchData{
 						{
 							Course: database.UpsertClassesParams{
 								Code:      "SC1015",
@@ -169,7 +169,7 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 
 				return bytes.NewReader(b), "application/json", nil
 			},
-			wantResponse: classesCreateResponse{
+			wantResponse: batchPostResponse{
 				response:           newSuccessResponse(),
 				Classes:            1,
 				ClassGroups:        3,
@@ -197,10 +197,10 @@ func TestAPIServerV1_classesCreate(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			req := httptest.NewRequest(http.MethodPost, classesUrl, body)
+			req := httptest.NewRequest(http.MethodPost, batchUrl, body)
 			req.Header.Set("Content-Type", contentType)
 			rr := httptest.NewRecorder()
-			v1.classesCreate(rr, req)
+			v1.batchPost(rr, req)
 
 			b, err := json.Marshal(tt.wantResponse)
 			a.Nil(err)

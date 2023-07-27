@@ -24,13 +24,13 @@ const (
 	multipartFormFileIdent = "attachments"
 )
 
-type classesCreateRequest struct {
-	Classes []common.ClassCreationData `json:"classes"`
+type batchPostRequest struct {
+	Batches []common.BatchData `json:"batches"`
 }
 
 // isValid does a validation of the request, and returns an error if it is not valid.
-func (r classesCreateRequest) isValid() error {
-	for _, class := range r.Classes {
+func (r batchPostRequest) isValid() error {
+	for _, class := range r.Batches {
 		if err := class.IsValid(); err != nil {
 			return err
 		}
@@ -39,7 +39,7 @@ func (r classesCreateRequest) isValid() error {
 	return nil
 }
 
-type classesCreateResponse struct {
+type batchPostResponse struct {
 	response
 	Classes            int `json:"classes"`
 	ClassGroups        int `json:"class_groups"`
@@ -48,39 +48,39 @@ type classesCreateResponse struct {
 	SessionEnrollments int `json:"session_enrollments"`
 }
 
-// classesCreate is the handler for a request to create classes.
-func (v *APIServerV1) classesCreate(w http.ResponseWriter, r *http.Request) {
+// batchPost is the handler for a request to create classes.
+func (v *APIServerV1) batchPost(w http.ResponseWriter, r *http.Request) {
 	var (
-		req  classesCreateRequest
+		req  batchPostRequest
 		resp apiResponse
 		err  error
 	)
 
 	switch contentType := r.Header.Get("Content-Type"); {
 	case strings.HasPrefix(contentType, "multipart"):
-		req, err = v.fromClassCreationFiles(r)
+		req, err = v.fromBatchFiles(r)
 	case contentType == "application/json":
-		req, err = v.fromClassCreationJSON(r)
+		req, err = v.fromBatchJSON(r)
 	default:
 		resp = newErrorResponse(http.StatusUnsupportedMediaType, fmt.Sprintf("%s is unsupported", contentType))
-		v.writeResponse(w, classesUrl, resp)
+		v.writeResponse(w, batchUrl, resp)
 		return
 	}
 
 	if err == nil {
-		resp, err = v.processClassesCreateRequest(r.Context(), req)
+		resp, err = v.processBatchPostRequest(r.Context(), req)
 	}
 
 	if err != nil {
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 
-	v.writeResponse(w, classesUrl, resp)
+	v.writeResponse(w, batchUrl, resp)
 }
 
-// fromClassCreationFiles creates a request struct from uploaded files.
-func (v *APIServerV1) fromClassCreationFiles(r *http.Request) (classesCreateRequest, error) {
-	var req classesCreateRequest
+// fromBatchFiles creates a request struct from uploaded files.
+func (v *APIServerV1) fromBatchFiles(r *http.Request) (batchPostRequest, error) {
+	var req batchPostRequest
 
 	if err := r.ParseMultipartForm(maxParseMemory); err != nil {
 		return req, err
@@ -92,7 +92,7 @@ func (v *APIServerV1) fromClassCreationFiles(r *http.Request) (classesCreateRequ
 	for _, header := range r.MultipartForm.File[multipartFormFileIdent] {
 		header := header // Required for go routine to point to different file for each loop.
 		limiter.Do(func() {
-			creationData, err := v.fromClassCreationFile(header)
+			creationData, err := v.fromBatchFile(header)
 			saveRes.Store(&creationData, err)
 		})
 	}
@@ -101,7 +101,7 @@ func (v *APIServerV1) fromClassCreationFiles(r *http.Request) (classesCreateRequ
 
 	var err error
 	saveRes.Range(func(key, value any) bool {
-		data, ok := key.(*common.ClassCreationData)
+		data, ok := key.(*common.BatchData)
 		if !ok {
 			err = errors.New("type assertion failed when processing class creation data")
 			return false
@@ -112,16 +112,16 @@ func (v *APIServerV1) fromClassCreationFiles(r *http.Request) (classesCreateRequ
 			return false
 		}
 
-		req.Classes = append(req.Classes, *data)
+		req.Batches = append(req.Batches, *data)
 		return true
 	})
 
 	return req, err
 }
 
-// fromClassCreationFile processes a file to create new class creation data.
-func (v *APIServerV1) fromClassCreationFile(fileHeader *multipart.FileHeader) (common.ClassCreationData, error) {
-	var data common.ClassCreationData
+// fromBatchFile processes a file to create new class creation data.
+func (v *APIServerV1) fromBatchFile(fileHeader *multipart.FileHeader) (common.BatchData, error) {
+	var data common.BatchData
 
 	file, err := fileHeader.Open()
 	if err != nil {
@@ -134,7 +134,7 @@ func (v *APIServerV1) fromClassCreationFile(fileHeader *multipart.FileHeader) (c
 	v.l.Debug(fmt.Sprintf("%s - processing class creation file", namespace),
 		zap.String("filename", fileHeader.Filename))
 
-	data, err = common.ParseClassCreationFile(fileHeader.Filename, file)
+	data, err = common.ParseBatchFile(fileHeader.Filename, file)
 	if err != nil {
 		return data, fmt.Errorf("%s - error parsing class creation file %s: %w", namespace, fileHeader.Filename, err)
 	}
@@ -142,10 +142,10 @@ func (v *APIServerV1) fromClassCreationFile(fileHeader *multipart.FileHeader) (c
 	return data, nil
 }
 
-// fromClassCreationJSON creates a request struct from JSON body.
-func (v *APIServerV1) fromClassCreationJSON(r *http.Request) (classesCreateRequest, error) {
+// fromBatchJSON creates a request struct from JSON body.
+func (v *APIServerV1) fromBatchJSON(r *http.Request) (batchPostRequest, error) {
 	var (
-		req classesCreateRequest
+		req batchPostRequest
 		b   bytes.Buffer
 	)
 
@@ -167,8 +167,8 @@ type classGroupSessionsParamsWithStudents struct {
 	students                 [][]database.UpsertUsersParams
 }
 
-// processClassesCreateRequest and return a classesCreateResponse and error if encountered.
-func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req classesCreateRequest) (apiResponse, error) {
+// processBatchPostRequest and return a batchPostResponse and error if encountered.
+func (v *APIServerV1) processBatchPostRequest(ctx context.Context, req batchPostRequest) (apiResponse, error) {
 	if err := req.isValid(); err != nil {
 		return newErrorResponse(http.StatusBadRequest, err.Error()), nil
 	}
@@ -184,7 +184,7 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 		dbErr         error
 		coursesParams []database.UpsertClassesParams
 	)
-	resp := classesCreateResponse{
+	resp := batchPostResponse{
 		response: newSuccessResponse(),
 	}
 
@@ -196,7 +196,7 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 		}
 	}()
 
-	for _, class := range req.Classes {
+	for _, class := range req.Batches {
 		coursesParams = append(coursesParams, class.Course)
 	}
 
@@ -218,7 +218,7 @@ func (v *APIServerV1) processClassesCreateRequest(ctx context.Context, req class
 
 		resp.Classes++
 
-		class := req.Classes[i]
+		class := req.Batches[i]
 		for idx := range class.ClassGroups {
 			class.ClassGroups[idx].UpsertClassGroupsParams.ClassID = course.ID
 			classGroupsHelper.classGroupsParams = append(classGroupsHelper.classGroupsParams, class.ClassGroups[idx].UpsertClassGroupsParams)
