@@ -20,6 +20,15 @@ INSERT INTO users (id, name, email, role, created_at, updated_at)
 VALUES ($1, $2, $3, $4, NOW(), NOW())
 RETURNING id, name, email, role, created_at;
 
+-- name: UpdateUser :one
+UPDATE users
+    SET name = COALESCE(sqlc.narg('name'), name),
+        email = COALESCE(sqlc.narg('email'), email),
+        role = COALESCE(sqlc.narg('role'), role),
+        updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
 -- name: UpsertUsers :batchone
 INSERT INTO users (id, name, email, role, created_at, updated_at)
 VALUES ($1, $2, $3, $4, NOW(), NOW())
