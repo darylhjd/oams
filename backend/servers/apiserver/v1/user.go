@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/jackc/pgx/v5"
@@ -36,26 +35,7 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 
 type userGetResponse struct {
 	response
-	User userGetUserResponseFields `json:"user"`
-}
-
-type userGetUserResponseFields struct {
-	ID    string            `json:"id"`
-	Name  string            `json:"name"`
-	Email string            `json:"email"`
-	Role  database.UserRole `json:"role"`
-}
-
-func (r userGetResponse) fromDatabaseUser(user database.User) userGetResponse {
-	return userGetResponse{
-		newSuccessResponse(),
-		userGetUserResponseFields{
-			user.ID,
-			user.Name,
-			user.Email,
-			user.Role,
-		},
-	}
+	User database.User `json:"user"`
 }
 
 func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
@@ -68,7 +48,10 @@ func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process user get database action")
 	}
 
-	return userGetResponse{}.fromDatabaseUser(user)
+	return userGetResponse{
+		newSuccessResponse(),
+		user,
+	}
 }
 
 type userPutRequest struct {
@@ -102,28 +85,7 @@ func (r userPutRequest) updateUserParams(userId string) database.UpdateUserParam
 
 type userPutResponse struct {
 	response
-	User userPutUserResponseFields `json:"user"`
-}
-
-type userPutUserResponseFields struct {
-	ID        string            `json:"id"`
-	Name      string            `json:"name"`
-	Email     string            `json:"email"`
-	Role      database.UserRole `json:"role"`
-	UpdatedAt time.Time         `json:"updated_at"`
-}
-
-func (r userPutResponse) fromDatabaseUser(user database.User) userPutResponse {
-	return userPutResponse{
-		newSuccessResponse(),
-		userPutUserResponseFields{
-			ID:        user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
-			Role:      user.Role,
-			UpdatedAt: user.UpdatedAt.Time,
-		},
-	}
+	User database.UpdateUserRow `json:"user"`
 }
 
 func (v *APIServerV1) userPut(r *http.Request, id string) apiResponse {
@@ -149,7 +111,10 @@ func (v *APIServerV1) userPut(r *http.Request, id string) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process user put database action")
 	}
 
-	return userPutResponse{}.fromDatabaseUser(user)
+	return userPutResponse{
+		newSuccessResponse(),
+		user,
+	}
 }
 
 type userDeleteResponse struct {

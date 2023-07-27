@@ -136,7 +136,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 		{
 			"request with no existing user",
 			usersCreateRequest{
-				usersCreateUserRequestFields{
+				database.CreateUserParams{
 					ID:   "NEW_USER",
 					Role: database.UserRoleSTUDENT,
 				},
@@ -144,7 +144,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			false,
 			usersCreateResponse{
 				newSuccessResponse(),
-				usersCreateUserResponseFields{
+				database.CreateUserRow{
 					ID:   "NEW_USER",
 					Role: database.UserRoleSTUDENT,
 				},
@@ -155,7 +155,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 		{
 			"request with existing user",
 			usersCreateRequest{
-				usersCreateUserRequestFields{
+				database.CreateUserParams{
 					ID:   "EXISTING_USER",
 					Role: database.UserRoleSTUDENT,
 				},

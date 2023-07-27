@@ -34,7 +34,7 @@ SET name       = COALESCE(sqlc.narg('name'), name),
                            COALESCE(sqlc.narg('role'), role) <> role) THEN NOW()
                      ELSE updated_at END
 WHERE id = $1
-RETURNING *;
+RETURNING id, name, email, role, updated_at;
 
 -- name: DeleteUser :one
 DELETE

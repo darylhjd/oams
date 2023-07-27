@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -47,49 +46,12 @@ func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 }
 
 type usersCreateRequest struct {
-	User usersCreateUserRequestFields `json:"user"`
-}
-
-type usersCreateUserRequestFields struct {
-	ID    string            `json:"id"`
-	Name  string            `json:"name"`
-	Email string            `json:"email"`
-	Role  database.UserRole `json:"role"`
-}
-
-func (r usersCreateRequest) createUserParams() database.CreateUserParams {
-	return database.CreateUserParams{
-		ID:    r.User.ID,
-		Name:  r.User.Name,
-		Email: r.User.Email,
-		Role:  r.User.Role,
-	}
+	User database.CreateUserParams `json:"user"`
 }
 
 type usersCreateResponse struct {
 	response
-	User usersCreateUserResponseFields `json:"user"`
-}
-
-type usersCreateUserResponseFields struct {
-	ID        string            `json:"id"`
-	Name      string            `json:"name"`
-	Email     string            `json:"email"`
-	Role      database.UserRole `json:"role"`
-	CreatedAt time.Time         `json:"created_at"`
-}
-
-func (r usersCreateResponse) fromDatabaseCreateUserRow(row database.CreateUserRow) usersCreateResponse {
-	return usersCreateResponse{
-		newSuccessResponse(),
-		usersCreateUserResponseFields{
-			ID:        row.ID,
-			Name:      row.Name,
-			Email:     row.Email,
-			Role:      row.Role,
-			CreatedAt: row.CreatedAt.Time,
-		},
-	}
+	User database.CreateUserRow `json:"user"`
 }
 
 func (v *APIServerV1) usersCreate(r *http.Request) apiResponse {
@@ -106,7 +68,7 @@ func (v *APIServerV1) usersCreate(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
 	}
 
-	user, err := v.db.Q.CreateUser(r.Context(), req.createUserParams())
+	user, err := v.db.Q.CreateUser(r.Context(), req.User)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.SQLState() == database.SQLStateDuplicateKeyOrIndex {
@@ -116,5 +78,8 @@ func (v *APIServerV1) usersCreate(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process users post database action")
 	}
 
-	return usersCreateResponse{}.fromDatabaseCreateUserRow(user)
+	return usersCreateResponse{
+		newSuccessResponse(),
+		user,
+	}
 }
