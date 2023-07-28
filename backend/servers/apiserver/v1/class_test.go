@@ -36,7 +36,7 @@ func TestAPIServerV1_class(t *testing.T) {
 		{
 			"with DELETE method",
 			http.MethodDelete,
-			http.StatusNotImplemented,
+			http.StatusNotFound,
 		},
 		{
 			"with PATCH method",
@@ -264,6 +264,68 @@ func TestAPIServerV1_classPut(t *testing.T) {
 				req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%d", classUrl, classId), bytes.NewReader(reqBodyBytes))
 				successiveResp := v1.classPut(req, classId).(classPutResponse)
 				a.Equal(actualResp, successiveResp)
+			}
+		})
+	}
+}
+
+func TestAPIServerV1_classDelete(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name              string
+		withExistingClass bool
+		wantResponse      classDeleteResponse
+		wantStatusCode    int
+		wantErr           string
+	}{
+		{
+			"request with existing class",
+			true,
+			classDeleteResponse{newSuccessResponse()},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with non-existent class",
+			false,
+			classDeleteResponse{},
+			http.StatusNotFound,
+			"class to delete does not exist",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			var classId int64 = 6666 // Choose a random ID that does not exist.
+			if tt.withExistingClass {
+				createdClass := tests.StubClass(t, ctx, v1.db.Q, "RANDOM_CODE", 9999, "22")
+				classId = createdClass.ID
+			}
+
+			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classUrl, classId), nil)
+			resp := v1.classDelete(req, classId)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(classDeleteResponse)
+				a.True(ok)
+				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
 	}

@@ -28,7 +28,7 @@ func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 		resp = v.classPut(r, classId)
 	case http.MethodDelete:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classDelete(r, classId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -127,4 +127,21 @@ func (v *APIServerV1) classPut(r *http.Request, id int64) apiResponse {
 		newSuccessResponse(),
 		class,
 	}
+}
+
+type classDeleteResponse struct {
+	response
+}
+
+func (v *APIServerV1) classDelete(r *http.Request, id int64) apiResponse {
+	_, err := v.db.Q.DeleteClass(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "class to delete does not exist")
+		}
+
+		return newErrorResponse(http.StatusInternalServerError, "could not process class delete database action")
+	}
+
+	return classDeleteResponse{newSuccessResponse()}
 }

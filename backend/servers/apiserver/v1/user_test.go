@@ -379,7 +379,7 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 				_ = tests.StubUser(t, ctx, v1.db.Q, userId, database.UserRoleSTUDENT)
 			}
 
-			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), nil)
+			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%s", userUrl, userId), nil)
 			resp := v1.userDelete(req, userId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
