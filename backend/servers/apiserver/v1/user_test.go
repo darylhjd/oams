@@ -242,7 +242,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			userPutResponse{
 				newSuccessResponse(),
 				database.UpdateUserRow{
-					ID:    "NEW_ID",
+					ID:    "EXISTING_ID",
 					Name:  "NEW NAME",
 					Email: "NEW EMAIL",
 					Role:  database.UserRoleSTUDENT,
@@ -260,7 +260,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			userPutResponse{
 				newSuccessResponse(),
 				database.UpdateUserRow{
-					ID:   "NEW_ID",
+					ID:   "EXISTING_ID",
 					Role: database.UserRoleSTUDENT,
 				},
 			},
@@ -273,7 +273,11 @@ func TestAPIServerV1_userPut(t *testing.T) {
 				userPutUserRequestFields{},
 			},
 			false,
-			userPutResponse{},
+			userPutResponse{
+				User: database.UpdateUserRow{
+					ID: "NON_EXISTENT_ID",
+				},
+			},
 			http.StatusNotFound,
 			"user to update does not exist",
 		},
@@ -315,10 +319,10 @@ func TestAPIServerV1_userPut(t *testing.T) {
 				tt.wantResponse.User.UpdatedAt = actualResp.User.UpdatedAt
 				a.Equal(tt.wantResponse, actualResp)
 
-				// Check that successive updates do not change the updated_at field.
+				// Check that successive updates do not change anything.
 				req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), bytes.NewReader(reqBodyBytes))
 				successiveResp := v1.userPut(req, userId).(userPutResponse)
-				a.Equal(actualResp.User.UpdatedAt, successiveResp.User.UpdatedAt)
+				a.Equal(actualResp, successiveResp)
 			}
 		})
 	}
