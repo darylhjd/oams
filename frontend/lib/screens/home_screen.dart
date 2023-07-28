@@ -70,6 +70,7 @@ class _HomeScreenGuest extends StatelessWidget {
       padding: const EdgeInsets.all(mobilePadding),
       children: const [
         _WelcomeBanner(true),
+        _FeaturesDivider(),
       ],
     );
   }
@@ -79,6 +80,7 @@ class _HomeScreenGuest extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: desktopPadding),
       children: const [
         _WelcomeBanner(false),
+        _FeaturesDivider(),
       ],
     );
   }
@@ -182,6 +184,30 @@ class _WelcomeBanner extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// _FeaturesDivider is applicable only tot he guest home screen.
+// It shows the divider between the welcome banner and the bottom.
+class _FeaturesDivider extends StatelessWidget {
+  static const double padding = 30;
+
+  const _FeaturesDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: padding),
+      child: const Column(
+        children: [
+          Text(
+            "Scroll down to discover more.",
+            textAlign: TextAlign.center,
+          ),
+          Icon(Icons.arrow_downward),
+        ],
       ),
     );
   }
