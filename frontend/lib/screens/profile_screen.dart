@@ -58,8 +58,7 @@ class _Name extends StatelessWidget {
   final bool isMobile;
   final String name;
 
-  const _Name(this.isMobile, this.name, {Key? key})
-      : super(key: key);
+  const _Name(this.isMobile, this.name, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
