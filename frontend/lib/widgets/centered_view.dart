@@ -7,7 +7,7 @@ class CenteredView extends StatelessWidget {
   static const double mobileVerticalPadding = 5;
   static const double desktopHorizontalPadding = 20;
   static const double desktopVerticalPadding = 10;
-  static const double desktopMaxWidth = 1100;
+  static const double desktopMaxWidth = 1500;
 
   final Widget child;
 

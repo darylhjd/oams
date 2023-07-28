@@ -11,9 +11,9 @@ class LoginScreen extends StatelessWidget {
   static const String buttonText = "SSO with Microsoft";
   static const String urlLaunchMode = "_self";
 
-  final String returnTo;
+  final String redirectUrl;
 
-  const LoginScreen({Key? key, this.returnTo = ""}) : super(key: key);
+  const LoginScreen({Key? key, this.redirectUrl = ""}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +46,8 @@ class LoginScreen extends StatelessWidget {
   }
 
   Future<void> loginAction() async {
-    final redirectUrl = await APIClient.getLoginURL(returnTo);
-    if (!await launchUrl(Uri.parse(redirectUrl),
-        webOnlyWindowName: urlLaunchMode)) {
+    final url = await APIClient.getLoginURL(redirectUrl);
+    if (!await launchUrl(Uri.parse(url), webOnlyWindowName: urlLaunchMode)) {
       // TODO: Add handling here.
     }
   }

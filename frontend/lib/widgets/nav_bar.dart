@@ -22,10 +22,12 @@ class NavBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(padding),
         decoration: BoxDecoration(
-            color: Theme.of(context).primaryColorLight,
-            boxShadow: boxShadow,
-            borderRadius:
-                const BorderRadius.all(Radius.circular(borderRadius))),
+          color: Theme.of(context).primaryColorLight,
+          boxShadow: boxShadow,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(borderRadius),
+          ),
+        ),
         child: ResponsiveBreakpoints.of(context).isMobile
             ? mobile(context)
             : desktop(context),
