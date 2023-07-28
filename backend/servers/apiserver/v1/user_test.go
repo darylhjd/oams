@@ -226,6 +226,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 		withRequest      userPutRequest
 		withExistingUser bool
 		wantResponse     userPutResponse
+		wantNoChange     bool
 		wantStatusCode   int
 		wantErr          string
 	}{
@@ -248,6 +249,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 					Role:  database.UserRoleSTUDENT,
 				},
 			},
+			false,
 			http.StatusOK,
 			"",
 		},
@@ -264,6 +266,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 					Role: database.UserRoleSTUDENT,
 				},
 			},
+			true,
 			http.StatusOK,
 			"",
 		},
@@ -278,6 +281,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 					ID: "NON_EXISTENT_ID",
 				},
 			},
+			false,
 			http.StatusNotFound,
 			"user to update does not exist",
 		},
@@ -297,7 +301,8 @@ func TestAPIServerV1_userPut(t *testing.T) {
 
 			userId := tt.wantResponse.User.ID
 			if tt.withExistingUser {
-				_ = tests.StubUser(t, ctx, v1.db.Q, userId, tt.wantResponse.User.Role)
+				createdUser := tests.StubUser(t, ctx, v1.db.Q, userId, tt.wantResponse.User.Role)
+				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
@@ -316,7 +321,10 @@ func TestAPIServerV1_userPut(t *testing.T) {
 				actualResp, ok := resp.(userPutResponse)
 				a.True(ok)
 
-				tt.wantResponse.User.UpdatedAt = actualResp.User.UpdatedAt
+				if !tt.wantNoChange {
+					tt.wantResponse.User.UpdatedAt = actualResp.User.UpdatedAt
+				}
+
 				a.Equal(tt.wantResponse, actualResp)
 
 				// Check that successive updates do not change anything.

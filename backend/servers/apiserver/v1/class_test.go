@@ -149,6 +149,7 @@ func TestAPIServerV1_classPut(t *testing.T) {
 		withRequest       classPutRequest
 		withExistingClass bool
 		wantResponse      classPutResponse
+		wantNoChange      bool
 		wantStatusCode    int
 		wantErr           string
 	}{
@@ -174,6 +175,7 @@ func TestAPIServerV1_classPut(t *testing.T) {
 					Au:        3,
 				},
 			},
+			false,
 			http.StatusOK,
 			"",
 		},
@@ -191,6 +193,7 @@ func TestAPIServerV1_classPut(t *testing.T) {
 					Semester: "1",
 				},
 			},
+			true,
 			http.StatusOK,
 			"",
 		},
@@ -205,6 +208,7 @@ func TestAPIServerV1_classPut(t *testing.T) {
 					ID: 6666,
 				},
 			},
+			false,
 			http.StatusNotFound,
 			"class to update does not exist",
 		},
@@ -230,6 +234,7 @@ func TestAPIServerV1_classPut(t *testing.T) {
 					tt.wantResponse.Class.Semester,
 				)
 				tt.wantResponse.Class.ID = createdClass.ID
+				tt.wantResponse.Class.UpdatedAt = createdClass.CreatedAt
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
@@ -249,7 +254,10 @@ func TestAPIServerV1_classPut(t *testing.T) {
 				actualResp, ok := resp.(classPutResponse)
 				a.True(ok)
 
-				tt.wantResponse.Class.UpdatedAt = actualResp.Class.UpdatedAt
+				if !tt.wantNoChange {
+					tt.wantResponse.Class.UpdatedAt = actualResp.Class.UpdatedAt
+				}
+
 				a.Equal(tt.wantResponse, actualResp)
 
 				// Check that successive updates do not change anything.
