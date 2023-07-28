@@ -53,7 +53,6 @@ class _HomeScreenLoggedIn extends ConsumerWidget {
 class _HomeScreenGuest extends StatelessWidget {
   static const double mobilePadding = 10;
   static const double desktopPadding = 20;
-  static const double desktopMargin = 100;
 
   const _HomeScreenGuest();
 
@@ -88,9 +87,15 @@ class _HomeScreenGuest extends StatelessWidget {
 // _WelcomeBanner is applicable only to the guest home screen.
 class _WelcomeBanner extends StatelessWidget {
   static const String bannerText =
-      "Welcome to Online Attendance Management System!";
+      "Welcome to the Online Attendance Management System!";
   static const double buttonRadius = 5;
   static const String buttonText = "Get started";
+
+  static const double mobilePadding = 10;
+  static const double mobileMargin = 50;
+  static const double mobileButtonVerticalPadding = 20;
+  static const double mobileButtonHorizontalPadding = 15;
+  static const double mobileButtonFontSize = 18;
 
   static const double desktopPadding = 20;
   static const double desktopMargin = 100;
@@ -108,7 +113,40 @@ class _WelcomeBanner extends StatelessWidget {
   }
 
   Widget mobile(BuildContext context) {
-    return const Placeholder();
+    return Card(
+      child: Container(
+        padding: const EdgeInsets.all(mobilePadding),
+        margin: const EdgeInsets.symmetric(vertical: mobileMargin),
+        alignment: Alignment.center,
+        child: Column(
+          children: [
+            Text(
+              bannerText,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: mobilePadding),
+            FilledButton(
+              onPressed: () => context.goNamed(Routes.login.name),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  vertical: mobileButtonVerticalPadding,
+                  horizontal: mobileButtonHorizontalPadding,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(buttonRadius),
+                ),
+                textStyle: const TextStyle(fontSize: mobileButtonFontSize),
+              ),
+              child: const Text(buttonText),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   Widget desktop(BuildContext context) {
