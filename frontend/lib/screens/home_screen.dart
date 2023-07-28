@@ -192,14 +192,19 @@ class _WelcomeBanner extends StatelessWidget {
 // _FeaturesDivider is applicable only tot he guest home screen.
 // It shows the divider between the welcome banner and the bottom.
 class _FeaturesDivider extends StatelessWidget {
-  static const double padding = 30;
+  static const double mobilePadding = 20;
+  static const double desktopPadding = 30;
 
   const _FeaturesDivider();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: padding),
+      padding: EdgeInsets.symmetric(
+        vertical: ResponsiveBreakpoints.of(context).isMobile
+            ? mobilePadding
+            : desktopPadding,
+      ),
       child: const Column(
         children: [
           Text(
