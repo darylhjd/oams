@@ -189,7 +189,7 @@ class _WelcomeBanner extends StatelessWidget {
   }
 }
 
-// _FeaturesDivider is applicable only tot he guest home screen.
+// _FeaturesDivider is applicable only to the guest home screen.
 // It shows the divider between the welcome banner and the bottom.
 class _FeaturesDivider extends StatelessWidget {
   static const double mobilePadding = 20;
