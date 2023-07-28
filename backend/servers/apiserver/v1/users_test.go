@@ -163,6 +163,19 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			http.StatusConflict,
 			"user with same id already exists",
 		},
+		{
+			"request with special session user id me",
+			usersPostRequest{
+				database.CreateUserParams{
+					ID:   sessionUserId,
+					Role: database.UserRoleSTUDENT,
+				},
+			},
+			false,
+			usersPostResponse{},
+			http.StatusUnprocessableEntity,
+			"id is not allowed",
+		},
 	}
 
 	for _, tt := range tts {

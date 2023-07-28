@@ -48,7 +48,7 @@ type batchPostResponse struct {
 	SessionEnrollments int `json:"session_enrollments"`
 }
 
-// batchPost is the handler for a request to create classes.
+// batchPost is the handler for a request to create a batch of entities.
 func (v *APIServerV1) batchPost(w http.ResponseWriter, r *http.Request) {
 	var (
 		req  batchPostRequest

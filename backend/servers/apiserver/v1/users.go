@@ -66,6 +66,10 @@ func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
 	}
 
+	if req.User.ID == sessionUserId {
+		return newErrorResponse(http.StatusUnprocessableEntity, "id is not allowed")
+	}
+
 	user, err := v.db.Q.CreateUser(r.Context(), req.User)
 	if err != nil {
 		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
