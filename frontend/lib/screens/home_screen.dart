@@ -370,6 +370,8 @@ class _FinalActionCall extends StatelessWidget {
   static const double mobilePadding = 10;
   static const double mobileMargin = 40;
   static const double mobileButtonFontSize = 20;
+  static const double mobileButtonVerticalPadding = 15;
+  static const double mobileButtonHorizontalPadding = 10;
 
   static const double desktopPadding = 20;
   static const double desktopMargin = 100;
@@ -398,6 +400,10 @@ class _FinalActionCall extends StatelessWidget {
           const SizedBox(height: mobilePadding),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                vertical: mobileButtonVerticalPadding,
+                horizontal: mobileButtonHorizontalPadding,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(buttonRadius),
               ),
