@@ -60,7 +60,6 @@ class NavBar extends StatelessWidget {
 // _Logo is a widget that shows the app logo on the navigation bar.
 class _Logo extends StatelessWidget {
   static const double width = 100;
-  static const double height = double.infinity;
 
   static const String logoPath = "assets/logo.png";
 
@@ -70,7 +69,6 @@ class _Logo extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
-      height: height,
       child: IconButton(
         icon: Image.asset(logoPath),
         onPressed: () => context.goNamed(Routes.index.name),
