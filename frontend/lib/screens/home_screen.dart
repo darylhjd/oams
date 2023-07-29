@@ -72,6 +72,9 @@ class _HomeScreenGuest extends StatelessWidget {
         _WelcomeBanner(true),
         _FeaturesDivider(),
         _Features(true),
+        Divider(),
+        _FinalActionCall(true),
+        Divider(),
       ],
     );
   }
@@ -83,6 +86,9 @@ class _HomeScreenGuest extends StatelessWidget {
         _WelcomeBanner(false),
         _FeaturesDivider(),
         _Features(false),
+        Divider(),
+        _FinalActionCall(false),
+        Divider(),
       ],
     );
   }
@@ -210,7 +216,7 @@ class _FeaturesDivider extends StatelessWidget {
       child: const Column(
         children: [
           Text(
-            "Scroll down to discover more.",
+            "Discover our features.",
             textAlign: TextAlign.center,
           ),
           Icon(Icons.arrow_downward),
@@ -236,38 +242,37 @@ class _Features extends StatelessWidget {
     return const Column(
       children: [
         _CloudBasedFeature(true),
+        _DetailedSystemDashboard(true),
+        _CloudBasedFeature(true),
       ],
     );
   }
 
   Widget desktop() {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return const Column(
       children: [
-        Flexible(
-          child: _CloudBasedFeature(false),
-        ),
+        _CloudBasedFeature(false),
+        _DetailedSystemDashboard(false),
+        _CloudBasedFeature(false),
       ],
     );
   }
 }
 
-// _CloudBasedFeature shows the online cloud-based feature of OAMS.
-class _CloudBasedFeature extends StatelessWidget {
-  static const String headline = "Cloud-based management system";
-  static const String body =
-      "Say goodbye to cumbersome paper-based attendance sheets. OAMS stores attendance data online so you can stay up-to-date wherever you are - instantly.";
-
+// _FeatureCard provides the template for a feature showcase.
+class _FeatureCard extends StatelessWidget {
+  static const double mobileCardMargin = 10;
   static const double mobilePadding = 10;
   static const double mobileMargin = 20;
 
   static const double desktopPadding = 20;
   static const double desktopMargin = 20;
-  static const double desktopMaxWidth = 400;
 
+  final String title;
+  final String body;
   final bool isMobile;
 
-  const _CloudBasedFeature(this.isMobile);
+  const _FeatureCard(this.title, this.body, this.isMobile);
 
   @override
   Widget build(BuildContext context) {
@@ -276,6 +281,7 @@ class _CloudBasedFeature extends StatelessWidget {
 
   Widget mobile(BuildContext context) {
     return Card(
+      margin: const EdgeInsets.symmetric(vertical: mobileCardMargin),
       child: Container(
         padding: const EdgeInsets.all(mobilePadding),
         margin: const EdgeInsets.symmetric(vertical: mobileMargin),
@@ -284,7 +290,7 @@ class _CloudBasedFeature extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              headline,
+              title,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: mobilePadding),
@@ -303,13 +309,12 @@ class _CloudBasedFeature extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(desktopPadding),
         margin: const EdgeInsets.symmetric(vertical: desktopMargin),
-        width: desktopMaxWidth,
-        alignment: Alignment.center,
+        alignment: Alignment.topLeft,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              headline,
+              title,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: desktopPadding),
@@ -319,6 +324,119 @@ class _CloudBasedFeature extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// _CloudBasedFeature shows the online cloud-based feature of OAMS.
+class _CloudBasedFeature extends StatelessWidget {
+  static const String title = "Cloud-based management system";
+  static const String body =
+      "Say goodbye to cumbersome paper-based attendance sheets. OAMS stores attendance data online so you can stay up-to-date wherever you are - instantly.";
+
+  final bool isMobile;
+
+  const _CloudBasedFeature(this.isMobile);
+
+  @override
+  Widget build(BuildContext context) {
+    return _FeatureCard(title, body, isMobile);
+  }
+}
+
+// _DetailedSystemDashboard shows the reports and analytics feature of OAMS.
+class _DetailedSystemDashboard extends StatelessWidget {
+  static const String title = "Detailed system dashboard";
+  static const String body =
+      "Get comprehensive access to attendance data. Our system dashboard provides you with detailed visualisations of your most important analytics - all at your fingertips.";
+
+  final bool isMobile;
+
+  const _DetailedSystemDashboard(this.isMobile);
+
+  @override
+  Widget build(BuildContext context) {
+    return _FeatureCard(title, body, isMobile);
+  }
+}
+
+// _CallToAction is the final call to the user to sign up.
+class _FinalActionCall extends StatelessWidget {
+  static const String callText = "Try OAMS now.";
+  static const double buttonRadius = 5;
+  static const String buttonText = "Sign Up/Login";
+
+  static const double mobilePadding = 10;
+  static const double mobileMargin = 40;
+  static const double mobileButtonFontSize = 20;
+
+  static const double desktopPadding = 20;
+  static const double desktopMargin = 100;
+  static const double desktopButtonFontSize = 24;
+  static const double desktopButtonVerticalPadding = 20;
+  static const double desktopButtonHorizontalPadding = 10;
+
+  final bool isMobile;
+
+  const _FinalActionCall(this.isMobile);
+
+  @override
+  Widget build(BuildContext context) {
+    return isMobile ? mobile(context) : desktop(context);
+  }
+
+  Widget mobile(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: mobileMargin),
+      child: Column(
+        children: [
+          Text(
+            callText,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: mobilePadding),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(buttonRadius),
+              ),
+              textStyle: const TextStyle(fontSize: mobileButtonFontSize),
+            ),
+            onPressed: () => context.goNamed(Routes.login.name),
+            child: const Text(buttonText),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget desktop(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: desktopMargin),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            callText,
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
+          const SizedBox(width: desktopPadding),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                vertical: desktopButtonVerticalPadding,
+                horizontal: desktopButtonHorizontalPadding,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(buttonRadius),
+              ),
+              textStyle: const TextStyle(fontSize: desktopButtonFontSize),
+            ),
+            onPressed: () => context.goNamed(Routes.login.name),
+            child: const Text(buttonText),
+          ),
+        ],
       ),
     );
   }
