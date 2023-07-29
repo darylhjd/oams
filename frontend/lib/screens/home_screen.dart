@@ -259,7 +259,7 @@ class _CloudBasedFeature extends StatelessWidget {
       "Say goodbye to cumbersome paper-based attendance sheets. OAMS stores attendance data online so you can stay up-to-date wherever you are - instantly.";
 
   static const double mobilePadding = 10;
-  static const double mobileMargin = 10;
+  static const double mobileMargin = 20;
 
   static const double desktopPadding = 20;
   static const double desktopMargin = 20;
