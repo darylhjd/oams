@@ -8,7 +8,7 @@ import 'package:responsive_framework/responsive_breakpoints.dart';
 
 // ProfileScreen shows the profile screen.
 class ProfileScreen extends ConsumerWidget {
-  static const double mobilePadding = 10;
+  static const double mobilePadding = 30;
   static const double desktopPadding = 20;
 
   const ProfileScreen({Key? key}) : super(key: key);
@@ -30,60 +30,71 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget mobile(BuildContext context, User data) {
+  Widget mobile(BuildContext context, User user) {
     return ListView(
-      padding: const EdgeInsets.all(mobilePadding),
+      padding: const EdgeInsets.symmetric(vertical: mobilePadding),
       children: [
-        _Name(true, data.id),
+        _NameHeader(true, user),
       ],
     );
   }
 
-  Widget desktop(BuildContext context, User data) {
+  Widget desktop(BuildContext context, User user) {
     return ListView(
       padding: const EdgeInsets.all(desktopPadding),
       children: [
-        _Name(false, data.id),
+        _NameHeader(false, user),
       ],
     );
   }
 }
 
-// _Name shows as a larger text the name of a User.
-class _Name extends StatelessWidget {
-  static const double mobileTopPadding = 50;
-  static const double mobileOtherPadding = 5;
-  static const double desktopTopPadding = 100;
-  static const double desktopOtherPadding = 10;
+// _NameHeader shows as a larger text the name of a User.
+class _NameHeader extends StatelessWidget {
+  final User user;
   final bool isMobile;
-  final String name;
 
-  const _Name(this.isMobile, this.name, {Key? key}) : super(key: key);
+  const _NameHeader(this.isMobile, this.user);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.bottomCenter,
-      padding: isMobile
-          ? const EdgeInsets.fromLTRB(
-              mobileOtherPadding,
-              mobileTopPadding,
-              mobileOtherPadding,
-              mobileOtherPadding,
-            )
-          : const EdgeInsets.fromLTRB(
-              desktopOtherPadding,
-              desktopTopPadding,
-              desktopOtherPadding,
-              desktopOtherPadding,
-            ),
-      child: Text(
-        name,
-        style: Theme.of(context)
-            .textTheme
-            .bodyLarge
-            ?.copyWith(fontWeight: FontWeight.bold),
-      ),
+    return isMobile ? mobile(context) : desktop(context);
+  }
+
+  Widget mobile(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          user.id,
+          style: Theme.of(context)
+              .textTheme
+              .headlineLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          user.name,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ],
+    );
+  }
+
+  Widget desktop(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          user.id,
+          style: Theme.of(context)
+              .textTheme
+              .headlineLarge
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          user.name,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ],
     );
   }
 }
