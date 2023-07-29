@@ -67,10 +67,11 @@ class _HomeScreenGuest extends StatelessWidget {
 
   Widget mobile(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(mobilePadding),
+      padding: const EdgeInsets.symmetric(vertical: mobilePadding),
       children: const [
         _WelcomeBanner(true),
         _FeaturesDivider(),
+        _Features(true),
       ],
     );
   }
@@ -81,6 +82,7 @@ class _HomeScreenGuest extends StatelessWidget {
       children: const [
         _WelcomeBanner(false),
         _FeaturesDivider(),
+        _Features(false),
       ],
     );
   }
@@ -213,6 +215,110 @@ class _FeaturesDivider extends StatelessWidget {
           ),
           Icon(Icons.arrow_downward),
         ],
+      ),
+    );
+  }
+}
+
+// _Features is only applicable to the guest home screen.
+// It contains the list of feature "selling points" of OAMS.
+class _Features extends StatelessWidget {
+  final bool isMobile;
+
+  const _Features(this.isMobile);
+
+  @override
+  Widget build(BuildContext context) {
+    return isMobile ? mobile(context) : desktop();
+  }
+
+  Widget mobile(BuildContext context) {
+    return const Column(
+      children: [
+        _CloudBasedFeature(true),
+      ],
+    );
+  }
+
+  Widget desktop() {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Flexible(
+          child: _CloudBasedFeature(false),
+        ),
+      ],
+    );
+  }
+}
+
+// _CloudBasedFeature shows the online cloud-based feature of OAMS.
+class _CloudBasedFeature extends StatelessWidget {
+  static const String headline = "Cloud-based management system";
+  static const String body =
+      "Say goodbye to cumbersome paper-based attendance sheets. OAMS stores attendance data online so you can stay up-to-date wherever you are - instantly.";
+
+  static const double mobilePadding = 10;
+  static const double mobileMargin = 20;
+
+  static const double desktopPadding = 20;
+  static const double desktopMargin = 20;
+  static const double desktopMaxWidth = 400;
+
+  final bool isMobile;
+
+  const _CloudBasedFeature(this.isMobile);
+
+  @override
+  Widget build(BuildContext context) {
+    return isMobile ? mobile(context) : desktop(context);
+  }
+
+  Widget mobile(BuildContext context) {
+    return Card(
+      child: Container(
+        padding: const EdgeInsets.all(mobilePadding),
+        margin: const EdgeInsets.symmetric(vertical: mobileMargin),
+        alignment: Alignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              headline,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: mobilePadding),
+            Text(
+              body,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget desktop(BuildContext context) {
+    return Card(
+      child: Container(
+        padding: const EdgeInsets.all(desktopPadding),
+        margin: const EdgeInsets.symmetric(vertical: desktopMargin),
+        width: desktopMaxWidth,
+        alignment: Alignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              headline,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: desktopPadding),
+            Text(
+              body,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ],
+        ),
       ),
     );
   }
