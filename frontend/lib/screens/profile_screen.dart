@@ -9,7 +9,7 @@ import 'package:responsive_framework/responsive_breakpoints.dart';
 // ProfileScreen shows the profile screen.
 class ProfileScreen extends ConsumerWidget {
   static const double mobilePadding = 30;
-  static const double desktopPadding = 20;
+  static const double desktopPadding = 40;
 
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -35,16 +35,32 @@ class ProfileScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: mobilePadding),
       children: [
         _NameHeader(true, user),
+        const SizedBox(height: mobilePadding),
+        _DetailsCard(true, user),
       ],
     );
   }
 
   Widget desktop(BuildContext context, User user) {
-    return ListView(
-      padding: const EdgeInsets.all(desktopPadding),
-      children: [
-        _NameHeader(false, user),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: desktopPadding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(0, 0, desktopPadding, 0),
+            child: _NameHeader(false, user),
+          ),
+          Flexible(
+            child: ListView(
+              children: [
+                _DetailsCard(false, user),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -96,5 +112,26 @@ class _NameHeader extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+// _DetailsCard shows the details of the user.
+class _DetailsCard extends StatelessWidget {
+  final User user;
+  final bool isMobile;
+
+  const _DetailsCard(this.isMobile, this.user);
+
+  @override
+  Widget build(BuildContext context) {
+    return isMobile ? mobile(context) : desktop(context);
+  }
+
+  Widget mobile(BuildContext context) {
+    return const Placeholder();
+  }
+
+  Widget desktop(BuildContext context) {
+    return const Placeholder();
   }
 }
