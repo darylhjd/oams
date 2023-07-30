@@ -9,6 +9,7 @@ import (
 type SQLState string
 
 const (
+	SQLStateForeignKeyViolation SQLState = "23503"
 	SQLStateDuplicateKeyOrIndex SQLState = "23505"
 )
 
