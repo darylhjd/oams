@@ -84,8 +84,8 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			"request with no user in database",
 			false,
 			usersGetResponse{
-				response: newSuccessResponse(),
-				Users:    []database.User{},
+				newSuccessResponse(),
+				[]database.User{},
 			},
 		},
 	}
