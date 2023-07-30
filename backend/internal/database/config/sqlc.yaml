@@ -1,7 +1,13 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: [ "query.sql", "users.sql", "classes.sql" ]
+    queries: [
+      "users.sql",
+      "classes.sql",
+      "class_groups.sql",
+      "class_group_sessions.sql",
+      "session_enrollments.sql",
+    ]
     schema: "migrations/"
     gen:
       go:

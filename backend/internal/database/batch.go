@@ -76,7 +76,13 @@ VALUES ($1, $2, $3, $4, NOW(), NOW())
 ON CONFLICT ON CONSTRAINT ux_class_group_id_start_time
     DO UPDATE SET end_time   = $3,
                   venue      = $4,
-                  updated_at = NOW()
+                  updated_at =
+                      CASE
+                          WHEN $3 <> class_group_sessions.end_time OR
+                               $4 <> class_group_sessions.venue
+                              THEN NOW()
+                          ELSE class_group_sessions.updated_at
+                          END
 RETURNING id, class_group_id, start_time, end_time, venue, created_at, updated_at
 `
 
@@ -93,6 +99,7 @@ type UpsertClassGroupSessionsParams struct {
 	Venue        string           `json:"venue"`
 }
 
+// Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
 func (q *Queries) UpsertClassGroupSessions(ctx context.Context, arg []UpsertClassGroupSessionsParams) *UpsertClassGroupSessionsBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
@@ -144,7 +151,12 @@ INSERT INTO class_groups (class_id, name, class_type, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
 ON CONFLICT ON CONSTRAINT ux_class_id_name
     DO UPDATE SET class_type = $3,
-                  updated_at = NOW()
+                  updated_at =
+                      CASE
+                          WHEN $3 <> class_groups.class_type
+                              THEN NOW()
+                          ELSE class_groups.updated_at
+                          END
 RETURNING id, class_id, name, class_type, created_at, updated_at
 `
 
@@ -160,6 +172,7 @@ type UpsertClassGroupsParams struct {
 	ClassType ClassType `json:"class_type"`
 }
 
+// Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
 func (q *Queries) UpsertClassGroups(ctx context.Context, arg []UpsertClassGroupsParams) *UpsertClassGroupsBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
@@ -205,14 +218,19 @@ func (b *UpsertClassGroupsBatchResults) Close() error {
 }
 
 const upsertClasses = `-- name: UpsertClasses :batchone
-INSERT
-INTO classes (code, year, semester, programme, au, created_at, updated_at)
+INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 ON CONFLICT
     ON CONSTRAINT ux_code_year_semester
     DO UPDATE SET programme  = $4,
                   au         = $5,
-                  updated_at = NOW()
+                  updated_at =
+                      CASE
+                          WHEN $4 <> classes.programme OR
+                               $5 <> classes.au
+                              THEN NOW()
+                          ELSE classes.updated_at
+                          END
 RETURNING id, code, year, semester, programme, au, created_at, updated_at
 `
 
@@ -230,6 +248,7 @@ type UpsertClassesParams struct {
 	Au        int16  `json:"au"`
 }
 
+// Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
 func (q *Queries) UpsertClasses(ctx context.Context, arg []UpsertClassesParams) *UpsertClassesBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
@@ -285,7 +304,14 @@ ON CONFLICT (id)
     DO UPDATE SET name       = $2,
                   email      = $3,
                   role       = $4,
-                  updated_at = NOW()
+                  updated_at =
+                      CASE
+                          WHEN $2 <> users.name OR
+                               $3 <> users.email OR
+                               $4 <> users.role
+                              THEN NOW()
+                          ELSE users.updated_at
+                          END
 RETURNING id, name, email, role, created_at, updated_at
 `
 
@@ -302,6 +328,7 @@ type UpsertUsersParams struct {
 	Role  UserRole `json:"role"`
 }
 
+// Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
 func (q *Queries) UpsertUsers(ctx context.Context, arg []UpsertUsersParams) *UpsertUsersBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {

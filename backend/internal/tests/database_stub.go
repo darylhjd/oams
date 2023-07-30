@@ -11,11 +11,11 @@ import (
 func StubAuthContextUser(t *testing.T, ctx context.Context, q *database.Queries) {
 	t.Helper()
 
-	err := q.UpsertUsers(ctx, []database.UpsertUsersParams{{
+	_, err := q.CreateUser(ctx, database.CreateUserParams{
 		ID:    MockAuthenticatorIDTokenName,
 		Email: MockAuthenticatorAccountPreferredUsername,
 		Role:  database.UserRoleSTUDENT,
-	}}).Close()
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
