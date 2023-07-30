@@ -28,7 +28,7 @@ func TestAPIServerV1_classGroups(t *testing.T) {
 		{
 			"with POST method",
 			http.MethodPost,
-			http.StatusNotImplemented,
+			http.StatusBadRequest,
 		},
 		{
 			"with DELETE method",
@@ -114,6 +114,23 @@ func TestAPIServerV1_classGroupsGet(t *testing.T) {
 			actualResp, ok := v1.classGroupsGet(req).(classGroupsGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
+		})
+	}
+}
+
+func TestAPIServerV1_classGroupsPost(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name string
+	}{
+		{},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+
 		})
 	}
 }
