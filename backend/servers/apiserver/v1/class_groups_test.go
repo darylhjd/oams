@@ -133,10 +133,6 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 		wantStatusCode         int
 		wantErr                string
 	}{
-		// Test cases.
-		// 1. POST with non-existing class group.
-		// 2. POST with existing class group.
-		// 3. POST with non-existent class (foreign key constraint).
 		{
 			"request with no existing class group",
 			classGroupsPostRequest{
