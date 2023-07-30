@@ -85,8 +85,8 @@ func TestAPIServerV1_classesGet(t *testing.T) {
 			"request with no class in database",
 			false,
 			classesGetResponse{
-				response: newSuccessResponse(),
-				Classes:  []database.Class{},
+				newSuccessResponse(),
+				[]database.Class{},
 			},
 		},
 	}
