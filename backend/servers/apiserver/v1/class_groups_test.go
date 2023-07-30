@@ -46,7 +46,7 @@ func TestAPIServerV1_classGroups(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			req := httptest.NewRequest(tt.withMethod, classesUrl, nil)
+			req := httptest.NewRequest(tt.withMethod, classGroupsUrl, nil)
 			rr := httptest.NewRecorder()
 			v1.classGroups(rr, req)
 
