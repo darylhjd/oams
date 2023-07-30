@@ -16,7 +16,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
-func TestAPIServerV1_signOut(t *testing.T) {
+func TestAPIServerV1_logOut(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
