@@ -23,7 +23,7 @@ func TestAPIServerV1_classGroups(t *testing.T) {
 		{
 			"with GET method",
 			http.MethodGet,
-			http.StatusNotImplemented,
+			http.StatusOK,
 		},
 		{
 			"with POST method",

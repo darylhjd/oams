@@ -11,7 +11,7 @@ func (v *APIServerV1) classGroups(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classGroupsGet(r)
 	case http.MethodPost:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
