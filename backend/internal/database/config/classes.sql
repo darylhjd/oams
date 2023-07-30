@@ -12,7 +12,7 @@ LIMIT 1;
 -- name: GetClassesByIDs :many
 SELECT *
 FROM classes
-WHERE id = ANY (sqlc.arg(ids)::BIGSERIAL[])
+WHERE id = ANY (@ids::BIGSERIAL[])
 ORDER BY id;
 
 -- name: CreateClass :one
@@ -53,12 +53,18 @@ WHERE id = $1
 RETURNING *;
 
 -- name: UpsertClasses :batchone
-INSERT
-INTO classes (code, year, semester, programme, au, created_at, updated_at)
+-- Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
+INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 ON CONFLICT
     ON CONSTRAINT ux_code_year_semester
     DO UPDATE SET programme  = $4,
                   au         = $5,
-                  updated_at = NOW()
+                  updated_at =
+                      CASE
+                          WHEN $4 <> classes.programme OR
+                               $5 <> classes.au
+                              THEN NOW()
+                          ELSE classes.updated_at
+                          END
 RETURNING *;
