@@ -89,7 +89,7 @@ func (q *Queries) GetClassGroup(ctx context.Context, id int64) (ClassGroup, erro
 const getClassGroupsByIDs = `-- name: GetClassGroupsByIDs :many
 SELECT id, class_id, name, class_type, created_at, updated_at
 FROM class_groups
-WHERE id = ANY ($1::BIGSERIAL[])
+WHERE id = ANY ($1::BIGINT[])
 ORDER BY id
 `
 
@@ -160,7 +160,7 @@ SET class_id   = COALESCE($2, class_id),
     class_type = COALESCE($4, class_type),
     updated_at =
         CASE
-            WHEN (NOT ($2::BIGSERIAL IS NULL AND
+            WHEN (NOT ($2::BIGINT IS NULL AND
                        $3::TEXT IS NULL AND
                        $4::CLASS_TYPE IS NULL))
                 AND

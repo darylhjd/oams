@@ -105,7 +105,7 @@ func (q *Queries) GetClass(ctx context.Context, id int64) (Class, error) {
 const getClassesByIDs = `-- name: GetClassesByIDs :many
 SELECT id, code, year, semester, programme, au, created_at, updated_at
 FROM classes
-WHERE id = ANY ($1::BIGSERIAL[])
+WHERE id = ANY ($1::BIGINT[])
 ORDER BY id
 `
 

@@ -12,7 +12,7 @@ LIMIT 1;
 -- name: GetClassGroupSessionsByIDs :many
 SELECT *
 FROM class_group_sessions
-WHERE id = ANY (@ids::BIGSERIAL[])
+WHERE id = ANY (@ids::BIGINT[])
 ORDER BY id;
 
 -- name: CreateClassGroupSession :one
@@ -28,7 +28,7 @@ SET class_group_id = COALESCE(sqlc.narg('class_group_id'), class_group_id),
     venue          = COALESCE(sqlc.narg('venue'), venue),
     updated_at     =
         CASE
-            WHEN (NOT (sqlc.narg('class_group_id')::BIGSERIAL IS NULL AND
+            WHEN (NOT (sqlc.narg('class_group_id')::BIGINT IS NULL AND
                        sqlc.narg('start_time')::TIMESTAMP IS NULL AND
                        sqlc.narg('end_time')::TIMESTAMP IS NULL AND
                        sqlc.narg('venue')::TEXT IS NULL))

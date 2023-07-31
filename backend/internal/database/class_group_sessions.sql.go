@@ -77,7 +77,7 @@ func (q *Queries) GetClassGroupSession(ctx context.Context, id int64) (ClassGrou
 const getClassGroupSessionsByIDs = `-- name: GetClassGroupSessionsByIDs :many
 SELECT id, class_group_id, start_time, end_time, venue, created_at, updated_at
 FROM class_group_sessions
-WHERE id = ANY ($1::BIGSERIAL[])
+WHERE id = ANY ($1::BIGINT[])
 ORDER BY id
 `
 
@@ -151,7 +151,7 @@ SET class_group_id = COALESCE($2, class_group_id),
     venue          = COALESCE($5, venue),
     updated_at     =
         CASE
-            WHEN (NOT ($2::BIGSERIAL IS NULL AND
+            WHEN (NOT ($2::BIGINT IS NULL AND
                        $3::TIMESTAMP IS NULL AND
                        $4::TIMESTAMP IS NULL AND
                        $5::TEXT IS NULL))
