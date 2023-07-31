@@ -26,9 +26,9 @@ func (v *APIServerV1) classGroup(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		resp = v.classGroupGet(r, groupId)
 	case http.MethodPut:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classGroupPut(r, groupId)
 	case http.MethodDelete:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classGroupDelete(r, groupId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -117,4 +117,21 @@ func (v *APIServerV1) classGroupPut(r *http.Request, id int64) apiResponse {
 		newSuccessResponse(),
 		group,
 	}
+}
+
+type classGroupDeleteResponse struct {
+	response
+}
+
+func (v *APIServerV1) classGroupDelete(r *http.Request, id int64) apiResponse {
+	_, err := v.db.Q.DeleteClassGroup(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "class group to delete does not exist")
+		}
+
+		return newErrorResponse(http.StatusInternalServerError, "could not process class group delete database action")
+	}
+
+	return classGroupDeleteResponse{newSuccessResponse()}
 }
