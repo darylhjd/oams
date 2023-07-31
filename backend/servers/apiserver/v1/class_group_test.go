@@ -31,12 +31,12 @@ func TestAPIServerV1_classGroup(t *testing.T) {
 		{
 			"with PUT method",
 			http.MethodPut,
-			http.StatusNotImplemented,
+			http.StatusBadRequest,
 		},
 		{
 			"with DELETE method",
 			http.MethodDelete,
-			http.StatusNotImplemented,
+			http.StatusNotFound,
 		},
 		{
 			"with PATCH method",
@@ -258,6 +258,72 @@ func TestAPIServerV1_classGroupPut(t *testing.T) {
 				req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%d", classGroupUrl, groupId), bytes.NewReader(reqBodyBytes))
 				successiveResp := v1.classGroupPut(req, groupId).(classGroupPutResponse)
 				a.Equal(actualResp, successiveResp)
+			}
+		})
+	}
+}
+
+func TestAPIServerV1_classGroupDelete(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name                   string
+		withExistingClassGroup bool
+		wantResponse           classGroupDeleteResponse
+		wantStatusCode         int
+		wantErr                string
+	}{
+		{
+			"request with existing class group",
+			true,
+			classGroupDeleteResponse{newSuccessResponse()},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with non-existent class group",
+			false,
+			classGroupDeleteResponse{},
+			http.StatusNotFound,
+			"class group to delete does not exist",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			var classId int64 = 6666 // Choose a random ID that does not exist.
+			if tt.withExistingClassGroup {
+				createdClassGroup := tests.StubClassGroup(
+					t, ctx, v1.db.Q,
+					"RANDOM33",
+					database.ClassTypeTUT,
+				)
+				classId = createdClassGroup.ID
+			}
+
+			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classGroupUrl, classId), nil)
+			resp := v1.classGroupDelete(req, classId)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(classGroupDeleteResponse)
+				a.True(ok)
+				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
 	}
