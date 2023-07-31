@@ -12,7 +12,7 @@ LIMIT 1;
 -- name: GetClassGroupsByIDs :many
 SELECT *
 FROM class_groups
-WHERE id = ANY (@ids::BIGSERIAL[])
+WHERE id = ANY (@ids::BIGINT[])
 ORDER BY id;
 
 -- name: CreateClassGroup :one
@@ -27,7 +27,7 @@ SET class_id   = COALESCE(sqlc.narg('class_id'), class_id),
     class_type = COALESCE(sqlc.narg('class_type'), class_type),
     updated_at =
         CASE
-            WHEN (NOT (sqlc.narg('class_id')::BIGSERIAL IS NULL AND
+            WHEN (NOT (sqlc.narg('class_id')::BIGINT IS NULL AND
                        sqlc.narg('name')::TEXT IS NULL AND
                        sqlc.narg('class_type')::CLASS_TYPE IS NULL))
                 AND

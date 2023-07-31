@@ -31,7 +31,7 @@ CREATE TABLE classes
 CREATE TABLE class_groups
 (
     id         BIGSERIAL PRIMARY KEY,
-    class_id   BIGSERIAL  NOT NULL,
+    class_id   BIGINT     NOT NULL,
     name       TEXT       NOT NULL,
     class_type CLASS_TYPE NOT NULL,
     created_at TIMESTAMP  NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE class_groups
 CREATE TABLE class_group_sessions
 (
     id             BIGSERIAL PRIMARY KEY,
-    class_group_id BIGSERIAL NOT NULL,
+    class_group_id BIGINT    NOT NULL,
     start_time     TIMESTAMP NOT NULL,
     end_time       TIMESTAMP NOT NULL,
     venue          TEXT      NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE class_group_sessions
 
 CREATE TABLE session_enrollments
 (
-    session_id BIGSERIAL NOT NULL,
+    session_id BIGINT    NOT NULL,
     user_id    TEXT      NOT NULL,
     created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (session_id, user_id),

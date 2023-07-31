@@ -69,12 +69,7 @@ type classPutClassRequestFields struct {
 	Au        *int16  `json:"au"`
 }
 
-type classPutResponse struct {
-	response
-	Class database.UpdateClassRow `json:"class"`
-}
-
-func (r *classPutRequest) updateClassParams(classId int64) database.UpdateClassParams {
+func (r classPutRequest) updateClassParams(classId int64) database.UpdateClassParams {
 	params := database.UpdateClassParams{ID: classId}
 
 	if r.Class.Code != nil {
@@ -98,6 +93,11 @@ func (r *classPutRequest) updateClassParams(classId int64) database.UpdateClassP
 	}
 
 	return params
+}
+
+type classPutResponse struct {
+	response
+	Class database.UpdateClassRow `json:"class"`
 }
 
 func (v *APIServerV1) classPut(r *http.Request, id int64) apiResponse {

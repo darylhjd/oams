@@ -12,7 +12,7 @@ LIMIT 1;
 -- name: GetClassesByIDs :many
 SELECT *
 FROM classes
-WHERE id = ANY (@ids::BIGSERIAL[])
+WHERE id = ANY (@ids::BIGINT[])
 ORDER BY id;
 
 -- name: CreateClass :one
