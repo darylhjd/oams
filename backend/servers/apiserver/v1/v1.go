@@ -19,18 +19,19 @@ const (
 )
 
 const (
-	baseUrl            = "/"
-	pingUrl            = "/ping"
-	loginUrl           = "/login"
-	msLoginCallbackUrl = "/ms-login-callback"
-	logoutUrl          = "/logout"
-	batchUrl           = "/batch"
-	usersUrl           = "/users"
-	userUrl            = "/users/"
-	classesUrl         = "/classes"
-	classUrl           = "/classes/"
-	classGroupsUrl     = "/class_groups"
-	classGroupUrl      = "/class_groups/"
+	baseUrl               = "/"
+	pingUrl               = "/ping"
+	loginUrl              = "/login"
+	msLoginCallbackUrl    = "/ms-login-callback"
+	logoutUrl             = "/logout"
+	batchUrl              = "/batch"
+	usersUrl              = "/users"
+	userUrl               = "/users/"
+	classesUrl            = "/classes"
+	classUrl              = "/classes/"
+	classGroupsUrl        = "/class_groups"
+	classGroupUrl         = "/class_groups/"
+	classGroupSessionsUrl = "/class_group_sessions"
 )
 
 type APIServerV1 struct {
@@ -95,6 +96,12 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classGroupUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroup, http.MethodGet, http.MethodPut, http.MethodDelete),
+		v.azure,
+		true,
+	))
+
+	v.mux.HandleFunc(classGroupSessionsUrl, middleware.WithAuthContext(
+		middleware.AllowMethods(v.classGroupSessions, http.MethodGet, http.MethodPost),
 		v.azure,
 		true,
 	))
