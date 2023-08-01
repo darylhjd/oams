@@ -7,6 +7,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // StubAuthContextUser inserts the mock auth context user into the database.
@@ -73,4 +74,26 @@ func StubClassGroup(t *testing.T, ctx context.Context, q *database.Queries, name
 	}
 
 	return group
+}
+
+// StubClassGroupSession inserts a mock class, class group and corresponding class group session into the database.
+func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Queries, startTime, endTime pgtype.Timestamp, venue string) database.CreateClassGroupSessionRow {
+	t.Helper()
+
+	classGroup := StubClassGroup(t, ctx, q, uuid.NewString(), database.ClassTypeLEC)
+
+	startTime.Time = startTime.Time.UTC()
+	endTime.Time = endTime.Time.UTC()
+
+	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
+		ClassGroupID: classGroup.ID,
+		StartTime:    startTime,
+		EndTime:      endTime,
+		Venue:        venue,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return session
 }
