@@ -29,8 +29,8 @@ func TestAPIServerV1_classGroupSession(t *testing.T) {
 			http.StatusNotFound,
 		},
 		{
-			"with PUT method",
-			http.MethodPut,
+			"with PATCH method",
+			http.MethodPatch,
 			http.StatusNotImplemented,
 		},
 		{
@@ -39,8 +39,8 @@ func TestAPIServerV1_classGroupSession(t *testing.T) {
 			http.StatusNotImplemented,
 		},
 		{
-			"with PATCH method",
-			http.MethodPatch,
+			"with PUT method",
+			http.MethodPut,
 			http.StatusMethodNotAllowed,
 		},
 	}

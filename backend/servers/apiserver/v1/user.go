@@ -27,8 +27,8 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 		resp = v.userMe(r)
 	case m == http.MethodGet:
 		resp = v.userGet(r, userId)
-	case m == http.MethodPut:
-		resp = v.userPut(r, userId)
+	case m == http.MethodPatch:
+		resp = v.userPatch(r, userId)
 	case m == http.MethodDelete:
 		resp = v.userDelete(r, userId)
 	default:
@@ -86,17 +86,17 @@ func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
 	}
 }
 
-type userPutRequest struct {
-	User userPutUserRequestFields `json:"user"`
+type userPatchRequest struct {
+	User userPatchUserRequestFields `json:"user"`
 }
 
-type userPutUserRequestFields struct {
+type userPatchUserRequestFields struct {
 	Name  *string            `json:"name"`
 	Email *string            `json:"email"`
 	Role  *database.UserRole `json:"role"`
 }
 
-func (r userPutRequest) updateUserParams(userId string) database.UpdateUserParams {
+func (r userPatchRequest) updateUserParams(userId string) database.UpdateUserParams {
 	params := database.UpdateUserParams{ID: userId}
 
 	// Parse request.
@@ -115,15 +115,15 @@ func (r userPutRequest) updateUserParams(userId string) database.UpdateUserParam
 	return params
 }
 
-type userPutResponse struct {
+type userPatchResponse struct {
 	response
 	User database.UpdateUserRow `json:"user"`
 }
 
-func (v *APIServerV1) userPut(r *http.Request, id string) apiResponse {
+func (v *APIServerV1) userPatch(r *http.Request, id string) apiResponse {
 	var (
 		b   bytes.Buffer
-		req userPutRequest
+		req userPatchRequest
 	)
 
 	if _, err := b.ReadFrom(r.Body); err != nil {
@@ -143,7 +143,7 @@ func (v *APIServerV1) userPut(r *http.Request, id string) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process user put database action")
 	}
 
-	return userPutResponse{
+	return userPatchResponse{
 		newSuccessResponse(),
 		user,
 	}

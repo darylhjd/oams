@@ -29,8 +29,8 @@ func TestAPIServerV1_class(t *testing.T) {
 			http.StatusNotFound,
 		},
 		{
-			"with PUT method",
-			http.MethodPut,
+			"with PATCH method",
+			http.MethodPatch,
 			http.StatusBadRequest,
 		},
 		{
@@ -39,8 +39,8 @@ func TestAPIServerV1_class(t *testing.T) {
 			http.StatusNotFound,
 		},
 		{
-			"with PATCH method",
-			http.MethodPatch,
+			"with PUT method",
+			http.MethodPut,
 			http.StatusMethodNotAllowed,
 		},
 	}
@@ -146,17 +146,17 @@ func TestAPIServerV1_classPut(t *testing.T) {
 
 	tts := []struct {
 		name              string
-		withRequest       classPutRequest
+		withRequest       classPatchRequest
 		withExistingClass bool
-		wantResponse      classPutResponse
+		wantResponse      classPatchResponse
 		wantNoChange      bool
 		wantStatusCode    int
 		wantErr           string
 	}{
 		{
 			"request with all fields set",
-			classPutRequest{
-				classPutClassRequestFields{
+			classPatchRequest{
+				classPatchClassRequestFields{
 					ptr("CZ9999"),
 					ptr(int32(1999)),
 					ptr("1"),
@@ -165,7 +165,7 @@ func TestAPIServerV1_classPut(t *testing.T) {
 				},
 			},
 			true,
-			classPutResponse{
+			classPatchResponse{
 				newSuccessResponse(),
 				database.UpdateClassRow{
 					Code:      "CZ9999",
@@ -181,11 +181,11 @@ func TestAPIServerV1_classPut(t *testing.T) {
 		},
 		{
 			"request with optional fields not set",
-			classPutRequest{
-				classPutClassRequestFields{},
+			classPatchRequest{
+				classPatchClassRequestFields{},
 			},
 			true,
-			classPutResponse{
+			classPatchResponse{
 				newSuccessResponse(),
 				database.UpdateClassRow{
 					Code:     "EXISTING123",
@@ -199,11 +199,11 @@ func TestAPIServerV1_classPut(t *testing.T) {
 		},
 		{
 			"request updating non-existent class",
-			classPutRequest{
-				classPutClassRequestFields{},
+			classPatchRequest{
+				classPatchClassRequestFields{},
 			},
 			false,
-			classPutResponse{
+			classPatchResponse{
 				Class: database.UpdateClassRow{
 					ID: 6666,
 				},
@@ -241,8 +241,8 @@ func TestAPIServerV1_classPut(t *testing.T) {
 			a.Nil(err)
 
 			classId := tt.wantResponse.Class.ID
-			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%d", classUrl, classId), bytes.NewReader(reqBodyBytes))
-			resp := v1.classPut(req, classId)
+			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classUrl, classId), bytes.NewReader(reqBodyBytes))
+			resp := v1.classPatch(req, classId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
@@ -251,7 +251,7 @@ func TestAPIServerV1_classPut(t *testing.T) {
 				a.True(ok)
 				a.Contains(actualResp.Error, tt.wantErr)
 			default:
-				actualResp, ok := resp.(classPutResponse)
+				actualResp, ok := resp.(classPatchResponse)
 				a.True(ok)
 
 				if !tt.wantNoChange {
@@ -261,8 +261,8 @@ func TestAPIServerV1_classPut(t *testing.T) {
 				a.Equal(tt.wantResponse, actualResp)
 
 				// Check that successive updates do not change anything.
-				req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%d", classUrl, classId), bytes.NewReader(reqBodyBytes))
-				successiveResp := v1.classPut(req, classId).(classPutResponse)
+				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classUrl, classId), bytes.NewReader(reqBodyBytes))
+				successiveResp := v1.classPatch(req, classId).(classPatchResponse)
 				a.Equal(actualResp, successiveResp)
 			}
 		})

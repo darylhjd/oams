@@ -25,8 +25,8 @@ func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		resp = v.classGet(r, classId)
-	case http.MethodPut:
-		resp = v.classPut(r, classId)
+	case http.MethodPatch:
+		resp = v.classPatch(r, classId)
 	case http.MethodDelete:
 		resp = v.classDelete(r, classId)
 	default:
@@ -57,11 +57,11 @@ func (v *APIServerV1) classGet(r *http.Request, id int64) apiResponse {
 	}
 }
 
-type classPutRequest struct {
-	Class classPutClassRequestFields `json:"class"`
+type classPatchRequest struct {
+	Class classPatchClassRequestFields `json:"class"`
 }
 
-type classPutClassRequestFields struct {
+type classPatchClassRequestFields struct {
 	Code      *string `json:"code"`
 	Year      *int32  `json:"year"`
 	Semester  *string `json:"semester"`
@@ -69,7 +69,7 @@ type classPutClassRequestFields struct {
 	Au        *int16  `json:"au"`
 }
 
-func (r classPutRequest) updateClassParams(classId int64) database.UpdateClassParams {
+func (r classPatchRequest) updateClassParams(classId int64) database.UpdateClassParams {
 	params := database.UpdateClassParams{ID: classId}
 
 	if r.Class.Code != nil {
@@ -95,15 +95,15 @@ func (r classPutRequest) updateClassParams(classId int64) database.UpdateClassPa
 	return params
 }
 
-type classPutResponse struct {
+type classPatchResponse struct {
 	response
 	Class database.UpdateClassRow `json:"class"`
 }
 
-func (v *APIServerV1) classPut(r *http.Request, id int64) apiResponse {
+func (v *APIServerV1) classPatch(r *http.Request, id int64) apiResponse {
 	var (
 		b   bytes.Buffer
-		req classPutRequest
+		req classPatchRequest
 	)
 
 	if _, err := b.ReadFrom(r.Body); err != nil {
@@ -123,7 +123,7 @@ func (v *APIServerV1) classPut(r *http.Request, id int64) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process class put database action")
 	}
 
-	return classPutResponse{
+	return classPatchResponse{
 		newSuccessResponse(),
 		class,
 	}

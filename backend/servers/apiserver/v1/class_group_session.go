@@ -22,7 +22,7 @@ func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) 
 	switch r.Method {
 	case http.MethodGet:
 		resp = v.classGroupSessionGet(r, sessionId)
-	case http.MethodPut:
+	case http.MethodPatch:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	case http.MethodDelete:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
