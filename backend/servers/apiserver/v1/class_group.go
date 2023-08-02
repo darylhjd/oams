@@ -110,7 +110,7 @@ func (v *APIServerV1) classGroupPatch(r *http.Request, id int64) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "class group to update does not exist")
 		}
 
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group put database action")
+		return newErrorResponse(http.StatusInternalServerError, "could not process class group patch database action")
 	}
 
 	return classGroupPatchResponse{

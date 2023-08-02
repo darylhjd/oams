@@ -218,7 +218,7 @@ func TestAPIServerV1_userGet(t *testing.T) {
 	}
 }
 
-func TestAPIServerV1_userPut(t *testing.T) {
+func TestAPIServerV1_userPatch(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {

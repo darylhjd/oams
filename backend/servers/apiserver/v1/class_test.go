@@ -141,7 +141,7 @@ func TestAPIServerV1_classGet(t *testing.T) {
 	}
 }
 
-func TestAPIServerV1_classPut(t *testing.T) {
+func TestAPIServerV1_classPatch(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {

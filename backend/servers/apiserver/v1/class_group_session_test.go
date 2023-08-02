@@ -143,3 +143,7 @@ func TestAPIServerV1_classGroupSessionGet(t *testing.T) {
 		})
 	}
 }
+
+func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
+
+}

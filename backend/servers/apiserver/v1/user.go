@@ -140,7 +140,7 @@ func (v *APIServerV1) userPatch(r *http.Request, id string) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "user to update does not exist")
 		}
 
-		return newErrorResponse(http.StatusInternalServerError, "could not process user put database action")
+		return newErrorResponse(http.StatusInternalServerError, "could not process user patch database action")
 	}
 
 	return userPatchResponse{

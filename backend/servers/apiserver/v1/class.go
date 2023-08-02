@@ -120,7 +120,7 @@ func (v *APIServerV1) classPatch(r *http.Request, id int64) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "class to update does not exist")
 		}
 
-		return newErrorResponse(http.StatusInternalServerError, "could not process class put database action")
+		return newErrorResponse(http.StatusInternalServerError, "could not process class patch database action")
 	}
 
 	return classPatchResponse{

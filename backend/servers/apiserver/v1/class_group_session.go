@@ -1,13 +1,17 @@
 package v1
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +27,7 @@ func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) 
 	case http.MethodGet:
 		resp = v.classGroupSessionGet(r, sessionId)
 	case http.MethodPatch:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classGroupSessionPatch(r, sessionId)
 	case http.MethodDelete:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
@@ -47,6 +51,73 @@ func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiRespons
 	}
 
 	return classGroupSessionGetResponse{
+		newSuccessResponse(),
+		session,
+	}
+}
+
+type classGroupSessionPatchRequest struct {
+	ClassGroupSession classGroupSessionPatchClassGroupSessionRequestFields `json:"class_group_session"`
+}
+
+type classGroupSessionPatchClassGroupSessionRequestFields struct {
+	ClassGroupID *int64  `json:"class_group_id"`
+	StartTime    *int64  `json:"start_time"`
+	EndTime      *int64  `json:"end_time"`
+	Venue        *string `json:"venue"`
+}
+
+func (r classGroupSessionPatchRequest) updateClassGroupPatchParams(classGroupSessionId int64) database.UpdateClassGroupSessionParams {
+	params := database.UpdateClassGroupSessionParams{ID: classGroupSessionId}
+
+	if r.ClassGroupSession.ClassGroupID != nil {
+		params.ClassGroupID = pgtype.Int8{Int64: *r.ClassGroupSession.ClassGroupID, Valid: true}
+	}
+
+	if r.ClassGroupSession.StartTime != nil {
+		params.StartTime = pgtype.Timestamp{Time: time.UnixMicro(*r.ClassGroupSession.StartTime).UTC(), Valid: true}
+	}
+
+	if r.ClassGroupSession.EndTime != nil {
+		params.EndTime = pgtype.Timestamp{Time: time.UnixMicro(*r.ClassGroupSession.EndTime).UTC(), Valid: true}
+	}
+
+	if r.ClassGroupSession.Venue != nil {
+		params.Venue = pgtype.Text{String: *r.ClassGroupSession.Venue, Valid: true}
+	}
+
+	return params
+}
+
+type classGroupSessionPatchResponse struct {
+	response
+	ClassGroupSession database.UpdateClassGroupSessionRow `json:"class_group_session"`
+}
+
+func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiResponse {
+	var (
+		b   bytes.Buffer
+		req classGroupSessionPatchRequest
+	)
+
+	if _, err := b.ReadFrom(r.Body); err != nil {
+		return newErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	}
+
+	session, err := v.db.Q.UpdateClassGroupSession(r.Context(), req.updateClassGroupPatchParams(id))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "class group session to update does not exist")
+		}
+
+		return newErrorResponse(http.StatusInternalServerError, "could not process class group session patch database action")
+	}
+
+	return classGroupSessionPatchResponse{
 		newSuccessResponse(),
 		session,
 	}

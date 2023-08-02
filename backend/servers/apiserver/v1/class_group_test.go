@@ -140,7 +140,7 @@ func TestAPIServerV1_classGroupGet(t *testing.T) {
 	}
 }
 
-func TestAPIServerV1_classGroupPut(t *testing.T) {
+func TestAPIServerV1_classGroupPatch(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
