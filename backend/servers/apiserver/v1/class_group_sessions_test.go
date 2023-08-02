@@ -1,7 +1,9 @@
 package v1
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -74,8 +76,8 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 				newSuccessResponse(),
 				[]database.ClassGroupSession{
 					{
-						StartTime: pgtype.Timestamp{Time: time.Now(), Valid: true},
-						EndTime:   pgtype.Timestamp{Time: time.Now(), Valid: true},
+						StartTime: pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+						EndTime:   pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
 						Venue:     "CLASS+22",
 					},
 				},
@@ -118,6 +120,127 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 			actualResp, ok := v1.classGroupSessionsGet(req).(classGroupSessionsGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
+		})
+	}
+}
+
+func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name                          string
+		withRequest                   classGroupSessionsPostRequest
+		withExistingClassGroupSession bool
+		withExistingClassGroup        bool
+		wantResponse                  classGroupSessionsPostResponse
+		wantStatusCode                int
+		wantErr                       string
+	}{
+		{
+			"request with no existing class group session",
+			classGroupSessionsPostRequest{
+				database.CreateClassGroupSessionParams{
+					StartTime: pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					EndTime:   pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					Venue:     "NEW_CLASS+22",
+				},
+			},
+			false,
+			true,
+			classGroupSessionsPostResponse{
+				newSuccessResponse(),
+				database.CreateClassGroupSessionRow{
+					Venue: "NEW_CLASS+22",
+				},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with existing class group session",
+			classGroupSessionsPostRequest{
+				database.CreateClassGroupSessionParams{
+					StartTime: pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					EndTime:   pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					Venue:     "EXISTING_CLASS+22",
+				},
+			},
+			true,
+			true,
+			classGroupSessionsPostResponse{},
+			http.StatusConflict,
+			"class group session with same class_group_id and start_time already exists",
+		},
+		{
+			"request with non-existent class group dependency",
+			classGroupSessionsPostRequest{
+				database.CreateClassGroupSessionParams{
+					StartTime: pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					EndTime:   pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					Venue:     "FAIL_INSERT_CLASS+22",
+				},
+			},
+			false,
+			false,
+			classGroupSessionsPostResponse{},
+			http.StatusBadRequest,
+			"class_group_id is not valid",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			switch {
+			case tt.withExistingClassGroup && tt.withExistingClassGroupSession:
+				createdSession := tests.StubClassGroupSession(
+					t, ctx, v1.db.Q,
+					tt.withRequest.ClassGroupSession.StartTime,
+					tt.withRequest.ClassGroupSession.EndTime,
+					tt.withRequest.ClassGroupSession.Venue,
+				)
+				tt.withRequest.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
+			case tt.withExistingClassGroup:
+				createdGroup := tests.StubClassGroup(
+					t, ctx, v1.db.Q,
+					uuid.NewString(),
+					database.ClassTypeLAB,
+				)
+				tt.withRequest.ClassGroupSession.ClassGroupID = createdGroup.ID
+			}
+
+			reqBodyBytes, err := json.Marshal(tt.withRequest)
+			a.Nil(err)
+
+			req := httptest.NewRequest(http.MethodPost, classGroupSessionsUrl, bytes.NewReader(reqBodyBytes))
+			resp := v1.classGroupSessionsPost(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(classGroupSessionsPostResponse)
+				a.True(ok)
+
+				tt.wantResponse.ClassGroupSession.ID = actualResp.ClassGroupSession.ID
+				tt.wantResponse.ClassGroupSession.ClassGroupID = actualResp.ClassGroupSession.ClassGroupID
+				tt.wantResponse.ClassGroupSession.StartTime = actualResp.ClassGroupSession.StartTime
+				tt.wantResponse.ClassGroupSession.EndTime = actualResp.ClassGroupSession.EndTime
+				tt.wantResponse.ClassGroupSession.CreatedAt = actualResp.ClassGroupSession.CreatedAt
+				a.Equal(tt.wantResponse, actualResp)
+			}
 		})
 	}
 }
