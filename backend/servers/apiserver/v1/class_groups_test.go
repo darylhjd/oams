@@ -172,7 +172,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			classGroupsPostRequest{
 				database.CreateClassGroupParams{
 					ClassID:   rand.Int63(),
-					Name:      "FAILINSERT22",
+					Name:      "FAIL_INSERT22",
 					ClassType: database.ClassTypeTUT,
 				},
 			},

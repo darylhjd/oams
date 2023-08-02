@@ -82,9 +82,6 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Querie
 
 	classGroup := StubClassGroup(t, ctx, q, uuid.NewString(), database.ClassTypeLEC)
 
-	startTime.Time = startTime.Time.UTC()
-	endTime.Time = endTime.Time.UTC()
-
 	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
 		ClassGroupID: classGroup.ID,
 		StartTime:    startTime,
