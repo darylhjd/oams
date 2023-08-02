@@ -56,7 +56,9 @@ CREATE TABLE class_group_sessions
         UNIQUE (class_group_id, start_time),
     CONSTRAINT fk_class_group_id
         FOREIGN KEY (class_group_id)
-            REFERENCES class_groups (id)
+            REFERENCES class_groups (id),
+    CONSTRAINT ck_start_time_more_than_end_time
+        CHECK (start_time < end_time)
 );
 
 CREATE TABLE session_enrollments
