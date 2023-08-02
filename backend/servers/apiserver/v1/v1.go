@@ -32,6 +32,7 @@ const (
 	classGroupsUrl        = "/class_groups"
 	classGroupUrl         = "/class_groups/"
 	classGroupSessionsUrl = "/class_group_sessions"
+	classGroupSessionUrl  = "/class_group_sessions/"
 )
 
 type APIServerV1 struct {
@@ -102,6 +103,12 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classGroupSessionsUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroupSessions, http.MethodGet, http.MethodPost),
+		v.azure,
+		true,
+	))
+
+	v.mux.HandleFunc(classGroupSessionUrl, middleware.WithAuthContext(
+		middleware.AllowMethods(v.classGroupSession, http.MethodGet, http.MethodPut, http.MethodDelete),
 		v.azure,
 		true,
 	))
