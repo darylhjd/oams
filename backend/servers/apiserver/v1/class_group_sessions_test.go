@@ -76,8 +76,8 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 				newSuccessResponse(),
 				[]database.ClassGroupSession{
 					{
-						StartTime: pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
-						EndTime:   pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+						StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+						EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
 						Venue:     "CLASS+22",
 					},
 				},
@@ -140,8 +140,8 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			"request with no existing class group session",
 			classGroupSessionsPostRequest{
 				database.CreateClassGroupSessionParams{
-					StartTime: pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
 					Venue:     "NEW_CLASS+22",
 				},
 			},
@@ -160,8 +160,8 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			"request with existing class group session",
 			classGroupSessionsPostRequest{
 				database.CreateClassGroupSessionParams{
-					StartTime: pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
 					Venue:     "EXISTING_CLASS+22",
 				},
 			},
@@ -175,8 +175,8 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			"request with non-existent class group dependency",
 			classGroupSessionsPostRequest{
 				database.CreateClassGroupSessionParams{
-					StartTime: pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
 					Venue:     "FAIL_INSERT_CLASS+22",
 				},
 			},

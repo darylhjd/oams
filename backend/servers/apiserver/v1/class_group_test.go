@@ -29,8 +29,8 @@ func TestAPIServerV1_classGroup(t *testing.T) {
 			http.StatusNotFound,
 		},
 		{
-			"with PUT method",
-			http.MethodPut,
+			"with PATCH method",
+			http.MethodPatch,
 			http.StatusBadRequest,
 		},
 		{
@@ -39,8 +39,8 @@ func TestAPIServerV1_classGroup(t *testing.T) {
 			http.StatusNotFound,
 		},
 		{
-			"with PATCH method",
-			http.MethodPatch,
+			"with PUT method",
+			http.MethodPut,
 			http.StatusMethodNotAllowed,
 		},
 	}
@@ -140,29 +140,29 @@ func TestAPIServerV1_classGroupGet(t *testing.T) {
 	}
 }
 
-func TestAPIServerV1_classGroupPut(t *testing.T) {
+func TestAPIServerV1_classGroupPatch(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
 		name                   string
-		withRequest            classGroupPutRequest
+		withRequest            classGroupPatchRequest
 		withExistingClassGroup bool
-		wantResponse           classGroupPutResponse
+		wantResponse           classGroupPatchResponse
 		wantNoChange           bool
 		wantStatusCode         int
 		wantErr                string
 	}{
 		{
 			"request with all fields set",
-			classGroupPutRequest{
-				classGroupPutClassGroupRequestFields{
+			classGroupPatchRequest{
+				classGroupPatchClassGroupRequestFields{
 					ptr(int64(1)),
 					ptr("NEW21"),
 					ptr(database.ClassTypeLAB),
 				},
 			},
 			true,
-			classGroupPutResponse{
+			classGroupPatchResponse{
 				newSuccessResponse(),
 				database.UpdateClassGroupRow{
 					ClassID:   1,
@@ -176,11 +176,11 @@ func TestAPIServerV1_classGroupPut(t *testing.T) {
 		},
 		{
 			"request with optional fields not set",
-			classGroupPutRequest{
-				classGroupPutClassGroupRequestFields{},
+			classGroupPatchRequest{
+				classGroupPatchClassGroupRequestFields{},
 			},
 			true,
-			classGroupPutResponse{
+			classGroupPatchResponse{
 				newSuccessResponse(),
 				database.UpdateClassGroupRow{
 					Name:      "EXISTING21",
@@ -193,11 +193,11 @@ func TestAPIServerV1_classGroupPut(t *testing.T) {
 		},
 		{
 			"request updating non-existent class group",
-			classGroupPutRequest{
-				classGroupPutClassGroupRequestFields{},
+			classGroupPatchRequest{
+				classGroupPatchClassGroupRequestFields{},
 			},
 			false,
-			classGroupPutResponse{
+			classGroupPatchResponse{
 				ClassGroup: database.UpdateClassGroupRow{
 					ID: 6666,
 				},
@@ -235,8 +235,8 @@ func TestAPIServerV1_classGroupPut(t *testing.T) {
 			a.Nil(err)
 
 			groupId := tt.wantResponse.ClassGroup.ID
-			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%d", classGroupUrl, groupId), bytes.NewReader(reqBodyBytes))
-			resp := v1.classGroupPut(req, groupId)
+			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classGroupUrl, groupId), bytes.NewReader(reqBodyBytes))
+			resp := v1.classGroupPatch(req, groupId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
@@ -245,7 +245,7 @@ func TestAPIServerV1_classGroupPut(t *testing.T) {
 				a.True(ok)
 				a.Contains(actualResp.Error, tt.wantErr)
 			default:
-				actualResp, ok := resp.(classGroupPutResponse)
+				actualResp, ok := resp.(classGroupPatchResponse)
 				a.True(ok)
 
 				if !tt.wantNoChange {
@@ -255,8 +255,8 @@ func TestAPIServerV1_classGroupPut(t *testing.T) {
 				a.Equal(tt.wantResponse, actualResp)
 
 				// Check that successive updates do not change anything.
-				req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%d", classGroupUrl, groupId), bytes.NewReader(reqBodyBytes))
-				successiveResp := v1.classGroupPut(req, groupId).(classGroupPutResponse)
+				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classGroupUrl, groupId), bytes.NewReader(reqBodyBytes))
+				successiveResp := v1.classGroupPatch(req, groupId).(classGroupPatchResponse)
 				a.Equal(actualResp, successiveResp)
 			}
 		})

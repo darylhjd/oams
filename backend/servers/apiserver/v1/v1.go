@@ -72,7 +72,7 @@ func (v *APIServerV1) registerHandlers() {
 	))
 
 	v.mux.HandleFunc(userUrl, middleware.WithAuthContext(
-		middleware.AllowMethods(v.user, http.MethodGet, http.MethodPut, http.MethodDelete),
+		middleware.AllowMethods(v.user, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 		true,
 	))
@@ -84,7 +84,7 @@ func (v *APIServerV1) registerHandlers() {
 	))
 
 	v.mux.HandleFunc(classUrl, middleware.WithAuthContext(
-		middleware.AllowMethods(v.class, http.MethodGet, http.MethodPut, http.MethodDelete),
+		middleware.AllowMethods(v.class, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 		true,
 	))
@@ -96,7 +96,7 @@ func (v *APIServerV1) registerHandlers() {
 	))
 
 	v.mux.HandleFunc(classGroupUrl, middleware.WithAuthContext(
-		middleware.AllowMethods(v.classGroup, http.MethodGet, http.MethodPut, http.MethodDelete),
+		middleware.AllowMethods(v.classGroup, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 		true,
 	))
@@ -108,7 +108,7 @@ func (v *APIServerV1) registerHandlers() {
 	))
 
 	v.mux.HandleFunc(classGroupSessionUrl, middleware.WithAuthContext(
-		middleware.AllowMethods(v.classGroupSession, http.MethodGet, http.MethodPut, http.MethodDelete),
+		middleware.AllowMethods(v.classGroupSession, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 		true,
 	))

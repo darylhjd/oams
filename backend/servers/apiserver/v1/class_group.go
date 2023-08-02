@@ -25,8 +25,8 @@ func (v *APIServerV1) classGroup(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		resp = v.classGroupGet(r, groupId)
-	case http.MethodPut:
-		resp = v.classGroupPut(r, groupId)
+	case http.MethodPatch:
+		resp = v.classGroupPatch(r, groupId)
 	case http.MethodDelete:
 		resp = v.classGroupDelete(r, groupId)
 	default:
@@ -57,17 +57,17 @@ func (v *APIServerV1) classGroupGet(r *http.Request, id int64) apiResponse {
 	}
 }
 
-type classGroupPutRequest struct {
-	ClassGroup classGroupPutClassGroupRequestFields `json:"class_group"`
+type classGroupPatchRequest struct {
+	ClassGroup classGroupPatchClassGroupRequestFields `json:"class_group"`
 }
 
-type classGroupPutClassGroupRequestFields struct {
+type classGroupPatchClassGroupRequestFields struct {
 	ClassID   *int64              `json:"class_id"`
 	Name      *string             `json:"name"`
 	ClassType *database.ClassType `json:"class_type"`
 }
 
-func (r classGroupPutRequest) updateClassGroupParams(classGroupId int64) database.UpdateClassGroupParams {
+func (r classGroupPatchRequest) updateClassGroupParams(classGroupId int64) database.UpdateClassGroupParams {
 	params := database.UpdateClassGroupParams{ID: classGroupId}
 
 	if r.ClassGroup.ClassID != nil {
@@ -85,15 +85,15 @@ func (r classGroupPutRequest) updateClassGroupParams(classGroupId int64) databas
 	return params
 }
 
-type classGroupPutResponse struct {
+type classGroupPatchResponse struct {
 	response
 	ClassGroup database.UpdateClassGroupRow `json:"class_group"`
 }
 
-func (v *APIServerV1) classGroupPut(r *http.Request, id int64) apiResponse {
+func (v *APIServerV1) classGroupPatch(r *http.Request, id int64) apiResponse {
 	var (
 		b   bytes.Buffer
-		req classGroupPutRequest
+		req classGroupPatchRequest
 	)
 
 	if _, err := b.ReadFrom(r.Body); err != nil {
@@ -110,10 +110,10 @@ func (v *APIServerV1) classGroupPut(r *http.Request, id int64) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "class group to update does not exist")
 		}
 
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group put database action")
+		return newErrorResponse(http.StatusInternalServerError, "could not process class group patch database action")
 	}
 
-	return classGroupPutResponse{
+	return classGroupPatchResponse{
 		newSuccessResponse(),
 		group,
 	}

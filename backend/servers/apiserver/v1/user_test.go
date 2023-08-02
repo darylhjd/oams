@@ -31,8 +31,8 @@ func TestAPIServerV1_user(t *testing.T) {
 			http.StatusNotFound,
 		},
 		{
-			"with PUT method",
-			http.MethodPut,
+			"with PATCH method",
+			http.MethodPatch,
 			http.StatusBadRequest,
 		},
 		{
@@ -41,8 +41,8 @@ func TestAPIServerV1_user(t *testing.T) {
 			http.StatusNotFound,
 		},
 		{
-			"with PATCH method",
-			http.MethodPatch,
+			"with PUT method",
+			http.MethodPut,
 			http.StatusMethodNotAllowed,
 		},
 	}
@@ -218,29 +218,29 @@ func TestAPIServerV1_userGet(t *testing.T) {
 	}
 }
 
-func TestAPIServerV1_userPut(t *testing.T) {
+func TestAPIServerV1_userPatch(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
 		name             string
-		withRequest      userPutRequest
+		withRequest      userPatchRequest
 		withExistingUser bool
-		wantResponse     userPutResponse
+		wantResponse     userPatchResponse
 		wantNoChange     bool
 		wantStatusCode   int
 		wantErr          string
 	}{
 		{
 			"request with all fields set",
-			userPutRequest{
-				userPutUserRequestFields{
+			userPatchRequest{
+				userPatchUserRequestFields{
 					ptr("NEW NAME"),
 					ptr("NEW EMAIL"),
 					ptr(database.UserRoleSTUDENT),
 				},
 			},
 			true,
-			userPutResponse{
+			userPatchResponse{
 				newSuccessResponse(),
 				database.UpdateUserRow{
 					ID:    "EXISTING_ID",
@@ -255,11 +255,11 @@ func TestAPIServerV1_userPut(t *testing.T) {
 		},
 		{
 			"request with optional fields not set",
-			userPutRequest{
-				userPutUserRequestFields{},
+			userPatchRequest{
+				userPatchUserRequestFields{},
 			},
 			true,
-			userPutResponse{
+			userPatchResponse{
 				newSuccessResponse(),
 				database.UpdateUserRow{
 					ID:   "EXISTING_ID",
@@ -272,11 +272,11 @@ func TestAPIServerV1_userPut(t *testing.T) {
 		},
 		{
 			"request updating non-existent user",
-			userPutRequest{
-				userPutUserRequestFields{},
+			userPatchRequest{
+				userPatchUserRequestFields{},
 			},
 			false,
-			userPutResponse{
+			userPatchResponse{
 				User: database.UpdateUserRow{
 					ID: "NON_EXISTENT_ID",
 				},
@@ -308,8 +308,8 @@ func TestAPIServerV1_userPut(t *testing.T) {
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
 			a.Nil(err)
 
-			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), bytes.NewReader(reqBodyBytes))
-			resp := v1.userPut(req, userId)
+			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%s", userUrl, userId), bytes.NewReader(reqBodyBytes))
+			resp := v1.userPatch(req, userId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
@@ -318,7 +318,7 @@ func TestAPIServerV1_userPut(t *testing.T) {
 				a.True(ok)
 				a.Contains(actualResp.Error, tt.wantErr)
 			default:
-				actualResp, ok := resp.(userPutResponse)
+				actualResp, ok := resp.(userPatchResponse)
 				a.True(ok)
 
 				if !tt.wantNoChange {
@@ -328,8 +328,8 @@ func TestAPIServerV1_userPut(t *testing.T) {
 				a.Equal(tt.wantResponse, actualResp)
 
 				// Check that successive updates do not change anything.
-				req = httptest.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", userUrl, userId), bytes.NewReader(reqBodyBytes))
-				successiveResp := v1.userPut(req, userId).(userPutResponse)
+				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%s", userUrl, userId), bytes.NewReader(reqBodyBytes))
+				successiveResp := v1.userPatch(req, userId).(userPatchResponse)
 				a.Equal(actualResp, successiveResp)
 			}
 		})
