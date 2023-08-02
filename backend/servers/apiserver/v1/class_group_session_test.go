@@ -201,7 +201,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			"",
 		},
 		{
-			"request updating non-existent class group",
+			"request updating non-existent class group session",
 			classGroupSessionPatchRequest{
 				classGroupSessionPatchClassGroupSessionRequestFields{},
 			},
