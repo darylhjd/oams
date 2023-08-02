@@ -52,6 +52,28 @@ func (q *Queries) CreateClassGroupSession(ctx context.Context, arg CreateClassGr
 	return i, err
 }
 
+const deleteClassGroupSession = `-- name: DeleteClassGroupSession :one
+DELETE
+FROM class_group_sessions
+WHERE id = $1
+RETURNING id, class_group_id, start_time, end_time, venue, created_at, updated_at
+`
+
+func (q *Queries) DeleteClassGroupSession(ctx context.Context, id int64) (ClassGroupSession, error) {
+	row := q.db.QueryRow(ctx, deleteClassGroupSession, id)
+	var i ClassGroupSession
+	err := row.Scan(
+		&i.ID,
+		&i.ClassGroupID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.Venue,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getClassGroupSession = `-- name: GetClassGroupSession :one
 SELECT id, class_group_id, start_time, end_time, venue, created_at, updated_at
 FROM class_group_sessions

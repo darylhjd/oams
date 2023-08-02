@@ -38,7 +38,7 @@ func TestAPIServerV1_classGroupSession(t *testing.T) {
 		{
 			"with DELETE method",
 			http.MethodDelete,
-			http.StatusNotImplemented,
+			http.StatusNotFound,
 		},
 		{
 			"with PUT method",
@@ -268,6 +268,73 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classGroupSessionUrl, sessionId), bytes.NewReader(reqBodyBytes))
 				successiveResp := v1.classGroupSessionPatch(req, sessionId).(classGroupSessionPatchResponse)
 				a.Equal(actualResp, successiveResp)
+			}
+		})
+	}
+}
+
+func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name                          string
+		withExistingClassGroupSession bool
+		wantResponse                  classGroupSessionDeleteResponse
+		wantStatusCode                int
+		wantErr                       string
+	}{
+		{
+			"request with existing class group session",
+			true,
+			classGroupSessionDeleteResponse{newSuccessResponse()},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with non-existent class group",
+			false,
+			classGroupSessionDeleteResponse{},
+			http.StatusNotFound,
+			"class group session to delete does not exist",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			var sessionId int64 = 6666 // Choose a random ID that does not exist.
+			if tt.withExistingClassGroupSession {
+				createdSession := tests.StubClassGroupSession(
+					t, ctx, v1.db.Q,
+					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					uuid.NewString(),
+				)
+				sessionId = createdSession.ID
+			}
+
+			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classGroupSessionUrl, sessionId), nil)
+			resp := v1.classGroupSessionDelete(req, sessionId)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(classGroupSessionDeleteResponse)
+				a.True(ok)
+				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
 	}

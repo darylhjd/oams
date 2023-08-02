@@ -43,6 +43,12 @@ SET class_group_id = COALESCE(sqlc.narg('class_group_id'), class_group_id),
 WHERE id = $1
 RETURNING id, class_group_id, start_time, end_time, venue, updated_at;
 
+-- name: DeleteClassGroupSession :one
+DELETE
+FROM class_group_sessions
+WHERE id = $1
+RETURNING *;
+
 -- name: UpsertClassGroupSessions :batchone
 -- Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
 INSERT INTO class_group_sessions (class_group_id, start_time, end_time, venue, created_at, updated_at)
