@@ -72,6 +72,7 @@ func (v *APIServerV1) batchPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
+		v.l.Error(fmt.Sprintf("%s - error while processing batch post request", namespace), zap.Error(err))
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 
@@ -131,12 +132,11 @@ func (v *APIServerV1) fromBatchFile(fileHeader *multipart.FileHeader) (common.Ba
 		_ = file.Close()
 	}()
 
-	v.l.Debug(fmt.Sprintf("%s - processing class creation file", namespace),
-		zap.String("filename", fileHeader.Filename))
+	v.l.Debug(fmt.Sprintf("%s - processing class creation file", namespace), zap.String("filename", fileHeader.Filename))
 
 	data, err = common.ParseBatchFile(fileHeader.Filename, file)
 	if err != nil {
-		return data, fmt.Errorf("%s - error parsing class creation file %s: %w", namespace, fileHeader.Filename, err)
+		return data, err
 	}
 
 	return data, nil
@@ -191,8 +191,7 @@ func (v *APIServerV1) processBatchPostRequest(ctx context.Context, req batchPost
 	defer func() {
 		_ = tx.Rollback(ctx)
 		if dbErr != nil {
-			v.l.Debug(fmt.Sprintf("%s - error while doing classes create action", namespace),
-				zap.Error(dbErr))
+			v.l.Debug(fmt.Sprintf("%s - error while doing classes create action", namespace), zap.Error(dbErr))
 		}
 	}()
 

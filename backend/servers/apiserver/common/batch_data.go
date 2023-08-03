@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -36,16 +37,16 @@ type SessionData struct {
 // IsValid is a helper function to check if a BatchData is valid and returns an error if it is not.
 func (c *BatchData) IsValid() error {
 	if len(c.ClassGroups) == 0 {
-		return fmt.Errorf("%s - creation data has no valid class groups", namespace)
+		return errors.New("creation data has no valid class groups")
 	}
 
 	for _, classGroup := range c.ClassGroups {
 		if len(classGroup.Sessions) == 0 {
-			return fmt.Errorf("%s - class group %s has no sessions", namespace, classGroup.Name)
+			return fmt.Errorf("class group %s has no sessions", classGroup.Name)
 		}
 
 		if len(classGroup.Students) == 0 {
-			return fmt.Errorf("%s - class group %s has no enrollments", namespace, classGroup.Name)
+			return fmt.Errorf("class group %s has no enrollments", classGroup.Name)
 		}
 	}
 

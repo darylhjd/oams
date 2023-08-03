@@ -11,6 +11,10 @@ import (
 )
 
 const (
+	connectionNamespace = "database/connection"
+)
+
+const (
 	sslMode     = "sslmode"
 	sslRootCert = "sslrootcert"
 )
@@ -37,12 +41,12 @@ func ConnectDB(ctx context.Context, dbName string) (*DB, error) {
 
 	pool, err := pgxpool.New(ctx, connString)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s - error creating connection pool: %w", connectionNamespace, err)
 	}
 
 	// Check that connection is successful.
 	if err = pool.Ping(ctx); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s - could not ping database connection: %w", connectionNamespace, err)
 	}
 
 	return &DB{pool, New(pool)}, nil

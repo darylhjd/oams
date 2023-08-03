@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -52,7 +53,7 @@ const (
 func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 	file, err := excelize.OpenReader(f)
 	if err != nil {
-		return BatchData{}, err
+		return BatchData{}, fmt.Errorf("%s - cannot open request file: %w", namespace, err)
 	}
 	defer func() {
 		_ = file.Close()
@@ -86,13 +87,13 @@ func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 func parseClassMetaData(creationData *BatchData, rows [][]string) error {
 	// The first few rows in the sheet should be the course metadata.
 	if len(rows) < expectedClassMetaDataRows {
-		return fmt.Errorf("%s - not enough rows for class metadata", namespace)
+		return errors.New("not enough rows for class metadata")
 	}
 
 	// Each metadata row has an expected number of filled columns.
 	for i := 0; i < expectedClassMetaDataRows; i++ {
 		if len(rows[i]) != expectedClassMetaDataRowLength {
-			return fmt.Errorf("%s - unexpected number of columns for class metadata row %d", namespace, i+1)
+			return fmt.Errorf("unexpected number of columns for class metadata row %d", i+1)
 		}
 	}
 
@@ -103,17 +104,17 @@ func parseClassMetaData(creationData *BatchData, rows [][]string) error {
 	)
 	if _, err := fmt.Sscanf(rows[yearSemesterDateRow][expectedClassMetaDataRowLength-1], yearSemesterDateFormat,
 		&creationData.Course.Year, &creationData.Course.Semester, &d, &t); err != nil {
-		return fmt.Errorf("%s - could not parse class year and semester: %w", namespace, err)
+		return fmt.Errorf("could not parse class year and semester: %w", err)
 	}
 
 	loc, err := time.LoadLocation(timezoneLocation)
 	if err != nil {
-		return fmt.Errorf("%s - invalid timezone name when parsing class creation file creation date: %w", namespace, err)
+		return fmt.Errorf("invalid timezone name when parsing class creation file creation date: %w", err)
 	}
 
 	date, err := time.ParseInLocation(creationDateFormat, fmt.Sprintf("%s %s", d, t), loc)
 	if err != nil {
-		return fmt.Errorf("%s - could not parse class creation file creation date: %w", namespace, err)
+		return fmt.Errorf("could not parse class creation file creation date: %w", err)
 	}
 
 	creationData.FileCreationDate = date
@@ -124,13 +125,13 @@ func parseClassMetaData(creationData *BatchData, rows [][]string) error {
 	// Parse class course code.
 	if _, err = fmt.Sscanf(rows[courseCodeRow][expectedClassMetaDataRowLength-1], courseCodeFormat,
 		&creationData.Course.Code, &creationData.Course.Au); err != nil {
-		return fmt.Errorf("%s - could not parse course code and au count: %w", namespace, err)
+		return fmt.Errorf("could not parse course code and au count: %w", err)
 	}
 
 	// Parse class type.
 	if _, err = fmt.Sscanf(rows[classTypeRow][expectedClassMetaDataRowLength-1], classTypeFormat,
 		&creationData.classType); err != nil {
-		return fmt.Errorf("%s - could not parse class type: %w", namespace, err)
+		return fmt.Errorf("could not parse class type: %w", err)
 	}
 
 	return nil
@@ -145,12 +146,12 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 
 		// Parse class group ID.
 		if len(rows[index]) != expectedClassGroupMetaDataRowLength {
-			return fmt.Errorf("%s - unexpected number of columns for class group row", namespace)
+			return errors.New("unexpected number of columns for class group row")
 		}
 
 		if _, err := fmt.Sscanf(rows[index][expectedClassGroupMetaDataRowLength-1], classGroupFormat,
 			&group.Name); err != nil {
-			return fmt.Errorf("%s - could not parse class group: %w", namespace, err)
+			return fmt.Errorf("could not parse class group: %w", err)
 		}
 
 		// Parse class group sessions.
@@ -167,13 +168,13 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 			// Parse session day-time.
 			if _, err := fmt.Sscanf(rows[index][expectedClassGroupMetaDataRowLength-1], classGroupSessionDayTimeFormat,
 				&dayOfWeek, &from, &to, &weeks); err != nil {
-				return fmt.Errorf("%s - could not parse class group day-time: %w", namespace, err)
+				return fmt.Errorf("could not parse class group day-time: %w", err)
 			}
 
 			// TODO: Store actual date with the time.
 			startTime, err := time.Parse(classGroupSessionTimeFormat, from)
 			if err != nil {
-				return fmt.Errorf("%s - could not parse class group session start time: %w", namespace, err)
+				return fmt.Errorf("could not parse class group session start time: %w", err)
 			}
 
 			session.StartTime = pgtype.Timestamp{
@@ -183,7 +184,7 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 
 			endTime, err := time.Parse(classGroupSessionTimeFormat, to)
 			if err != nil {
-				return fmt.Errorf("%s - could not parse class group session end time: %w", namespace, err)
+				return fmt.Errorf("could not parse class group session end time: %w", err)
 			}
 
 			session.EndTime = pgtype.Timestamp{
@@ -204,13 +205,13 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 		if index+1 > len(rows) ||
 			len(rows[index]) != expectedClassGroupEnrollmentIdentRowLength ||
 			rows[index][0] != classGroupEnrollmentListIdent {
-			return fmt.Errorf("%s - unexpected start of class group enrollment list", namespace)
+			return errors.New("unexpected start of class group enrollment list")
 		}
 
 		index += 1
 		for index+1 <= len(rows) && len(rows[index]) != 0 {
 			if len(rows[index]) != expectedStudentEnrollmentRowLength {
-				return fmt.Errorf("%s - unexpected number of columns for student enrollment row", namespace)
+				return errors.New("unexpected number of columns for student enrollment row")
 			}
 
 			group.Students = append(group.Students, database.UpsertUsersParams{

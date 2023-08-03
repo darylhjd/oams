@@ -11,7 +11,9 @@ import (
 	"github.com/lib/pq"
 )
 
-const MigrationNamespace = "database/migration"
+const (
+	MigrationNamespace = "database/migration"
+)
 
 const (
 	migrationDir         = "config/migrations"
@@ -32,12 +34,17 @@ func NewMigrate(dbName string) (*migrate.Migrate, error) {
 
 	migrationSource, err := iofs.New(migrations, migrationDir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s - could not get migration source: %w", MigrationNamespace, err)
 	}
 
 	_, connString := GetConnectionProperties(dbName)
 
-	return migrate.NewWithSourceInstance(MigrationNamespace, migrationSource, connString)
+	m, err := migrate.NewWithSourceInstance(MigrationNamespace, migrationSource, connString)
+	if err != nil {
+		return nil, fmt.Errorf("%s - could not get migration instance: %w", MigrationNamespace, err)
+	}
+
+	return m, nil
 }
 
 // Create creates a new database with the specified name.
@@ -46,18 +53,18 @@ func NewMigrate(dbName string) (*migrate.Migrate, error) {
 func Create(ctx context.Context, dbName string, truncate bool) error {
 	db, err := ConnectDB(ctx, "")
 	if err != nil {
-		return err
+		return fmt.Errorf("%s - could not establish database connection for creation: %w", MigrationNamespace, err)
 	}
 	defer db.Close()
 
 	if truncate {
 		if _, err = db.C.Exec(ctx, dropDatabaseIfExists+pq.QuoteIdentifier(dbName)); err != nil {
-			return err
+			return fmt.Errorf("%s - could not drop database before creation: %w", MigrationNamespace, err)
 		}
 	}
 
 	if _, err = db.C.Exec(ctx, createDatabase+pq.QuoteIdentifier(dbName)); err != nil {
-		return err
+		return fmt.Errorf("%s - could not create database: %w", MigrationNamespace, err)
 	}
 
 	return nil
@@ -69,7 +76,7 @@ func Create(ctx context.Context, dbName string, truncate bool) error {
 func Drop(ctx context.Context, dbName string, mustExist bool) error {
 	db, err := ConnectDB(ctx, "")
 	if err != nil {
-		return err
+		return fmt.Errorf("%s - could not establish database connection for dropping: %w", MigrationNamespace, err)
 	}
 	defer db.Close()
 
@@ -79,7 +86,7 @@ func Drop(ctx context.Context, dbName string, mustExist bool) error {
 	}
 
 	if _, err = db.C.Exec(ctx, statement+pq.QuoteIdentifier(dbName)); err != nil {
-		return err
+		return fmt.Errorf("%s - could not drop database: %w", MigrationNamespace, err)
 	}
 
 	return nil

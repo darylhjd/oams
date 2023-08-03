@@ -91,7 +91,7 @@ func WithAuthContext(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		// Instead, a zero-value Account is returned, so we check that.
 		acct, err := authenticator.Account(r.Context(), c.Value)
 		if err != nil || acct.IsZero() {
-			http.Error(w, fmt.Sprintf("%s - account not found in session cache", namespace), http.StatusUnauthorized)
+			http.Error(w, "account not found in session cache", http.StatusUnauthorized)
 			return
 		}
 
