@@ -68,6 +68,7 @@ CREATE TABLE session_enrollments
     user_id    TEXT      NOT NULL,
     attended   BOOLEAN   NOT NULL,
     created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
     CONSTRAINT ux_session_id_user_id
         UNIQUE (session_id, user_id),
     CONSTRAINT fk_session_id

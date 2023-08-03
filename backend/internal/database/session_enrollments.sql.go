@@ -7,10 +7,45 @@ package database
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createSessionEnrollment = `-- name: CreateSessionEnrollment :one
+INSERT INTO session_enrollments (session_id, user_id, attended, created_at, updated_at)
+VALUES ($1, $2, $3, NOW(), NOW())
+RETURNING id, session_id, user_id, attended, created_at
+`
+
+type CreateSessionEnrollmentParams struct {
+	SessionID int64  `json:"session_id"`
+	UserID    string `json:"user_id"`
+	Attended  bool   `json:"attended"`
+}
+
+type CreateSessionEnrollmentRow struct {
+	ID        int64            `json:"id"`
+	SessionID int64            `json:"session_id"`
+	UserID    string           `json:"user_id"`
+	Attended  bool             `json:"attended"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+}
+
+func (q *Queries) CreateSessionEnrollment(ctx context.Context, arg CreateSessionEnrollmentParams) (CreateSessionEnrollmentRow, error) {
+	row := q.db.QueryRow(ctx, createSessionEnrollment, arg.SessionID, arg.UserID, arg.Attended)
+	var i CreateSessionEnrollmentRow
+	err := row.Scan(
+		&i.ID,
+		&i.SessionID,
+		&i.UserID,
+		&i.Attended,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getSessionEnrollment = `-- name: GetSessionEnrollment :one
-SELECT id, session_id, user_id, attended, created_at
+SELECT id, session_id, user_id, attended, created_at, updated_at
 FROM session_enrollments
 WHERE id = $1
 LIMIT 1
@@ -25,12 +60,13 @@ func (q *Queries) GetSessionEnrollment(ctx context.Context, id int64) (SessionEn
 		&i.UserID,
 		&i.Attended,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getSessionEnrollmentsBySessionID = `-- name: GetSessionEnrollmentsBySessionID :many
-SELECT id, session_id, user_id, attended, created_at
+SELECT id, session_id, user_id, attended, created_at, updated_at
 FROM session_enrollments
 WHERE session_id = $1
 `
@@ -50,6 +86,7 @@ func (q *Queries) GetSessionEnrollmentsBySessionID(ctx context.Context, sessionI
 			&i.UserID,
 			&i.Attended,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -62,7 +99,7 @@ func (q *Queries) GetSessionEnrollmentsBySessionID(ctx context.Context, sessionI
 }
 
 const getSessionEnrollmentsByUserID = `-- name: GetSessionEnrollmentsByUserID :many
-SELECT id, session_id, user_id, attended, created_at
+SELECT id, session_id, user_id, attended, created_at, updated_at
 FROM session_enrollments
 WHERE user_id = $1
 `
@@ -82,6 +119,7 @@ func (q *Queries) GetSessionEnrollmentsByUserID(ctx context.Context, userID stri
 			&i.UserID,
 			&i.Attended,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -94,7 +132,7 @@ func (q *Queries) GetSessionEnrollmentsByUserID(ctx context.Context, userID stri
 }
 
 const listSessionEnrollments = `-- name: ListSessionEnrollments :many
-SELECT id, session_id, user_id, attended, created_at
+SELECT id, session_id, user_id, attended, created_at, updated_at
 FROM session_enrollments
 ORDER BY session_id, user_id
 `
@@ -114,6 +152,7 @@ func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollme
 			&i.UserID,
 			&i.Attended,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
