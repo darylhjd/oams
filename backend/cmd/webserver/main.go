@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/darylhjd/oams/backend/servers/webserver"
+	"github.com/darylhjd/oams/backend/internal/servers/webserver"
 )
 
 func main() {

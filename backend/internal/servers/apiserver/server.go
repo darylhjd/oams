@@ -14,7 +14,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/logger"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
-	"github.com/darylhjd/oams/backend/servers/apiserver/v1"
+	"github.com/darylhjd/oams/backend/internal/servers/apiserver/v1"
 )
 
 const Namespace = "apiserver"

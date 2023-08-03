@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/darylhjd/oams/backend/servers/apiserver"
+	"github.com/darylhjd/oams/backend/internal/servers/apiserver"
 )
 
 func main() {
