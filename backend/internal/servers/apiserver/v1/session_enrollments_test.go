@@ -28,7 +28,7 @@ func TestAPIServerV1_sessionEnrollments(t *testing.T) {
 		{
 			"with POST method",
 			http.MethodPost,
-			http.StatusNotImplemented,
+			http.StatusBadRequest,
 		},
 		{
 			"with DELETE method",
@@ -114,6 +114,30 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 			actualResp, ok := v1.sessionEnrollmentsGet(req).(sessionEnrollmentsGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
+		})
+	}
+}
+
+func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name                          string
+		withRequest                   sessionEnrollmentsPostRequest
+		withExistingSessionEnrollment bool
+		withExistingClassGroupSession bool
+		withExistingUser              bool
+		wantResponse                  sessionEnrollmentsPostResponse
+		wantStatusCode                int
+		wantErr                       string
+	}{
+		{},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 		})
 	}
 }
