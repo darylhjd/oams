@@ -12,7 +12,7 @@ import (
 	"sync"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/servers/apiserver/common"
+	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/pkg/goroutines"

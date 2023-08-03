@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	v1 "github.com/darylhjd/oams/backend/servers/apiserver/v1"
+	"github.com/darylhjd/oams/backend/internal/servers/apiserver/v1"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
