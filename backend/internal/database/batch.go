@@ -18,9 +18,9 @@ var (
 )
 
 const createSessionEnrollments = `-- name: CreateSessionEnrollments :batchone
-INSERT INTO session_enrollments (session_id, user_id, created_at)
-VALUES ($1, $2, NOW())
-RETURNING session_id, user_id, created_at
+INSERT INTO session_enrollments (session_id, user_id, attended, created_at)
+VALUES ($1, $2, $3, NOW())
+RETURNING session_id, user_id, attended, created_at
 `
 
 type CreateSessionEnrollmentsBatchResults struct {
@@ -32,6 +32,7 @@ type CreateSessionEnrollmentsBatchResults struct {
 type CreateSessionEnrollmentsParams struct {
 	SessionID int64  `json:"session_id"`
 	UserID    string `json:"user_id"`
+	Attended  bool   `json:"attended"`
 }
 
 func (q *Queries) CreateSessionEnrollments(ctx context.Context, arg []CreateSessionEnrollmentsParams) *CreateSessionEnrollmentsBatchResults {
@@ -40,6 +41,7 @@ func (q *Queries) CreateSessionEnrollments(ctx context.Context, arg []CreateSess
 		vals := []interface{}{
 			a.SessionID,
 			a.UserID,
+			a.Attended,
 		}
 		batch.Queue(createSessionEnrollments, vals...)
 	}
@@ -58,7 +60,12 @@ func (b *CreateSessionEnrollmentsBatchResults) QueryRow(f func(int, SessionEnrol
 			continue
 		}
 		row := b.br.QueryRow()
-		err := row.Scan(&i.SessionID, &i.UserID, &i.CreatedAt)
+		err := row.Scan(
+			&i.SessionID,
+			&i.UserID,
+			&i.Attended,
+			&i.CreatedAt,
+		)
 		if f != nil {
 			f(t, i, err)
 		}

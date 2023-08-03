@@ -266,8 +266,9 @@ func (v *APIServerV1) processBatchPostRequest(ctx context.Context, req batchPost
 		for idx := range classGroupSessionsHelper.students[i] {
 			studentsParams = append(studentsParams, classGroupSessionsHelper.students[i][idx])
 			enrollmentsParams = append(enrollmentsParams, database.CreateSessionEnrollmentsParams{
-				SessionID: session.ID,
-				UserID:    classGroupSessionsHelper.students[i][idx].ID,
+				session.ID,
+				classGroupSessionsHelper.students[i][idx].ID,
+				false,
 			})
 		}
 	})

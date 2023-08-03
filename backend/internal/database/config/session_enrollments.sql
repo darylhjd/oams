@@ -14,6 +14,6 @@ FROM session_enrollments
 WHERE user_id = $1;
 
 -- name: CreateSessionEnrollments :batchone
-INSERT INTO session_enrollments (session_id, user_id, created_at)
-VALUES ($1, $2, NOW())
+INSERT INTO session_enrollments (session_id, user_id, attended, created_at)
+VALUES ($1, $2, $3, NOW())
 RETURNING *;

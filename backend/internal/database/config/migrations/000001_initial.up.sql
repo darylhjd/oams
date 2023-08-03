@@ -65,6 +65,7 @@ CREATE TABLE session_enrollments
 (
     session_id BIGINT    NOT NULL,
     user_id    TEXT      NOT NULL,
+    attended   BOOLEAN   NOT NULL,
     created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (session_id, user_id),
     CONSTRAINT fk_session_id
