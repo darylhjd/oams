@@ -128,6 +128,7 @@ type ClassGroupSession struct {
 }
 
 type SessionEnrollment struct {
+	ID        int64            `json:"id"`
 	SessionID int64            `json:"session_id"`
 	UserID    string           `json:"user_id"`
 	Attended  bool             `json:"attended"`

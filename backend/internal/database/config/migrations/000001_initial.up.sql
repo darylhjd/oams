@@ -63,11 +63,13 @@ CREATE TABLE class_group_sessions
 
 CREATE TABLE session_enrollments
 (
+    id         BIGSERIAL PRIMARY KEY,
     session_id BIGINT    NOT NULL,
     user_id    TEXT      NOT NULL,
     attended   BOOLEAN   NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    PRIMARY KEY (session_id, user_id),
+    CONSTRAINT ux_session_id_user_id
+        UNIQUE (session_id, user_id),
     CONSTRAINT fk_session_id
         FOREIGN KEY (session_id)
             REFERENCES class_group_sessions (id),

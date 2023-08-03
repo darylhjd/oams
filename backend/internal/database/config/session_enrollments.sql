@@ -3,6 +3,12 @@ SELECT *
 FROM session_enrollments
 ORDER BY session_id, user_id;
 
+-- name: GetSessionEnrollment :one
+SELECT *
+FROM session_enrollments
+WHERE id = $1
+LIMIT 1;
+
 -- name: GetSessionEnrollmentsBySessionID :many
 SELECT *
 FROM session_enrollments

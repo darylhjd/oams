@@ -9,8 +9,28 @@ import (
 	"context"
 )
 
+const getSessionEnrollment = `-- name: GetSessionEnrollment :one
+SELECT id, session_id, user_id, attended, created_at
+FROM session_enrollments
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetSessionEnrollment(ctx context.Context, id int64) (SessionEnrollment, error) {
+	row := q.db.QueryRow(ctx, getSessionEnrollment, id)
+	var i SessionEnrollment
+	err := row.Scan(
+		&i.ID,
+		&i.SessionID,
+		&i.UserID,
+		&i.Attended,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getSessionEnrollmentsBySessionID = `-- name: GetSessionEnrollmentsBySessionID :many
-SELECT session_id, user_id, attended, created_at
+SELECT id, session_id, user_id, attended, created_at
 FROM session_enrollments
 WHERE session_id = $1
 `
@@ -25,6 +45,7 @@ func (q *Queries) GetSessionEnrollmentsBySessionID(ctx context.Context, sessionI
 	for rows.Next() {
 		var i SessionEnrollment
 		if err := rows.Scan(
+			&i.ID,
 			&i.SessionID,
 			&i.UserID,
 			&i.Attended,
@@ -41,7 +62,7 @@ func (q *Queries) GetSessionEnrollmentsBySessionID(ctx context.Context, sessionI
 }
 
 const getSessionEnrollmentsByUserID = `-- name: GetSessionEnrollmentsByUserID :many
-SELECT session_id, user_id, attended, created_at
+SELECT id, session_id, user_id, attended, created_at
 FROM session_enrollments
 WHERE user_id = $1
 `
@@ -56,6 +77,7 @@ func (q *Queries) GetSessionEnrollmentsByUserID(ctx context.Context, userID stri
 	for rows.Next() {
 		var i SessionEnrollment
 		if err := rows.Scan(
+			&i.ID,
 			&i.SessionID,
 			&i.UserID,
 			&i.Attended,
@@ -72,7 +94,7 @@ func (q *Queries) GetSessionEnrollmentsByUserID(ctx context.Context, userID stri
 }
 
 const listSessionEnrollments = `-- name: ListSessionEnrollments :many
-SELECT session_id, user_id, attended, created_at
+SELECT id, session_id, user_id, attended, created_at
 FROM session_enrollments
 ORDER BY session_id, user_id
 `
@@ -87,6 +109,7 @@ func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollme
 	for rows.Next() {
 		var i SessionEnrollment
 		if err := rows.Scan(
+			&i.ID,
 			&i.SessionID,
 			&i.UserID,
 			&i.Attended,
