@@ -197,7 +197,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			switch {
-			case tt.withExistingClass && tt.withExistingClassGroup:
+			case tt.withExistingClassGroup:
 				createdGroup := tests.StubClassGroup(
 					t, ctx, v1.db.Q,
 					tt.withRequest.ClassGroup.Name,

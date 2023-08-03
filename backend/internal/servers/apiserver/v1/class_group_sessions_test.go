@@ -201,7 +201,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			switch {
-			case tt.withExistingClassGroup && tt.withExistingClassGroupSession:
+			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db.Q,
 					tt.withRequest.ClassGroupSession.StartTime,
