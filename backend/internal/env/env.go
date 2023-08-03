@@ -24,32 +24,29 @@ func MustLoad() {
 }
 
 func verifyEnvironment() error {
-	environment := GetAppEnv()
-	if err := checkVarEmpty(string(environment)); err != nil {
+	if err := checkRequiredEnvs(appEnv); err != nil {
 		return err
 	}
 
 	var err error
-	baseErr := fmt.Errorf("%s - environment verification failed", namespace)
-
-	switch environment {
+	switch environment := GetAppEnv(); environment {
 	case AppEnvLocal:
 		err = godotenv.Load(GetEnvLoc())
 	case AppEnvIntegration, AppEnvStaging:
 		return nil
 	default:
-		err = fmt.Errorf("%s - unknown %s value: %s", namespace, appEnv, environment)
+		err = fmt.Errorf("unknown %s value: %s", appEnv, environment)
 	}
 
 	if err != nil {
-		return errors.Join(baseErr, err)
+		return fmt.Errorf("environment verification failed: %w", err)
 	}
 
 	return nil
 }
 
 func verifyConfiguration() error {
-	switch GetConfiguration() {
+	switch getConfiguration() {
 	case ConfigurationApiServer:
 		return verifyApiServerConfiguration()
 	case ConfigurationWebServer:
@@ -61,7 +58,8 @@ func verifyConfiguration() error {
 		return errors.Join(
 			verifyApiServerConfiguration(),
 			verifyWebServerConfiguration(),
-			verifyDatabaseConfiguration())
+			verifyDatabaseConfiguration(),
+		)
 	}
 }
 
@@ -78,7 +76,7 @@ func checkRequiredEnvs(envs ...string) error {
 
 func checkVarEmpty(v string) error {
 	if strings.TrimSpace(v) == "" {
-		return fmt.Errorf("%s - empty variable", namespace)
+		return errors.New("empty variable")
 	}
 
 	return nil

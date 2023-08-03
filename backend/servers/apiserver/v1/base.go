@@ -9,7 +9,6 @@ type baseResponse struct {
 	Message string `json:"message"`
 }
 
-// base is the handler for the baseUrl.
 func (v *APIServerV1) base(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 

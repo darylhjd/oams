@@ -1,7 +1,6 @@
 package env
 
 import (
-	"errors"
 	"fmt"
 	"os"
 )
@@ -18,8 +17,8 @@ const (
 	ConfigurationDatabase  = "database"
 )
 
-// GetConfiguration returns the CONFIGURATION environment variable.
-func GetConfiguration() Configuration {
+// getConfiguration returns the CONFIGURATION environment variable.
+func getConfiguration() Configuration {
 	return Configuration(os.Getenv(configuration))
 }
 
@@ -35,13 +34,12 @@ func verifyApiServerConfiguration() error {
 		webServerPort,
 	}
 
-	baseErr := fmt.Errorf("%s - configuration verification failed for %s", namespace, ConfigurationApiServer)
 	if err := checkRequiredEnvs(envs...); err != nil {
-		return errors.Join(baseErr, err)
+		return err
 	}
 
 	if err := verifyDatabaseConfiguration(); err != nil {
-		return errors.Join(baseErr, err)
+		return err
 	}
 
 	return nil
@@ -52,13 +50,12 @@ func verifyWebServerConfiguration() error {
 		webServerPort,
 	}
 
-	baseErr := fmt.Errorf("%s - configuration verification failed for %s", namespace, ConfigurationWebServer)
 	if err := checkRequiredEnvs(envs...); err != nil {
-		return errors.Join(baseErr, err)
+		return err
 	}
 
 	if err := verifyDatabaseConfiguration(); err != nil {
-		return errors.Join(baseErr, err)
+		return err
 	}
 
 	return nil
@@ -75,9 +72,8 @@ func verifyDatabaseConfiguration() error {
 		databaseSslMode,
 	}
 
-	baseErr := fmt.Errorf("%s - configuration verification failed for %s", namespace, ConfigurationDatabase)
 	if err := checkRequiredEnvs(envs...); err != nil {
-		return errors.Join(baseErr, err)
+		return err
 	}
 
 	// Check SSL mode and root cert.
@@ -86,14 +82,12 @@ func verifyDatabaseConfiguration() error {
 	switch mode {
 	case databaseSslModeDisable:
 		if env == AppEnvStaging {
-			disabledErr := fmt.Errorf("database connection ssl mode disabled for critical environment %q", env)
-			return errors.Join(baseErr, disabledErr)
+			return fmt.Errorf("database connection ssl mode disabled for critical environment %q", env)
 		}
 		fallthrough
 	case databaseSslModeVerifyFull:
 		return nil
 	default:
-		invalidErr := fmt.Errorf("invalid %s value %q", databaseSslMode, mode)
-		return errors.Join(baseErr, invalidErr)
+		return fmt.Errorf("invalid %s value %q", databaseSslMode, mode)
 	}
 }
