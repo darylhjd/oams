@@ -114,7 +114,7 @@ func StubSessionEnrollment(t *testing.T, ctx context.Context, q *database.Querie
 	enrollment, err := q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
 		SessionID: session.ID,
 		UserID:    user.ID,
-		Attended:  false,
+		Attended:  attended,
 	})
 	if err != nil {
 		t.Fatal(err)
