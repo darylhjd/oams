@@ -48,6 +48,8 @@ func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiRespons
 		if errors.Is(err, pgx.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested class group session does not exist")
 		}
+
+		return newErrorResponse(http.StatusInternalServerError, "could not process class group session get database action")
 	}
 
 	return classGroupSessionGetResponse{
