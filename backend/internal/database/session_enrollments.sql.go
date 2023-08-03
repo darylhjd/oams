@@ -10,7 +10,7 @@ import (
 )
 
 const getSessionEnrollmentsBySessionID = `-- name: GetSessionEnrollmentsBySessionID :many
-SELECT session_id, user_id, created_at
+SELECT session_id, user_id, attended, created_at
 FROM session_enrollments
 WHERE session_id = $1
 `
@@ -24,7 +24,12 @@ func (q *Queries) GetSessionEnrollmentsBySessionID(ctx context.Context, sessionI
 	var items []SessionEnrollment
 	for rows.Next() {
 		var i SessionEnrollment
-		if err := rows.Scan(&i.SessionID, &i.UserID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.SessionID,
+			&i.UserID,
+			&i.Attended,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -36,7 +41,7 @@ func (q *Queries) GetSessionEnrollmentsBySessionID(ctx context.Context, sessionI
 }
 
 const getSessionEnrollmentsByUserID = `-- name: GetSessionEnrollmentsByUserID :many
-SELECT session_id, user_id, created_at
+SELECT session_id, user_id, attended, created_at
 FROM session_enrollments
 WHERE user_id = $1
 `
@@ -50,7 +55,12 @@ func (q *Queries) GetSessionEnrollmentsByUserID(ctx context.Context, userID stri
 	var items []SessionEnrollment
 	for rows.Next() {
 		var i SessionEnrollment
-		if err := rows.Scan(&i.SessionID, &i.UserID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.SessionID,
+			&i.UserID,
+			&i.Attended,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -62,7 +72,7 @@ func (q *Queries) GetSessionEnrollmentsByUserID(ctx context.Context, userID stri
 }
 
 const listSessionEnrollments = `-- name: ListSessionEnrollments :many
-SELECT session_id, user_id, created_at
+SELECT session_id, user_id, attended, created_at
 FROM session_enrollments
 ORDER BY session_id, user_id
 `
@@ -76,7 +86,12 @@ func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollme
 	var items []SessionEnrollment
 	for rows.Next() {
 		var i SessionEnrollment
-		if err := rows.Scan(&i.SessionID, &i.UserID, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.SessionID,
+			&i.UserID,
+			&i.Attended,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

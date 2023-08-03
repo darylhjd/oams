@@ -130,6 +130,7 @@ type ClassGroupSession struct {
 type SessionEnrollment struct {
 	SessionID int64            `json:"session_id"`
 	UserID    string           `json:"user_id"`
+	Attended  bool             `json:"attended"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
