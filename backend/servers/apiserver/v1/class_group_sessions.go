@@ -15,7 +15,7 @@ func (v *APIServerV1) classGroupSessions(w http.ResponseWriter, r *http.Request)
 	case http.MethodGet:
 		resp = v.classGroupSessionsGet(r)
 	case http.MethodPost:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classGroupSessionsPost(r)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}

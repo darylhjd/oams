@@ -32,7 +32,7 @@ func TestAPIServerV1_classGroupSessions(t *testing.T) {
 		{
 			"with POST method",
 			http.MethodPost,
-			http.StatusNotImplemented,
+			http.StatusBadRequest,
 		},
 		{
 			"with DELETE method",
