@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/google/uuid"
@@ -93,4 +94,31 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Querie
 	}
 
 	return session
+}
+
+// StubSessionEnrollment inserts a mock class group session, user, and corresponding session enrollment into the database.
+func StubSessionEnrollment(t *testing.T, ctx context.Context, q *database.Queries, attended bool) database.CreateSessionEnrollmentRow {
+	t.Helper()
+
+	session := StubClassGroupSession(t, ctx, q,
+		pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+		pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+		"VENUE+66",
+	)
+
+	user := StubUser(t, ctx, q,
+		uuid.NewString(),
+		database.UserRoleSTUDENT,
+	)
+
+	enrollment, err := q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
+		SessionID: session.ID,
+		UserID:    user.ID,
+		Attended:  false,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return enrollment
 }

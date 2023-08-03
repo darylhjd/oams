@@ -19,7 +19,12 @@ SELECT *
 FROM session_enrollments
 WHERE user_id = $1;
 
+-- name: CreateSessionEnrollment :one
+INSERT INTO session_enrollments (session_id, user_id, attended, created_at, updated_at)
+VALUES ($1, $2, $3, NOW(), NOW())
+RETURNING id, session_id, user_id, attended, created_at;
+
 -- name: CreateSessionEnrollments :batchone
-INSERT INTO session_enrollments (session_id, user_id, attended, created_at)
-VALUES ($1, $2, $3, NOW())
+INSERT INTO session_enrollments (session_id, user_id, attended, created_at, updated_at)
+VALUES ($1, $2, $3, NOW(), NOW())
 RETURNING *;

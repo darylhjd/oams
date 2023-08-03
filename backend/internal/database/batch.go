@@ -18,9 +18,9 @@ var (
 )
 
 const createSessionEnrollments = `-- name: CreateSessionEnrollments :batchone
-INSERT INTO session_enrollments (session_id, user_id, attended, created_at)
-VALUES ($1, $2, $3, NOW())
-RETURNING id, session_id, user_id, attended, created_at
+INSERT INTO session_enrollments (session_id, user_id, attended, created_at, updated_at)
+VALUES ($1, $2, $3, NOW(), NOW())
+RETURNING id, session_id, user_id, attended, created_at, updated_at
 `
 
 type CreateSessionEnrollmentsBatchResults struct {
@@ -66,6 +66,7 @@ func (b *CreateSessionEnrollmentsBatchResults) QueryRow(f func(int, SessionEnrol
 			&i.UserID,
 			&i.Attended,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		)
 		if f != nil {
 			f(t, i, err)

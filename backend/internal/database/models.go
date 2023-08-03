@@ -133,6 +133,7 @@ type SessionEnrollment struct {
 	UserID    string           `json:"user_id"`
 	Attended  bool             `json:"attended"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
 }
 
 type User struct {
