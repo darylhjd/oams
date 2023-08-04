@@ -65,9 +65,8 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 	}
 }
 
-// WithAuthContext adds AuthContext for a handler and checks for authentication status if required by mustAuth.
-// If mustAuth is true and request is not authenticated, unauthorised response code is set.
-func WithAuthContext(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator, mustAuth bool) http.HandlerFunc {
+// WithAuthContext adds AuthContext for a handler and checks for authentication status.
+func WithAuthContext(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		set, err := authenticator.GetKeyCache().Get(r.Context(), oauth2.KeySetSource)
 		if err != nil {
@@ -78,11 +77,6 @@ func WithAuthContext(handlerFunc http.HandlerFunc, authenticator oauth2.Authenti
 		// We will be using session cookies for authentication.
 		c, err := r.Cookie(oauth2.SessionCookieIdent)
 		if err != nil {
-			if !mustAuth {
-				handlerFunc(w, r)
-				return
-			}
-
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}

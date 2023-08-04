@@ -59,72 +59,61 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	v.mux.HandleFunc(logoutUrl, middleware.WithAuthContext(v.logout, v.azure, true))
+	v.mux.HandleFunc(logoutUrl, middleware.WithAuthContext(v.logout, v.azure))
 
 	v.mux.HandleFunc(batchUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.batchPost, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(usersUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.users, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(userUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.user, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classesUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classes, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.class, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classGroupsUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroups, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classGroupUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroup, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classGroupSessionsUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroupSessions, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classGroupSessionUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroupSession, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(sessionEnrollmentsUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.sessionEnrollments, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(sessionEnrollmentUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.sessionEnrollment, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 }
 
