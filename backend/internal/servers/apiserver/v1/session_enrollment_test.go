@@ -36,7 +36,7 @@ func TestAPIServerV1_sessionEnrollment(t *testing.T) {
 		{
 			"with DELETE method",
 			http.MethodDelete,
-			http.StatusNotImplemented,
+			http.StatusNotFound,
 		},
 		{
 			"with PUT method",
@@ -249,6 +249,68 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), bytes.NewReader(reqBodyBytes))
 				successiveResp := v1.sessionEnrollmentPatch(req, enrollmentId).(sessionEnrollmentPatchResponse)
 				a.Equal(actualResp, successiveResp)
+			}
+		})
+	}
+}
+
+func TestAPIServerV1_sessionEnrollmentDelete(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name                          string
+		withExistingSessionEnrollment bool
+		wantResponse                  sessionEnrollmentDeleteResponse
+		wantStatusCode                int
+		wantErr                       string
+	}{
+		{
+			"request with existing session enrollment",
+			true,
+			sessionEnrollmentDeleteResponse{newSuccessResponse()},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with non-existent session enrollment",
+			false,
+			sessionEnrollmentDeleteResponse{},
+			http.StatusNotFound,
+			"session enrollment to delete does not exist",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			var enrollmentId int64 = 6666 // Choose a random ID that does not exist.
+			if tt.withExistingSessionEnrollment {
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, false)
+				enrollmentId = createdEnrollment.ID
+			}
+
+			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), nil)
+			resp := v1.sessionEnrollmentDelete(req, enrollmentId)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(sessionEnrollmentDeleteResponse)
+				a.True(ok)
+				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
 	}

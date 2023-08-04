@@ -27,7 +27,7 @@ func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) 
 	case http.MethodPatch:
 		resp = v.sessionEnrollmentPatch(r, enrollmentId)
 	case http.MethodDelete:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.sessionEnrollmentDelete(r, enrollmentId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -116,4 +116,21 @@ func (v *APIServerV1) sessionEnrollmentPatch(r *http.Request, id int64) apiRespo
 		newSuccessResponse(),
 		enrollment,
 	}
+}
+
+type sessionEnrollmentDeleteResponse struct {
+	response
+}
+
+func (v *APIServerV1) sessionEnrollmentDelete(r *http.Request, id int64) apiResponse {
+	_, err := v.db.Q.DeleteSessionEnrollment(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "session enrollment to delete does not exist")
+		}
+
+		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollment delete database action")
+	}
+
+	return sessionEnrollmentDeleteResponse{newSuccessResponse()}
 }
