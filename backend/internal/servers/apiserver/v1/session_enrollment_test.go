@@ -1,7 +1,9 @@
 package v1
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -29,7 +31,7 @@ func TestAPIServerV1_sessionEnrollment(t *testing.T) {
 		{
 			"with PATCH method",
 			http.MethodPatch,
-			http.StatusNotImplemented,
+			http.StatusBadRequest,
 		},
 		{
 			"with DELETE method",
@@ -132,6 +134,121 @@ func TestAPIServerV1_sessionEnrollmentGet(t *testing.T) {
 				actualResp, ok := resp.(sessionEnrollmentGetResponse)
 				a.True(ok)
 				a.Equal(tt.wantResponse, actualResp)
+			}
+		})
+	}
+}
+
+func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name                          string
+		withRequest                   sessionEnrollmentPatchRequest
+		withExistingSessionEnrollment bool
+		wantResponse                  sessionEnrollmentPatchResponse
+		wantNoChange                  bool
+		wantStatusCode                int
+		wantErr                       string
+	}{
+		{
+			"request with all fields set",
+			sessionEnrollmentPatchRequest{
+				sessionEnrollmentPatchSessionEnrollmentRequestFields{
+					Attended: ptr(true),
+				},
+			},
+			true,
+			sessionEnrollmentPatchResponse{
+				newSuccessResponse(),
+				database.UpdateSessionEnrollmentRow{
+					Attended: true,
+				},
+			},
+			false,
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with optional fields not set",
+			sessionEnrollmentPatchRequest{
+				sessionEnrollmentPatchSessionEnrollmentRequestFields{},
+			},
+			true,
+			sessionEnrollmentPatchResponse{
+				newSuccessResponse(),
+				database.UpdateSessionEnrollmentRow{
+					Attended: true,
+				},
+			},
+			true,
+			http.StatusOK,
+			"",
+		},
+		{
+			"request updating non-existent sessionEnrollment",
+			sessionEnrollmentPatchRequest{
+				sessionEnrollmentPatchSessionEnrollmentRequestFields{},
+			},
+			false,
+			sessionEnrollmentPatchResponse{
+				SessionEnrollment: database.UpdateSessionEnrollmentRow{
+					ID: 6666,
+				},
+			},
+			false,
+			http.StatusNotFound,
+			"session enrollment to update does not exist",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			if tt.withExistingSessionEnrollment {
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, tt.wantResponse.SessionEnrollment.Attended)
+				tt.wantResponse.SessionEnrollment.ID = createdEnrollment.ID
+				tt.wantResponse.SessionEnrollment.SessionID = createdEnrollment.SessionID
+				tt.wantResponse.SessionEnrollment.UserID = createdEnrollment.UserID
+				tt.wantResponse.SessionEnrollment.UpdatedAt = createdEnrollment.CreatedAt
+			}
+
+			reqBodyBytes, err := json.Marshal(tt.withRequest)
+			a.Nil(err)
+
+			enrollmentId := tt.wantResponse.SessionEnrollment.ID
+			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), bytes.NewReader(reqBodyBytes))
+			resp := v1.sessionEnrollmentPatch(req, enrollmentId)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(sessionEnrollmentPatchResponse)
+				a.True(ok)
+
+				if !tt.wantNoChange {
+					tt.wantResponse.SessionEnrollment.UpdatedAt = actualResp.SessionEnrollment.UpdatedAt
+				}
+
+				a.Equal(tt.wantResponse, actualResp)
+
+				// Check that successive updates do not change anything.
+				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), bytes.NewReader(reqBodyBytes))
+				successiveResp := v1.sessionEnrollmentPatch(req, enrollmentId).(sessionEnrollmentPatchResponse)
+				a.Equal(actualResp, successiveResp)
 			}
 		})
 	}

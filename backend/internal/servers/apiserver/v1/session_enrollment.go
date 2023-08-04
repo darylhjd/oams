@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -8,6 +10,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +25,7 @@ func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) 
 	case http.MethodGet:
 		resp = v.sessionEnrollmentGet(r, enrollmentId)
 	case http.MethodPatch:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.sessionEnrollmentPatch(r, enrollmentId)
 	case http.MethodDelete:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
@@ -48,6 +51,68 @@ func (v *APIServerV1) sessionEnrollmentGet(r *http.Request, id int64) apiRespons
 	}
 
 	return sessionEnrollmentGetResponse{
+		newSuccessResponse(),
+		enrollment,
+	}
+}
+
+type sessionEnrollmentPatchRequest struct {
+	SessionEnrollment sessionEnrollmentPatchSessionEnrollmentRequestFields `json:"session_enrollment"`
+}
+
+type sessionEnrollmentPatchSessionEnrollmentRequestFields struct {
+	SessionID *int64  `json:"session_id"`
+	UserID    *string `json:"user_id"`
+	Attended  *bool   `json:"attended"`
+}
+
+func (r sessionEnrollmentPatchRequest) updateSessionEnrollmentParams(enrollmentId int64) database.UpdateSessionEnrollmentParams {
+	params := database.UpdateSessionEnrollmentParams{ID: enrollmentId}
+
+	if r.SessionEnrollment.SessionID != nil {
+		params.SessionID = pgtype.Int8{Int64: *r.SessionEnrollment.SessionID, Valid: true}
+	}
+
+	if r.SessionEnrollment.UserID != nil {
+		params.UserID = pgtype.Text{String: *r.SessionEnrollment.UserID, Valid: true}
+	}
+
+	if r.SessionEnrollment.Attended != nil {
+		params.Attended = pgtype.Bool{Bool: *r.SessionEnrollment.Attended, Valid: true}
+	}
+
+	return params
+}
+
+type sessionEnrollmentPatchResponse struct {
+	response
+	SessionEnrollment database.UpdateSessionEnrollmentRow `json:"session_enrollment"`
+}
+
+func (v *APIServerV1) sessionEnrollmentPatch(r *http.Request, id int64) apiResponse {
+	var (
+		b   bytes.Buffer
+		req sessionEnrollmentPatchRequest
+	)
+
+	if _, err := b.ReadFrom(r.Body); err != nil {
+		return newErrorResponse(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	}
+
+	enrollment, err := v.db.Q.UpdateSessionEnrollment(r.Context(), req.updateSessionEnrollmentParams(id))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "session enrollment to update does not exist")
+		}
+
+		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollment patch database action")
+	}
+
+	return sessionEnrollmentPatchResponse{
 		newSuccessResponse(),
 		enrollment,
 	}

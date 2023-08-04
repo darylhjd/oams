@@ -69,7 +69,7 @@ type classGroupSessionPatchClassGroupSessionRequestFields struct {
 	Venue        *string `json:"venue"`
 }
 
-func (r classGroupSessionPatchRequest) updateClassGroupPatchParams(classGroupSessionId int64) database.UpdateClassGroupSessionParams {
+func (r classGroupSessionPatchRequest) updateClassGroupParams(classGroupSessionId int64) database.UpdateClassGroupSessionParams {
 	params := database.UpdateClassGroupSessionParams{ID: classGroupSessionId}
 
 	if r.ClassGroupSession.ClassGroupID != nil {
@@ -110,7 +110,7 @@ func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiRespo
 		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
 	}
 
-	session, err := v.db.Q.UpdateClassGroupSession(r.Context(), req.updateClassGroupPatchParams(id))
+	session, err := v.db.Q.UpdateClassGroupSession(r.Context(), req.updateClassGroupParams(id))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "class group session to update does not exist")
