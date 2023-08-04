@@ -39,7 +39,7 @@ SET session_id = COALESCE(sqlc.narg('session_id'), session_id),
                   COALESCE(sqlc.narg('user_id'), user_id) <> user_id OR
                   COALESCE(sqlc.narg('attended'), attended) <> attended)
                 THEN NOW()
-            ELSE Updated_at END
+            ELSE updated_at END
 WHERE id = $1
 RETURNING id, session_id, user_id, attended, updated_at;
 
