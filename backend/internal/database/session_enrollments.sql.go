@@ -163,3 +163,56 @@ func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollme
 	}
 	return items, nil
 }
+
+const updateSessionEnrollment = `-- name: UpdateSessionEnrollment :one
+UPDATE session_enrollments
+SET session_id = COALESCE($2, session_id),
+    user_id    = COALESCE($3, user_id),
+    attended   = COALESCE($4, attended),
+    updated_at =
+        CASE
+            WHEN (NOT ($2::BIGINT IS NULL AND
+                       $3::BIGINT IS NULL AND
+                       $4::BOOLEAN IS NULL))
+                AND
+                 (COALESCE($2, session_id) <> session_id OR
+                  COALESCE($3, user_id) <> user_id OR
+                  COALESCE($4, attended) <> attended)
+                THEN NOW()
+            ELSE Updated_at END
+WHERE id = $1
+RETURNING id, session_id, user_id, attended, updated_at
+`
+
+type UpdateSessionEnrollmentParams struct {
+	ID        int64       `json:"id"`
+	SessionID pgtype.Int8 `json:"session_id"`
+	UserID    pgtype.Text `json:"user_id"`
+	Attended  pgtype.Bool `json:"attended"`
+}
+
+type UpdateSessionEnrollmentRow struct {
+	ID        int64            `json:"id"`
+	SessionID int64            `json:"session_id"`
+	UserID    string           `json:"user_id"`
+	Attended  bool             `json:"attended"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+}
+
+func (q *Queries) UpdateSessionEnrollment(ctx context.Context, arg UpdateSessionEnrollmentParams) (UpdateSessionEnrollmentRow, error) {
+	row := q.db.QueryRow(ctx, updateSessionEnrollment,
+		arg.ID,
+		arg.SessionID,
+		arg.UserID,
+		arg.Attended,
+	)
+	var i UpdateSessionEnrollmentRow
+	err := row.Scan(
+		&i.ID,
+		&i.SessionID,
+		&i.UserID,
+		&i.Attended,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
