@@ -43,6 +43,12 @@ SET session_id = COALESCE(sqlc.narg('session_id'), session_id),
 WHERE id = $1
 RETURNING id, session_id, user_id, attended, updated_at;
 
+-- name: DeleteSessionEnrollment :one
+DELETE
+FROM session_enrollments
+    WHERE id = $1
+RETURNING *;
+
 -- name: CreateSessionEnrollments :batchone
 INSERT INTO session_enrollments (session_id, user_id, attended, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())

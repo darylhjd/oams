@@ -44,6 +44,27 @@ func (q *Queries) CreateSessionEnrollment(ctx context.Context, arg CreateSession
 	return i, err
 }
 
+const deleteSessionEnrollment = `-- name: DeleteSessionEnrollment :one
+DELETE
+FROM session_enrollments
+    WHERE id = $1
+RETURNING id, session_id, user_id, attended, created_at, updated_at
+`
+
+func (q *Queries) DeleteSessionEnrollment(ctx context.Context, id int64) (SessionEnrollment, error) {
+	row := q.db.QueryRow(ctx, deleteSessionEnrollment, id)
+	var i SessionEnrollment
+	err := row.Scan(
+		&i.ID,
+		&i.SessionID,
+		&i.UserID,
+		&i.Attended,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getSessionEnrollment = `-- name: GetSessionEnrollment :one
 SELECT id, session_id, user_id, attended, created_at, updated_at
 FROM session_enrollments
