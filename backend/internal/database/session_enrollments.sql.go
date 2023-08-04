@@ -179,7 +179,7 @@ SET session_id = COALESCE($2, session_id),
                   COALESCE($3, user_id) <> user_id OR
                   COALESCE($4, attended) <> attended)
                 THEN NOW()
-            ELSE Updated_at END
+            ELSE updated_at END
 WHERE id = $1
 RETURNING id, session_id, user_id, attended, updated_at
 `
