@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -48,6 +47,7 @@ func (v *APIServerV1) classGroupGet(r *http.Request, id int64) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "the requested class group does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group get database action")
 	}
 
@@ -91,26 +91,24 @@ type classGroupPatchResponse struct {
 }
 
 func (v *APIServerV1) classGroupPatch(r *http.Request, id int64) apiResponse {
-	var (
-		b   bytes.Buffer
-		req classGroupPatchRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req classGroupPatchRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	group, err := v.db.Q.UpdateClassGroup(r.Context(), req.updateClassGroupParams(id))
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group to update does not exist")
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusBadRequest, "class_id does not exist")
+		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
+			return newErrorResponse(http.StatusConflict, "class group with same class_id and name already exists")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process class group patch database action")
 		}
-
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group patch database action")
 	}
 
 	return classGroupPatchResponse{
@@ -126,11 +124,15 @@ type classGroupDeleteResponse struct {
 func (v *APIServerV1) classGroupDelete(r *http.Request, id int64) apiResponse {
 	_, err := v.db.Q.DeleteClassGroup(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group to delete does not exist")
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusConflict, "class group to delete is still referenced")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process class group delete database action")
 		}
-
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group delete database action")
 	}
 
 	return classGroupDeleteResponse{newSuccessResponse()}

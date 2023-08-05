@@ -180,7 +180,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			false,
 			classGroupsPostResponse{},
 			http.StatusBadRequest,
-			"class_id is not valid",
+			"class_id does not exist",
 		},
 	}
 

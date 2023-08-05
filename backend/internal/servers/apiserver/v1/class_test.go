@@ -338,7 +338,7 @@ func TestAPIServerV1_classDelete(t *testing.T) {
 			"class to delete does not exist",
 		},
 		{
-			"request with class foreign key constraint",
+			"request with class foreign key dependency",
 			true,
 			true,
 			classDeleteResponse{},
