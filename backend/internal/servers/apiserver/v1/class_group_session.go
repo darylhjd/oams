@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -49,6 +48,7 @@ func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiRespons
 			return newErrorResponse(http.StatusNotFound, "the requested class group session does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group session get database action")
 	}
 
@@ -97,17 +97,9 @@ type classGroupSessionPatchResponse struct {
 }
 
 func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiResponse {
-	var (
-		b   bytes.Buffer
-		req classGroupSessionPatchRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req classGroupSessionPatchRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	session, err := v.db.Q.UpdateClassGroupSession(r.Context(), req.updateClassGroupParams(id))
@@ -116,6 +108,7 @@ func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiRespo
 			return newErrorResponse(http.StatusNotFound, "class group session to update does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group session patch database action")
 	}
 
@@ -136,6 +129,7 @@ func (v *APIServerV1) classGroupSessionDelete(r *http.Request, id int64) apiResp
 			return newErrorResponse(http.StatusNotFound, "class group session to delete does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group session delete database action")
 	}
 

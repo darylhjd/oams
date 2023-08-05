@@ -9,8 +9,9 @@ import (
 type SQLState string
 
 const (
-	SQLStateForeignKeyViolation SQLState = "23503"
-	SQLStateDuplicateKeyOrIndex SQLState = "23505"
+	SQLStateForeignKeyViolation    SQLState = "23503"
+	SQLStateDuplicateKeyOrIndex    SQLState = "23505"
+	SQLStateCheckConstraintFailure SQLState = "23514"
 )
 
 // ErrSQLState is a helper function to check if a given err corresponds to a *pgconn.PgError

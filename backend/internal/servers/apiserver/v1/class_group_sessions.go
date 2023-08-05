@@ -1,11 +1,12 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (v *APIServerV1) classGroupSessions(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +32,7 @@ type classGroupSessionsGetResponse struct {
 func (v *APIServerV1) classGroupSessionsGet(r *http.Request) apiResponse {
 	sessions, err := v.db.Q.ListClassGroupSessions(r.Context())
 	if err != nil {
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group sessions get database action")
 	}
 
@@ -44,7 +46,23 @@ func (v *APIServerV1) classGroupSessionsGet(r *http.Request) apiResponse {
 }
 
 type classGroupSessionsPostRequest struct {
-	ClassGroupSession database.CreateClassGroupSessionParams `json:"class_group_session"`
+	ClassGroupSession classGroupSessionsPostClassGroupSessionRequestFields `json:"class_group_session"`
+}
+
+type classGroupSessionsPostClassGroupSessionRequestFields struct {
+	ClassGroupID int64  `json:"class_group_id"`
+	StartTime    int64  `json:"start_time"`
+	EndTime      int64  `json:"end_time"`
+	Venue        string `json:"venue"`
+}
+
+func (r classGroupSessionsPostRequest) createClassGroupSessionParams() database.CreateClassGroupSessionParams {
+	return database.CreateClassGroupSessionParams{
+		ClassGroupID: r.ClassGroupSession.ClassGroupID,
+		StartTime:    pgtype.Timestamp{Time: time.UnixMicro(r.ClassGroupSession.StartTime).UTC(), Valid: true},
+		EndTime:      pgtype.Timestamp{Time: time.UnixMicro(r.ClassGroupSession.EndTime).UTC(), Valid: true},
+		Venue:        r.ClassGroupSession.Venue,
+	}
 }
 
 type classGroupSessionsPostResponse struct {
@@ -53,27 +71,22 @@ type classGroupSessionsPostResponse struct {
 }
 
 func (v *APIServerV1) classGroupSessionsPost(r *http.Request) apiResponse {
-	var (
-		b   bytes.Buffer
-		req classGroupSessionsPostRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
+	var req classGroupSessionsPostRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
-	}
-
-	session, err := v.db.Q.CreateClassGroupSession(r.Context(), req.ClassGroupSession)
+	session, err := v.db.Q.CreateClassGroupSession(r.Context(), req.createClassGroupSessionParams())
 	if err != nil {
 		switch {
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusBadRequest, "class_group_id does not exist")
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
 			return newErrorResponse(http.StatusConflict, "class group session with same class_group_id and start_time already exists")
-		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
-			return newErrorResponse(http.StatusBadRequest, "class_group_id is not valid")
+		case database.ErrSQLState(err, database.SQLStateCheckConstraintFailure):
+			return newErrorResponse(http.StatusBadRequest, "class group session cannot have a start_time later than or equal to end_time")
 		default:
+			v.logInternalServerError(r, err)
 			return newErrorResponse(http.StatusInternalServerError, "could not process class group sessions post database action")
 		}
 	}
