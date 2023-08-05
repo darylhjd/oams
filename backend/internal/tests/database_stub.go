@@ -112,6 +112,23 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Querie
 	return session
 }
 
+// StubClassGroupSessionWithClassGroupID creates a mock class group session using an existing class group ID.
+func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q *database.Queries, classGroupId int64, startTime, endTime pgtype.Timestamp, venue string) database.CreateClassGroupSessionRow {
+	t.Helper()
+
+	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
+		ClassGroupID: classGroupId,
+		StartTime:    startTime,
+		EndTime:      endTime,
+		Venue:        venue,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return session
+}
+
 // StubSessionEnrollment inserts a mock class group session, user, and corresponding session enrollment into the database.
 func StubSessionEnrollment(t *testing.T, ctx context.Context, q *database.Queries, attended bool) database.CreateSessionEnrollmentRow {
 	t.Helper()

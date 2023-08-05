@@ -111,7 +111,6 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 					sessionPtr := &tt.wantResponse.ClassGroupSessions[idx]
 					sessionPtr.ID = createdSession.ID
 					sessionPtr.ClassGroupID = createdSession.ClassGroupID
-					sessionPtr.StartTime, sessionPtr.EndTime = createdSession.StartTime, createdSession.EndTime
 					sessionPtr.CreatedAt, sessionPtr.UpdatedAt = createdSession.CreatedAt, createdSession.CreatedAt
 				}
 			}
@@ -150,7 +149,9 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			classGroupSessionsPostResponse{
 				newSuccessResponse(),
 				database.CreateClassGroupSessionRow{
-					Venue: "NEW_CLASS+22",
+					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					Venue:     "NEW_CLASS+22",
 				},
 			},
 			http.StatusOK,
@@ -266,8 +267,6 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 
 				tt.wantResponse.ClassGroupSession.ID = actualResp.ClassGroupSession.ID
 				tt.wantResponse.ClassGroupSession.ClassGroupID = actualResp.ClassGroupSession.ClassGroupID
-				tt.wantResponse.ClassGroupSession.StartTime = actualResp.ClassGroupSession.StartTime
-				tt.wantResponse.ClassGroupSession.EndTime = actualResp.ClassGroupSession.EndTime
 				tt.wantResponse.ClassGroupSession.CreatedAt = actualResp.ClassGroupSession.CreatedAt
 				a.Equal(tt.wantResponse, actualResp)
 			}

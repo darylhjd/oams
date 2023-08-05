@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -122,8 +123,6 @@ func TestAPIServerV1_classGroupSessionGet(t *testing.T) {
 
 				tt.wantResponse.ClassGroupSession.ID = createdSession.ID
 				tt.wantResponse.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
-				tt.wantResponse.ClassGroupSession.StartTime = createdSession.StartTime
-				tt.wantResponse.ClassGroupSession.EndTime = createdSession.EndTime
 				tt.wantResponse.ClassGroupSession.CreatedAt = createdSession.CreatedAt
 				tt.wantResponse.ClassGroupSession.UpdatedAt = createdSession.CreatedAt
 			}
@@ -153,13 +152,15 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 		name                          string
 		withRequest                   classGroupSessionPatchRequest
 		withExistingClassGroupSession bool
+		withUpdateConflict            bool
+		withExistingUpdateClassGroup  bool
 		wantResponse                  classGroupSessionPatchResponse
 		wantNoChange                  bool
 		wantStatusCode                int
 		wantErr                       string
 	}{
 		{
-			"request with all fields set",
+			"request with field changes",
 			classGroupSessionPatchRequest{
 				classGroupSessionPatchClassGroupSessionRequestFields{
 					ptr(int64(1)),
@@ -168,6 +169,8 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 					ptr("NEW_VENUE+99"),
 				},
 			},
+			true,
+			false,
 			true,
 			classGroupSessionPatchResponse{
 				newSuccessResponse(),
@@ -183,10 +186,12 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			"",
 		},
 		{
-			"request with optional fields not set",
+			"request with no field changes",
 			classGroupSessionPatchRequest{
 				classGroupSessionPatchClassGroupSessionRequestFields{},
 			},
+			true,
+			false,
 			true,
 			classGroupSessionPatchResponse{
 				newSuccessResponse(),
@@ -206,6 +211,8 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				classGroupSessionPatchClassGroupSessionRequestFields{},
 			},
 			false,
+			false,
+			false,
 			classGroupSessionPatchResponse{
 				ClassGroupSession: database.UpdateClassGroupSessionRow{
 					ID: 6666,
@@ -214,6 +221,33 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			false,
 			http.StatusNotFound,
 			"class group session to update does not exist",
+		},
+		{
+			"request with update conflict",
+			classGroupSessionPatchRequest{
+				classGroupSessionPatchClassGroupSessionRequestFields{
+					StartTime: ptr(int64(2)),
+					EndTime:   ptr(int64(3)),
+				},
+			},
+			true,
+			true,
+			true,
+			classGroupSessionPatchResponse{},
+			false,
+			http.StatusConflict,
+			"class group session with same class_group_id and start_time already exists",
+		},
+		{
+			"request with non-existent class group dependency",
+			classGroupSessionPatchRequest{},
+			true,
+			false,
+			false,
+			classGroupSessionPatchResponse{},
+			false,
+			http.StatusBadRequest,
+			"class_group_id does not exist",
 		},
 	}
 
@@ -229,22 +263,55 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			if tt.withExistingClassGroupSession {
+			var sessionId int64
+			switch {
+			case tt.withUpdateConflict:
+				// Create session to update.
+				updateClassGroupSession := tests.StubClassGroupSession(
+					t, ctx, v1.db.Q,
+					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					uuid.NewString(),
+				)
+				sessionId = updateClassGroupSession.ID
+
+				// Also create session to conflict with.
+				_ = tests.StubClassGroupSessionWithClassGroupID(
+					t, ctx, v1.db.Q,
+					updateClassGroupSession.ClassGroupID,
+					pgtype.Timestamp{Time: time.UnixMicro(*tt.withRequest.ClassGroupSession.StartTime).UTC(), Valid: true},
+					pgtype.Timestamp{Time: time.UnixMicro(*tt.withRequest.ClassGroupSession.EndTime).UTC(), Valid: true},
+					uuid.NewString(),
+				)
+			case tt.withExistingClassGroupSession && !tt.withExistingUpdateClassGroup:
+				createdSession := tests.StubClassGroupSession(
+					t, ctx, v1.db.Q,
+					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					uuid.NewString(),
+				)
+
+				sessionId = createdSession.ID
+				tt.withRequest.ClassGroupSession.ClassGroupID = ptr(createdSession.ClassGroupID + 1)
+			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db.Q,
 					tt.wantResponse.ClassGroupSession.StartTime,
 					tt.wantResponse.ClassGroupSession.EndTime,
 					tt.wantResponse.ClassGroupSession.Venue,
 				)
+
+				sessionId = createdSession.ID
 				tt.wantResponse.ClassGroupSession.ID = createdSession.ID
 				tt.wantResponse.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
 				tt.wantResponse.ClassGroupSession.UpdatedAt = createdSession.CreatedAt
+			default:
+				sessionId = rand.Int63()
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
 			a.Nil(err)
 
-			sessionId := tt.wantResponse.ClassGroupSession.ID
 			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classGroupSessionUrl, sessionId), bytes.NewReader(reqBodyBytes))
 			resp := v1.classGroupSessionPatch(req, sessionId)
 			a.Equal(tt.wantStatusCode, resp.Code())
@@ -279,6 +346,7 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 	tts := []struct {
 		name                          string
 		withExistingClassGroupSession bool
+		withForeignKeyDependency      bool
 		wantResponse                  classGroupSessionDeleteResponse
 		wantStatusCode                int
 		wantErr                       string
@@ -286,6 +354,7 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 		{
 			"request with existing class group session",
 			true,
+			false,
 			classGroupSessionDeleteResponse{newSuccessResponse()},
 			http.StatusOK,
 			"",
@@ -293,9 +362,18 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 		{
 			"request with non-existent class group",
 			false,
+			false,
 			classGroupSessionDeleteResponse{},
 			http.StatusNotFound,
 			"class group session to delete does not exist",
+		},
+		{
+			"request with class group session foreign key dependency",
+			true,
+			true,
+			classGroupSessionDeleteResponse{},
+			http.StatusConflict,
+			"class group session to delete is still referenced",
 		},
 	}
 
@@ -311,8 +389,12 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			var sessionId int64 = 6666 // Choose a random ID that does not exist.
-			if tt.withExistingClassGroupSession {
+			var sessionId int64
+			switch {
+			case tt.withForeignKeyDependency:
+				createdSessionEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, true)
+				sessionId = createdSessionEnrollment.SessionID
+			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db.Q,
 					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
@@ -320,6 +402,8 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 					uuid.NewString(),
 				)
 				sessionId = createdSession.ID
+			default:
+				sessionId = rand.Int63()
 			}
 
 			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classGroupSessionUrl, sessionId), nil)

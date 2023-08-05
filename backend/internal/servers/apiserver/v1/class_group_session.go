@@ -104,12 +104,19 @@ func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiRespo
 
 	session, err := v.db.Q.UpdateClassGroupSession(r.Context(), req.updateClassGroupParams(id))
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group session to update does not exist")
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusBadRequest, "class_group_id does not exist")
+		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
+			return newErrorResponse(http.StatusConflict, "class group session with same class_group_id and start_time already exists")
+		case database.ErrSQLState(err, database.SQLStateCheckConstraintFailure):
+			return newErrorResponse(http.StatusBadRequest, "class group session cannot have a start_time later than or equal to end_time")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process class group session patch database action")
 		}
-
-		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group session patch database action")
 	}
 
 	return classGroupSessionPatchResponse{
@@ -125,12 +132,15 @@ type classGroupSessionDeleteResponse struct {
 func (v *APIServerV1) classGroupSessionDelete(r *http.Request, id int64) apiResponse {
 	_, err := v.db.Q.DeleteClassGroupSession(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group session to delete does not exist")
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusConflict, "class group session to delete is still referenced")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process class group session delete database action")
 		}
-
-		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group session delete database action")
 	}
 
 	return classGroupSessionDeleteResponse{newSuccessResponse()}
