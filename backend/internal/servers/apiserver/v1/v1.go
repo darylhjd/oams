@@ -1,8 +1,10 @@
 package v1
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -35,6 +37,10 @@ const (
 	classGroupSessionUrl  = "/class_group_sessions/"
 	sessionEnrollmentsUrl = "/session_enrollments"
 	sessionEnrollmentUrl  = "/session_enrollments/"
+)
+
+var (
+	internalErrorMsg = fmt.Sprintf("%s - internal server error", namespace)
 )
 
 type APIServerV1 struct {
@@ -123,8 +129,18 @@ func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	v.mux.ServeHTTP(w, r)
 }
 
+func (v *APIServerV1) parseRequestBody(body io.ReadCloser, a any) error {
+	var b bytes.Buffer
+
+	if _, err := b.ReadFrom(body); err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b.Bytes(), a)
+}
+
 func (v *APIServerV1) writeResponse(w http.ResponseWriter, url string, resp apiResponse) {
-	bytes, err := json.Marshal(resp)
+	b, err := json.Marshal(resp)
 	if err != nil {
 		v.l.Error(fmt.Sprintf("%s - could not marshal response", namespace),
 			zap.String("url", url),
@@ -134,10 +150,14 @@ func (v *APIServerV1) writeResponse(w http.ResponseWriter, url string, resp apiR
 	}
 
 	w.WriteHeader(resp.Code())
-	if _, err = w.Write(bytes); err != nil {
+	if _, err = w.Write(b); err != nil {
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
 			zap.String("url", url),
 			zap.Error(err),
 		)
 	}
+}
+
+func (v *APIServerV1) logInternalServerError(r *http.Request, err error) {
+	v.l.Error(internalErrorMsg, zap.String("endpoint", r.URL.Path), zap.String("method", r.Method), zap.Error(err))
 }

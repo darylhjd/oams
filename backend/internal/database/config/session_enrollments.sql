@@ -46,7 +46,7 @@ RETURNING id, session_id, user_id, attended, updated_at;
 -- name: DeleteSessionEnrollment :one
 DELETE
 FROM session_enrollments
-    WHERE id = $1
+WHERE id = $1
 RETURNING *;
 
 -- name: CreateSessionEnrollments :batchone

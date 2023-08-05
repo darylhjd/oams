@@ -1,11 +1,11 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +31,7 @@ type usersGetResponse struct {
 func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 	users, err := v.db.Q.ListUsers(r.Context())
 	if err != nil {
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process users get database action")
 	}
 
@@ -53,17 +54,9 @@ type usersPostResponse struct {
 }
 
 func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
-	var (
-		b   bytes.Buffer
-		req usersPostRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req usersPostRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	if req.User.ID == sessionUserId {
@@ -73,10 +66,11 @@ func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 	user, err := v.db.Q.CreateUser(r.Context(), req.User)
 	if err != nil {
 		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
-			return newErrorResponse(http.StatusConflict, "user with same id already exists")
+			return newErrorResponse(http.StatusConflict, err.(*pgconn.PgError).Detail)
 
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process users post database action")
 	}
 
