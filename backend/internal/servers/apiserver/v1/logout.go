@@ -32,5 +32,5 @@ func (v *APIServerV1) logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = oauth2.DeleteSessionCookie(w)
-	v.writeResponse(w, logoutUrl, resp)
+	v.writeResponse(w, r, resp)
 }

@@ -21,13 +21,13 @@ const (
 func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	var s state
 	if err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s); err != nil {
-		v.writeResponse(w, msLoginCallbackUrl, newErrorResponse(http.StatusInternalServerError, "cannot parse state from login callback"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "cannot parse state from login callback"))
 		return
 	}
 
 	// Check that we only handle callbacks from appropriate API version.
 	if s.Version != namespace {
-		v.writeResponse(w, msLoginCallbackUrl, newErrorResponse(http.StatusTeapot, "wrong api version handling"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusTeapot, "wrong api version handling"))
 		return
 	}
 
@@ -38,7 +38,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		[]string{env.GetAPIServerAzureLoginScope()},
 	)
 	if err != nil {
-		v.writeResponse(w, msLoginCallbackUrl, newErrorResponse(http.StatusInternalServerError, "cannot get auth tokens from code"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "cannot get auth tokens from code"))
 		return
 	}
 

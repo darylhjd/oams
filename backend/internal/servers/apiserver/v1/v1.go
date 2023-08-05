@@ -139,11 +139,12 @@ func (v *APIServerV1) parseRequestBody(body io.ReadCloser, a any) error {
 	return json.Unmarshal(b.Bytes(), a)
 }
 
-func (v *APIServerV1) writeResponse(w http.ResponseWriter, url string, resp apiResponse) {
+func (v *APIServerV1) writeResponse(w http.ResponseWriter, r *http.Request, resp apiResponse) {
 	b, err := json.Marshal(resp)
 	if err != nil {
 		v.l.Error(fmt.Sprintf("%s - could not marshal response", namespace),
-			zap.String("url", url),
+			zap.String("endpoint", r.URL.Path),
+			zap.String("method", r.Method),
 			zap.Error(err),
 		)
 		return
@@ -152,7 +153,8 @@ func (v *APIServerV1) writeResponse(w http.ResponseWriter, url string, resp apiR
 	w.WriteHeader(resp.Code())
 	if _, err = w.Write(b); err != nil {
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
-			zap.String("url", url),
+			zap.String("endpoint", r.URL.Path),
+			zap.String("method", r.Method),
 			zap.Error(err),
 		)
 	}

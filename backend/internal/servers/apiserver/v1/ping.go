@@ -22,5 +22,5 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusInternalServerError, "database cannot be contacted")
 	}
 
-	v.writeResponse(w, pingUrl, resp)
+	v.writeResponse(w, r, resp)
 }

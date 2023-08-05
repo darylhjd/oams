@@ -18,7 +18,7 @@ func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) 
 
 	enrollmentId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, sessionEnrollmentUrl), 10, 64)
 	if err != nil {
-		v.writeResponse(w, sessionEnrollmentUrl, newErrorResponse(http.StatusUnprocessableEntity, "invalid session_enrollment id"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid session_enrollment id"))
 	}
 
 	switch r.Method {
@@ -32,7 +32,7 @@ func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) 
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, sessionEnrollmentUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type sessionEnrollmentGetResponse struct {

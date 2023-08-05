@@ -19,7 +19,7 @@ func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) 
 
 	sessionId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, classGroupSessionUrl), 10, 64)
 	if err != nil {
-		v.writeResponse(w, classGroupSessionUrl, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group session id"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group session id"))
 		return
 	}
 
@@ -34,7 +34,7 @@ func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) 
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, classGroupSessionUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type classGroupSessionGetResponse struct {

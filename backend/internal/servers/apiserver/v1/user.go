@@ -35,7 +35,7 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, userUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type userMeResponse struct {

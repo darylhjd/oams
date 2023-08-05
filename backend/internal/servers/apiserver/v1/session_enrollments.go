@@ -20,7 +20,7 @@ func (v *APIServerV1) sessionEnrollments(w http.ResponseWriter, r *http.Request)
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, sessionEnrollmentsUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type sessionEnrollmentsGetResponse struct {

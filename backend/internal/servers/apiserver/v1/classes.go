@@ -20,7 +20,7 @@ func (v *APIServerV1) classes(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, classesUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type classesGetResponse struct {

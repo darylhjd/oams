@@ -18,7 +18,7 @@ func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
 
 	classId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, classUrl), 10, 64)
 	if err != nil {
-		v.writeResponse(w, classUrl, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
 		return
 	}
 
@@ -33,7 +33,7 @@ func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, classUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type classGetResponse struct {

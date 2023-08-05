@@ -18,7 +18,7 @@ func (v *APIServerV1) classGroup(w http.ResponseWriter, r *http.Request) {
 
 	groupId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, classGroupUrl), 10, 64)
 	if err != nil {
-		v.writeResponse(w, classGroupUrl, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group id"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group id"))
 		return
 	}
 
@@ -33,7 +33,7 @@ func (v *APIServerV1) classGroup(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, classGroupUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type classGroupGetResponse struct {
