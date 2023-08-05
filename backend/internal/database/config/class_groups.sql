@@ -27,11 +27,7 @@ SET class_id   = COALESCE(sqlc.narg('class_id'), class_id),
     class_type = COALESCE(sqlc.narg('class_type'), class_type),
     updated_at =
         CASE
-            WHEN (NOT (sqlc.narg('class_id')::BIGINT IS NULL AND
-                       sqlc.narg('name')::TEXT IS NULL AND
-                       sqlc.narg('class_type')::CLASS_TYPE IS NULL))
-                AND
-                 (COALESCE(sqlc.narg('class_id'), class_id) <> class_id OR
+            WHEN (COALESCE(sqlc.narg('class_id'), class_id) <> class_id OR
                   COALESCE(sqlc.narg('name'), name) <> name OR
                   COALESCE(sqlc.narg('class_type'), class_type) <> class_type)
                 THEN NOW()

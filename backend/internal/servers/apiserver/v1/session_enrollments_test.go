@@ -180,7 +180,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 			true,
 			sessionEnrollmentsPostResponse{},
 			http.StatusBadRequest,
-			"session_id or user_id is not valid",
+			"session_id and/or user_id does not exist",
 		},
 		{
 			"request with non existent user",
@@ -194,7 +194,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 			false,
 			sessionEnrollmentsPostResponse{},
 			http.StatusBadRequest,
-			"session_id or user_id is not valid",
+			"session_id and/or user_id does not exist",
 		},
 		{
 			"request with non existent class group session and user",
@@ -208,7 +208,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 			false,
 			sessionEnrollmentsPostResponse{},
 			http.StatusBadRequest,
-			"session_id or user_id is not valid",
+			"session_id and/or user_id does not exist",
 		},
 	}
 

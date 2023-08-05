@@ -1,8 +1,7 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -31,6 +30,7 @@ type sessionEnrollmentsGetResponse struct {
 func (v *APIServerV1) sessionEnrollmentsGet(r *http.Request) apiResponse {
 	enrollments, err := v.db.Q.ListSessionEnrollments(r.Context())
 	if err != nil {
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollments get database action")
 	}
 
@@ -53,17 +53,9 @@ type sessionEnrollmentsPostResponse struct {
 }
 
 func (v *APIServerV1) sessionEnrollmentsPost(r *http.Request) apiResponse {
-	var (
-		b   bytes.Buffer
-		req sessionEnrollmentsPostRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req sessionEnrollmentsPostRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	session, err := v.db.Q.CreateSessionEnrollment(r.Context(), req.SessionEnrollment)
@@ -72,8 +64,9 @@ func (v *APIServerV1) sessionEnrollmentsPost(r *http.Request) apiResponse {
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
 			return newErrorResponse(http.StatusConflict, "session enrollment with same session_id and user_id already exists")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
-			return newErrorResponse(http.StatusBadRequest, "session_id or user_id is not valid")
+			return newErrorResponse(http.StatusBadRequest, "session_id and/or user_id does not exist")
 		default:
+			v.logInternalServerError(r, err)
 			return newErrorResponse(http.StatusInternalServerError, "could not process session enrollments post database action")
 		}
 	}

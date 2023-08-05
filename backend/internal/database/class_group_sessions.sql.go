@@ -173,12 +173,7 @@ SET class_group_id = COALESCE($2, class_group_id),
     venue          = COALESCE($5, venue),
     updated_at     =
         CASE
-            WHEN (NOT ($2::BIGINT IS NULL AND
-                       $3::TIMESTAMP IS NULL AND
-                       $4::TIMESTAMP IS NULL AND
-                       $5::TEXT IS NULL))
-                AND
-                 (COALESCE($2, class_group_id) <> class_group_id OR
+            WHEN (COALESCE($2, class_group_id) <> class_group_id OR
                   COALESCE($3, start_time) <> start_time OR
                   COALESCE($4, end_time) <> end_time OR
                   COALESCE($5, venue) <> venue)

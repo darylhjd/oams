@@ -29,13 +29,7 @@ SET code       = COALESCE(sqlc.narg('code'), code),
     au         = COALESCE(sqlc.narg('au'), au),
     updated_at =
         CASE
-            WHEN (NOT (sqlc.narg('code')::TEXT IS NULL AND
-                       sqlc.narg('year')::INTEGER IS NULL AND
-                       sqlc.narg('semester')::TEXT IS NULL AND
-                       sqlc.narg('programme')::TEXT IS NULL AND
-                       sqlc.narg('au')::SMALLINT IS NULL))
-                AND
-                 (COALESCE(sqlc.narg('code'), code) <> code OR
+            WHEN (COALESCE(sqlc.narg('code'), code) <> code OR
                   COALESCE(sqlc.narg('year'), year) <> year OR
                   COALESCE(sqlc.narg('semester'), semester) <> semester OR
                   COALESCE(sqlc.narg('programme'), programme) <> programme OR

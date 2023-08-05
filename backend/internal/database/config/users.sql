@@ -27,11 +27,7 @@ SET name       = COALESCE(sqlc.narg('name'), name),
     role       = COALESCE(sqlc.narg('role'), role),
     updated_at =
         CASE
-            WHEN (NOT (sqlc.narg('name')::TEXT IS NULL AND
-                       sqlc.narg('email')::TEXT IS NULL AND
-                       sqlc.narg('role')::USER_ROLE IS NULL))
-                AND
-                 (COALESCE(sqlc.narg('name'), name) <> name OR
+            WHEN (COALESCE(sqlc.narg('name'), name) <> name OR
                   COALESCE(sqlc.narg('email'), email) <> email OR
                   COALESCE(sqlc.narg('role'), role) <> role)
                 THEN NOW()
