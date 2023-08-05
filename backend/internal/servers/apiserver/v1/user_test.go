@@ -231,7 +231,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 		wantErr          string
 	}{
 		{
-			"request with all fields set",
+			"request with field changes",
 			userPatchRequest{
 				userPatchUserRequestFields{
 					ptr("NEW NAME"),
@@ -254,7 +254,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 			"",
 		},
 		{
-			"request with optional fields not set",
+			"request with no field changes",
 			userPatchRequest{
 				userPatchUserRequestFields{},
 			},
@@ -340,15 +340,17 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name             string
-		withExistingUser bool
-		wantResponse     userDeleteResponse
-		wantStatusCode   int
-		wantErr          string
+		name                     string
+		withExistingUser         bool
+		withForeignKeyDependency bool
+		wantResponse             userDeleteResponse
+		wantStatusCode           int
+		wantErr                  string
 	}{
 		{
 			"request with existing user",
 			true,
+			false,
 			userDeleteResponse{newSuccessResponse()},
 			http.StatusOK,
 			"",
@@ -356,9 +358,18 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 		{
 			"request with non-existent user",
 			false,
+			false,
 			userDeleteResponse{},
 			http.StatusNotFound,
 			"user to delete does not exist",
+		},
+		{
+			"request with user foreign key constraint",
+			true,
+			true,
+			userDeleteResponse{},
+			http.StatusConflict,
+			"user to delete is still referenced",
 		},
 	}
 
@@ -375,7 +386,11 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			userId := uuid.NewString()
-			if tt.withExistingUser {
+			switch {
+			case tt.withForeignKeyDependency:
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, true)
+				userId = createdEnrollment.UserID
+			case tt.withExistingUser:
 				_ = tests.StubUser(t, ctx, v1.db.Q, userId, database.UserRoleSTUDENT)
 			}
 

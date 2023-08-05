@@ -159,7 +159,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			true,
 			usersPostResponse{},
 			http.StatusConflict,
-			"Key (id)=(EXISTING_USER) already exists.",
+			"user with same id already exists",
 		},
 		{
 			"request with special session user id me",

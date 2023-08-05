@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +65,7 @@ func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 	user, err := v.db.Q.CreateUser(r.Context(), req.User)
 	if err != nil {
 		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
-			return newErrorResponse(http.StatusConflict, err.(*pgconn.PgError).Detail)
+			return newErrorResponse(http.StatusConflict, "user with same id already exists")
 
 		}
 
