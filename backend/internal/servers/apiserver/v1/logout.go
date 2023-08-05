@@ -12,22 +12,23 @@ type logoutResponse struct {
 	response
 }
 
-// logout endpoint invalidates a user session. This is done by requesting that the browser
-// remove the cookie containing the session information.
 func (v *APIServerV1) logout(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
 	authContext, isSignedIn, err := middleware.GetAuthContext(r)
 	switch {
 	case err == nil && !isSignedIn:
-		err = errors.New("sign-out called but there is no session user")
-		fallthrough
-	case err != nil:
+		err = errors.New("logout called but there is no session user")
+		v.logInternalServerError(r, err)
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
+	case err != nil:
+		v.logInternalServerError(r, err)
+		resp = newErrorResponse(http.StatusInternalServerError, "unexpected auth context type")
 	default:
 		resp = logoutResponse{newSuccessResponse()}
 		if err = v.azure.RemoveAccount(r.Context(), authContext.AuthResult.Account); err != nil {
-			resp = newErrorResponse(http.StatusInternalServerError, err.Error())
+			v.logInternalServerError(r, err)
+			resp = newErrorResponse(http.StatusInternalServerError, "error clearing account cache")
 		}
 	}
 

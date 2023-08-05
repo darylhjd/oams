@@ -2,12 +2,9 @@ package v1
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"go.uber.org/zap"
-
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
@@ -21,6 +18,7 @@ const (
 func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	var s state
 	if err := json.Unmarshal([]byte(r.PostFormValue(callbackStateParam)), &s); err != nil {
+		v.logInternalServerError(r, err)
 		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "cannot parse state from login callback"))
 		return
 	}
@@ -38,6 +36,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		[]string{env.GetAPIServerAzureLoginScope()},
 	)
 	if err != nil {
+		v.logInternalServerError(r, err)
 		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "cannot get auth tokens from code"))
 		return
 	}
@@ -52,8 +51,8 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		},
 	}).Close()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		v.l.Error(fmt.Sprintf("%s - error upserting users info", namespace), zap.Error(err))
+		v.logInternalServerError(r, err)
+		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "could not update login user details"))
 		return
 	}
 
