@@ -22,5 +22,5 @@ func (v *APIServerV1) base(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	v.writeResponse(w, baseUrl, resp)
+	v.writeResponse(w, r, resp)
 }

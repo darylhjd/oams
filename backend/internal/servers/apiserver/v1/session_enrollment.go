@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,7 +17,8 @@ func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) 
 
 	enrollmentId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, sessionEnrollmentUrl), 10, 64)
 	if err != nil {
-		v.writeResponse(w, sessionEnrollmentUrl, newErrorResponse(http.StatusUnprocessableEntity, "invalid session_enrollment id"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid session enrollment id"))
+		return
 	}
 
 	switch r.Method {
@@ -32,7 +32,7 @@ func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) 
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, sessionEnrollmentUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type sessionEnrollmentGetResponse struct {
@@ -47,6 +47,7 @@ func (v *APIServerV1) sessionEnrollmentGet(r *http.Request, id int64) apiRespons
 			return newErrorResponse(http.StatusNotFound, "the requested session enrollment does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollment get database action")
 	}
 
@@ -61,21 +62,11 @@ type sessionEnrollmentPatchRequest struct {
 }
 
 type sessionEnrollmentPatchSessionEnrollmentRequestFields struct {
-	SessionID *int64  `json:"session_id"`
-	UserID    *string `json:"user_id"`
-	Attended  *bool   `json:"attended"`
+	Attended *bool `json:"attended"`
 }
 
 func (r sessionEnrollmentPatchRequest) updateSessionEnrollmentParams(enrollmentId int64) database.UpdateSessionEnrollmentParams {
 	params := database.UpdateSessionEnrollmentParams{ID: enrollmentId}
-
-	if r.SessionEnrollment.SessionID != nil {
-		params.SessionID = pgtype.Int8{Int64: *r.SessionEnrollment.SessionID, Valid: true}
-	}
-
-	if r.SessionEnrollment.UserID != nil {
-		params.UserID = pgtype.Text{String: *r.SessionEnrollment.UserID, Valid: true}
-	}
 
 	if r.SessionEnrollment.Attended != nil {
 		params.Attended = pgtype.Bool{Bool: *r.SessionEnrollment.Attended, Valid: true}
@@ -90,17 +81,9 @@ type sessionEnrollmentPatchResponse struct {
 }
 
 func (v *APIServerV1) sessionEnrollmentPatch(r *http.Request, id int64) apiResponse {
-	var (
-		b   bytes.Buffer
-		req sessionEnrollmentPatchRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req sessionEnrollmentPatchRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	enrollment, err := v.db.Q.UpdateSessionEnrollment(r.Context(), req.updateSessionEnrollmentParams(id))
@@ -109,6 +92,7 @@ func (v *APIServerV1) sessionEnrollmentPatch(r *http.Request, id int64) apiRespo
 			return newErrorResponse(http.StatusNotFound, "session enrollment to update does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollment patch database action")
 	}
 
@@ -129,6 +113,7 @@ func (v *APIServerV1) sessionEnrollmentDelete(r *http.Request, id int64) apiResp
 			return newErrorResponse(http.StatusNotFound, "session enrollment to delete does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollment delete database action")
 	}
 

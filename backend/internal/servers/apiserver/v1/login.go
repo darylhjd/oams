@@ -31,7 +31,6 @@ type loginResponse struct {
 	RedirectUrl string `json:"redirect_url"`
 }
 
-// login is the entrypoint to OAM's OAuth2 flow.
 func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 	// https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 	redirectString, err := v.azure.AuthCodeURL(
@@ -40,7 +39,8 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		env.GetAPIServerAzureLoginCallbackURL(),
 		[]string{env.GetAPIServerAzureLoginScope()})
 	if err != nil {
-		v.writeResponse(w, loginUrl, newErrorResponse(http.StatusInternalServerError, "cannot create auth code url"))
+		v.logInternalServerError(r, err)
+		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "cannot create auth code url"))
 		return
 	}
 
@@ -50,7 +50,8 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 		RedirectUrl: r.URL.Query().Get(stateRedirectUrlQueryParam),
 	})
 	if err != nil {
-		v.writeResponse(w, loginUrl, newErrorResponse(http.StatusInternalServerError, "cannot create oauth state"))
+		v.logInternalServerError(r, err)
+		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "cannot create oauth state"))
 		return
 	}
 
@@ -62,8 +63,7 @@ func (v *APIServerV1) login(w http.ResponseWriter, r *http.Request) {
 	redirectString = redirectUrl.String()
 
 	v.l.Debug(fmt.Sprintf("%s - generated azure login url", namespace), zap.String("url", redirectString))
-
-	v.writeResponse(w, loginUrl, loginResponse{
+	v.writeResponse(w, r, loginResponse{
 		newSuccessResponse(),
 		redirectString,
 	})

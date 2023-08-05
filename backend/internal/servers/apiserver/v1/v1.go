@@ -1,8 +1,10 @@
 package v1
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -37,6 +39,10 @@ const (
 	sessionEnrollmentUrl  = "/session_enrollments/"
 )
 
+var (
+	internalErrorMsg = fmt.Sprintf("%s - internal server error", namespace)
+)
+
 type APIServerV1 struct {
 	l   *zap.Logger
 	db  *database.DB
@@ -59,72 +65,61 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	v.mux.HandleFunc(logoutUrl, middleware.WithAuthContext(v.logout, v.azure, true))
+	v.mux.HandleFunc(logoutUrl, middleware.WithAuthContext(v.logout, v.azure))
 
 	v.mux.HandleFunc(batchUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.batchPost, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(usersUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.users, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(userUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.user, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classesUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classes, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.class, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classGroupsUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroups, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classGroupUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroup, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classGroupSessionsUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroupSessions, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(classGroupSessionUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.classGroupSession, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(sessionEnrollmentsUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.sessionEnrollments, http.MethodGet, http.MethodPost),
 		v.azure,
-		true,
 	))
 
 	v.mux.HandleFunc(sessionEnrollmentUrl, middleware.WithAuthContext(
 		middleware.AllowMethods(v.sessionEnrollment, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
-		true,
 	))
 }
 
@@ -134,21 +129,37 @@ func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	v.mux.ServeHTTP(w, r)
 }
 
-func (v *APIServerV1) writeResponse(w http.ResponseWriter, url string, resp apiResponse) {
-	bytes, err := json.Marshal(resp)
+func (v *APIServerV1) parseRequestBody(body io.ReadCloser, a any) error {
+	var b bytes.Buffer
+
+	if _, err := b.ReadFrom(body); err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b.Bytes(), a)
+}
+
+func (v *APIServerV1) writeResponse(w http.ResponseWriter, r *http.Request, resp apiResponse) {
+	b, err := json.Marshal(resp)
 	if err != nil {
 		v.l.Error(fmt.Sprintf("%s - could not marshal response", namespace),
-			zap.String("url", url),
+			zap.String("endpoint", r.URL.Path),
+			zap.String("method", r.Method),
 			zap.Error(err),
 		)
 		return
 	}
 
 	w.WriteHeader(resp.Code())
-	if _, err = w.Write(bytes); err != nil {
+	if _, err = w.Write(b); err != nil {
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
-			zap.String("url", url),
+			zap.String("endpoint", r.URL.Path),
+			zap.String("method", r.Method),
 			zap.Error(err),
 		)
 	}
+}
+
+func (v *APIServerV1) logInternalServerError(r *http.Request, err error) {
+	v.l.Error(internalErrorMsg, zap.String("endpoint", r.URL.Path), zap.String("method", r.Method), zap.Error(err))
 }

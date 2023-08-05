@@ -111,7 +111,6 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 					sessionPtr := &tt.wantResponse.ClassGroupSessions[idx]
 					sessionPtr.ID = createdSession.ID
 					sessionPtr.ClassGroupID = createdSession.ClassGroupID
-					sessionPtr.StartTime, sessionPtr.EndTime = createdSession.StartTime, createdSession.EndTime
 					sessionPtr.CreatedAt, sessionPtr.UpdatedAt = createdSession.CreatedAt, createdSession.CreatedAt
 				}
 			}
@@ -139,9 +138,9 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 		{
 			"request with no existing class group session",
 			classGroupSessionsPostRequest{
-				database.CreateClassGroupSessionParams{
-					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+				classGroupSessionsPostClassGroupSessionRequestFields{
+					StartTime: 1,
+					EndTime:   2,
 					Venue:     "NEW_CLASS+22",
 				},
 			},
@@ -150,7 +149,9 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			classGroupSessionsPostResponse{
 				newSuccessResponse(),
 				database.CreateClassGroupSessionRow{
-					Venue: "NEW_CLASS+22",
+					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					Venue:     "NEW_CLASS+22",
 				},
 			},
 			http.StatusOK,
@@ -159,9 +160,9 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 		{
 			"request with existing class group session",
 			classGroupSessionsPostRequest{
-				database.CreateClassGroupSessionParams{
-					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+				classGroupSessionsPostClassGroupSessionRequestFields{
+					StartTime: 1,
+					EndTime:   2,
 					Venue:     "EXISTING_CLASS+22",
 				},
 			},
@@ -172,11 +173,41 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			"class group session with same class_group_id and start_time already exists",
 		},
 		{
+			"request with start time later than end time",
+			classGroupSessionsPostRequest{
+				classGroupSessionsPostClassGroupSessionRequestFields{
+					StartTime: 2,
+					EndTime:   1,
+					Venue:     "NEW_CLASS+55",
+				},
+			},
+			false,
+			true,
+			classGroupSessionsPostResponse{},
+			http.StatusBadRequest,
+			"class group session cannot have a start_time later than or equal to end_time",
+		},
+		{
+			"request with start time equal to end time",
+			classGroupSessionsPostRequest{
+				classGroupSessionsPostClassGroupSessionRequestFields{
+					StartTime: 1,
+					EndTime:   1,
+					Venue:     "NEW_CLASS+55",
+				},
+			},
+			false,
+			true,
+			classGroupSessionsPostResponse{},
+			http.StatusBadRequest,
+			"class group session cannot have a start_time later than or equal to end_time",
+		},
+		{
 			"request with non-existent class group dependency",
 			classGroupSessionsPostRequest{
-				database.CreateClassGroupSessionParams{
-					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+				classGroupSessionsPostClassGroupSessionRequestFields{
+					StartTime: 1,
+					EndTime:   2,
 					Venue:     "FAIL_INSERT_CLASS+22",
 				},
 			},
@@ -184,7 +215,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			false,
 			classGroupSessionsPostResponse{},
 			http.StatusBadRequest,
-			"class_group_id is not valid",
+			"class_group_id does not exist",
 		},
 	}
 
@@ -204,8 +235,8 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db.Q,
-					tt.withRequest.ClassGroupSession.StartTime,
-					tt.withRequest.ClassGroupSession.EndTime,
+					tt.withRequest.createClassGroupSessionParams().StartTime,
+					tt.withRequest.createClassGroupSessionParams().EndTime,
 					tt.withRequest.ClassGroupSession.Venue,
 				)
 				tt.withRequest.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
@@ -236,8 +267,6 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 
 				tt.wantResponse.ClassGroupSession.ID = actualResp.ClassGroupSession.ID
 				tt.wantResponse.ClassGroupSession.ClassGroupID = actualResp.ClassGroupSession.ClassGroupID
-				tt.wantResponse.ClassGroupSession.StartTime = actualResp.ClassGroupSession.StartTime
-				tt.wantResponse.ClassGroupSession.EndTime = actualResp.ClassGroupSession.EndTime
 				tt.wantResponse.ClassGroupSession.CreatedAt = actualResp.ClassGroupSession.CreatedAt
 				a.Equal(tt.wantResponse, actualResp)
 			}

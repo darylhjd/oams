@@ -166,11 +166,7 @@ SET name       = COALESCE($2, name),
     role       = COALESCE($4, role),
     updated_at =
         CASE
-            WHEN (NOT ($2::TEXT IS NULL AND
-                       $3::TEXT IS NULL AND
-                       $4::USER_ROLE IS NULL))
-                AND
-                 (COALESCE($2, name) <> name OR
+            WHEN (COALESCE($2, name) <> name OR
                   COALESCE($3, email) <> email OR
                   COALESCE($4, role) <> role)
                 THEN NOW()

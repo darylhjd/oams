@@ -182,13 +182,7 @@ SET code       = COALESCE($2, code),
     au         = COALESCE($6, au),
     updated_at =
         CASE
-            WHEN (NOT ($2::TEXT IS NULL AND
-                       $3::INTEGER IS NULL AND
-                       $4::TEXT IS NULL AND
-                       $5::TEXT IS NULL AND
-                       $6::SMALLINT IS NULL))
-                AND
-                 (COALESCE($2, code) <> code OR
+            WHEN (COALESCE($2, code) <> code OR
                   COALESCE($3, year) <> year OR
                   COALESCE($4, semester) <> semester OR
                   COALESCE($5, programme) <> programme OR

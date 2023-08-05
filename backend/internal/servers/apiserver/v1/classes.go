@@ -1,8 +1,7 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -20,7 +19,7 @@ func (v *APIServerV1) classes(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, classesUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type classesGetResponse struct {
@@ -31,6 +30,7 @@ type classesGetResponse struct {
 func (v *APIServerV1) classesGet(r *http.Request) apiResponse {
 	classes, err := v.db.Q.ListClasses(r.Context())
 	if err != nil {
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process classes get database action")
 	}
 
@@ -53,17 +53,9 @@ type classesPostResponse struct {
 }
 
 func (v *APIServerV1) classesPost(r *http.Request) apiResponse {
-	var (
-		b   bytes.Buffer
-		req classesPostRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req classesPostRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	class, err := v.db.Q.CreateClass(r.Context(), req.Class)
@@ -72,6 +64,7 @@ func (v *APIServerV1) classesPost(r *http.Request) apiResponse {
 			return newErrorResponse(http.StatusConflict, "class with same code, year, and semester already exists")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process classes post database action")
 	}
 

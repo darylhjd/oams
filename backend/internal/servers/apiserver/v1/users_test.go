@@ -113,8 +113,6 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, usersUrl, nil)
 			actualResp, ok := v1.usersGet(req).(usersGetResponse)
 			a.True(ok)
-
-			a.Equal(len(tt.wantResponse.Users), len(actualResp.Users))
 			a.Equal(tt.wantResponse, actualResp)
 		})
 	}

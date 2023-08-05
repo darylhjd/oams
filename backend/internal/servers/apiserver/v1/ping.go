@@ -9,7 +9,6 @@ type pingResponse struct {
 	Message string `json:"message"`
 }
 
-// ping helps check the health of the API server. It also checks the database connection.
 func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
@@ -19,8 +18,9 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := v.db.C.Ping(r.Context()); err != nil {
+		v.logInternalServerError(r, err)
 		resp = newErrorResponse(http.StatusInternalServerError, "database cannot be contacted")
 	}
 
-	v.writeResponse(w, pingUrl, resp)
+	v.writeResponse(w, r, resp)
 }

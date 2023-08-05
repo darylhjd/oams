@@ -77,6 +77,22 @@ func StubClassGroup(t *testing.T, ctx context.Context, q *database.Queries, name
 	return group
 }
 
+// StubClassGroupWithClassID creates a mock class group using an existing class ID.
+func StubClassGroupWithClassID(t *testing.T, ctx context.Context, q *database.Queries, classId int64, name string, classType database.ClassType) database.CreateClassGroupRow {
+	t.Helper()
+
+	group, err := q.CreateClassGroup(ctx, database.CreateClassGroupParams{
+		ClassID:   classId,
+		Name:      name,
+		ClassType: classType,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return group
+}
+
 // StubClassGroupSession inserts a mock class, class group and corresponding class group session into the database.
 func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Queries, startTime, endTime pgtype.Timestamp, venue string) database.CreateClassGroupSessionRow {
 	t.Helper()
@@ -85,6 +101,23 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Querie
 
 	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
 		ClassGroupID: classGroup.ID,
+		StartTime:    startTime,
+		EndTime:      endTime,
+		Venue:        venue,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return session
+}
+
+// StubClassGroupSessionWithClassGroupID creates a mock class group session using an existing class group ID.
+func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q *database.Queries, classGroupId int64, startTime, endTime pgtype.Timestamp, venue string) database.CreateClassGroupSessionRow {
+	t.Helper()
+
+	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
+		ClassGroupID: classGroupId,
 		StartTime:    startTime,
 		EndTime:      endTime,
 		Venue:        venue,

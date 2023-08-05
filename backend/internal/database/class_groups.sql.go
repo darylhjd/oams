@@ -160,11 +160,7 @@ SET class_id   = COALESCE($2, class_id),
     class_type = COALESCE($4, class_type),
     updated_at =
         CASE
-            WHEN (NOT ($2::BIGINT IS NULL AND
-                       $3::TEXT IS NULL AND
-                       $4::CLASS_TYPE IS NULL))
-                AND
-                 (COALESCE($2, class_id) <> class_id OR
+            WHEN (COALESCE($2, class_id) <> class_id OR
                   COALESCE($3, name) <> name OR
                   COALESCE($4, class_type) <> class_type)
                 THEN NOW()

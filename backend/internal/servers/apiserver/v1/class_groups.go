@@ -1,8 +1,7 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -20,7 +19,7 @@ func (v *APIServerV1) classGroups(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, classGroupsUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type classGroupsGetResponse struct {
@@ -31,6 +30,7 @@ type classGroupsGetResponse struct {
 func (v *APIServerV1) classGroupsGet(r *http.Request) apiResponse {
 	groups, err := v.db.Q.ListClassGroups(r.Context())
 	if err != nil {
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class groups get database action")
 	}
 
@@ -53,17 +53,9 @@ type classGroupsPostResponse struct {
 }
 
 func (v *APIServerV1) classGroupsPost(r *http.Request) apiResponse {
-	var (
-		b   bytes.Buffer
-		req classGroupsPostRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req classGroupsPostRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	group, err := v.db.Q.CreateClassGroup(r.Context(), req.ClassGroup)
@@ -72,8 +64,9 @@ func (v *APIServerV1) classGroupsPost(r *http.Request) apiResponse {
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
 			return newErrorResponse(http.StatusConflict, "class group with same class_id and name already exists")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
-			return newErrorResponse(http.StatusBadRequest, "class_id is not valid")
+			return newErrorResponse(http.StatusBadRequest, "class_id does not exist")
 		default:
+			v.logInternalServerError(r, err)
 			return newErrorResponse(http.StatusInternalServerError, "could not process class groups post database action")
 		}
 	}

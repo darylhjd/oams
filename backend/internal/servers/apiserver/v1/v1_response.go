@@ -4,7 +4,6 @@ import "net/http"
 
 // apiResponse is an interface defining all responses that the server must fulfill.
 type apiResponse interface {
-	Res() bool
 	Code() int
 }
 
@@ -14,10 +13,6 @@ type response struct {
 
 	// This field is used to set the response status code and does not appear in the response body.
 	statusCode int
-}
-
-func (r response) Res() bool {
-	return r.Result
 }
 
 func (r response) Code() int {

@@ -47,7 +47,7 @@ func (q *Queries) CreateSessionEnrollment(ctx context.Context, arg CreateSession
 const deleteSessionEnrollment = `-- name: DeleteSessionEnrollment :one
 DELETE
 FROM session_enrollments
-    WHERE id = $1
+WHERE id = $1
 RETURNING id, session_id, user_id, attended, created_at, updated_at
 `
 
@@ -187,18 +187,10 @@ func (q *Queries) ListSessionEnrollments(ctx context.Context) ([]SessionEnrollme
 
 const updateSessionEnrollment = `-- name: UpdateSessionEnrollment :one
 UPDATE session_enrollments
-SET session_id = COALESCE($2, session_id),
-    user_id    = COALESCE($3, user_id),
-    attended   = COALESCE($4, attended),
+SET attended   = COALESCE($2, attended),
     updated_at =
         CASE
-            WHEN (NOT ($2::BIGINT IS NULL AND
-                       $3::BIGINT IS NULL AND
-                       $4::BOOLEAN IS NULL))
-                AND
-                 (COALESCE($2, session_id) <> session_id OR
-                  COALESCE($3, user_id) <> user_id OR
-                  COALESCE($4, attended) <> attended)
+            WHEN COALESCE($2, attended) <> attended
                 THEN NOW()
             ELSE updated_at END
 WHERE id = $1
@@ -206,10 +198,8 @@ RETURNING id, session_id, user_id, attended, updated_at
 `
 
 type UpdateSessionEnrollmentParams struct {
-	ID        int64       `json:"id"`
-	SessionID pgtype.Int8 `json:"session_id"`
-	UserID    pgtype.Text `json:"user_id"`
-	Attended  pgtype.Bool `json:"attended"`
+	ID       int64       `json:"id"`
+	Attended pgtype.Bool `json:"attended"`
 }
 
 type UpdateSessionEnrollmentRow struct {
@@ -221,12 +211,7 @@ type UpdateSessionEnrollmentRow struct {
 }
 
 func (q *Queries) UpdateSessionEnrollment(ctx context.Context, arg UpdateSessionEnrollmentParams) (UpdateSessionEnrollmentRow, error) {
-	row := q.db.QueryRow(ctx, updateSessionEnrollment,
-		arg.ID,
-		arg.SessionID,
-		arg.UserID,
-		arg.Attended,
-	)
+	row := q.db.QueryRow(ctx, updateSessionEnrollment, arg.ID, arg.Attended)
 	var i UpdateSessionEnrollmentRow
 	err := row.Scan(
 		&i.ID,

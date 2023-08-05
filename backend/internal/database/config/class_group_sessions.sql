@@ -28,12 +28,7 @@ SET class_group_id = COALESCE(sqlc.narg('class_group_id'), class_group_id),
     venue          = COALESCE(sqlc.narg('venue'), venue),
     updated_at     =
         CASE
-            WHEN (NOT (sqlc.narg('class_group_id')::BIGINT IS NULL AND
-                       sqlc.narg('start_time')::TIMESTAMP IS NULL AND
-                       sqlc.narg('end_time')::TIMESTAMP IS NULL AND
-                       sqlc.narg('venue')::TEXT IS NULL))
-                AND
-                 (COALESCE(sqlc.narg('class_group_id'), class_group_id) <> class_group_id OR
+            WHEN (COALESCE(sqlc.narg('class_group_id'), class_group_id) <> class_group_id OR
                   COALESCE(sqlc.narg('start_time'), start_time) <> start_time OR
                   COALESCE(sqlc.narg('end_time'), end_time) <> end_time OR
                   COALESCE(sqlc.narg('venue'), venue) <> venue)

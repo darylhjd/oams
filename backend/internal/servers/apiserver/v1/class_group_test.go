@@ -5,13 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -144,28 +147,30 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name                   string
-		withRequest            classGroupPatchRequest
-		withExistingClassGroup bool
-		wantResponse           classGroupPatchResponse
-		wantNoChange           bool
-		wantStatusCode         int
-		wantErr                string
+		name                    string
+		withRequest             classGroupPatchRequest
+		withExistingClassGroup  bool
+		withUpdateConflict      bool
+		withExistingUpdateClass bool
+		wantResponse            classGroupPatchResponse
+		wantNoChange            bool
+		wantStatusCode          int
+		wantErr                 string
 	}{
 		{
-			"request with all fields set",
+			"request with field changes",
 			classGroupPatchRequest{
 				classGroupPatchClassGroupRequestFields{
-					ptr(int64(1)),
-					ptr("NEW21"),
-					ptr(database.ClassTypeLAB),
+					Name:      ptr("NEW21"),
+					ClassType: ptr(database.ClassTypeLAB),
 				},
 			},
+			true,
+			false,
 			true,
 			classGroupPatchResponse{
 				newSuccessResponse(),
 				database.UpdateClassGroupRow{
-					ClassID:   1,
 					Name:      "NEW21",
 					ClassType: database.ClassTypeLAB,
 				},
@@ -175,10 +180,12 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			"",
 		},
 		{
-			"request with optional fields not set",
+			"request with no field changes",
 			classGroupPatchRequest{
 				classGroupPatchClassGroupRequestFields{},
 			},
+			true,
+			false,
 			true,
 			classGroupPatchResponse{
 				newSuccessResponse(),
@@ -197,14 +204,39 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 				classGroupPatchClassGroupRequestFields{},
 			},
 			false,
-			classGroupPatchResponse{
-				ClassGroup: database.UpdateClassGroupRow{
-					ID: 6666,
-				},
-			},
+			false,
+			false,
+			classGroupPatchResponse{},
 			false,
 			http.StatusNotFound,
 			"class group to update does not exist",
+		},
+		{
+			"request with update conflict",
+			classGroupPatchRequest{
+				classGroupPatchClassGroupRequestFields{
+					Name:      ptr("EXISTING32"),
+					ClassType: ptr(database.ClassTypeLAB),
+				},
+			},
+			true,
+			true,
+			true,
+			classGroupPatchResponse{},
+			false,
+			http.StatusConflict,
+			"class group with same class_id and name already exists",
+		},
+		{
+			"request with non existent class dependency",
+			classGroupPatchRequest{},
+			true,
+			false,
+			false,
+			classGroupPatchResponse{},
+			false,
+			http.StatusBadRequest,
+			"class_id does not exist",
 		},
 	}
 
@@ -220,21 +252,47 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			if tt.withExistingClassGroup {
+			var groupId int64
+			switch {
+			case tt.withUpdateConflict:
+				// Create group to update.
+				updateClassGroup := tests.StubClassGroup(t, ctx, v1.db.Q, uuid.NewString(), database.ClassTypeTUT)
+				groupId = updateClassGroup.ID
+
+				// Also create group to conflict with.
+				_ = tests.StubClassGroupWithClassID(
+					t, ctx, v1.db.Q,
+					updateClassGroup.ClassID,
+					*tt.withRequest.ClassGroup.Name,
+					*tt.withRequest.ClassGroup.ClassType,
+				)
+			case tt.withExistingClassGroup && !tt.withExistingUpdateClass:
+				createdClassGroup := tests.StubClassGroup(
+					t, ctx, v1.db.Q,
+					uuid.NewString(),
+					database.ClassTypeTUT,
+				)
+
+				groupId = createdClassGroup.ID
+				tt.withRequest.ClassGroup.ClassID = ptr(createdClassGroup.ClassID + 1)
+			case tt.withExistingClassGroup:
 				createdClassGroup := tests.StubClassGroup(
 					t, ctx, v1.db.Q,
 					tt.wantResponse.ClassGroup.Name,
 					tt.wantResponse.ClassGroup.ClassType,
 				)
+
+				groupId = createdClassGroup.ID
 				tt.wantResponse.ClassGroup.ID = createdClassGroup.ID
 				tt.wantResponse.ClassGroup.ClassID = createdClassGroup.ClassID
 				tt.wantResponse.ClassGroup.UpdatedAt = createdClassGroup.CreatedAt
+			default:
+				groupId = rand.Int63()
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
 			a.Nil(err)
 
-			groupId := tt.wantResponse.ClassGroup.ID
 			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classGroupUrl, groupId), bytes.NewReader(reqBodyBytes))
 			resp := v1.classGroupPatch(req, groupId)
 			a.Equal(tt.wantStatusCode, resp.Code())
@@ -267,15 +325,17 @@ func TestAPIServerV1_classGroupDelete(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name                   string
-		withExistingClassGroup bool
-		wantResponse           classGroupDeleteResponse
-		wantStatusCode         int
-		wantErr                string
+		name                     string
+		withExistingClassGroup   bool
+		withForeignKeyDependency bool
+		wantResponse             classGroupDeleteResponse
+		wantStatusCode           int
+		wantErr                  string
 	}{
 		{
 			"request with existing class group",
 			true,
+			false,
 			classGroupDeleteResponse{newSuccessResponse()},
 			http.StatusOK,
 			"",
@@ -283,9 +343,18 @@ func TestAPIServerV1_classGroupDelete(t *testing.T) {
 		{
 			"request with non-existent class group",
 			false,
+			false,
 			classGroupDeleteResponse{},
 			http.StatusNotFound,
 			"class group to delete does not exist",
+		},
+		{
+			"request with class group foreign key dependency",
+			true,
+			true,
+			classGroupDeleteResponse{},
+			http.StatusConflict,
+			"class group to delete is still referenced",
 		},
 	}
 
@@ -301,18 +370,29 @@ func TestAPIServerV1_classGroupDelete(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			var classId int64 = 6666 // Choose a random ID that does not exist.
-			if tt.withExistingClassGroup {
+			var groupId int64
+			switch {
+			case tt.withForeignKeyDependency:
+				createdClassGroupSession := tests.StubClassGroupSession(
+					t, ctx, v1.db.Q,
+					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
+					pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					uuid.NewString(),
+				)
+				groupId = createdClassGroupSession.ClassGroupID
+			case tt.withExistingClassGroup:
 				createdClassGroup := tests.StubClassGroup(
 					t, ctx, v1.db.Q,
-					"RANDOM33",
+					uuid.NewString(),
 					database.ClassTypeTUT,
 				)
-				classId = createdClassGroup.ID
+				groupId = createdClassGroup.ID
+			default:
+				groupId = rand.Int63()
 			}
 
-			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classGroupUrl, classId), nil)
-			resp := v1.classGroupDelete(req, classId)
+			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classGroupUrl, groupId), nil)
+			resp := v1.classGroupDelete(req, groupId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {

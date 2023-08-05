@@ -63,7 +63,7 @@ func (v *APIServerV1) batchPost(w http.ResponseWriter, r *http.Request) {
 		req, err = v.fromBatchJSON(r)
 	default:
 		resp = newErrorResponse(http.StatusUnsupportedMediaType, fmt.Sprintf("%s is unsupported", contentType))
-		v.writeResponse(w, batchUrl, resp)
+		v.writeResponse(w, r, resp)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (v *APIServerV1) batchPost(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 
-	v.writeResponse(w, batchUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 // fromBatchFiles creates a request struct from uploaded files.

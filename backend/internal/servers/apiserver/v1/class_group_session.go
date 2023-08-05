@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,7 +18,7 @@ func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) 
 
 	sessionId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, classGroupSessionUrl), 10, 64)
 	if err != nil {
-		v.writeResponse(w, classGroupSessionUrl, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group session id"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group session id"))
 		return
 	}
 
@@ -34,7 +33,7 @@ func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) 
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, classGroupSessionUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type classGroupSessionGetResponse struct {
@@ -49,6 +48,7 @@ func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiRespons
 			return newErrorResponse(http.StatusNotFound, "the requested class group session does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group session get database action")
 	}
 
@@ -97,26 +97,26 @@ type classGroupSessionPatchResponse struct {
 }
 
 func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiResponse {
-	var (
-		b   bytes.Buffer
-		req classGroupSessionPatchRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req classGroupSessionPatchRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	session, err := v.db.Q.UpdateClassGroupSession(r.Context(), req.updateClassGroupParams(id))
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group session to update does not exist")
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusBadRequest, "class_group_id does not exist")
+		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
+			return newErrorResponse(http.StatusConflict, "class group session with same class_group_id and start_time already exists")
+		case database.ErrSQLState(err, database.SQLStateCheckConstraintFailure):
+			return newErrorResponse(http.StatusBadRequest, "class group session cannot have a start_time later than or equal to end_time")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process class group session patch database action")
 		}
-
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group session patch database action")
 	}
 
 	return classGroupSessionPatchResponse{
@@ -132,11 +132,15 @@ type classGroupSessionDeleteResponse struct {
 func (v *APIServerV1) classGroupSessionDelete(r *http.Request, id int64) apiResponse {
 	_, err := v.db.Q.DeleteClassGroupSession(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group session to delete does not exist")
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusConflict, "class group session to delete is still referenced")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process class group session delete database action")
 		}
-
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group session delete database action")
 	}
 
 	return classGroupSessionDeleteResponse{newSuccessResponse()}

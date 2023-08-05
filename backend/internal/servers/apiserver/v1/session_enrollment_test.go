@@ -152,7 +152,7 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 		wantErr                       string
 	}{
 		{
-			"request with all fields set",
+			"request with field changes",
 			sessionEnrollmentPatchRequest{
 				sessionEnrollmentPatchSessionEnrollmentRequestFields{
 					Attended: ptr(true),
@@ -170,7 +170,7 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 			"",
 		},
 		{
-			"request with optional fields not set",
+			"request with no field changes",
 			sessionEnrollmentPatchRequest{
 				sessionEnrollmentPatchSessionEnrollmentRequestFields{},
 			},
@@ -186,7 +186,7 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 			"",
 		},
 		{
-			"request updating non-existent sessionEnrollment",
+			"request updating non-existent session enrollment",
 			sessionEnrollmentPatchRequest{
 				sessionEnrollmentPatchSessionEnrollmentRequestFields{},
 			},

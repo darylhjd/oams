@@ -1,9 +1,8 @@
 package v1
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,7 +17,7 @@ func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
 
 	classId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, classUrl), 10, 64)
 	if err != nil {
-		v.writeResponse(w, classUrl, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
 		return
 	}
 
@@ -33,7 +32,7 @@ func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, classUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type classGetResponse struct {
@@ -48,6 +47,7 @@ func (v *APIServerV1) classGet(r *http.Request, id int64) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "the requested class does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class get database action")
 	}
 
@@ -101,26 +101,22 @@ type classPatchResponse struct {
 }
 
 func (v *APIServerV1) classPatch(r *http.Request, id int64) apiResponse {
-	var (
-		b   bytes.Buffer
-		req classPatchRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req classPatchRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	class, err := v.db.Q.UpdateClass(r.Context(), req.updateClassParams(id))
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class to update does not exist")
+		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
+			return newErrorResponse(http.StatusConflict, "class with same code, year, and semester already exists")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process class patch database action")
 		}
-
-		return newErrorResponse(http.StatusInternalServerError, "could not process class patch database action")
 	}
 
 	return classPatchResponse{
@@ -136,11 +132,15 @@ type classDeleteResponse struct {
 func (v *APIServerV1) classDelete(r *http.Request, id int64) apiResponse {
 	_, err := v.db.Q.DeleteClass(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class to delete does not exist")
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusConflict, "class to delete is still referenced")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process class delete database action")
 		}
-
-		return newErrorResponse(http.StatusInternalServerError, "could not process class delete database action")
 	}
 
 	return classDeleteResponse{newSuccessResponse()}

@@ -1,10 +1,9 @@
 package v1
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -35,7 +34,7 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
 
-	v.writeResponse(w, userUrl, resp)
+	v.writeResponse(w, r, resp)
 }
 
 type userMeResponse struct {
@@ -44,25 +43,25 @@ type userMeResponse struct {
 }
 
 func (v *APIServerV1) userMe(r *http.Request) apiResponse {
-	resp := userMeResponse{response: newSuccessResponse()}
-
-	// Fill session user.
 	authContext, isSignedIn, err := middleware.GetAuthContext(r)
 	switch {
 	case err != nil:
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, err.Error())
 	case isSignedIn:
 		user, err := v.db.Q.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
 		if err != nil {
+			v.logInternalServerError(r, fmt.Errorf("expected session user in database: %w", err))
 			return newErrorResponse(http.StatusInternalServerError, "could get session user from database")
 		}
 
-		resp.SessionUser = user
+		return userMeResponse{
+			newSuccessResponse(),
+			user,
+		}
 	default:
 		return newErrorResponse(http.StatusUnauthorized, "client lacks authentication credentials")
 	}
-
-	return resp
 }
 
 type userGetResponse struct {
@@ -77,6 +76,7 @@ func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "the requested user does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process user get database action")
 	}
 
@@ -99,7 +99,6 @@ type userPatchUserRequestFields struct {
 func (r userPatchRequest) updateUserParams(userId string) database.UpdateUserParams {
 	params := database.UpdateUserParams{ID: userId}
 
-	// Parse request.
 	if r.User.Name != nil {
 		params.Name = pgtype.Text{String: *r.User.Name, Valid: true}
 	}
@@ -121,17 +120,9 @@ type userPatchResponse struct {
 }
 
 func (v *APIServerV1) userPatch(r *http.Request, id string) apiResponse {
-	var (
-		b   bytes.Buffer
-		req userPatchRequest
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := json.Unmarshal(b.Bytes(), &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not parse request body")
+	var req userPatchRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	user, err := v.db.Q.UpdateUser(r.Context(), req.updateUserParams(id))
@@ -140,6 +131,7 @@ func (v *APIServerV1) userPatch(r *http.Request, id string) apiResponse {
 			return newErrorResponse(http.StatusNotFound, "user to update does not exist")
 		}
 
+		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process user patch database action")
 	}
 
@@ -156,11 +148,15 @@ type userDeleteResponse struct {
 func (v *APIServerV1) userDelete(r *http.Request, id string) apiResponse {
 	_, err := v.db.Q.DeleteUser(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "user to delete does not exist")
+		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
+			return newErrorResponse(http.StatusConflict, "user to delete is still referenced")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process user delete database action")
 		}
-
-		return newErrorResponse(http.StatusInternalServerError, "could not process user delete database action")
 	}
 
 	return userDeleteResponse{newSuccessResponse()}
