@@ -385,13 +385,15 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			userId := uuid.NewString()
+			var userId string
 			switch {
 			case tt.withForeignKeyDependency:
 				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, true)
 				userId = createdEnrollment.UserID
 			case tt.withExistingUser:
 				_ = tests.StubUser(t, ctx, v1.db.Q, userId, database.UserRoleSTUDENT)
+			default:
+				userId = uuid.NewString()
 			}
 
 			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%s", userUrl, userId), nil)

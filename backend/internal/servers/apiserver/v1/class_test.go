@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -145,16 +146,17 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name              string
-		withRequest       classPatchRequest
-		withExistingClass bool
-		wantResponse      classPatchResponse
-		wantNoChange      bool
-		wantStatusCode    int
-		wantErr           string
+		name               string
+		withRequest        classPatchRequest
+		withExistingClass  bool
+		withUpdateConflict bool
+		wantResponse       classPatchResponse
+		wantNoChange       bool
+		wantStatusCode     int
+		wantErr            string
 	}{
 		{
-			"request with all fields set",
+			"request with field changes",
 			classPatchRequest{
 				classPatchClassRequestFields{
 					ptr("CZ9999"),
@@ -165,6 +167,7 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 				},
 			},
 			true,
+			false,
 			classPatchResponse{
 				newSuccessResponse(),
 				database.UpdateClassRow{
@@ -180,11 +183,12 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			"",
 		},
 		{
-			"request with optional fields not set",
+			"request with no field changes",
 			classPatchRequest{
 				classPatchClassRequestFields{},
 			},
 			true,
+			false,
 			classPatchResponse{
 				newSuccessResponse(),
 				database.UpdateClassRow{
@@ -203,14 +207,29 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 				classPatchClassRequestFields{},
 			},
 			false,
-			classPatchResponse{
-				Class: database.UpdateClassRow{
-					ID: 6666,
-				},
-			},
+			false,
+			classPatchResponse{},
 			false,
 			http.StatusNotFound,
 			"class to update does not exist",
+		},
+		{
+			"request with update conflict",
+			classPatchRequest{
+				classPatchClassRequestFields{
+					Code:      ptr("EXISTING2023"),
+					Year:      ptr(int32(2023)),
+					Semester:  ptr("1"),
+					Programme: ptr("CSC Full-time"),
+					Au:        ptr(int16(2)),
+				},
+			},
+			true,
+			true,
+			classPatchResponse{},
+			false,
+			http.StatusConflict,
+			"class with same code, year, and semester already exists",
 		},
 	}
 
@@ -226,21 +245,43 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			if tt.withExistingClass {
+			var classId int64
+			switch {
+			case tt.withUpdateConflict:
+				// Create the class to update.
+				updateClass := tests.StubClass(
+					t, ctx, v1.db.Q,
+					uuid.NewString(),
+					2222,
+					uuid.NewString(),
+				)
+				classId = updateClass.ID
+
+				// Also create the class to conflict with.
+				_ = tests.StubClass(
+					t, ctx, v1.db.Q,
+					*tt.withRequest.Class.Code,
+					*tt.withRequest.Class.Year,
+					*tt.withRequest.Class.Semester,
+				)
+			case tt.withExistingClass:
 				createdClass := tests.StubClass(
 					t, ctx, v1.db.Q,
 					tt.wantResponse.Class.Code,
 					tt.wantResponse.Class.Year,
 					tt.wantResponse.Class.Semester,
 				)
+
+				classId = createdClass.ID
 				tt.wantResponse.Class.ID = createdClass.ID
 				tt.wantResponse.Class.UpdatedAt = createdClass.CreatedAt
+			default:
+				classId = rand.Int63()
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
 			a.Nil(err)
 
-			classId := tt.wantResponse.Class.ID
 			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classUrl, classId), bytes.NewReader(reqBodyBytes))
 			resp := v1.classPatch(req, classId)
 			a.Equal(tt.wantStatusCode, resp.Code())
@@ -273,15 +314,17 @@ func TestAPIServerV1_classDelete(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name              string
-		withExistingClass bool
-		wantResponse      classDeleteResponse
-		wantStatusCode    int
-		wantErr           string
+		name                     string
+		withExistingClass        bool
+		withForeignKeyDependency bool
+		wantResponse             classDeleteResponse
+		wantStatusCode           int
+		wantErr                  string
 	}{
 		{
 			"request with existing class",
 			true,
+			false,
 			classDeleteResponse{newSuccessResponse()},
 			http.StatusOK,
 			"",
@@ -289,9 +332,18 @@ func TestAPIServerV1_classDelete(t *testing.T) {
 		{
 			"request with non-existent class",
 			false,
+			false,
 			classDeleteResponse{},
 			http.StatusNotFound,
 			"class to delete does not exist",
+		},
+		{
+			"request with class foreign key constraint",
+			true,
+			true,
+			classDeleteResponse{},
+			http.StatusConflict,
+			"class to delete is still referenced",
 		},
 	}
 
@@ -307,10 +359,16 @@ func TestAPIServerV1_classDelete(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			var classId int64 = 6666 // Choose a random ID that does not exist.
-			if tt.withExistingClass {
+			var classId int64
+			switch {
+			case tt.withForeignKeyDependency:
+				createdClassGroup := tests.StubClassGroup(t, ctx, v1.db.Q, uuid.NewString(), database.ClassTypeLAB)
+				classId = createdClassGroup.ClassID
+			case tt.withExistingClass:
 				createdClass := tests.StubClass(t, ctx, v1.db.Q, "RANDOM_CODE", 9999, "22")
 				classId = createdClass.ID
+			default:
+				classId = rand.Int63()
 			}
 
 			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classUrl, classId), nil)
