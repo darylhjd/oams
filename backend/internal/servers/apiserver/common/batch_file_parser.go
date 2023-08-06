@@ -80,7 +80,7 @@ func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 		return creationData, fmt.Errorf("%s - error while parsing class groups: %w", namespace, err)
 	}
 
-	return creationData, creationData.IsValid()
+	return creationData, nil
 }
 
 // parseClassMetaData is a helper function to parse a class' metadata from a file.

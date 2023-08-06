@@ -41,17 +41,6 @@ type batchPostRequest struct {
 	Batches []common.BatchData `json:"batches"`
 }
 
-// isValid does a validation of the request, and returns an error if it is not valid.
-func (r batchPostRequest) isValid() error {
-	for _, class := range r.Batches {
-		if err := class.IsValid(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 type batchPostResponse struct {
 	response
 	Classes            int `json:"classes"`
@@ -180,10 +169,6 @@ type classGroupSessionsParamsWithStudents struct {
 
 // processBatchPostRequest and return a batchPostResponse and error if encountered.
 func (v *APIServerV1) processBatchPostRequest(ctx context.Context, req batchPostRequest) (apiResponse, error) {
-	if err := req.isValid(); err != nil {
-		return newErrorResponse(http.StatusBadRequest, err.Error()), nil
-	}
-
 	tx, err := v.db.C.Begin(ctx)
 	if err != nil {
 		return nil, err
