@@ -1,9 +1,7 @@
 package v1
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -13,6 +11,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
+	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/pkg/goroutines"
@@ -44,6 +43,8 @@ type batchPostResponse struct {
 	batchPutRequest
 }
 
+// batchPost processes a file and returns the corresponding PUT request that can be created
+// from it. It does not process (create, delete, etc...) any of the entities.
 func (v *APIServerV1) batchPost(r *http.Request) apiResponse {
 	if !strings.HasPrefix(r.Header.Get("Content-Type"), "multipart") {
 		return newErrorResponse(http.StatusUnsupportedMediaType, "a multipart request body is required")
@@ -51,10 +52,12 @@ func (v *APIServerV1) batchPost(r *http.Request) apiResponse {
 
 	req, err := v.fromBatchFiles(r)
 	if err != nil {
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not process batch file")
 	}
 
 	return batchPostResponse{
-		newSuccessResponse(),
+		response{true, http.StatusAccepted},
 		req,
 	}
 }
@@ -135,48 +138,20 @@ type batchPutResponse struct {
 	SessionEnrollments int `json:"session_enrollments"`
 }
 
-// batchPut is the handler for a request to create a batch of entities.
+// batchPut is the handler that does the actual processing of the entities.
 func (v *APIServerV1) batchPut(r *http.Request) apiResponse {
-	var (
-		req  batchPutRequest
-		resp apiResponse
-		err  error
-	)
-
-	switch contentType := r.Header.Get("Content-Type"); {
-	case strings.HasPrefix(contentType, "multipart"):
-		req, err = v.fromBatchFiles(r)
-	case contentType == "application/json":
-		req, err = v.fromBatchJSON(r)
-	default:
-		return newErrorResponse(http.StatusUnsupportedMediaType, fmt.Sprintf("%s is unsupported", contentType))
+	var req batchPutRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	if err == nil {
-		resp, err = v.processBatchPutRequest(r.Context(), req)
-	}
-
+	resp, err := v.processBatchPutRequest(r.Context(), req)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 
 	return resp
-}
-
-// fromBatchJSON creates a request struct from JSON body.
-func (v *APIServerV1) fromBatchJSON(r *http.Request) (batchPutRequest, error) {
-	var (
-		req batchPutRequest
-		b   bytes.Buffer
-	)
-
-	if _, err := b.ReadFrom(r.Body); err != nil {
-		return req, err
-	}
-
-	err := json.Unmarshal(b.Bytes(), &req)
-	return req, err
 }
 
 type classGroupsParamsWithClassGroup struct {
@@ -312,4 +287,41 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 
 	resp.SessionEnrollments = len(sessionEnrollments)
 	return resp, tx.Commit(ctx)
+}
+
+// upsertUsers inserts the provided usersParams into the specified database. If tx is nil, a new transaction is started.
+// Otherwise, a nested transaction (using save points) is used.
+func upsertUsers(ctx context.Context, db *database.DB, tx pgx.Tx, usersParams []database.UpsertUsersParams) ([]database.User, error) {
+	var err error
+
+	if tx != nil {
+		tx, err = tx.Begin(ctx)
+	} else {
+		tx, err = db.C.Begin(ctx)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
+	q := db.Q.WithTx(tx)
+
+	if err = q.UpsertUsers(ctx, usersParams).Close(); err != nil {
+		return nil, err
+	}
+
+	ids := make([]string, 0, len(usersParams))
+	for _, param := range usersParams {
+		ids = append(ids, param.ID)
+	}
+
+	users, err := q.GetUsersByIDs(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, tx.Commit(ctx)
 }

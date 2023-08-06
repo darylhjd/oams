@@ -35,7 +35,7 @@ func TestAPIServerV1_batch(t *testing.T) {
 		{
 			"with PUT method",
 			http.MethodPut,
-			http.StatusUnsupportedMediaType,
+			http.StatusBadRequest,
 		},
 		{
 			"with GET method",
@@ -74,16 +74,18 @@ func TestAPIServerV1_batch(t *testing.T) {
 	}
 }
 
-func TestAPIServerV1_batchPut(t *testing.T) {
+func TestAPIServerV1_batchPost(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name         string
-		body         func() (io.Reader, string, error)
-		wantResponse batchPutResponse
+		name           string
+		body           func() (io.Reader, string, error)
+		wantResponse   batchPostResponse
+		wantStatusCode int
+		wantErr        string
 	}{
 		{
-			"with file upload",
+			"request with file upload",
 			func() (io.Reader, string, error) {
 				file := "../common/batch_file_well_formatted.xlsx"
 
@@ -111,15 +113,51 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 
 				return &b, w.FormDataContentType(), w.Close()
 			},
-			batchPutResponse{
-				newSuccessResponse(),
-				1,
-				3,
-				4,
-				58,
-				94,
-			},
+			batchPostResponse{},
+			http.StatusAccepted,
+			"",
 		},
+		{
+			"request with non-file content-type",
+			func() (io.Reader, string, error) {
+				return nil, "application/json", nil
+			},
+			batchPostResponse{},
+			http.StatusUnsupportedMediaType,
+			"a multipart request body is required",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			body, contentType, err := tt.body()
+			a.Nil(err)
+
+			req := httptest.NewRequest(http.MethodPost, batchUrl, body)
+			req.Header.Set("Content-Type", contentType)
+			resp := v1.batchPost(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
+		})
+	}
+}
+
+func TestAPIServerV1_batchPut(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name         string
+		body         func() (io.Reader, string, error)
+		wantResponse batchPutResponse
+	}{
 		{
 			name: "with json body",
 			body: func() (io.Reader, string, error) {

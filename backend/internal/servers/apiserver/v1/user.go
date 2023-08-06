@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -160,41 +159,4 @@ func (v *APIServerV1) userDelete(r *http.Request, id string) apiResponse {
 	}
 
 	return userDeleteResponse{newSuccessResponse()}
-}
-
-// upsertUsers inserts the provided usersParams into the specified database. If tx is nil, a new transaction is started.
-// Otherwise, a nested transaction (using save points) is used.
-func upsertUsers(ctx context.Context, db *database.DB, tx pgx.Tx, usersParams []database.UpsertUsersParams) ([]database.User, error) {
-	var err error
-
-	if tx != nil {
-		tx, err = tx.Begin(ctx)
-	} else {
-		tx, err = db.C.Begin(ctx)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = tx.Rollback(ctx)
-	}()
-
-	q := db.Q.WithTx(tx)
-
-	if err = q.UpsertUsers(ctx, usersParams).Close(); err != nil {
-		return nil, err
-	}
-
-	ids := make([]string, 0, len(usersParams))
-	for _, param := range usersParams {
-		ids = append(ids, param.ID)
-	}
-
-	users, err := q.GetUsersByIDs(ctx, ids)
-	if err != nil {
-		return nil, err
-	}
-
-	return users, tx.Commit(ctx)
 }
