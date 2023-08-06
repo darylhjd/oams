@@ -1,8 +1,6 @@
 package common
 
 import (
-	"errors"
-	"fmt"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -32,23 +30,4 @@ type ClassGroupData struct {
 type SessionData struct {
 	Course *BatchData `json:"-"`
 	database.UpsertClassGroupSessionsParams
-}
-
-// IsValid is a helper function to check if a BatchData is valid and returns an error if it is not.
-func (c *BatchData) IsValid() error {
-	if len(c.ClassGroups) == 0 {
-		return errors.New("creation data has no valid class groups")
-	}
-
-	for _, classGroup := range c.ClassGroups {
-		if len(classGroup.Sessions) == 0 {
-			return fmt.Errorf("class group %s has no sessions", classGroup.Name)
-		}
-
-		if len(classGroup.Students) == 0 {
-			return fmt.Errorf("class group %s has no enrollments", classGroup.Name)
-		}
-	}
-
-	return nil
 }

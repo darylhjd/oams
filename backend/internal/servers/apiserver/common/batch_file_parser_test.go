@@ -105,18 +105,6 @@ func TestParseBatchFile(t *testing.T) {
 			nil,
 		},
 		{
-			"class group with no enrollment",
-			"batch_file_class_group_no_enrollment.xlsx",
-			"class group A21 has no enrollments",
-			nil,
-		},
-		{
-			"course with no class groups",
-			"batch_file_no_class_groups.xlsx",
-			"creation data has no valid class groups",
-			nil,
-		},
-		{
 			"invalid format for class group name",
 			"batch_file_invalid_class_group_name.xlsx",
 			"could not parse class group",

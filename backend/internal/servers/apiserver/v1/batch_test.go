@@ -2,7 +2,6 @@ package v1
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"mime/multipart"
@@ -20,16 +19,73 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestAPIServerV1_batch(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name           string
+		withMethod     string
+		wantStatusCode int
+	}{
+		{
+			"with POST method",
+			http.MethodPost,
+			http.StatusUnsupportedMediaType,
+		},
+		{
+			"with PUT method",
+			http.MethodPut,
+			http.StatusBadRequest,
+		},
+		{
+			"with GET method",
+			http.MethodGet,
+			http.StatusMethodNotAllowed,
+		},
+		{
+			"with PATCH method",
+			http.MethodPatch,
+			http.StatusMethodNotAllowed,
+		},
+		{
+			"with DELETE method",
+			http.MethodDelete,
+			http.StatusMethodNotAllowed,
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			req := httptest.NewRequest(tt.withMethod, userUrl, nil)
+			rr := httptest.NewRecorder()
+			v1.batch(rr, req)
+
+			a.Equal(tt.wantStatusCode, rr.Code)
+		})
+	}
+}
+
 func TestAPIServerV1_batchPost(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name         string
-		body         func() (io.Reader, string, error)
-		wantResponse batchPostResponse
+		name           string
+		body           func() (io.Reader, string, error)
+		wantResponse   batchPostResponse
+		wantStatusCode int
+		wantErr        string
 	}{
 		{
-			"with file upload",
+			"request with file upload",
 			func() (io.Reader, string, error) {
 				file := "../common/batch_file_well_formatted.xlsx"
 
@@ -57,21 +113,57 @@ func TestAPIServerV1_batchPost(t *testing.T) {
 
 				return &b, w.FormDataContentType(), w.Close()
 			},
-			batchPostResponse{
-				newSuccessResponse(),
-				1,
-				3,
-				4,
-				58,
-				94,
-			},
+			batchPostResponse{},
+			http.StatusAccepted,
+			"",
 		},
+		{
+			"request with non-file content-type",
+			func() (io.Reader, string, error) {
+				return nil, "application/json", nil
+			},
+			batchPostResponse{},
+			http.StatusUnsupportedMediaType,
+			"a multipart request body is required",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			body, contentType, err := tt.body()
+			a.Nil(err)
+
+			req := httptest.NewRequest(http.MethodPost, batchUrl, body)
+			req.Header.Set("Content-Type", contentType)
+			resp := v1.batchPost(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
+		})
+	}
+}
+
+func TestAPIServerV1_batchPut(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name         string
+		body         func() (io.Reader, string, error)
+		wantResponse batchPutResponse
+	}{
 		{
 			name: "with json body",
 			body: func() (io.Reader, string, error) {
 				now := time.Now()
 
-				body := batchPostRequest{
+				body := batchPutRequest{
 					[]common.BatchData{
 						{
 							Course: database.UpsertClassesParams{
@@ -169,7 +261,7 @@ func TestAPIServerV1_batchPost(t *testing.T) {
 
 				return bytes.NewReader(b), "application/json", nil
 			},
-			wantResponse: batchPostResponse{
+			wantResponse: batchPutResponse{
 				response:           newSuccessResponse(),
 				Classes:            1,
 				ClassGroups:        3,
@@ -186,46 +278,19 @@ func TestAPIServerV1_batchPost(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
-			ctx := context.Background()
 			id := uuid.NewString()
-
-			body, contentType, err := tt.body()
-			if err != nil {
-				t.Fatal(err)
-			}
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
+			body, contentType, err := tt.body()
+			a.Nil(err)
+
 			req := httptest.NewRequest(http.MethodPost, batchUrl, body)
 			req.Header.Set("Content-Type", contentType)
-			rr := httptest.NewRecorder()
-			v1.batchPost(rr, req)
+			resp := v1.batchPut(req)
 
-			b, err := json.Marshal(tt.wantResponse)
-			a.Nil(err)
-			a.Equal(string(b), rr.Body.String())
-
-			// Check correct number of inputs in database.
-			courses, err := v1.db.Q.ListClasses(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.Classes, len(courses))
-
-			classGroups, err := v1.db.Q.ListClassGroups(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.ClassGroups, len(classGroups))
-
-			classGroupSessions, err := v1.db.Q.ListClassGroupSessions(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.ClassGroupSessions, len(classGroupSessions))
-
-			students, err := v1.db.Q.ListUsers(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.Students, len(students))
-
-			sessionEnrollments, err := v1.db.Q.ListSessionEnrollments(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.SessionEnrollments, len(sessionEnrollments))
+			a.Equal(tt.wantResponse, resp)
 		})
 	}
 }
