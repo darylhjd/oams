@@ -88,7 +88,7 @@ func (v *APIServerV1) processPostBody(r *http.Request) (apiResponse, error) {
 				return
 			}
 
-			saveRes.Store(&data, "")
+			saveRes.Store(&data, nil)
 		})
 	}
 
@@ -112,12 +112,10 @@ func (v *APIServerV1) processPostBody(r *http.Request) (apiResponse, error) {
 			err = t
 			return false
 		case string:
-			if t != "" {
-				isErrResponse = true
-				errResp = newErrorResponse(http.StatusBadRequest, t)
-				return false
-			}
-
+			isErrResponse = true
+			errResp = newErrorResponse(http.StatusBadRequest, t)
+			return false
+		case nil:
 			okResp.Batches = append(okResp.Batches, *data)
 			return true
 		default:
