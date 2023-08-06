@@ -72,19 +72,20 @@ func (v *APIServerV1) processPostBody(r *http.Request) (apiResponse, error) {
 			var data common.BatchData
 
 			file, err := header.Open()
-			defer func() {
-				_ = file.Close()
-			}()
 			if err != nil {
 				// Save value as error type. This is an internal error.
 				saveRes.Store(&data, err)
 				return
 			}
+			defer func() {
+				_ = file.Close()
+			}()
 
 			data, err = common.ParseBatchFile(header.Filename, file)
 			if err != nil {
 				// Save as string type. This is a request error.
 				saveRes.Store(&data, err.Error())
+				return
 			}
 
 			saveRes.Store(&data, "")
