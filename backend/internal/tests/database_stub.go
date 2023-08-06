@@ -134,8 +134,8 @@ func StubSessionEnrollment(t *testing.T, ctx context.Context, q *database.Querie
 	t.Helper()
 
 	session := StubClassGroupSession(t, ctx, q,
-		pgtype.Timestamptz{Time: time.UnixMicro(1).Local(), Valid: true},
-		pgtype.Timestamptz{Time: time.UnixMicro(2).Local(), Valid: true},
+		pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+		pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 		"VENUE+66",
 	)
 
