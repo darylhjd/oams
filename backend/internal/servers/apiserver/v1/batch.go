@@ -24,6 +24,19 @@ const (
 	multipartFormFileIdent = "attachments"
 )
 
+func (v *APIServerV1) batch(w http.ResponseWriter, r *http.Request) {
+	var resp apiResponse
+
+	switch r.Method {
+	case http.MethodPost:
+		resp = v.batchPost(r)
+	default:
+		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
+	}
+
+	v.writeResponse(w, r, resp)
+}
+
 type batchPostRequest struct {
 	Batches []common.BatchData `json:"batches"`
 }
@@ -49,7 +62,7 @@ type batchPostResponse struct {
 }
 
 // batchPost is the handler for a request to create a batch of entities.
-func (v *APIServerV1) batchPost(w http.ResponseWriter, r *http.Request) {
+func (v *APIServerV1) batchPost(r *http.Request) apiResponse {
 	var (
 		req  batchPostRequest
 		resp apiResponse
@@ -62,9 +75,7 @@ func (v *APIServerV1) batchPost(w http.ResponseWriter, r *http.Request) {
 	case contentType == "application/json":
 		req, err = v.fromBatchJSON(r)
 	default:
-		resp = newErrorResponse(http.StatusUnsupportedMediaType, fmt.Sprintf("%s is unsupported", contentType))
-		v.writeResponse(w, r, resp)
-		return
+		return newErrorResponse(http.StatusUnsupportedMediaType, fmt.Sprintf("%s is unsupported", contentType))
 	}
 
 	if err == nil {
@@ -72,11 +83,11 @@ func (v *APIServerV1) batchPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		v.l.Error(fmt.Sprintf("%s - error while processing batch post request", namespace), zap.Error(err))
+		v.logInternalServerError(r, err)
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 
-	v.writeResponse(w, r, resp)
+	return resp
 }
 
 // fromBatchFiles creates a request struct from uploaded files.

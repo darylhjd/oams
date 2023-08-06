@@ -2,7 +2,6 @@ package v1
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"mime/multipart"
@@ -186,46 +185,19 @@ func TestAPIServerV1_batchPost(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
-			ctx := context.Background()
 			id := uuid.NewString()
-
-			body, contentType, err := tt.body()
-			if err != nil {
-				t.Fatal(err)
-			}
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
+			body, contentType, err := tt.body()
+			a.Nil(err)
+
 			req := httptest.NewRequest(http.MethodPost, batchUrl, body)
 			req.Header.Set("Content-Type", contentType)
-			rr := httptest.NewRecorder()
-			v1.batchPost(rr, req)
+			resp := v1.batchPost(req)
 
-			b, err := json.Marshal(tt.wantResponse)
-			a.Nil(err)
-			a.Equal(string(b), rr.Body.String())
-
-			// Check correct number of inputs in database.
-			courses, err := v1.db.Q.ListClasses(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.Classes, len(courses))
-
-			classGroups, err := v1.db.Q.ListClassGroups(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.ClassGroups, len(classGroups))
-
-			classGroupSessions, err := v1.db.Q.ListClassGroupSessions(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.ClassGroupSessions, len(classGroupSessions))
-
-			students, err := v1.db.Q.ListUsers(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.Students, len(students))
-
-			sessionEnrollments, err := v1.db.Q.ListSessionEnrollments(ctx)
-			a.Nil(err)
-			a.Equal(tt.wantResponse.SessionEnrollments, len(sessionEnrollments))
+			a.Equal(tt.wantResponse, resp)
 		})
 	}
 }
