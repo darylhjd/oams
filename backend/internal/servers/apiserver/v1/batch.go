@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mime/multipart"
 	"net/http"
 	"strings"
 	"sync"
@@ -50,24 +49,18 @@ func (v *APIServerV1) batchPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusUnsupportedMediaType, "a multipart request body is required")
 	}
 
-	req, err := v.fromBatchFiles(r)
+	resp, err := v.processPostBody(r)
 	if err != nil {
 		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process batch file")
+		return newErrorResponse(http.StatusInternalServerError, "could not process batch file(s)")
 	}
 
-	return batchPostResponse{
-		response{true, http.StatusAccepted},
-		req,
-	}
+	return resp
 }
 
-// fromBatchFiles creates a request struct from uploaded files.
-func (v *APIServerV1) fromBatchFiles(r *http.Request) (batchPutRequest, error) {
-	var req batchPutRequest
-
+func (v *APIServerV1) processPostBody(r *http.Request) (apiResponse, error) {
 	if err := r.ParseMultipartForm(maxParseMemory); err != nil {
-		return req, err
+		return batchPostResponse{}, err
 	}
 
 	limiter := goroutines.NewLimiter(maxGoRoutines)
@@ -76,53 +69,70 @@ func (v *APIServerV1) fromBatchFiles(r *http.Request) (batchPutRequest, error) {
 	for _, header := range r.MultipartForm.File[multipartFormFileIdent] {
 		header := header // Required for go routine to point to different file for each loop.
 		limiter.Do(func() {
-			creationData, err := v.fromBatchFile(header)
-			saveRes.Store(&creationData, err)
+			var data common.BatchData
+
+			file, err := header.Open()
+			if err != nil {
+				// Save value as error type. This is an internal error.
+				saveRes.Store(&data, err)
+				return
+			}
+			defer func() {
+				_ = file.Close()
+			}()
+
+			data, err = common.ParseBatchFile(header.Filename, file)
+			if err != nil {
+				// Save as string type. This is a request error.
+				saveRes.Store(&data, err.Error())
+				return
+			}
+
+			saveRes.Store(&data, nil)
 		})
 	}
 
 	limiter.Wait()
 
-	var err error
+	var (
+		errResp       errorResponse
+		okResp        batchPostResponse
+		isErrResponse bool
+		err           error
+	)
 	saveRes.Range(func(key, value any) bool {
 		data, ok := key.(*common.BatchData)
 		if !ok {
-			err = errors.New("type assertion failed when processing class creation data")
+			err = errors.New("type assertion failed when processing batch data")
 			return false
 		}
 
-		if value != nil {
-			err = value.(error)
+		switch t := value.(type) {
+		case error:
+			err = t
+			return false
+		case string:
+			isErrResponse = true
+			errResp = newErrorResponse(http.StatusBadRequest, t)
+			return false
+		case nil:
+			okResp.Batches = append(okResp.Batches, *data)
+			return true
+		default:
+			err = errors.New("type assertion failed when processing batch result")
 			return false
 		}
-
-		req.Batches = append(req.Batches, *data)
-		return true
 	})
 
-	return req, err
-}
-
-// fromBatchFile processes a file to create new class creation data.
-func (v *APIServerV1) fromBatchFile(fileHeader *multipart.FileHeader) (common.BatchData, error) {
-	var data common.BatchData
-
-	file, err := fileHeader.Open()
-	if err != nil {
-		return data, err
+	switch {
+	case err != nil:
+		return batchPostResponse{}, err
+	case isErrResponse:
+		return errResp, nil
+	default:
+		okResp.response = response{true, http.StatusAccepted}
+		return okResp, nil
 	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	v.l.Debug(fmt.Sprintf("%s - processing class creation file", namespace), zap.String("filename", fileHeader.Filename))
-
-	data, err = common.ParseBatchFile(fileHeader.Filename, file)
-	if err != nil {
-		return data, err
-	}
-
-	return data, nil
 }
 
 type batchPutRequest struct {
@@ -148,7 +158,7 @@ func (v *APIServerV1) batchPut(r *http.Request) apiResponse {
 	resp, err := v.processBatchPutRequest(r.Context(), req)
 	if err != nil {
 		v.logInternalServerError(r, err)
-		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
+		return newErrorResponse(http.StatusInternalServerError, err.Error())
 	}
 
 	return resp
@@ -165,28 +175,27 @@ type classGroupSessionsParamsWithStudents struct {
 }
 
 // processBatchPutRequest and return a batchPutResponse and error if encountered.
-func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRequest) (apiResponse, error) {
-	tx, err := v.db.C.Begin(ctx)
-	if err != nil {
-		return nil, err
+func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRequest) (batchPutResponse, error) {
+	resp := batchPutResponse{
+		response: newSuccessResponse(),
 	}
-
-	q := v.db.Q.WithTx(tx)
 
 	var (
 		dbErr         error
 		coursesParams []database.UpsertClassesParams
 	)
-	resp := batchPutResponse{
-		response: newSuccessResponse(),
+	tx, err := v.db.C.Begin(ctx)
+	if err != nil {
+		return resp, err
 	}
-
 	defer func() {
 		_ = tx.Rollback(ctx)
 		if dbErr != nil {
 			v.l.Debug(fmt.Sprintf("%s - error while doing classes create action", namespace), zap.Error(dbErr))
 		}
 	}()
+
+	q := v.db.Q.WithTx(tx)
 
 	for _, class := range req.Batches {
 		coursesParams = append(coursesParams, class.Course)
@@ -218,7 +227,7 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 		}
 	})
 	if dbErr != nil {
-		return nil, dbErr
+		return resp, dbErr
 	}
 
 	var classGroupSessionsHelper classGroupSessionsParamsWithStudents
@@ -239,7 +248,7 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 		}
 	})
 	if dbErr != nil {
-		return nil, dbErr
+		return resp, dbErr
 	}
 
 	var (
@@ -259,30 +268,29 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 		for idx := range classGroupSessionsHelper.students[i] {
 			studentsParams = append(studentsParams, classGroupSessionsHelper.students[i][idx])
 			enrollmentsParams = append(enrollmentsParams, database.CreateSessionEnrollmentsParams{
-				session.ID,
-				classGroupSessionsHelper.students[i][idx].ID,
-				false,
+				SessionID: session.ID,
+				UserID:    classGroupSessionsHelper.students[i][idx].ID,
 			})
 		}
 	})
 	if dbErr != nil {
-		return nil, dbErr
+		return resp, dbErr
 	}
 
 	students, dbErr := upsertUsers(ctx, v.db, tx, studentsParams)
 	if dbErr != nil {
-		return nil, dbErr
+		return resp, dbErr
 	}
 
 	resp.Students = len(students)
 
 	if dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close(); dbErr != nil {
-		return nil, dbErr
+		return resp, dbErr
 	}
 
 	sessionEnrollments, dbErr := q.ListSessionEnrollments(ctx)
 	if dbErr != nil {
-		return nil, dbErr
+		return resp, dbErr
 	}
 
 	resp.SessionEnrollments = len(sessionEnrollments)
