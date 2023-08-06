@@ -59,8 +59,8 @@ type classGroupSessionsPostClassGroupSessionRequestFields struct {
 func (r classGroupSessionsPostRequest) createClassGroupSessionParams() database.CreateClassGroupSessionParams {
 	return database.CreateClassGroupSessionParams{
 		ClassGroupID: r.ClassGroupSession.ClassGroupID,
-		StartTime:    pgtype.Timestamp{Time: time.UnixMicro(r.ClassGroupSession.StartTime).UTC(), Valid: true},
-		EndTime:      pgtype.Timestamp{Time: time.UnixMicro(r.ClassGroupSession.EndTime).UTC(), Valid: true},
+		StartTime:    pgtype.Timestamptz{Time: time.UnixMicro(r.ClassGroupSession.StartTime), Valid: true},
+		EndTime:      pgtype.Timestamptz{Time: time.UnixMicro(r.ClassGroupSession.EndTime), Valid: true},
 		Venue:        r.ClassGroupSession.Venue,
 	}
 }

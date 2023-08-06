@@ -182,11 +182,11 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 									[]common.SessionData{
 										{
 											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamp{
+												StartTime: pgtype.Timestamptz{
 													Time:  now,
 													Valid: true,
 												},
-												EndTime: pgtype.Timestamp{
+												EndTime: pgtype.Timestamptz{
 													Time:  now.Add(2 * time.Hour),
 													Valid: true,
 												},
@@ -207,11 +207,11 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 									[]common.SessionData{
 										{
 											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamp{
+												StartTime: pgtype.Timestamptz{
 													Time:  now,
 													Valid: true,
 												},
-												EndTime: pgtype.Timestamp{
+												EndTime: pgtype.Timestamptz{
 													Time:  now.Add(2 * time.Hour),
 													Valid: true,
 												},
@@ -232,11 +232,11 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 									[]common.SessionData{
 										{
 											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamp{
+												StartTime: pgtype.Timestamptz{
 													Time:  now,
 													Valid: true,
 												},
-												EndTime: pgtype.Timestamp{
+												EndTime: pgtype.Timestamptz{
 													Time:  now.Add(2 * time.Hour),
 													Valid: true,
 												},

@@ -102,10 +102,10 @@ type UpsertClassGroupSessionsBatchResults struct {
 }
 
 type UpsertClassGroupSessionsParams struct {
-	ClassGroupID int64            `json:"class_group_id"`
-	StartTime    pgtype.Timestamp `json:"start_time"`
-	EndTime      pgtype.Timestamp `json:"end_time"`
-	Venue        string           `json:"venue"`
+	ClassGroupID int64              `json:"class_group_id"`
+	StartTime    pgtype.Timestamptz `json:"start_time"`
+	EndTime      pgtype.Timestamptz `json:"end_time"`
+	Venue        string             `json:"venue"`
 }
 
 // Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.

@@ -25,11 +25,11 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	ID        string           `json:"id"`
-	Name      string           `json:"name"`
-	Email     string           `json:"email"`
-	Role      UserRole         `json:"role"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID        string             `json:"id"`
+	Name      string             `json:"name"`
+	Email     string             `json:"email"`
+	Role      UserRole           `json:"role"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -184,11 +184,11 @@ type UpdateUserParams struct {
 }
 
 type UpdateUserRow struct {
-	ID        string           `json:"id"`
-	Name      string           `json:"name"`
-	Email     string           `json:"email"`
-	Role      UserRole         `json:"role"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        string             `json:"id"`
+	Name      string             `json:"name"`
+	Email     string             `json:"email"`
+	Role      UserRole           `json:"role"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {

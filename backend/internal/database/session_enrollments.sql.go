@@ -24,11 +24,11 @@ type CreateSessionEnrollmentParams struct {
 }
 
 type CreateSessionEnrollmentRow struct {
-	ID        int64            `json:"id"`
-	SessionID int64            `json:"session_id"`
-	UserID    string           `json:"user_id"`
-	Attended  bool             `json:"attended"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID        int64              `json:"id"`
+	SessionID int64              `json:"session_id"`
+	UserID    string             `json:"user_id"`
+	Attended  bool               `json:"attended"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateSessionEnrollment(ctx context.Context, arg CreateSessionEnrollmentParams) (CreateSessionEnrollmentRow, error) {
@@ -203,11 +203,11 @@ type UpdateSessionEnrollmentParams struct {
 }
 
 type UpdateSessionEnrollmentRow struct {
-	ID        int64            `json:"id"`
-	SessionID int64            `json:"session_id"`
-	UserID    string           `json:"user_id"`
-	Attended  bool             `json:"attended"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        int64              `json:"id"`
+	SessionID int64              `json:"session_id"`
+	UserID    string             `json:"user_id"`
+	Attended  bool               `json:"attended"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 func (q *Queries) UpdateSessionEnrollment(ctx context.Context, arg UpdateSessionEnrollmentParams) (UpdateSessionEnrollmentRow, error) {

@@ -24,11 +24,11 @@ type CreateClassGroupParams struct {
 }
 
 type CreateClassGroupRow struct {
-	ID        int64            `json:"id"`
-	ClassID   int64            `json:"class_id"`
-	Name      string           `json:"name"`
-	ClassType ClassType        `json:"class_type"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID        int64              `json:"id"`
+	ClassID   int64              `json:"class_id"`
+	Name      string             `json:"name"`
+	ClassType ClassType          `json:"class_type"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateClassGroup(ctx context.Context, arg CreateClassGroupParams) (CreateClassGroupRow, error) {
@@ -177,11 +177,11 @@ type UpdateClassGroupParams struct {
 }
 
 type UpdateClassGroupRow struct {
-	ID        int64            `json:"id"`
-	ClassID   int64            `json:"class_id"`
-	Name      string           `json:"name"`
-	ClassType ClassType        `json:"class_type"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        int64              `json:"id"`
+	ClassID   int64              `json:"class_id"`
+	Name      string             `json:"name"`
+	ClassType ClassType          `json:"class_type"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 func (q *Queries) UpdateClassGroup(ctx context.Context, arg UpdateClassGroupParams) (UpdateClassGroupRow, error) {

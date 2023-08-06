@@ -26,13 +26,13 @@ type CreateClassParams struct {
 }
 
 type CreateClassRow struct {
-	ID        int64            `json:"id"`
-	Code      string           `json:"code"`
-	Year      int32            `json:"year"`
-	Semester  string           `json:"semester"`
-	Programme string           `json:"programme"`
-	Au        int16            `json:"au"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID        int64              `json:"id"`
+	Code      string             `json:"code"`
+	Year      int32              `json:"year"`
+	Semester  string             `json:"semester"`
+	Programme string             `json:"programme"`
+	Au        int16              `json:"au"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (CreateClassRow, error) {
@@ -204,13 +204,13 @@ type UpdateClassParams struct {
 }
 
 type UpdateClassRow struct {
-	ID        int64            `json:"id"`
-	Code      string           `json:"code"`
-	Year      int32            `json:"year"`
-	Semester  string           `json:"semester"`
-	Programme string           `json:"programme"`
-	Au        int16            `json:"au"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        int64              `json:"id"`
+	Code      string             `json:"code"`
+	Year      int32              `json:"year"`
+	Semester  string             `json:"semester"`
+	Programme string             `json:"programme"`
+	Au        int16              `json:"au"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 func (q *Queries) UpdateClass(ctx context.Context, arg UpdateClassParams) (UpdateClassRow, error) {

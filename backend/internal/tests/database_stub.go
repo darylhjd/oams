@@ -94,7 +94,7 @@ func StubClassGroupWithClassID(t *testing.T, ctx context.Context, q *database.Qu
 }
 
 // StubClassGroupSession inserts a mock class, class group and corresponding class group session into the database.
-func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Queries, startTime, endTime pgtype.Timestamp, venue string) database.CreateClassGroupSessionRow {
+func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Queries, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
 	t.Helper()
 
 	classGroup := StubClassGroup(t, ctx, q, uuid.NewString(), database.ClassTypeLEC)
@@ -113,7 +113,7 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Querie
 }
 
 // StubClassGroupSessionWithClassGroupID creates a mock class group session using an existing class group ID.
-func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q *database.Queries, classGroupId int64, startTime, endTime pgtype.Timestamp, venue string) database.CreateClassGroupSessionRow {
+func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q *database.Queries, classGroupId int64, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
 	t.Helper()
 
 	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
@@ -134,8 +134,8 @@ func StubSessionEnrollment(t *testing.T, ctx context.Context, q *database.Querie
 	t.Helper()
 
 	session := StubClassGroupSession(t, ctx, q,
-		pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-		pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+		pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+		pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 		"VENUE+66",
 	)
 
