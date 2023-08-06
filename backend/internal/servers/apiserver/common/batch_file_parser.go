@@ -14,10 +14,6 @@ import (
 )
 
 const (
-	namespace = "apiserver/common"
-)
-
-const (
 	timezoneLocation    = "Asia/Singapore"
 	yearSemesterDateRow = 0
 	courseProgrammeRow  = 1
@@ -53,7 +49,7 @@ const (
 func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 	file, err := excelize.OpenReader(f)
 	if err != nil {
-		return BatchData{}, fmt.Errorf("%s - cannot open request file: %w", namespace, err)
+		return BatchData{}, fmt.Errorf("cannot open file: %w", err)
 	}
 	defer func() {
 		_ = file.Close()
@@ -64,20 +60,20 @@ func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 
 	sheets := file.GetSheetList()
 	if len(sheets) != expectedSheetCount {
-		return creationData, fmt.Errorf("%s - invalid class creation file format", namespace)
+		return creationData, errors.New("invalid class creation file format")
 	}
 
 	rows, err := file.GetRows(sheets[expectedSheetCount-1])
 	if err != nil {
-		return creationData, fmt.Errorf("%s - cannot get data rows", namespace)
+		return creationData, errors.New("cannot get data rows")
 	}
 
 	if err = parseClassMetaData(&creationData, rows); err != nil {
-		return creationData, fmt.Errorf("%s - error while parsing class metadata: %w", namespace, err)
+		return creationData, fmt.Errorf("error while parsing class metadata: %w", err)
 	}
 
 	if err = parseClassGroups(&creationData, rows); err != nil {
-		return creationData, fmt.Errorf("%s - error while parsing class groups: %w", namespace, err)
+		return creationData, fmt.Errorf("error while parsing class groups: %w", err)
 	}
 
 	return creationData, nil
