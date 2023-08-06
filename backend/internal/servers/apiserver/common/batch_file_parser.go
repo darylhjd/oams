@@ -173,7 +173,7 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 				return fmt.Errorf("could not parse class group session start time: %w", err)
 			}
 
-			session.StartTime = pgtype.Timestamp{
+			session.StartTime = pgtype.Timestamptz{
 				Time:  startTime,
 				Valid: true,
 			}
@@ -183,7 +183,7 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 				return fmt.Errorf("could not parse class group session end time: %w", err)
 			}
 
-			session.EndTime = pgtype.Timestamp{
+			session.EndTime = pgtype.Timestamptz{
 				Time:  endTime,
 				Valid: true,
 			}

@@ -98,49 +98,49 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 }
 
 type Class struct {
-	ID        int64            `json:"id"`
-	Code      string           `json:"code"`
-	Year      int32            `json:"year"`
-	Semester  string           `json:"semester"`
-	Programme string           `json:"programme"`
-	Au        int16            `json:"au"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        int64              `json:"id"`
+	Code      string             `json:"code"`
+	Year      int32              `json:"year"`
+	Semester  string             `json:"semester"`
+	Programme string             `json:"programme"`
+	Au        int16              `json:"au"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type ClassGroup struct {
-	ID        int64            `json:"id"`
-	ClassID   int64            `json:"class_id"`
-	Name      string           `json:"name"`
-	ClassType ClassType        `json:"class_type"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        int64              `json:"id"`
+	ClassID   int64              `json:"class_id"`
+	Name      string             `json:"name"`
+	ClassType ClassType          `json:"class_type"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type ClassGroupSession struct {
-	ID           int64            `json:"id"`
-	ClassGroupID int64            `json:"class_group_id"`
-	StartTime    pgtype.Timestamp `json:"start_time"`
-	EndTime      pgtype.Timestamp `json:"end_time"`
-	Venue        string           `json:"venue"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
-	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
+	ID           int64              `json:"id"`
+	ClassGroupID int64              `json:"class_group_id"`
+	StartTime    pgtype.Timestamptz `json:"start_time"`
+	EndTime      pgtype.Timestamptz `json:"end_time"`
+	Venue        string             `json:"venue"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
 
 type SessionEnrollment struct {
-	ID        int64            `json:"id"`
-	SessionID int64            `json:"session_id"`
-	UserID    string           `json:"user_id"`
-	Attended  bool             `json:"attended"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        int64              `json:"id"`
+	SessionID int64              `json:"session_id"`
+	UserID    string             `json:"user_id"`
+	Attended  bool               `json:"attended"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type User struct {
-	ID        string           `json:"id"`
-	Name      string           `json:"name"`
-	Email     string           `json:"email"`
-	Role      UserRole         `json:"role"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        string             `json:"id"`
+	Name      string             `json:"name"`
+	Email     string             `json:"email"`
+	Role      UserRole           `json:"role"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }

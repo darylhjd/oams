@@ -18,19 +18,19 @@ RETURNING id, class_group_id, start_time, end_time, venue, created_at
 `
 
 type CreateClassGroupSessionParams struct {
-	ClassGroupID int64            `json:"class_group_id"`
-	StartTime    pgtype.Timestamp `json:"start_time"`
-	EndTime      pgtype.Timestamp `json:"end_time"`
-	Venue        string           `json:"venue"`
+	ClassGroupID int64              `json:"class_group_id"`
+	StartTime    pgtype.Timestamptz `json:"start_time"`
+	EndTime      pgtype.Timestamptz `json:"end_time"`
+	Venue        string             `json:"venue"`
 }
 
 type CreateClassGroupSessionRow struct {
-	ID           int64            `json:"id"`
-	ClassGroupID int64            `json:"class_group_id"`
-	StartTime    pgtype.Timestamp `json:"start_time"`
-	EndTime      pgtype.Timestamp `json:"end_time"`
-	Venue        string           `json:"venue"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
+	ID           int64              `json:"id"`
+	ClassGroupID int64              `json:"class_group_id"`
+	StartTime    pgtype.Timestamptz `json:"start_time"`
+	EndTime      pgtype.Timestamptz `json:"end_time"`
+	Venue        string             `json:"venue"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateClassGroupSession(ctx context.Context, arg CreateClassGroupSessionParams) (CreateClassGroupSessionRow, error) {
@@ -185,20 +185,20 @@ RETURNING id, class_group_id, start_time, end_time, venue, updated_at
 `
 
 type UpdateClassGroupSessionParams struct {
-	ID           int64            `json:"id"`
-	ClassGroupID pgtype.Int8      `json:"class_group_id"`
-	StartTime    pgtype.Timestamp `json:"start_time"`
-	EndTime      pgtype.Timestamp `json:"end_time"`
-	Venue        pgtype.Text      `json:"venue"`
+	ID           int64              `json:"id"`
+	ClassGroupID pgtype.Int8        `json:"class_group_id"`
+	StartTime    pgtype.Timestamptz `json:"start_time"`
+	EndTime      pgtype.Timestamptz `json:"end_time"`
+	Venue        pgtype.Text        `json:"venue"`
 }
 
 type UpdateClassGroupSessionRow struct {
-	ID           int64            `json:"id"`
-	ClassGroupID int64            `json:"class_group_id"`
-	StartTime    pgtype.Timestamp `json:"start_time"`
-	EndTime      pgtype.Timestamp `json:"end_time"`
-	Venue        string           `json:"venue"`
-	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
+	ID           int64              `json:"id"`
+	ClassGroupID int64              `json:"class_group_id"`
+	StartTime    pgtype.Timestamptz `json:"start_time"`
+	EndTime      pgtype.Timestamptz `json:"end_time"`
+	Venue        string             `json:"venue"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
 
 func (q *Queries) UpdateClassGroupSession(ctx context.Context, arg UpdateClassGroupSessionParams) (UpdateClassGroupSessionRow, error) {

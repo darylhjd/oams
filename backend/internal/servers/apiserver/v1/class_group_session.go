@@ -77,11 +77,11 @@ func (r classGroupSessionPatchRequest) updateClassGroupParams(classGroupSessionI
 	}
 
 	if r.ClassGroupSession.StartTime != nil {
-		params.StartTime = pgtype.Timestamp{Time: time.UnixMicro(*r.ClassGroupSession.StartTime).UTC(), Valid: true}
+		params.StartTime = pgtype.Timestamptz{Time: time.UnixMicro(*r.ClassGroupSession.StartTime), Valid: true}
 	}
 
 	if r.ClassGroupSession.EndTime != nil {
-		params.EndTime = pgtype.Timestamp{Time: time.UnixMicro(*r.ClassGroupSession.EndTime).UTC(), Valid: true}
+		params.EndTime = pgtype.Timestamptz{Time: time.UnixMicro(*r.ClassGroupSession.EndTime), Valid: true}
 	}
 
 	if r.ClassGroupSession.Venue != nil {

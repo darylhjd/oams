@@ -84,8 +84,8 @@ func TestAPIServerV1_classGroupSessionGet(t *testing.T) {
 			classGroupSessionGetResponse{
 				newSuccessResponse(),
 				database.ClassGroupSession{
-					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					StartTime: pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+					EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					Venue:     "EXISTING+46",
 				},
 			},
@@ -176,8 +176,8 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				newSuccessResponse(),
 				database.UpdateClassGroupSessionRow{
 					ClassGroupID: 1,
-					StartTime:    pgtype.Timestamp{Time: time.UnixMicro(99999999999).UTC(), Valid: true},
-					EndTime:      pgtype.Timestamp{Time: time.UnixMicro(9999999999999).UTC(), Valid: true},
+					StartTime:    pgtype.Timestamptz{Time: time.UnixMicro(99999999999), Valid: true},
+					EndTime:      pgtype.Timestamptz{Time: time.UnixMicro(9999999999999), Valid: true},
 					Venue:        "NEW_VENUE+99",
 				},
 			},
@@ -196,8 +196,8 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			classGroupSessionPatchResponse{
 				newSuccessResponse(),
 				database.UpdateClassGroupSessionRow{
-					StartTime: pgtype.Timestamp{Time: time.UnixMicro(99999999999).UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(9999999999999).UTC(), Valid: true},
+					StartTime: pgtype.Timestamptz{Time: time.UnixMicro(99999999999), Valid: true},
+					EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(9999999999999), Valid: true},
 					Venue:     "EXISTING_VENUE+99",
 				},
 			},
@@ -269,8 +269,8 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				// Create session to update.
 				updateClassGroupSession := tests.StubClassGroupSession(
 					t, ctx, v1.db.Q,
-					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					uuid.NewString(),
 				)
 				sessionId = updateClassGroupSession.ID
@@ -279,15 +279,15 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				_ = tests.StubClassGroupSessionWithClassGroupID(
 					t, ctx, v1.db.Q,
 					updateClassGroupSession.ClassGroupID,
-					pgtype.Timestamp{Time: time.UnixMicro(*tt.withRequest.ClassGroupSession.StartTime).UTC(), Valid: true},
-					pgtype.Timestamp{Time: time.UnixMicro(*tt.withRequest.ClassGroupSession.EndTime).UTC(), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(*tt.withRequest.ClassGroupSession.StartTime), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(*tt.withRequest.ClassGroupSession.EndTime), Valid: true},
 					uuid.NewString(),
 				)
 			case tt.withExistingClassGroupSession && !tt.withExistingUpdateClassGroup:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db.Q,
-					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					uuid.NewString(),
 				)
 
@@ -397,8 +397,8 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db.Q,
-					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					uuid.NewString(),
 				)
 				sessionId = createdSession.ID

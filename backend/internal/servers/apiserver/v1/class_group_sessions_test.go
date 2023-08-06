@@ -76,8 +76,8 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 				newSuccessResponse(),
 				[]database.ClassGroupSession{
 					{
-						StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-						EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+						StartTime: pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+						EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 						Venue:     "CLASS+22",
 					},
 				},
@@ -149,8 +149,8 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			classGroupSessionsPostResponse{
 				newSuccessResponse(),
 				database.CreateClassGroupSessionRow{
-					StartTime: pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					EndTime:   pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					StartTime: pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+					EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					Venue:     "NEW_CLASS+22",
 				},
 			},

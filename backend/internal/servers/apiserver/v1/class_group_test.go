@@ -375,8 +375,8 @@ func TestAPIServerV1_classGroupDelete(t *testing.T) {
 			case tt.withForeignKeyDependency:
 				createdClassGroupSession := tests.StubClassGroupSession(
 					t, ctx, v1.db.Q,
-					pgtype.Timestamp{Time: time.UnixMicro(1).UTC(), Valid: true},
-					pgtype.Timestamp{Time: time.UnixMicro(2).UTC(), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
+					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					uuid.NewString(),
 				)
 				groupId = createdClassGroupSession.ClassGroupID
