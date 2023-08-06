@@ -68,7 +68,7 @@ func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(logoutUrl, middleware.WithAuthContext(v.logout, v.azure))
 
 	v.mux.HandleFunc(batchUrl, middleware.WithAuthContext(
-		middleware.AllowMethods(v.batch, http.MethodPost),
+		middleware.AllowMethods(v.batch, http.MethodPut),
 		v.azure,
 	))
 
