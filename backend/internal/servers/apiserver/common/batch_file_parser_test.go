@@ -128,7 +128,7 @@ func TestParseBatchFile(t *testing.T) {
 			attributeTests := map[any]any{
 				tt.expectedData.Filename:         data.Filename,
 				tt.expectedData.FileCreationDate: data.FileCreationDate,
-				tt.expectedData.Course:           data.Course,
+				tt.expectedData.Class:            data.Class,
 				tt.expectedData.classType:        data.classType,
 			}
 

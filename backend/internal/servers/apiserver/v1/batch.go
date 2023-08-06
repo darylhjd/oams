@@ -198,7 +198,7 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 	q := v.db.Q.WithTx(tx)
 
 	for _, class := range req.Batches {
-		coursesParams = append(coursesParams, class.Course)
+		coursesParams = append(coursesParams, class.Class)
 	}
 
 	// Insert courses.

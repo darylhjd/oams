@@ -166,7 +166,7 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 				body := batchPutRequest{
 					[]common.BatchData{
 						{
-							Course: database.UpsertClassesParams{
+							Class: database.UpsertClassesParams{
 								Code:      "SC1015",
 								Year:      2022,
 								Semester:  "2",
