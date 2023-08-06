@@ -14,7 +14,6 @@ func TestWeekStart(t *testing.T) {
 		weekNumber   int
 		expectedDate string // Expected date in "2006-01-02" format
 	}{
-		// Test cases with expected dates
 		{"1st week of 2023", 2023, 1, "2023-01-02"},
 		{"2nd week of 2023", 2023, 2, "2023-01-09"},
 		{"3rd week of 2023", 2023, 3, "2023-01-16"},
