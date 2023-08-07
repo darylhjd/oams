@@ -15,65 +15,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 )
 
-const (
-	timezoneLocation    = "Asia/Singapore"
-	yearSemesterDateRow = 0
-	courseProgrammeRow  = 1
-	courseCodeRow       = 2
-	classTypeRow        = 3
-	studentNameColumn   = 1
-	studentIdColumn     = 5
-
-	expectedSheetCount                         = 1
-	expectedClassMetaDataRows                  = 4
-	expectedClassMetaDataRowLength             = 1
-	expectedClassGroupIDRows                   = 1
-	expectedClassGroupSessionRows              = 2
-	expectedClassGroupMetaDataRowLength        = 1
-	expectedClassGroupEnrollmentIdentRowLength = 3
-	expectedStudentEnrollmentRowLength         = 6
-)
-
-const (
-	yearSemesterDateFormat         = "Class Attendance List: %d, %s  Date: %s %s"
-	creationDateFormat             = "02-Jan-2006 15:04"
-	courseProgrammePrefix          = "Programme: "
-	courseCodeFormat               = "Course: %s %dAU"
-	classTypeFormat                = "Class Type: %s"
-	classGroupFormat               = "Class Group: %s"
-	classGroupSessionDayTimeFormat = "Day-Time: %s  %s To: %s Wk%s"
-	classGroupSessionTimeFormat    = "1504"
-	classGroupSessionVenuePrefix   = "Venue: "
-	classGroupEnrollmentListIdent  = "No."
-)
-
-const (
-	semester1 = "1"
-	semester2 = "2"
-
-	classGroupSessionWeekCommaSep             = ","
-	classGroupSessionWeekHyphenSep            = "-"
-	classGroupSessionWeekHyphenExpectedLength = 2
-
-	semester1YearWeek   = 33
-	semester2YearWeek   = 2
-	recessWeekAfterWeek = 7
-)
-
-var parseLocation *time.Location
-
-var weekdays = map[string]time.Weekday{}
-
-func init() {
-	parseLocation, _ = time.LoadLocation(timezoneLocation)
-
-	for d := time.Sunday; d <= time.Saturday; d++ {
-		name := d.String()
-		weekdays[name] = d
-		weekdays[name[:3]] = d
-	}
-}
-
 // ParseBatchFile parses a class creation file.
 func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 	file, err := excelize.OpenReader(f)
@@ -132,7 +73,7 @@ func parseClassMetaData(batchData *BatchData, rows [][]string) error {
 		return fmt.Errorf("could not parse class year and semester: %w", err)
 	}
 
-	date, err := time.ParseInLocation(creationDateFormat, fmt.Sprintf("%s %s", d, t), parseLocation)
+	date, err := time.ParseInLocation(creationDateFormat, fmt.Sprintf("%s %s", d, t), location)
 	if err != nil {
 		return fmt.Errorf("could not parse class creation file creation date: %w", err)
 	}
@@ -249,16 +190,13 @@ func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeks, v
 			return nil, errors.New("cannot guess semester start week due to unknown semester value")
 		}
 
-		day, ok := weekdays[dayOfWeek]
-		if !ok {
-			return nil, fmt.Errorf("invalid day of week %q", dayOfWeek)
+		day, err := datetime.ParseWeekday(dayOfWeek)
+		if err != nil {
+			return nil, err
 		}
 
-		firstSessionDate = datetime.WeekStart(year, week).
-			In(parseLocation).
+		firstSessionDate = datetime.WeekStart(year, week, location).
 			AddDate(0, 0, int(day)-1)
-		_, offset := firstSessionDate.Zone()
-		firstSessionDate = firstSessionDate.Add(-time.Duration(offset) * time.Second)
 	}
 
 	var startHour, startMinute, endHour, endMinute int
