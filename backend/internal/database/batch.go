@@ -264,7 +264,7 @@ type UpsertSessionEnrollmentsParams struct {
 	Attended  bool   `json:"attended"`
 }
 
-// Insert a session enrollment into the database. If the session already exists, do nothing.
+// Insert a session enrollment into the database. If the session enrollment already exists, do nothing.
 func (q *Queries) UpsertSessionEnrollments(ctx context.Context, arg []UpsertSessionEnrollmentsParams) *UpsertSessionEnrollmentsBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
