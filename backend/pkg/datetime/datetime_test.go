@@ -12,7 +12,7 @@ func TestWeekStart(t *testing.T) {
 		name         string
 		year         int
 		weekNumber   int
-		expectedDate string // Expected date in "2006-01-02" format
+		expectedDate string // Expected date in "2006-01-02" format.
 	}{
 		{"1st week of 2023", 2023, 1, "2023-01-02"},
 		{"2nd week of 2023", 2023, 2, "2023-01-09"},
@@ -33,9 +33,42 @@ func TestWeekStart(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
 
-			expectedDate, err := time.Parse("2006-01-02", tt.expectedDate)
+			expectedDate, err := time.ParseInLocation("2006-01-02", tt.expectedDate, time.Local)
 			a.Nil(err)
-			a.Equal(expectedDate, WeekStart(tt.year, tt.weekNumber))
+			a.Equal(expectedDate, WeekStart(tt.year, tt.weekNumber, time.Local))
+		})
+	}
+}
+
+func TestParseWeekday(t *testing.T) {
+	tts := []struct {
+		name        string
+		inputs      []string
+		wantWeekday time.Weekday
+		wantErr     bool
+	}{
+		{"Monday", []string{"Monday", "Mon"}, time.Monday, false},
+		{"Tuesday", []string{"Tuesday", "Tue"}, time.Tuesday, false},
+		{"Wednesday", []string{"Wednesday", "Wed"}, time.Wednesday, false},
+		{"Thursday", []string{"Thursday", "Thu"}, time.Thursday, false},
+		{"Friday", []string{"Friday", "Fri"}, time.Friday, false},
+		{"Saturday", []string{"Saturday", "Sat"}, time.Saturday, false},
+		{"Sunday", []string{"Sunday", "Sun"}, time.Sunday, false},
+		{"invalid", []string{"invalid", "ii", "january"}, time.Sunday, true},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
+			for _, input := range tt.inputs {
+				output, err := ParseWeekday(input)
+				if tt.wantErr {
+					a.Error(err)
+				} else {
+					a.Equal(tt.wantWeekday, output)
+				}
+			}
 		})
 	}
 }
