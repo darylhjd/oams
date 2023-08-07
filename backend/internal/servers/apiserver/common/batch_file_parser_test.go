@@ -5,17 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 )
 
 func TestParseBatchFile(t *testing.T) {
-	loc, err := time.LoadLocation(timezoneLocation)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	tests := []struct {
 		name         string
 		file         string
@@ -28,7 +24,7 @@ func TestParseBatchFile(t *testing.T) {
 			"",
 			&BatchData{
 				"batch_file_well_formatted.xlsx",
-				time.Date(2023, time.June, 15, 13, 1, 0, 0, loc),
+				time.Date(2023, time.June, 15, 13, 1, 0, 0, parseLocation),
 				database.UpsertClassesParams{
 					Code:      "SC1015",
 					Year:      2022,
@@ -42,7 +38,64 @@ func TestParseBatchFile(t *testing.T) {
 							Name:      "A21",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]SessionData{},
+						[]SessionData{
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 16, 8, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 16, 9, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+15 NORTH,NS4-05-93",
+								},
+							},
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.April, 10, 8, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.April, 10, 9, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+15 NORTH,NS4-05-93",
+								},
+							},
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 17, 9, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 17, 10, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+15 NORTH,NS4-05-93",
+								},
+							},
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.April, 11, 9, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.April, 11, 10, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+15 NORTH,NS4-05-93",
+								},
+							},
+						},
 						[]database.UpsertUsersParams{
 							{"CHUL6789", "CHUA LI TING", "", database.UserRoleSTUDENT},
 							{"YAPW9087", "YAP WEN LI", "", database.UserRoleSTUDENT},
@@ -53,7 +106,36 @@ func TestParseBatchFile(t *testing.T) {
 							Name:      "A26",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]SessionData{},
+						[]SessionData{
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 16, 1, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 16, 2, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+19 NORTH,NS4-05-97",
+								},
+							},
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.April, 10, 1, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.April, 10, 2, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+19 NORTH,NS4-05-97",
+								},
+							},
+						},
 						[]database.UpsertUsersParams{
 							{"BENST129", "BENJAMIN SANTOS", "", database.UserRoleSTUDENT},
 							{"YAPW9088", "YAP WEI LING", "", database.UserRoleSTUDENT},
@@ -64,7 +146,64 @@ func TestParseBatchFile(t *testing.T) {
 							Name:      "A32",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]SessionData{},
+						[]SessionData{
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 17, 11, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 17, 12, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+37 NORTH,NS2-05-30",
+								},
+							},
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 31, 11, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.January, 31, 12, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+37 NORTH,NS2-05-30",
+								},
+							},
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.March, 21, 11, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.March, 21, 12, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+37 NORTH,NS2-05-30",
+								},
+							},
+							{
+								nil,
+								database.UpsertClassGroupSessionsParams{
+									StartTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.April, 4, 11, 30, 0, 0, parseLocation),
+										Valid: true,
+									},
+									EndTime: pgtype.Timestamptz{
+										Time:  time.Date(2023, time.April, 4, 12, 20, 0, 0, parseLocation),
+										Valid: true,
+									},
+									Venue: "TR+37 NORTH,NS2-05-30",
+								},
+							},
+						},
 						[]database.UpsertUsersParams{
 							{"PATELAR14", "ARJUN PATEL", "", database.UserRoleSTUDENT},
 							{"YAPX9087", "YAP XIN TING", "", database.UserRoleSTUDENT},
@@ -128,7 +267,7 @@ func TestParseBatchFile(t *testing.T) {
 			attributeTests := map[any]any{
 				tt.expectedData.Filename:         data.Filename,
 				tt.expectedData.FileCreationDate: data.FileCreationDate,
-				tt.expectedData.Course:           data.Course,
+				tt.expectedData.Class:            data.Class,
 				tt.expectedData.classType:        data.classType,
 			}
 
@@ -141,7 +280,9 @@ func TestParseBatchFile(t *testing.T) {
 			for i := 0; i < len(tt.expectedData.ClassGroups); i++ {
 				a.Equal(tt.expectedData.ClassGroups[i].Name, data.ClassGroups[i].Name)
 				a.Equal(tt.expectedData.ClassGroups[i].ClassType, data.ClassGroups[i].ClassType)
-				// TODO: Test for sessions.
+				for _, session := range tt.expectedData.ClassGroups[i].Sessions {
+					a.Contains(data.ClassGroups[i].Sessions, session)
+				}
 				for _, student := range tt.expectedData.ClassGroups[i].Students {
 					a.Contains(data.ClassGroups[i].Students, student)
 				}

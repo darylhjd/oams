@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/darylhjd/oams/backend/pkg/datetime"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/xuri/excelize/v2"
 
@@ -45,6 +47,33 @@ const (
 	classGroupEnrollmentListIdent  = "No."
 )
 
+const (
+	semester1 = "1"
+	semester2 = "2"
+
+	classGroupSessionWeekCommaSep             = ","
+	classGroupSessionWeekHyphenSep            = "-"
+	classGroupSessionWeekHyphenExpectedLength = 2
+
+	semester1YearWeek   = 33
+	semester2YearWeek   = 2
+	recessWeekAfterWeek = 7
+)
+
+var parseLocation *time.Location
+
+var weekdays = map[string]time.Weekday{}
+
+func init() {
+	parseLocation, _ = time.LoadLocation(timezoneLocation)
+
+	for d := time.Sunday; d <= time.Saturday; d++ {
+		name := d.String()
+		weekdays[name] = d
+		weekdays[name[:3]] = d
+	}
+}
+
 // ParseBatchFile parses a class creation file.
 func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 	file, err := excelize.OpenReader(f)
@@ -80,7 +109,7 @@ func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 }
 
 // parseClassMetaData is a helper function to parse a class' metadata from a file.
-func parseClassMetaData(creationData *BatchData, rows [][]string) error {
+func parseClassMetaData(batchData *BatchData, rows [][]string) error {
 	// The first few rows in the sheet should be the course metadata.
 	if len(rows) < expectedClassMetaDataRows {
 		return errors.New("not enough rows for class metadata")
@@ -99,34 +128,29 @@ func parseClassMetaData(creationData *BatchData, rows [][]string) error {
 		t string
 	)
 	if _, err := fmt.Sscanf(rows[yearSemesterDateRow][expectedClassMetaDataRowLength-1], yearSemesterDateFormat,
-		&creationData.Course.Year, &creationData.Course.Semester, &d, &t); err != nil {
+		&batchData.Class.Year, &batchData.Class.Semester, &d, &t); err != nil {
 		return fmt.Errorf("could not parse class year and semester: %w", err)
 	}
 
-	loc, err := time.LoadLocation(timezoneLocation)
-	if err != nil {
-		return fmt.Errorf("invalid timezone name when parsing class creation file creation date: %w", err)
-	}
-
-	date, err := time.ParseInLocation(creationDateFormat, fmt.Sprintf("%s %s", d, t), loc)
+	date, err := time.ParseInLocation(creationDateFormat, fmt.Sprintf("%s %s", d, t), parseLocation)
 	if err != nil {
 		return fmt.Errorf("could not parse class creation file creation date: %w", err)
 	}
 
-	creationData.FileCreationDate = date
+	batchData.FileCreationDate = date
 
 	// Parse course programme.
-	creationData.Course.Programme = strings.TrimPrefix(rows[courseProgrammeRow][expectedClassMetaDataRowLength-1], courseProgrammePrefix)
+	batchData.Class.Programme = strings.TrimPrefix(rows[courseProgrammeRow][expectedClassMetaDataRowLength-1], courseProgrammePrefix)
 
 	// Parse class course code.
 	if _, err = fmt.Sscanf(rows[courseCodeRow][expectedClassMetaDataRowLength-1], courseCodeFormat,
-		&creationData.Course.Code, &creationData.Course.Au); err != nil {
+		&batchData.Class.Code, &batchData.Class.Au); err != nil {
 		return fmt.Errorf("could not parse course code and au count: %w", err)
 	}
 
 	// Parse class type.
 	if _, err = fmt.Sscanf(rows[classTypeRow][expectedClassMetaDataRowLength-1], classTypeFormat,
-		&creationData.classType); err != nil {
+		&batchData.classType); err != nil {
 		return fmt.Errorf("could not parse class type: %w", err)
 	}
 
@@ -134,11 +158,11 @@ func parseClassMetaData(creationData *BatchData, rows [][]string) error {
 }
 
 // parseClassGroups is a helper function to parse a class' groups.
-func parseClassGroups(creationData *BatchData, rows [][]string) error {
+func parseClassGroups(batchData *BatchData, rows [][]string) error {
 	index := expectedClassMetaDataRows + 1            // Skip one blank row after metadata.
 	for index+expectedClassGroupIDRows <= len(rows) { // For each class group.
 		var group ClassGroupData
-		group.ClassType = creationData.classType
+		group.ClassType = batchData.classType
 
 		// Parse class group ID.
 		if len(rows[index]) != expectedClassGroupMetaDataRowLength {
@@ -154,7 +178,6 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 		index += expectedClassGroupIDRows
 		for index+expectedClassGroupSessionRows <= len(rows) && len(rows[index]) != 0 { // For each session for a class group.
 			var (
-				session   SessionData
 				dayOfWeek string
 				from      string
 				to        string
@@ -167,31 +190,15 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 				return fmt.Errorf("could not parse class group day-time: %w", err)
 			}
 
-			// TODO: Store actual date with the time.
-			startTime, err := time.Parse(classGroupSessionTimeFormat, from)
-			if err != nil {
-				return fmt.Errorf("could not parse class group session start time: %w", err)
-			}
-
-			session.StartTime = pgtype.Timestamptz{
-				Time:  startTime,
-				Valid: true,
-			}
-
-			endTime, err := time.Parse(classGroupSessionTimeFormat, to)
-			if err != nil {
-				return fmt.Errorf("could not parse class group session end time: %w", err)
-			}
-
-			session.EndTime = pgtype.Timestamptz{
-				Time:  endTime,
-				Valid: true,
-			}
-
 			// Parse session venue.
-			session.Venue = strings.TrimPrefix(rows[index+1][expectedClassGroupMetaDataRowLength-1], classGroupSessionVenuePrefix)
+			venue := strings.TrimPrefix(rows[index+1][expectedClassGroupMetaDataRowLength-1], classGroupSessionVenuePrefix)
 
-			group.Sessions = append(group.Sessions, session)
+			sessions, err := parseClassGroupSessions(batchData, dayOfWeek, from, to, weeks, venue)
+			if err != nil {
+				return fmt.Errorf("could not parse class group sessions: %w", err)
+			}
+
+			group.Sessions = append(group.Sessions, sessions...)
 			index += expectedClassGroupSessionRows
 		}
 
@@ -219,9 +226,124 @@ func parseClassGroups(creationData *BatchData, rows [][]string) error {
 			index += 1
 		}
 
-		creationData.ClassGroups = append(creationData.ClassGroups, group)
+		batchData.ClassGroups = append(batchData.ClassGroups, group)
 		index += 1 // Skip blank row after end of enrollment list. Will also work if it is the last list.
 	}
 
 	return nil
+}
+
+// parseClassGroupSessions is a helper function to create the appropriate sessions for a given class group session.
+func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeks, venue string) ([]SessionData, error) {
+	var firstSessionDate time.Time
+	{
+		var year, week int
+		switch batchData.Class.Semester {
+		case semester1:
+			year = int(batchData.Class.Year)
+			week = semester1YearWeek
+		case semester2:
+			year = int(batchData.Class.Year + 1)
+			week = semester2YearWeek
+		default:
+			return nil, errors.New("cannot guess semester start week due to unknown semester value")
+		}
+
+		day, ok := weekdays[dayOfWeek]
+		if !ok {
+			return nil, fmt.Errorf("invalid day of week %q", dayOfWeek)
+		}
+
+		firstSessionDate = datetime.WeekStart(year, week).
+			In(parseLocation).
+			AddDate(0, 0, int(day)-1)
+		_, offset := firstSessionDate.Zone()
+		firstSessionDate = firstSessionDate.Add(-time.Duration(offset) * time.Second)
+	}
+
+	var startHour, startMinute, endHour, endMinute int
+	{
+		startTime, err := time.Parse(classGroupSessionTimeFormat, from)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse session start time: %w", err)
+		}
+
+		endTime, err := time.Parse(classGroupSessionTimeFormat, to)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse session end time: %w", err)
+		}
+
+		startHour, startMinute, _ = startTime.Clock()
+		endHour, endMinute, _ = endTime.Clock()
+	}
+
+	firstSessionStartDateTime := firstSessionDate.
+		Add(time.Hour*time.Duration(startHour) + time.Minute*time.Duration(startMinute))
+	firstSessionEndDateTime := firstSessionDate.
+		Add(time.Hour*time.Duration(endHour) + time.Minute*time.Duration(endMinute))
+
+	// Parse the week numbers.
+	// Two cases: If separated by hyphen (e.g. 2-13), then every week including the start and end weeks included.
+	// If separated by commas (e.g. 2,4,6,8), then each individual week included.
+	var weekNos []int
+	switch {
+	case strings.Contains(weeks, classGroupSessionWeekHyphenSep):
+		startEnd := strings.Split(weeks, classGroupSessionWeekHyphenSep)
+		if len(startEnd) != classGroupSessionWeekHyphenExpectedLength {
+			return nil, errors.New("unexpected week formatting with hyphen separator")
+		}
+
+		startWeek, err := strconv.Atoi(startEnd[0])
+		if err != nil {
+			return nil, errors.New("start week number is not actually a number")
+		}
+
+		endWeek, err := strconv.Atoi(startEnd[classGroupSessionWeekHyphenExpectedLength-1])
+		if err != nil {
+			return nil, errors.New("end week number is not actually a number")
+		}
+
+		for i := startWeek; i <= endWeek; i++ {
+			weekNos = append(weekNos, i)
+		}
+	case strings.Contains(weeks, classGroupSessionWeekCommaSep):
+		for _, w := range strings.Split(weeks, classGroupSessionWeekCommaSep) {
+			wInt, err := strconv.Atoi(w)
+			if err != nil {
+				return nil, errors.New("week number is not actually a number")
+			}
+
+			weekNos = append(weekNos, wInt)
+		}
+	default:
+		return nil, errors.New("unexpected week formatting")
+	}
+
+	// For calculating session dates, add offset of 1 week after recess week.
+	for idx := range weekNos {
+		if weekNos[idx] > recessWeekAfterWeek {
+			weekNos[idx] += 1
+		}
+	}
+
+	// Create all sessions.
+	var sessions []SessionData
+	for _, week := range weekNos {
+		daysToAdd := 7 * (week - 1) // Since week count starts from 1.
+		sessions = append(sessions, SessionData{
+			UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
+				StartTime: pgtype.Timestamptz{
+					Time:  firstSessionStartDateTime.AddDate(0, 0, daysToAdd),
+					Valid: true,
+				},
+				EndTime: pgtype.Timestamptz{
+					Time:  firstSessionEndDateTime.AddDate(0, 0, daysToAdd),
+					Valid: true,
+				},
+				Venue: venue,
+			},
+		})
+	}
+
+	return sessions, nil
 }

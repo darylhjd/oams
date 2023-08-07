@@ -13,7 +13,7 @@ type BatchData struct {
 	Filename         string    `json:"filename"`
 	FileCreationDate time.Time `json:"file_creation_date"`
 
-	Course      database.UpsertClassesParams `json:"course"`
+	Class       database.UpsertClassesParams `json:"course"`
 	ClassGroups []ClassGroupData             `json:"class_groups"`
 
 	// These variables are helper fields for generating filled data.
