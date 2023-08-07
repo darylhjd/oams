@@ -15,21 +15,15 @@ type BatchData struct {
 	Class       database.UpsertClassesParams `json:"class"`
 	ClassGroups []ClassGroupData             `json:"class_groups"`
 
-	// Helper fields for filling data during processing.
+	// classType allows each class group to have access to class type information during processing.
+	// The class type information is discovered only when processing a class' metadata, which only occurs once
+	// and happens before processing for class groups can begin.
 	classType database.ClassType
 }
 
-// ClassGroupData is a struct containing data for creating a class group and its associated sessions.
+// ClassGroupData is a struct containing data for creating a class group and its associated sessions and students.
 type ClassGroupData struct {
 	database.UpsertClassGroupsParams
-	Sessions []SessionData                `json:"sessions"`
-	Students []database.UpsertUsersParams `json:"students"`
-}
-
-// SessionData is a struct containing information on a session.
-type SessionData struct {
-	database.UpsertClassGroupSessionsParams
-
-	// Helper field for filling session data.
-	Course *BatchData `json:"-"`
+	Sessions []database.UpsertClassGroupSessionsParams `json:"sessions"`
+	Students []database.UpsertUsersParams              `json:"students"`
 }

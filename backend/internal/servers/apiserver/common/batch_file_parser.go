@@ -174,7 +174,7 @@ func parseClassGroups(batchData *BatchData, rows [][]string) error {
 }
 
 // parseClassGroupSessions is a helper function to create the appropriate sessions for a given class group session.
-func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr, venue string) ([]SessionData, error) {
+func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr, venue string) ([]database.UpsertClassGroupSessionsParams, error) {
 	var firstSessionStartDateTime, firstSessionEndDateTime time.Time
 	{
 		var year, week int
@@ -260,21 +260,19 @@ func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr
 	}
 
 	// Create all sessions.
-	sessions := make([]SessionData, 0, len(weeks))
+	sessions := make([]database.UpsertClassGroupSessionsParams, 0, len(weeks))
 	for _, week := range weeks {
 		daysToAdd := 7 * (week - 1) // Since week count starts from 1.
-		sessions = append(sessions, SessionData{
-			UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-				StartTime: pgtype.Timestamptz{
-					Time:  firstSessionStartDateTime.AddDate(0, 0, daysToAdd),
-					Valid: true,
-				},
-				EndTime: pgtype.Timestamptz{
-					Time:  firstSessionEndDateTime.AddDate(0, 0, daysToAdd),
-					Valid: true,
-				},
-				Venue: venue,
+		sessions = append(sessions, database.UpsertClassGroupSessionsParams{
+			StartTime: pgtype.Timestamptz{
+				Time:  firstSessionStartDateTime.AddDate(0, 0, daysToAdd),
+				Valid: true,
 			},
+			EndTime: pgtype.Timestamptz{
+				Time:  firstSessionEndDateTime.AddDate(0, 0, daysToAdd),
+				Valid: true,
+			},
+			Venue: venue,
 		})
 	}
 

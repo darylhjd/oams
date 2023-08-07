@@ -243,7 +243,7 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 
 		for idx := range classGroupsHelper.classGroups[i].Sessions {
 			classGroupsHelper.classGroups[i].Sessions[idx].ClassGroupID = group.ID
-			classGroupSessionsHelper.classGroupSessionsParams = append(classGroupSessionsHelper.classGroupSessionsParams, classGroupsHelper.classGroups[i].Sessions[idx].UpsertClassGroupSessionsParams)
+			classGroupSessionsHelper.classGroupSessionsParams = append(classGroupSessionsHelper.classGroupSessionsParams, classGroupsHelper.classGroups[i].Sessions[idx])
 			classGroupSessionsHelper.students = append(classGroupSessionsHelper.students, classGroupsHelper.classGroups[i].Students)
 		}
 	})

@@ -38,62 +38,50 @@ func TestParseBatchFile(t *testing.T) {
 							Name:      "A21",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]SessionData{
+						[]database.UpsertClassGroupSessionsParams{
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 16, 8, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 16, 9, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+15 NORTH,NS4-05-93",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 16, 8, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 16, 9, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.April, 10, 8, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.April, 10, 9, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+15 NORTH,NS4-05-93",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.April, 10, 8, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.April, 10, 9, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 17, 9, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 17, 10, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+15 NORTH,NS4-05-93",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 17, 9, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 17, 10, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.April, 11, 9, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.April, 11, 10, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+15 NORTH,NS4-05-93",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.April, 11, 9, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.April, 11, 10, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+15 NORTH,NS4-05-93",
 							},
 						},
 						[]database.UpsertUsersParams{
@@ -106,34 +94,28 @@ func TestParseBatchFile(t *testing.T) {
 							Name:      "A26",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]SessionData{
+						[]database.UpsertClassGroupSessionsParams{
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 16, 1, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 16, 2, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+19 NORTH,NS4-05-97",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 16, 1, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 16, 2, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+19 NORTH,NS4-05-97",
 							},
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.April, 10, 1, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.April, 10, 2, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+19 NORTH,NS4-05-97",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.April, 10, 1, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.April, 10, 2, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+19 NORTH,NS4-05-97",
 							},
 						},
 						[]database.UpsertUsersParams{
@@ -146,62 +128,50 @@ func TestParseBatchFile(t *testing.T) {
 							Name:      "A32",
 							ClassType: database.ClassTypeTUT,
 						},
-						[]SessionData{
+						[]database.UpsertClassGroupSessionsParams{
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 17, 11, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 17, 12, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+37 NORTH,NS2-05-30",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 17, 11, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 17, 12, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 31, 11, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.January, 31, 12, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+37 NORTH,NS2-05-30",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 31, 11, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.January, 31, 12, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.March, 21, 11, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.March, 21, 12, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+37 NORTH,NS2-05-30",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.March, 21, 11, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.March, 21, 12, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								database.UpsertClassGroupSessionsParams{
-									StartTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.April, 4, 11, 30, 0, 0, location),
-										Valid: true,
-									},
-									EndTime: pgtype.Timestamptz{
-										Time:  time.Date(2023, time.April, 4, 12, 20, 0, 0, location),
-										Valid: true,
-									},
-									Venue: "TR+37 NORTH,NS2-05-30",
+								StartTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.April, 4, 11, 30, 0, 0, location),
+									Valid: true,
 								},
-								nil,
+								EndTime: pgtype.Timestamptz{
+									Time:  time.Date(2023, time.April, 4, 12, 20, 0, 0, location),
+									Valid: true,
+								},
+								Venue: "TR+37 NORTH,NS2-05-30",
 							},
 						},
 						[]database.UpsertUsersParams{

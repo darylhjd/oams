@@ -179,19 +179,17 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										Name:      "A21",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{
+									[]database.UpsertClassGroupSessionsParams{
 										{
-											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamptz{
-													Time:  now,
-													Valid: true,
-												},
-												EndTime: pgtype.Timestamptz{
-													Time:  now.Add(2 * time.Hour),
-													Valid: true,
-												},
-												Venue: "",
+											StartTime: pgtype.Timestamptz{
+												Time:  now,
+												Valid: true,
 											},
+											EndTime: pgtype.Timestamptz{
+												Time:  now.Add(2 * time.Hour),
+												Valid: true,
+											},
+											Venue: "",
 										},
 									},
 									[]database.UpsertUsersParams{
@@ -204,19 +202,17 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										Name:      "A26",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{
+									[]database.UpsertClassGroupSessionsParams{
 										{
-											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamptz{
-													Time:  now,
-													Valid: true,
-												},
-												EndTime: pgtype.Timestamptz{
-													Time:  now.Add(2 * time.Hour),
-													Valid: true,
-												},
-												Venue: "",
+											StartTime: pgtype.Timestamptz{
+												Time:  now,
+												Valid: true,
 											},
+											EndTime: pgtype.Timestamptz{
+												Time:  now.Add(2 * time.Hour),
+												Valid: true,
+											},
+											Venue: "",
 										},
 									},
 									[]database.UpsertUsersParams{
@@ -229,19 +225,17 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										Name:      "A32",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{
+									[]database.UpsertClassGroupSessionsParams{
 										{
-											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamptz{
-													Time:  now,
-													Valid: true,
-												},
-												EndTime: pgtype.Timestamptz{
-													Time:  now.Add(2 * time.Hour),
-													Valid: true,
-												},
-												Venue: "",
+											StartTime: pgtype.Timestamptz{
+												Time:  now,
+												Valid: true,
 											},
+											EndTime: pgtype.Timestamptz{
+												Time:  now.Add(2 * time.Hour),
+												Valid: true,
+											},
+											Venue: "",
 										},
 									},
 									[]database.UpsertUsersParams{
