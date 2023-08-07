@@ -165,7 +165,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			true,
 			classGroupsPostResponse{},
 			http.StatusConflict,
-			"class group with same class_id and name already exists",
+			"class group with same class_id, name, and class_type already exists",
 		},
 		{
 			"request with non-existent class dependency",

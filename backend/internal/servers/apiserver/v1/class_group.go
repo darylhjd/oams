@@ -104,7 +104,7 @@ func (v *APIServerV1) classGroupPatch(r *http.Request, id int64) apiResponse {
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
 			return newErrorResponse(http.StatusBadRequest, "class_id does not exist")
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
-			return newErrorResponse(http.StatusConflict, "class group with same class_id and name already exists")
+			return newErrorResponse(http.StatusConflict, "class group with same class_id, name, and class_type already exists")
 		default:
 			v.logInternalServerError(r, err)
 			return newErrorResponse(http.StatusInternalServerError, "could not process class group patch database action")

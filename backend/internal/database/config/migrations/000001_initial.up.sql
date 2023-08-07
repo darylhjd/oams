@@ -36,8 +36,8 @@ CREATE TABLE class_groups
     class_type CLASS_TYPE  NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL,
-    CONSTRAINT ux_class_id_name
-        UNIQUE (class_id, name),
+    CONSTRAINT ux_class_id_name_class_type
+        UNIQUE (class_id, name, class_type),
     CONSTRAINT fk_class_id
         FOREIGN KEY (class_id)
             REFERENCES classes (id)
