@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/darylhjd/oams/backend/pkg/datetime"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/xuri/excelize/v2"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -49,9 +51,12 @@ const (
 	semester1 = "1"
 	semester2 = "2"
 
-	semester1YearWeek   = 33
-	semester2YearWeek   = 2
-	recessWeekAfterWeek = 7
+	classGroupSessionWeekHyphenSep            = "-"
+	classGroupSessionWeekHyphenExpectedLength = 2
+	classGroupSessionWeekCommaSep             = ","
+	semester1YearWeek                         = 33
+	semester2YearWeek                         = 2
+	recessWeekAfterWeek                       = 7
 )
 
 var parseLocation *time.Location
@@ -229,28 +234,30 @@ func parseClassGroups(batchData *BatchData, rows [][]string) error {
 
 // parseClassGroupSessions is a helper function to create the appropriate sessions for a given class group session.
 func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeks, venue string) ([]SessionData, error) {
-	var year, week int
-	switch batchData.Class.Semester {
-	case semester1:
-		year = int(batchData.Class.Year)
-		week = semester1YearWeek
-	case semester2:
-		year = int(batchData.Class.Year + 1)
-		week = semester2YearWeek
-	default:
-		return nil, errors.New("cannot guess semester start week due to unknown semester value")
-	}
-
 	var firstSessionDate time.Time
 	{
+		var year, week int
+		switch batchData.Class.Semester {
+		case semester1:
+			year = int(batchData.Class.Year)
+			week = semester1YearWeek
+		case semester2:
+			year = int(batchData.Class.Year + 1)
+			week = semester2YearWeek
+		default:
+			return nil, errors.New("cannot guess semester start week due to unknown semester value")
+		}
+
 		day, ok := weekdays[dayOfWeek]
 		if !ok {
 			return nil, fmt.Errorf("invalid day of week %q", dayOfWeek)
 		}
 
 		firstSessionDate = datetime.WeekStart(year, week).
-			Local().
+			In(parseLocation).
 			AddDate(0, 0, int(day)-1)
+		_, offset := firstSessionDate.Zone()
+		firstSessionDate = firstSessionDate.Add(-time.Duration(offset) * time.Second)
 	}
 
 	var startHour, startMinute, endHour, endMinute int
@@ -273,4 +280,69 @@ func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeks, v
 		Add(time.Hour*time.Duration(startHour) + time.Minute*time.Duration(startMinute))
 	firstSessionEndDateTime := firstSessionDate.
 		Add(time.Hour*time.Duration(endHour) + time.Minute*time.Duration(endMinute))
+
+	// Parse the week numbers.
+	// Two cases: If separated by hyphen (e.g. 2-13), then every week including the start and end weeks included.
+	// If separated by commas (e.g. 2,4,6,8), then each individual week included.
+	var weekNos []int
+	switch {
+	case strings.Contains(weeks, classGroupSessionWeekHyphenSep):
+		startEnd := strings.Split(weeks, classGroupSessionWeekHyphenSep)
+		if len(startEnd) != classGroupSessionWeekHyphenExpectedLength {
+			return nil, errors.New("unexpected week formatting with hyphen separator")
+		}
+
+		startWeek, err := strconv.Atoi(startEnd[0])
+		if err != nil {
+			return nil, errors.New("start week number is not actually a number")
+		}
+
+		endWeek, err := strconv.Atoi(startEnd[classGroupSessionWeekHyphenExpectedLength-1])
+		if err != nil {
+			return nil, errors.New("end week number is not actually a number")
+		}
+
+		for i := startWeek; i <= endWeek; i++ {
+			weekNos = append(weekNos, i)
+		}
+	case strings.Contains(weeks, classGroupSessionWeekCommaSep):
+		for _, w := range strings.Split(weeks, classGroupSessionWeekCommaSep) {
+			wInt, err := strconv.Atoi(w)
+			if err != nil {
+				return nil, errors.New("week number is not actually a number")
+			}
+
+			weekNos = append(weekNos, wInt)
+		}
+	default:
+		return nil, errors.New("unexpected week formatting")
+	}
+
+	// For calculating session dates, add offset of 1 week after recess week.
+	for idx := range weekNos {
+		if weekNos[idx] > recessWeekAfterWeek {
+			weekNos[idx] += 1
+		}
+	}
+
+	// Create all sessions.
+	var sessions []SessionData
+	for _, week := range weekNos {
+		daysToAdd := 7 * (week - 1) // Since week count starts from 1.
+		sessions = append(sessions, SessionData{
+			UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
+				StartTime: pgtype.Timestamptz{
+					Time:  firstSessionStartDateTime.AddDate(0, 0, daysToAdd),
+					Valid: true,
+				},
+				EndTime: pgtype.Timestamptz{
+					Time:  firstSessionEndDateTime.AddDate(0, 0, daysToAdd),
+					Valid: true,
+				},
+				Venue: venue,
+			},
+		})
+	}
+
+	return sessions, nil
 }
