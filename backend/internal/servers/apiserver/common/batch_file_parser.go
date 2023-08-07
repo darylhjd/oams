@@ -51,12 +51,13 @@ const (
 	semester1 = "1"
 	semester2 = "2"
 
+	classGroupSessionWeekCommaSep             = ","
 	classGroupSessionWeekHyphenSep            = "-"
 	classGroupSessionWeekHyphenExpectedLength = 2
-	classGroupSessionWeekCommaSep             = ","
-	semester1YearWeek                         = 33
-	semester2YearWeek                         = 2
-	recessWeekAfterWeek                       = 7
+
+	semester1YearWeek   = 33
+	semester2YearWeek   = 2
+	recessWeekAfterWeek = 7
 )
 
 var parseLocation *time.Location
