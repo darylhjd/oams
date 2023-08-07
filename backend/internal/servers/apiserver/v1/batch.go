@@ -253,7 +253,7 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 
 	var (
 		studentsParams    []database.UpsertUsersParams
-		enrollmentsParams []database.CreateSessionEnrollmentsParams
+		enrollmentsParams []database.UpsertSessionEnrollmentsParams
 	)
 	q.UpsertClassGroupSessions(ctx, classGroupSessionsHelper.classGroupSessionsParams).QueryRow(func(i int, session database.ClassGroupSession, err error) {
 		if dbErr != nil {
@@ -267,7 +267,7 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 
 		for idx := range classGroupSessionsHelper.students[i] {
 			studentsParams = append(studentsParams, classGroupSessionsHelper.students[i][idx])
-			enrollmentsParams = append(enrollmentsParams, database.CreateSessionEnrollmentsParams{
+			enrollmentsParams = append(enrollmentsParams, database.UpsertSessionEnrollmentsParams{
 				SessionID: session.ID,
 				UserID:    classGroupSessionsHelper.students[i][idx].ID,
 			})
@@ -284,7 +284,7 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 
 	resp.Students = len(students)
 
-	if dbErr = q.CreateSessionEnrollments(ctx, enrollmentsParams).Close(); dbErr != nil {
+	if dbErr = q.UpsertSessionEnrollments(ctx, enrollmentsParams).Close(); dbErr != nil {
 		return resp, dbErr
 	}
 
