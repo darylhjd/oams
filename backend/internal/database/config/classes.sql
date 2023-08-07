@@ -47,7 +47,7 @@ WHERE id = $1
 RETURNING *;
 
 -- name: UpsertClasses :batchone
--- Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
+-- Insert a class into the database. If the class already exists, then only update the programme and au.
 INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 ON CONFLICT

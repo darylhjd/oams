@@ -17,68 +17,6 @@ var (
 	ErrBatchAlreadyClosed = errors.New("batch already closed")
 )
 
-const createSessionEnrollments = `-- name: CreateSessionEnrollments :batchone
-INSERT INTO session_enrollments (session_id, user_id, attended, created_at, updated_at)
-VALUES ($1, $2, $3, NOW(), NOW())
-RETURNING id, session_id, user_id, attended, created_at, updated_at
-`
-
-type CreateSessionEnrollmentsBatchResults struct {
-	br     pgx.BatchResults
-	tot    int
-	closed bool
-}
-
-type CreateSessionEnrollmentsParams struct {
-	SessionID int64  `json:"session_id"`
-	UserID    string `json:"user_id"`
-	Attended  bool   `json:"attended"`
-}
-
-func (q *Queries) CreateSessionEnrollments(ctx context.Context, arg []CreateSessionEnrollmentsParams) *CreateSessionEnrollmentsBatchResults {
-	batch := &pgx.Batch{}
-	for _, a := range arg {
-		vals := []interface{}{
-			a.SessionID,
-			a.UserID,
-			a.Attended,
-		}
-		batch.Queue(createSessionEnrollments, vals...)
-	}
-	br := q.db.SendBatch(ctx, batch)
-	return &CreateSessionEnrollmentsBatchResults{br, len(arg), false}
-}
-
-func (b *CreateSessionEnrollmentsBatchResults) QueryRow(f func(int, SessionEnrollment, error)) {
-	defer b.br.Close()
-	for t := 0; t < b.tot; t++ {
-		var i SessionEnrollment
-		if b.closed {
-			if f != nil {
-				f(t, i, ErrBatchAlreadyClosed)
-			}
-			continue
-		}
-		row := b.br.QueryRow()
-		err := row.Scan(
-			&i.ID,
-			&i.SessionID,
-			&i.UserID,
-			&i.Attended,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		)
-		if f != nil {
-			f(t, i, err)
-		}
-	}
-}
-
-func (b *CreateSessionEnrollmentsBatchResults) Close() error {
-	b.closed = true
-	return b.br.Close()
-}
-
 const upsertClassGroupSessions = `-- name: UpsertClassGroupSessions :batchone
 INSERT INTO class_group_sessions (class_group_id, start_time, end_time, venue, created_at, updated_at)
 VALUES ($1, $2, $3, $4, NOW(), NOW())
@@ -108,7 +46,8 @@ type UpsertClassGroupSessionsParams struct {
 	Venue        string             `json:"venue"`
 }
 
-// Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
+// Insert a class group session into the database. If the class group session already exists, only update
+// the end_time and venue.
 func (q *Queries) UpsertClassGroupSessions(ctx context.Context, arg []UpsertClassGroupSessionsParams) *UpsertClassGroupSessionsBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
@@ -181,7 +120,7 @@ type UpsertClassGroupsParams struct {
 	ClassType ClassType `json:"class_type"`
 }
 
-// Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
+// Insert a class group into the database. If the class group already exists, only update the class type.
 func (q *Queries) UpsertClassGroups(ctx context.Context, arg []UpsertClassGroupsParams) *UpsertClassGroupsBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
@@ -257,7 +196,7 @@ type UpsertClassesParams struct {
 	Au        int16  `json:"au"`
 }
 
-// Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
+// Insert a class into the database. If the class already exists, then only update the programme and au.
 func (q *Queries) UpsertClasses(ctx context.Context, arg []UpsertClassesParams) *UpsertClassesBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
@@ -306,13 +245,76 @@ func (b *UpsertClassesBatchResults) Close() error {
 	return b.br.Close()
 }
 
+const upsertSessionEnrollments = `-- name: UpsertSessionEnrollments :batchone
+INSERT INTO session_enrollments (session_id, user_id, attended, created_at, updated_at)
+VALUES ($1, $2, $3, NOW(), NOW())
+ON CONFLICT DO NOTHING
+RETURNING id, session_id, user_id, attended, created_at, updated_at
+`
+
+type UpsertSessionEnrollmentsBatchResults struct {
+	br     pgx.BatchResults
+	tot    int
+	closed bool
+}
+
+type UpsertSessionEnrollmentsParams struct {
+	SessionID int64  `json:"session_id"`
+	UserID    string `json:"user_id"`
+	Attended  bool   `json:"attended"`
+}
+
+// Insert a session enrollment into the database. If the session enrollment already exists, do nothing.
+func (q *Queries) UpsertSessionEnrollments(ctx context.Context, arg []UpsertSessionEnrollmentsParams) *UpsertSessionEnrollmentsBatchResults {
+	batch := &pgx.Batch{}
+	for _, a := range arg {
+		vals := []interface{}{
+			a.SessionID,
+			a.UserID,
+			a.Attended,
+		}
+		batch.Queue(upsertSessionEnrollments, vals...)
+	}
+	br := q.db.SendBatch(ctx, batch)
+	return &UpsertSessionEnrollmentsBatchResults{br, len(arg), false}
+}
+
+func (b *UpsertSessionEnrollmentsBatchResults) QueryRow(f func(int, SessionEnrollment, error)) {
+	defer b.br.Close()
+	for t := 0; t < b.tot; t++ {
+		var i SessionEnrollment
+		if b.closed {
+			if f != nil {
+				f(t, i, ErrBatchAlreadyClosed)
+			}
+			continue
+		}
+		row := b.br.QueryRow()
+		err := row.Scan(
+			&i.ID,
+			&i.SessionID,
+			&i.UserID,
+			&i.Attended,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		)
+		if f != nil {
+			f(t, i, err)
+		}
+	}
+}
+
+func (b *UpsertSessionEnrollmentsBatchResults) Close() error {
+	b.closed = true
+	return b.br.Close()
+}
+
 const upsertUsers = `-- name: UpsertUsers :batchone
 INSERT INTO users (id, name, email, role, created_at, updated_at)
 VALUES ($1, $2, $3, $4, NOW(), NOW())
 ON CONFLICT (id)
     DO UPDATE SET name       = $2,
                   email      = $3,
-                  role       = $4,
                   updated_at =
                       CASE
                           WHEN $2 <> users.name OR
@@ -337,7 +339,7 @@ type UpsertUsersParams struct {
 	Role  UserRole `json:"role"`
 }
 
-// Use this sparingly. When in doubt, use the atomic INSERT and UPDATE statements instead.
+// Insert a user into the database. If the user already exists, then only update the name and email.
 func (q *Queries) UpsertUsers(ctx context.Context, arg []UpsertUsersParams) *UpsertUsersBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
