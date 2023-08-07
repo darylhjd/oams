@@ -32,7 +32,7 @@ location in the `.env` file. Otherwise, you will not be able to successfully con
 The frontend is built on Flutter.
 
 The `frontend` module requires its own set of environment variables that is defined separately from the `backend` module.
-Refer to the `env.example.json` file for details on the formatting of the file formatting and values required.
+Refer to the `env.example.json` file for details on the formatting of the file and values required.
 
 As always, the recommendation is to use a proper IDE that can help you set up the environment variables before running any
 build or run commands. For your information, you can use the `--dart-define-from-file=env.json` argument with `flutter`

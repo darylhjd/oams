@@ -225,7 +225,7 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			classGroupPatchResponse{},
 			false,
 			http.StatusConflict,
-			"class group with same class_id and name already exists",
+			"class group with same class_id, name, and class_type already exists",
 		},
 		{
 			"request with non existent class dependency",

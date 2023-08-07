@@ -62,7 +62,7 @@ func (v *APIServerV1) classGroupsPost(r *http.Request) apiResponse {
 	if err != nil {
 		switch {
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
-			return newErrorResponse(http.StatusConflict, "class group with same class_id and name already exists")
+			return newErrorResponse(http.StatusConflict, "class group with same class_id, name, and class_type already exists")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
 			return newErrorResponse(http.StatusBadRequest, "class_id does not exist")
 		default:

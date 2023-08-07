@@ -46,8 +46,7 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		{
 			ID:    authResult.IDToken.Name,
 			Email: authResult.Account.PreferredUsername,
-			// TODO: Set correct role based on auth result.
-			Role: database.UserRoleSTUDENT,
+			Role:  database.UserRoleSTUDENT, // Basic role given to all users on first login.
 		},
 	}).Close()
 	if err != nil {

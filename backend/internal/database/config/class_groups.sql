@@ -42,15 +42,8 @@ WHERE id = $1
 RETURNING *;
 
 -- name: UpsertClassGroups :batchone
--- Insert a class group into the database. If the class group already exists, only update the class type.
+-- Insert a class group into the database. If the class group already exists, do nothing.
 INSERT INTO class_groups (class_id, name, class_type, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
-ON CONFLICT ON CONSTRAINT ux_class_id_name
-    DO UPDATE SET class_type = $3,
-                  updated_at =
-                      CASE
-                          WHEN $3 <> class_groups.class_type
-                              THEN NOW()
-                          ELSE class_groups.updated_at
-                          END
+ON CONFLICT DO NOTHING
 RETURNING *;
