@@ -154,13 +154,14 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name         string
-		body         func() (io.Reader, string, error)
-		wantResponse batchPutResponse
+		name           string
+		body           func() (io.Reader, string, error)
+		wantResponse   batchPutResponse
+		wantStatusCode int
 	}{
 		{
-			name: "with json body",
-			body: func() (io.Reader, string, error) {
+			"acceptable request",
+			func() (io.Reader, string, error) {
 				now := time.Now()
 
 				body := batchPutRequest{
@@ -179,19 +180,17 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										Name:      "A21",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{
+									[]database.UpsertClassGroupSessionsParams{
 										{
-											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamptz{
-													Time:  now,
-													Valid: true,
-												},
-												EndTime: pgtype.Timestamptz{
-													Time:  now.Add(2 * time.Hour),
-													Valid: true,
-												},
-												Venue: "",
+											StartTime: pgtype.Timestamptz{
+												Time:  now,
+												Valid: true,
 											},
+											EndTime: pgtype.Timestamptz{
+												Time:  now.Add(2 * time.Hour),
+												Valid: true,
+											},
+											Venue: "",
 										},
 									},
 									[]database.UpsertUsersParams{
@@ -204,19 +203,17 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										Name:      "A26",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{
+									[]database.UpsertClassGroupSessionsParams{
 										{
-											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamptz{
-													Time:  now,
-													Valid: true,
-												},
-												EndTime: pgtype.Timestamptz{
-													Time:  now.Add(2 * time.Hour),
-													Valid: true,
-												},
-												Venue: "",
+											StartTime: pgtype.Timestamptz{
+												Time:  now,
+												Valid: true,
 											},
+											EndTime: pgtype.Timestamptz{
+												Time:  now.Add(2 * time.Hour),
+												Valid: true,
+											},
+											Venue: "",
 										},
 									},
 									[]database.UpsertUsersParams{
@@ -229,19 +226,17 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										Name:      "A32",
 										ClassType: database.ClassTypeLAB,
 									},
-									[]common.SessionData{
+									[]database.UpsertClassGroupSessionsParams{
 										{
-											UpsertClassGroupSessionsParams: database.UpsertClassGroupSessionsParams{
-												StartTime: pgtype.Timestamptz{
-													Time:  now,
-													Valid: true,
-												},
-												EndTime: pgtype.Timestamptz{
-													Time:  now.Add(2 * time.Hour),
-													Valid: true,
-												},
-												Venue: "",
+											StartTime: pgtype.Timestamptz{
+												Time:  now,
+												Valid: true,
 											},
+											EndTime: pgtype.Timestamptz{
+												Time:  now.Add(2 * time.Hour),
+												Valid: true,
+											},
+											Venue: "",
 										},
 									},
 									[]database.UpsertUsersParams{
@@ -261,14 +256,11 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 
 				return bytes.NewReader(b), "application/json", nil
 			},
-			wantResponse: batchPutResponse{
-				response:           newSuccessResponse(),
-				Classes:            1,
-				ClassGroups:        3,
-				ClassGroupSessions: 3,
-				Students:           6,
-				SessionEnrollments: 6,
+			batchPutResponse{
+				newSuccessResponse(),
+				[]int64{1},
 			},
+			http.StatusOK,
 		},
 	}
 
@@ -289,6 +281,7 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, batchUrl, body)
 			req.Header.Set("Content-Type", contentType)
 			resp := v1.batchPut(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
 
 			a.Equal(tt.wantResponse, resp)
 		})

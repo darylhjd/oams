@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,9 +9,6 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
-	"github.com/jackc/pgx/v5"
-	"go.uber.org/zap"
-
 	"github.com/darylhjd/oams/backend/pkg/goroutines"
 )
 
@@ -141,11 +137,7 @@ type batchPutRequest struct {
 
 type batchPutResponse struct {
 	response
-	Classes            int `json:"classes"`
-	ClassGroups        int `json:"class_groups"`
-	ClassGroupSessions int `json:"class_group_sessions"`
-	Students           int `json:"students"`
-	SessionEnrollments int `json:"session_enrollments"`
+	ClassIDs []int64 `json:"class_ids"`
 }
 
 // batchPut is the handler that does the actual processing of the entities.
@@ -155,7 +147,7 @@ func (v *APIServerV1) batchPut(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	resp, err := v.processBatchPutRequest(r.Context(), req)
+	resp, err := v.processBatchPutRequest(r, req)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, err.Error())
@@ -164,98 +156,58 @@ func (v *APIServerV1) batchPut(r *http.Request) apiResponse {
 	return resp
 }
 
-type classGroupsParamsWithClassGroup struct {
-	classGroupsParams []database.UpsertClassGroupsParams
-	classGroups       []*common.ClassGroupData
-}
-
-type classGroupSessionsParamsWithStudents struct {
-	classGroupSessionsParams []database.UpsertClassGroupSessionsParams
-	students                 [][]database.UpsertUsersParams
-}
-
 // processBatchPutRequest and return a batchPutResponse and error if encountered.
-func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRequest) (batchPutResponse, error) {
+// This implementation aims to reduce database actions by sacrificing memory usage.
+func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutRequest) (batchPutResponse, error) {
 	resp := batchPutResponse{
 		response: newSuccessResponse(),
 	}
 
-	var (
-		dbErr         error
-		coursesParams []database.UpsertClassesParams
-	)
-	tx, err := v.db.C.Begin(ctx)
+	var dbErr error
+	tx, err := v.db.C.Begin(r.Context())
 	if err != nil {
 		return resp, err
 	}
 	defer func() {
-		_ = tx.Rollback(ctx)
-		if dbErr != nil {
-			v.l.Debug(fmt.Sprintf("%s - error while doing classes create action", namespace), zap.Error(dbErr))
-		}
+		_ = tx.Rollback(r.Context())
 	}()
 
 	q := v.db.Q.WithTx(tx)
 
-	for _, class := range req.Batches {
-		coursesParams = append(coursesParams, class.Class)
-	}
-
-	// Insert courses.
-	// Then, for each course, update its class group's course_id foreign key.
+	// Collect all class params into one slice.
+	// Insert classes.
+	// - For each created class, update its class groups' class_id foreign key.
+	// - At the same time, collect all class group params into one slice.
 	// Then insert the class groups.
-	// Then for each class group, for each of its sessions, update its class_group_id.
-	// Then insert the sessions.
+	// - For each class group, update its class group sessions' class_group_id foreign key.
+	// - At the same time, collect all class group session params into one slice.
+	// Then insert the class group sessions.
 	// Then insert the students.
 	// Then for each of the sessions, insert an enrollment for each student.
-	var classGroupsHelper classGroupsParamsWithClassGroup
-	q.UpsertClasses(ctx, coursesParams).QueryRow(func(i int, course database.Class, err error) {
-		if dbErr != nil {
-			return
-		} else if err != nil {
-			dbErr = err
-			return
-		}
-
-		resp.Classes++
-
-		class := req.Batches[i]
-		for idx := range class.ClassGroups {
-			class.ClassGroups[idx].UpsertClassGroupsParams.ClassID = course.ID
-			classGroupsHelper.classGroupsParams = append(classGroupsHelper.classGroupsParams, class.ClassGroups[idx].UpsertClassGroupsParams)
-			classGroupsHelper.classGroups = append(classGroupsHelper.classGroups, &class.ClassGroups[idx])
-		}
-	})
-	if dbErr != nil {
-		return resp, dbErr
-	}
-
-	var classGroupSessionsHelper classGroupSessionsParamsWithStudents
-	q.UpsertClassGroups(ctx, classGroupsHelper.classGroupsParams).QueryRow(func(i int, group database.ClassGroup, err error) {
-		if dbErr != nil {
-			return
-		} else if err != nil {
-			dbErr = err
-			return
-		}
-
-		resp.ClassGroups++
-
-		for idx := range classGroupsHelper.classGroups[i].Sessions {
-			classGroupsHelper.classGroups[i].Sessions[idx].ClassGroupID = group.ID
-			classGroupSessionsHelper.classGroupSessionsParams = append(classGroupSessionsHelper.classGroupSessionsParams, classGroupsHelper.classGroups[i].Sessions[idx].UpsertClassGroupSessionsParams)
-			classGroupSessionsHelper.students = append(classGroupSessionsHelper.students, classGroupsHelper.classGroups[i].Students)
-		}
-	})
-	if dbErr != nil {
-		return resp, dbErr
-	}
-
 	var (
-		studentsParams    []database.UpsertUsersParams
-		enrollmentsParams []database.UpsertSessionEnrollmentsParams
+		classesParams     []database.UpsertClassesParams     // Store class params.
+		classGroupsParams []database.UpsertClassGroupsParams // Store class group params.
+
+		// classGroups is a helper for class group session processing. The array is in the same order in which each
+		// class group is created. This allows us to access and set variables within the class group using values
+		// that are available to us only during creation of each class group.
+		classGroups []*common.ClassGroupData
+
+		classGroupSessionsParams []database.UpsertClassGroupSessionsParams // Store class group session params.
+
+		// users is a helper for session enrollment processing. This is a two-dimensional array, and is simply
+		// an array of lists of students corresponding to each class group session.
+		users [][]string
+
+		usersParams       []database.UpsertUsersParams              // Store user params.
+		enrollmentsParams []database.UpsertSessionEnrollmentsParams // Store session enrollment params/
 	)
-	q.UpsertClassGroupSessions(ctx, classGroupSessionsHelper.classGroupSessionsParams).QueryRow(func(i int, session database.ClassGroupSession, err error) {
+
+	for _, class := range req.Batches {
+		classesParams = append(classesParams, class.Class)
+	}
+
+	q.UpsertClasses(r.Context(), classesParams).QueryRow(func(i int, class database.Class, err error) {
 		if dbErr != nil {
 			return
 		} else if err != nil {
@@ -263,13 +215,56 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 			return
 		}
 
-		resp.ClassGroupSessions++
+		resp.ClassIDs = append(resp.ClassIDs, class.ID)
 
-		for idx := range classGroupSessionsHelper.students[i] {
-			studentsParams = append(studentsParams, classGroupSessionsHelper.students[i][idx])
+		classData := &req.Batches[i]
+		for idx := range classData.ClassGroups {
+			classData.ClassGroups[idx].UpsertClassGroupsParams.ClassID = class.ID
+			classGroupsParams = append(classGroupsParams, classData.ClassGroups[idx].UpsertClassGroupsParams)
+			classGroups = append(classGroups, &classData.ClassGroups[idx])
+		}
+	})
+	if dbErr != nil {
+		return resp, dbErr
+	}
+
+	q.UpsertClassGroups(r.Context(), classGroupsParams).QueryRow(func(i int, group database.ClassGroup, err error) {
+		if dbErr != nil {
+			return
+		} else if err != nil {
+			dbErr = err
+			return
+		}
+
+		classGroup := classGroups[i]
+		usersParams = append(usersParams, classGroup.Students...)
+		userIds := make([]string, 0, len(classGroup.Students))
+		for _, user := range classGroup.Students {
+			userIds = append(userIds, user.ID)
+		}
+
+		for idx := range classGroup.Sessions {
+			classGroup.Sessions[idx].ClassGroupID = group.ID
+			classGroupSessionsParams = append(classGroupSessionsParams, classGroup.Sessions[idx])
+			users = append(users, userIds)
+		}
+	})
+	if dbErr != nil {
+		return resp, dbErr
+	}
+
+	q.UpsertClassGroupSessions(r.Context(), classGroupSessionsParams).QueryRow(func(i int, session database.ClassGroupSession, err error) {
+		if dbErr != nil {
+			return
+		} else if err != nil {
+			dbErr = err
+			return
+		}
+
+		for idx := range users[i] {
 			enrollmentsParams = append(enrollmentsParams, database.UpsertSessionEnrollmentsParams{
 				SessionID: session.ID,
-				UserID:    classGroupSessionsHelper.students[i][idx].ID,
+				UserID:    users[i][idx],
 			})
 		}
 	})
@@ -277,59 +272,13 @@ func (v *APIServerV1) processBatchPutRequest(ctx context.Context, req batchPutRe
 		return resp, dbErr
 	}
 
-	students, dbErr := upsertUsers(ctx, v.db, tx, studentsParams)
-	if dbErr != nil {
+	if dbErr = q.UpsertUsers(r.Context(), usersParams).Close(); dbErr != nil {
 		return resp, dbErr
 	}
 
-	resp.Students = len(students)
-
-	if dbErr = q.UpsertSessionEnrollments(ctx, enrollmentsParams).Close(); dbErr != nil {
+	if dbErr = q.UpsertSessionEnrollments(r.Context(), enrollmentsParams).Close(); dbErr != nil {
 		return resp, dbErr
 	}
 
-	sessionEnrollments, dbErr := q.ListSessionEnrollments(ctx)
-	if dbErr != nil {
-		return resp, dbErr
-	}
-
-	resp.SessionEnrollments = len(sessionEnrollments)
-	return resp, tx.Commit(ctx)
-}
-
-// upsertUsers inserts the provided usersParams into the specified database. If tx is nil, a new transaction is started.
-// Otherwise, a nested transaction (using save points) is used.
-func upsertUsers(ctx context.Context, db *database.DB, tx pgx.Tx, usersParams []database.UpsertUsersParams) ([]database.User, error) {
-	var err error
-
-	if tx != nil {
-		tx, err = tx.Begin(ctx)
-	} else {
-		tx, err = db.C.Begin(ctx)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = tx.Rollback(ctx)
-	}()
-
-	q := db.Q.WithTx(tx)
-
-	if err = q.UpsertUsers(ctx, usersParams).Close(); err != nil {
-		return nil, err
-	}
-
-	ids := make([]string, 0, len(usersParams))
-	for _, param := range usersParams {
-		ids = append(ids, param.ID)
-	}
-
-	users, err := q.GetUsersByIDs(ctx, ids)
-	if err != nil {
-		return nil, err
-	}
-
-	return users, tx.Commit(ctx)
+	return resp, tx.Commit(r.Context())
 }
