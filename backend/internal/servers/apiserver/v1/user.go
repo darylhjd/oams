@@ -38,29 +38,39 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 
 type userMeResponse struct {
 	response
-	SessionUser database.User `json:"session_user"`
+	SessionUser                database.User                                   `json:"session_user"`
+	UpcomingClassGroupSessions []database.GetUserUpcomingClassGroupSessionsRow `json:"upcoming_class_group_sessions"`
 }
 
 func (v *APIServerV1) userMe(r *http.Request) apiResponse {
+	resp := userMeResponse{response: newSuccessResponse()}
+
 	authContext, isSignedIn, err := middleware.GetAuthContext(r)
 	switch {
 	case err != nil:
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, err.Error())
 	case isSignedIn:
-		user, err := v.db.Q.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
+		resp.SessionUser, err = v.db.Q.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
 		if err != nil {
 			v.logInternalServerError(r, fmt.Errorf("expected session user in database: %w", err))
 			return newErrorResponse(http.StatusInternalServerError, "could get session user from database")
 		}
-
-		return userMeResponse{
-			newSuccessResponse(),
-			user,
-		}
 	default:
 		return newErrorResponse(http.StatusUnauthorized, "client lacks authentication credentials")
 	}
+
+	upcomingClassGroupSessions, err := v.db.Q.GetUserUpcomingClassGroupSessions(r.Context(), resp.SessionUser.ID)
+	if err != nil {
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not get session user upcoming class group sessions")
+	}
+
+	resp.UpcomingClassGroupSessions = append(
+		make([]database.GetUserUpcomingClassGroupSessionsRow, 0, len(upcomingClassGroupSessions)),
+		upcomingClassGroupSessions...,
+	)
+	return resp
 }
 
 type userGetResponse struct {

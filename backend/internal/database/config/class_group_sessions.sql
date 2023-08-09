@@ -9,12 +9,6 @@ FROM class_group_sessions
 WHERE id = $1
 LIMIT 1;
 
--- name: GetClassGroupSessionsByIDs :many
-SELECT *
-FROM class_group_sessions
-WHERE id = ANY (@ids::BIGINT[])
-ORDER BY id;
-
 -- name: CreateClassGroupSession :one
 INSERT INTO class_group_sessions (class_group_id, start_time, end_time, venue, created_at, updated_at)
 VALUES ($1, $2, $3, $4, NOW(), NOW())

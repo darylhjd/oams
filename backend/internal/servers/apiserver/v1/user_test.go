@@ -14,6 +14,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -71,16 +72,36 @@ func TestAPIServerV1_userMe(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name             string
-		withAuthContext  any
-		withStubAuthUser bool
-		wantResponse     userMeResponse
-		wantStatusCode   int
-		wantErr          string
+		name                          string
+		withAuthContext               any
+		withStubAuthUser              bool
+		withUpcomingClassGroupSession bool
+		wantResponse                  userMeResponse
+		wantStatusCode                int
+		wantErr                       string
 	}{
 		{
 			"request with valid auth context and auth context user in database",
 			tests.NewMockAuthContext(),
+			true,
+			false,
+			userMeResponse{
+				newSuccessResponse(),
+				database.User{
+					ID:    tests.MockAuthenticatorIDTokenName,
+					Name:  "",
+					Email: tests.MockAuthenticatorAccountPreferredUsername,
+					Role:  database.UserRoleSTUDENT,
+				},
+				[]database.GetUserUpcomingClassGroupSessionsRow{},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with upcoming class group sessions",
+			tests.NewMockAuthContext(),
+			true,
 			true,
 			userMeResponse{
 				newSuccessResponse(),
@@ -90,6 +111,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
 					Role:  database.UserRoleSTUDENT,
 				},
+				[]database.GetUserUpcomingClassGroupSessionsRow{},
 			},
 			http.StatusOK,
 			"",
@@ -98,6 +120,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			"request with invalid auth context",
 			time.Time{},
 			true,
+			false,
 			userMeResponse{},
 			http.StatusInternalServerError,
 			"unexpected auth context type",
@@ -105,6 +128,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 		{
 			"request with valid auth context but non-existent user in database",
 			tests.NewMockAuthContext(),
+			false,
 			false,
 			userMeResponse{},
 			http.StatusInternalServerError,
@@ -128,6 +152,22 @@ func TestAPIServerV1_userMe(t *testing.T) {
 				tests.StubAuthContextUser(t, ctx, v1.db.Q)
 			}
 
+			if tt.withUpcomingClassGroupSession {
+				createdSession := tests.StubClassGroupSession(
+					t, ctx, v1.db.Q,
+					pgtype.Timestamptz{Time: time.Now().Add(-time.Hour), Valid: true}, // Test ongoing session.
+					pgtype.Timestamptz{Time: time.Now().Add(time.Hour * 24), Valid: true},
+					uuid.NewString(),
+				)
+
+				_, err := v1.db.Q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
+					SessionID: createdSession.ID,
+					UserID:    tests.MockAuthenticatorIDTokenName,
+					Attended:  false,
+				})
+				a.Nil(err)
+			}
+
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, sessionUserId), nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
 			resp := v1.userMe(req)
@@ -144,6 +184,12 @@ func TestAPIServerV1_userMe(t *testing.T) {
 
 				tt.wantResponse.SessionUser.CreatedAt = actualResp.SessionUser.CreatedAt
 				tt.wantResponse.SessionUser.UpdatedAt = actualResp.SessionUser.UpdatedAt
+
+				if tt.withUpcomingClassGroupSession {
+					a.NotEmptyf(actualResp.UpcomingClassGroupSessions, "expected upcoming session")
+					tt.wantResponse.UpcomingClassGroupSessions = actualResp.UpcomingClassGroupSessions
+				}
+
 				a.Equal(tt.wantResponse, actualResp)
 			}
 		})

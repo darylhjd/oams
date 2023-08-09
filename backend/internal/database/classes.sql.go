@@ -102,42 +102,6 @@ func (q *Queries) GetClass(ctx context.Context, id int64) (Class, error) {
 	return i, err
 }
 
-const getClassesByIDs = `-- name: GetClassesByIDs :many
-SELECT id, code, year, semester, programme, au, created_at, updated_at
-FROM classes
-WHERE id = ANY ($1::BIGINT[])
-ORDER BY id
-`
-
-func (q *Queries) GetClassesByIDs(ctx context.Context, ids []int64) ([]Class, error) {
-	rows, err := q.db.Query(ctx, getClassesByIDs, ids)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Class
-	for rows.Next() {
-		var i Class
-		if err := rows.Scan(
-			&i.ID,
-			&i.Code,
-			&i.Year,
-			&i.Semester,
-			&i.Programme,
-			&i.Au,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listClasses = `-- name: ListClasses :many
 SELECT id, code, year, semester, programme, au, created_at, updated_at
 FROM classes

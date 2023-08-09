@@ -86,40 +86,6 @@ func (q *Queries) GetClassGroup(ctx context.Context, id int64) (ClassGroup, erro
 	return i, err
 }
 
-const getClassGroupsByIDs = `-- name: GetClassGroupsByIDs :many
-SELECT id, class_id, name, class_type, created_at, updated_at
-FROM class_groups
-WHERE id = ANY ($1::BIGINT[])
-ORDER BY id
-`
-
-func (q *Queries) GetClassGroupsByIDs(ctx context.Context, ids []int64) ([]ClassGroup, error) {
-	rows, err := q.db.Query(ctx, getClassGroupsByIDs, ids)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ClassGroup
-	for rows.Next() {
-		var i ClassGroup
-		if err := rows.Scan(
-			&i.ID,
-			&i.ClassID,
-			&i.Name,
-			&i.ClassType,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listClassGroups = `-- name: ListClassGroups :many
 SELECT id, class_id, name, class_type, created_at, updated_at
 FROM class_groups
