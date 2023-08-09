@@ -268,7 +268,7 @@ class _NavBarText extends StatelessWidget {
   final String _text;
   final Color? _color;
 
-  const _NavBarText(this._text, {Color? color, Key? key})
+  const _NavBarText(this._text, {Key? key, Color? color})
       : _color = color,
         super(key: key);
 

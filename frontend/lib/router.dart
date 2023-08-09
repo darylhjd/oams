@@ -61,7 +61,7 @@ GoRoute _loginRoute(ProviderRef<GoRouter> ref) {
         key: state.pageKey,
         child: LoginScreen(
           redirectUrl:
-              state.uri.queryParameters[APIClient.loginRedirectUrlParam] ?? "",
+              state.uri.queryParameters[APIClient.loginRedirectUrlParam],
         ),
       );
     },
