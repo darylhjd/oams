@@ -92,29 +92,59 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 	return i, err
 }
 
-const getUsersByIDs = `-- name: GetUsersByIDs :many
-SELECT id, name, email, role, created_at, updated_at
-FROM users
-WHERE id = ANY ($1::TEXT[])
-ORDER BY id
+const getUserUpcomingClassGroupSessions = `-- name: GetUserUpcomingClassGroupSessions :many
+SELECT c.code,
+       c.year,
+       c.semester,
+       cg.name,
+       cg.class_type,
+       cgs.start_time,
+       cgs.end_time,
+       cgs.venue
+FROM class_group_sessions cgs
+         INNER JOIN class_groups cg
+                    ON cgs.class_group_id = cg.id
+         INNER JOIN classes c
+                    ON cg.class_id = c.id
+WHERE cgs.id IN (SELECT session_id
+                 FROM session_enrollments
+                 WHERE user_id = $1)
+  AND cgs.end_time > NOW()
+ORDER BY cgs.start_time, cgs.end_time
 `
 
-func (q *Queries) GetUsersByIDs(ctx context.Context, ids []string) ([]User, error) {
-	rows, err := q.db.Query(ctx, getUsersByIDs, ids)
+type GetUserUpcomingClassGroupSessionsRow struct {
+	Code      string             `json:"code"`
+	Year      int32              `json:"year"`
+	Semester  string             `json:"semester"`
+	Name      string             `json:"name"`
+	ClassType ClassType          `json:"class_type"`
+	StartTime pgtype.Timestamptz `json:"start_time"`
+	EndTime   pgtype.Timestamptz `json:"end_time"`
+	Venue     string             `json:"venue"`
+}
+
+// Get information on a user's upcoming classes. This query returns all session enrollments for that user that are
+// currently happening or will happen in the future. The sessions are returned in ascending order of start time and then
+// end time.
+func (q *Queries) GetUserUpcomingClassGroupSessions(ctx context.Context, userID string) ([]GetUserUpcomingClassGroupSessionsRow, error) {
+	rows, err := q.db.Query(ctx, getUserUpcomingClassGroupSessions, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []GetUserUpcomingClassGroupSessionsRow
 	for rows.Next() {
-		var i User
+		var i GetUserUpcomingClassGroupSessionsRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.Code,
+			&i.Year,
+			&i.Semester,
 			&i.Name,
-			&i.Email,
-			&i.Role,
-			&i.CreatedAt,
-			&i.UpdatedAt,
+			&i.ClassType,
+			&i.StartTime,
+			&i.EndTime,
+			&i.Venue,
 		); err != nil {
 			return nil, err
 		}

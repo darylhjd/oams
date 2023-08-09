@@ -9,12 +9,6 @@ FROM class_groups
 WHERE id = $1
 LIMIT 1;
 
--- name: GetClassGroupsByIDs :many
-SELECT *
-FROM class_groups
-WHERE id = ANY (@ids::BIGINT[])
-ORDER BY id;
-
 -- name: CreateClassGroup :one
 INSERT INTO class_groups (class_id, name, class_type, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())

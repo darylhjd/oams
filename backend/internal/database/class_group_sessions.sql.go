@@ -96,41 +96,6 @@ func (q *Queries) GetClassGroupSession(ctx context.Context, id int64) (ClassGrou
 	return i, err
 }
 
-const getClassGroupSessionsByIDs = `-- name: GetClassGroupSessionsByIDs :many
-SELECT id, class_group_id, start_time, end_time, venue, created_at, updated_at
-FROM class_group_sessions
-WHERE id = ANY ($1::BIGINT[])
-ORDER BY id
-`
-
-func (q *Queries) GetClassGroupSessionsByIDs(ctx context.Context, ids []int64) ([]ClassGroupSession, error) {
-	rows, err := q.db.Query(ctx, getClassGroupSessionsByIDs, ids)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ClassGroupSession
-	for rows.Next() {
-		var i ClassGroupSession
-		if err := rows.Scan(
-			&i.ID,
-			&i.ClassGroupID,
-			&i.StartTime,
-			&i.EndTime,
-			&i.Venue,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listClassGroupSessions = `-- name: ListClassGroupSessions :many
 SELECT id, class_group_id, start_time, end_time, venue, created_at, updated_at
 FROM class_group_sessions

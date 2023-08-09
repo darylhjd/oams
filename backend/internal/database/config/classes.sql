@@ -9,12 +9,6 @@ FROM classes
 WHERE id = $1
 LIMIT 1;
 
--- name: GetClassesByIDs :many
-SELECT *
-FROM classes
-WHERE id = ANY (@ids::BIGINT[])
-ORDER BY id;
-
 -- name: CreateClass :one
 INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
