@@ -6,36 +6,36 @@ import 'package:frontend/router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-// NavBar is a widget that shows the app's navigation bar.
+// The navigation bar for the app.
 class NavBar extends StatelessWidget {
-  static const double height = 70;
-  static const double padding = 10;
-  static List<BoxShadow>? boxShadow = kElevationToShadow[8];
-  static const double borderRadius = 10;
+  static const double _height = 70;
+  static const double _padding = 10;
+  static final List<BoxShadow>? _boxShadow = kElevationToShadow[8];
+  static const double _borderRadius = 10;
 
   const NavBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: height,
+      height: _height,
       child: Container(
-        padding: const EdgeInsets.all(padding),
+        padding: const EdgeInsets.all(_padding),
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColorLight,
-          boxShadow: boxShadow,
+          boxShadow: _boxShadow,
           borderRadius: const BorderRadius.all(
-            Radius.circular(borderRadius),
+            Radius.circular(_borderRadius),
           ),
         ),
         child: ResponsiveBreakpoints.of(context).isMobile
-            ? mobile(context)
-            : desktop(context),
+            ? _mobile(context)
+            : _desktop(context),
       ),
     );
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return const Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,7 +46,7 @@ class NavBar extends StatelessWidget {
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -57,70 +57,67 @@ class NavBar extends StatelessWidget {
   }
 }
 
-// _Logo is a widget that shows the app logo on the navigation bar.
+// Shows the app logo on the navigation bar. Doubles as a button to go back to
+// the index screen on press.
 class _Logo extends StatelessWidget {
-  static const double width = 100;
-  static const double height = double.infinity;
+  static const double _width = 100;
+  static const double _height = double.infinity;
 
-  static const String logoPath = "assets/logo.png";
+  static const String _logoPath = "assets/logo.png";
 
   const _Logo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width,
-      height: height,
+      width: _width,
+      height: _height,
       child: IconButton(
-        icon: Image.asset(logoPath),
+        icon: Image.asset(_logoPath),
         onPressed: () => context.goNamed(Routes.index.name),
       ),
     );
   }
 }
 
-// _Options is a widget that stores all the navigation bar items except the logo.
+// Stores all the navigation bar items except the logo.
 class _Options extends ConsumerWidget {
-  final bool isMobile;
+  final bool _isMobile;
 
-  const _Options(this.isMobile, {Key? key}) : super(key: key);
+  const _Options(this._isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoggedIn = ref.read(sessionProvider);
-    return isMobile
-        ? mobile(context, isLoggedIn)
-        : desktop(context, isLoggedIn);
+    return _isMobile
+        ? _mobile(context, isLoggedIn)
+        : _desktop(context, isLoggedIn);
   }
 
-  Widget mobile(BuildContext context, bool isLoggedIn) {
+  Widget _mobile(BuildContext context, bool isLoggedIn) {
     var items = <PopupMenuItem<Widget>>[
       const PopupMenuItem(
         padding: EdgeInsets.zero,
-        child: _AboutItem(true),
+        child: _AboutButton(true),
       ),
     ];
 
     if (isLoggedIn) {
-      items.addAll(
-        [
-          const PopupMenuItem(
-            padding: EdgeInsets.zero,
-            child: _ProfileItem(true),
-          ),
-          const PopupMenuItem(
-            padding: EdgeInsets.zero,
-            child: _LogoutItem(true),
-          )
-        ],
-      );
-    } else {
-      items.add(
+      items.addAll([
         const PopupMenuItem(
           padding: EdgeInsets.zero,
-          child: _LoginItem(true),
+          child: _ProfileButton(true),
         ),
-      );
+        const PopupMenuItem(
+          padding: EdgeInsets.zero,
+          child: _LogoutButton(),
+        )
+      ]);
+    } else {
+      items.add(const PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: _LoginButton(true),
+      ));
     }
 
     return PopupMenuButton(
@@ -129,130 +126,124 @@ class _Options extends ConsumerWidget {
     );
   }
 
-  Widget desktop(BuildContext context, bool isLoggedIn) {
-    var children = <Widget>[
-      const _AboutItem(false),
-    ];
-
-    Widget newChild;
-    if (isLoggedIn) {
-      newChild = const _ProfileItem(false);
-    } else {
-      newChild = const _LoginItem(false);
-    }
-
-    children.add(newChild);
-
+  Widget _desktop(BuildContext context, bool isLoggedIn) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: children,
+      children: [
+        const _AboutButton(false),
+        isLoggedIn ? const _ProfileButton(false) : const _LoginButton(false),
+      ],
     );
   }
 }
 
-// _AboutItem is a widget that shows the About item on the navigation bar.
-class _AboutItem extends StatelessWidget {
-  final Widget text = const _NavBarText("About");
-  final bool isMobile;
+// Shows the About button on the navigation bar.
+class _AboutButton extends StatelessWidget {
+  final Widget _text = const _NavBarText("About");
+  final bool _isMobile;
 
-  const _AboutItem(this.isMobile, {Key? key}) : super(key: key);
+  const _AboutButton(this._isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? _mobile(context) : _desktop(context);
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return PopupMenuItem<Widget>(
       onTap: () => context.goNamed(Routes.about.name),
-      child: text,
+      child: _text,
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return TextButton(
       onPressed: () => context.goNamed(Routes.about.name),
-      child: text,
+      child: _text,
     );
   }
 }
 
-// _ProfileItem is a widget that shows the Profile item on the navigation bar.
-class _ProfileItem extends StatelessWidget {
-  final Widget text = const _NavBarText("Profile");
-  final bool isMobile;
+// Shows the Profile button on the navigation bar.
+class _ProfileButton extends StatelessWidget {
+  final Widget _text = const _NavBarText("Profile");
+  final bool _isMobile;
 
-  const _ProfileItem(this.isMobile, {Key? key}) : super(key: key);
+  const _ProfileButton(this._isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? _mobile(context) : _desktop(context);
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return PopupMenuItem<Widget>(
-      child: text,
+      child: _text,
       onTap: () => context.goNamed(Routes.profile.name),
     );
   }
 
-  Widget desktop(BuildContext context) {
-    var items = <PopupMenuItem<Widget>>[
-      PopupMenuItem(
-        onTap: () => context.goNamed(Routes.profile.name),
-        child: text,
-      ),
-      const PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: _LogoutItem(false),
-      ),
-    ];
-
+  Widget _desktop(BuildContext context) {
     return PopupMenuButton(
       icon: const Icon(Icons.account_circle_rounded),
-      itemBuilder: (context) => items,
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          onTap: () => context.goNamed(Routes.profile.name),
+          child: _text,
+        ),
+        const PopupMenuItem(
+          padding: EdgeInsets.zero,
+          child: _LogoutButton(),
+        ),
+      ],
     );
   }
 }
 
-// _LoginItem is a widget that shows the Login item on the navigation bar.
-class _LoginItem extends StatelessWidget {
-  final Widget text = const _NavBarText("Login");
-  final bool isMobile;
+// Shows the Login button on the navigation bar.
+class _LoginButton extends StatelessWidget {
+  final Widget _text = const _NavBarText("Login");
+  final bool _isMobile;
 
-  const _LoginItem(this.isMobile, {Key? key}) : super(key: key);
+  const _LoginButton(this._isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? _mobile(context) : _desktop(context);
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return PopupMenuItem<Widget>(
-      child: text,
+      child: _text,
       onTap: () => context.goNamed(Routes.login.name),
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return TextButton(
-      child: text,
+      child: _text,
       onPressed: () => context.goNamed(Routes.login.name),
     );
   }
 }
 
-// _LogoutItem is a widget that allows user to logout on click.
-class _LogoutItem extends ConsumerWidget {
-  static const String text = "Logout";
-  final bool isMobile;
+// Shows the Logout button on the navigation bar.
+class _LogoutButton extends ConsumerWidget {
+  final Widget _text = const _NavBarText("Logout", color: Colors.red);
 
-  const _LogoutItem(this.isMobile, {Key? key}) : super(key: key);
+  const _LogoutButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuItem(
-      onTap: () => logoutAction(context, ref),
+      onTap: () async {
+        await APIClient.logout();
+        ref.read(sessionProvider.notifier).update((_) => false);
+        ref.invalidate(sessionUserProvider);
+
+        // Do not depend on context mounting for routing in async function.
+        ref.read(routerProvider).goNamed(Routes.index.name);
+      },
       child: Text.rich(
         TextSpan(
           children: [
@@ -263,44 +254,29 @@ class _LogoutItem extends ConsumerWidget {
               ),
             ),
             WidgetSpan(
-              child: Text(
-                text,
-                style: _navBarTextStyle(context)?.copyWith(color: Colors.red),
-              ),
+              child: _text,
             ),
           ],
         ),
       ),
     );
   }
-
-  Future<void> logoutAction(BuildContext context, WidgetRef ref) async {
-    final ok = await APIClient.logout();
-    if (ok && context.mounted) {
-      ref.read(sessionProvider.notifier).update((_) => false);
-      ref.invalidate(sessionUserProvider);
-      context.goNamed(Routes.index.name);
-    }
-  }
 }
 
-// _NavBarText helps to standardise the text in the navigation bar.
+// Helps to standardise the text style in the navigation bar.
 class _NavBarText extends StatelessWidget {
-  final String text;
+  final String _text;
+  final Color? _color;
 
-  const _NavBarText(this.text, {Key? key}) : super(key: key);
+  const _NavBarText(this._text, {Color? color, Key? key})
+      : _color = color,
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      text,
-      style: _navBarTextStyle(context),
+      _text,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(color: _color),
     );
   }
-}
-
-// _navBarTextStyle is a helper function to return the default text style
-// for text in teh navigation bar.
-TextStyle? _navBarTextStyle(BuildContext context) {
-  return Theme.of(context).textTheme.titleMedium;
 }
