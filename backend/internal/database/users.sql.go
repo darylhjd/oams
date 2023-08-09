@@ -93,7 +93,14 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 }
 
 const getUserUpcomingClassGroupSessions = `-- name: GetUserUpcomingClassGroupSessions :many
-SELECT c.code, c.year, c.semester, cg.name, cg.class_type, cgs.start_time, cgs.end_time, cgs.venue
+SELECT c.code,
+       c.year,
+       c.semester,
+       cg.name,
+       cg.class_type,
+       cgs.start_time,
+       cgs.end_time,
+       cgs.venue
 FROM class_group_sessions cgs
          INNER JOIN class_groups cg
                     ON cgs.class_group_id = cg.id
