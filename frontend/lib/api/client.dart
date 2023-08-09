@@ -1,71 +1,90 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:frontend/api/models.dart';
 import 'package:frontend/env/env.dart';
 import 'package:http/browser_client.dart';
 
-import 'models.dart';
-
-// APIClient helps to interface with the OAMS API.
 class APIClient {
-  static final client = () {
+  static final _client = () {
     var client = BrowserClient();
     client.withCredentials = true;
     return client;
   }();
 
-  static Uri apiUri = Uri.parse("${apiServerHost()}:${apiServerPort()}");
-
-  static String defaultRedirectUrl = "${webServerHost()}:${webServerPort()}";
-
-  static const String loginPath = "api/v1/login";
+  static final Uri _apiUri = Uri.parse("${apiServerHost()}:${apiServerPort()}");
+  static final String _defaultRedirectUrl =
+      "${webServerHost()}:${webServerPort()}";
   static const String loginRedirectUrlParam = "redirect_url";
-  static const String logoutPath = "api/v1/logout";
-  static const String userMePath = "api/v1/users/me";
 
-  // getLoginURL gets a login URL from the APIServer.
+  static const String _loginPath = "api/v1/login";
+  static const String _logoutPath = "api/v1/logout";
+  static const String _userMePath = "api/v1/users/me";
+  static const String _userPath = "api/v1/users/";
+
+  // Get login URL to redirect user to SSO login site.
   static Future<String> getLoginURL(String returnTo) async {
     if (returnTo.isEmpty) {
-      returnTo = defaultRedirectUrl;
+      returnTo = _defaultRedirectUrl;
     }
 
-    final uri = apiUri.replace(
-      path: loginPath,
+    final uri = _apiUri.replace(
+      path: _loginPath,
       queryParameters: {
         loginRedirectUrlParam: returnTo,
       },
     );
 
-    final response = await client.get(uri);
+    final response = await _client.get(uri);
+    final body = jsonDecode(response.body);
+
     if (response.statusCode != HttpStatus.ok) {
-      return Future.error(const HttpException("cannot get login url"));
+      return Future.error(HttpException(ErrorResponse.fromJson(body).message));
     }
 
-    final loginResponse = LoginResponse.fromJson(jsonDecode(response.body));
-    return loginResponse.redirectUrl;
+    return LoginResponse.fromJson(body).redirectUrl;
   }
 
-  // logout removes the current logged in session.
+  // Remove the current user session, and also helps unset the session cookie.
   static Future<bool> logout() async {
-    final uri = apiUri.replace(
-      path: logoutPath,
+    final uri = _apiUri.replace(
+      path: _logoutPath,
     );
 
-    final response = await client.get(uri);
+    final response = await _client.get(uri);
     return response.statusCode == HttpStatus.ok;
   }
 
-  // getSessionUserInfo gets the session user info.
-  static Future<SessionUserInfoResponse> getSessionUserInfo() async {
-    final uri = apiUri.replace(
-      path: userMePath,
+  // Get current user session information. For more information on the user, use
+  // the GET endpoint for user.
+  static Future<UserMeResponse> getUserMe() async {
+    final uri = _apiUri.replace(
+      path: _userMePath,
     );
 
-    final response = await client.get(uri);
+    final response = await _client.get(uri);
+    final body = jsonDecode(response.body);
+
     if (response.statusCode != HttpStatus.ok) {
-      return Future.error(const HttpException("cannot get user details"));
+      return Future.error(HttpException(ErrorResponse.fromJson(body).message));
     }
 
-    return SessionUserInfoResponse.fromJson(jsonDecode(response.body));
+    return UserMeResponse.fromJson(body);
+  }
+
+  // Get a user information by ID.
+  static Future<GetUserResponse> getUser(String id) async {
+    final uri = _apiUri.replace(
+      path: "$_userPath$id",
+    );
+
+    final response = await (_client.get(uri));
+    final body = jsonDecode(response.body);
+
+    if (response.statusCode != HttpStatus.ok) {
+      return Future.error(HttpException(ErrorResponse.fromJson(body).message));
+    }
+
+    return GetUserResponse.fromJson(body);
   }
 }

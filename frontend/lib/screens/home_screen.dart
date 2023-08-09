@@ -6,53 +6,51 @@ import 'package:frontend/screens/screen_template.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
-// HomeScreen shows the home screen.
+// Shows the home screen.
 class HomeScreen extends ConsumerWidget {
-  static const double mobilePadding = 10;
-  static const double desktopPadding = 20;
-
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isLoggedIn = ref.read(sessionProvider);
-    return isLoggedIn ? const _HomeScreenLoggedIn() : const _HomeScreenGuest();
+    return ref.read(sessionProvider)
+        ? const _HomeScreenLoggedIn()
+        : const _HomeScreenGuest();
   }
 }
 
-// _HomeScreenLoggedIn shows the logged-in version of the home screen.
+// Shows the logged-in version of the home screen.
 class _HomeScreenLoggedIn extends ConsumerWidget {
-  static const double mobilePadding = 10;
-  static const double desktopPadding = 20;
+  static const double _mobilePadding = 10;
+  static const double _desktopPadding = 20;
 
   const _HomeScreenLoggedIn();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ScreenTemplate(
-      ResponsiveBreakpoints.of(context).isMobile ? mobile() : desktop(),
+      ResponsiveBreakpoints.of(context).isMobile ? _mobile() : _desktop(),
     );
   }
 
-  Widget mobile() {
+  Widget _mobile() {
     return ListView(
-      padding: const EdgeInsets.all(mobilePadding),
+      padding: const EdgeInsets.all(_mobilePadding),
       children: const [],
     );
   }
 
-  Widget desktop() {
+  Widget _desktop() {
     return ListView(
-      padding: const EdgeInsets.all(desktopPadding),
+      padding: const EdgeInsets.all(_desktopPadding),
       children: const [],
     );
   }
 }
 
-// _HomeScreenGuest shows the guest version of the home screen.
+// Shows the guest version of the home screen.
 class _HomeScreenGuest extends StatelessWidget {
-  static const double mobilePadding = 10;
-  static const double desktopPadding = 20;
+  static const double _mobilePadding = 10;
+  static const double _desktopPadding = 20;
 
   const _HomeScreenGuest();
 
@@ -60,14 +58,14 @@ class _HomeScreenGuest extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenTemplate(
       ResponsiveBreakpoints.of(context).isMobile
-          ? mobile(context)
-          : desktop(context),
+          ? _mobile(context)
+          : _desktop(context),
     );
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: mobilePadding),
+      padding: const EdgeInsets.symmetric(vertical: _mobilePadding),
       children: const [
         _WelcomeBanner(true),
         _FeaturesDivider(),
@@ -79,9 +77,9 @@ class _HomeScreenGuest extends StatelessWidget {
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: desktopPadding),
+      padding: const EdgeInsets.symmetric(vertical: _desktopPadding),
       children: const [
         _WelcomeBanner(false),
         _FeaturesDivider(),
@@ -94,64 +92,64 @@ class _HomeScreenGuest extends StatelessWidget {
   }
 }
 
-// _WelcomeBanner is applicable only to the guest home screen.
+// Shows the welcome banner on the guest home screen.
 class _WelcomeBanner extends StatelessWidget {
-  static const String bannerText =
+  static const String _bannerText =
       "Welcome to the Online Attendance Management System!";
-  static const double buttonRadius = 5;
-  static const String buttonText = "Get started";
+  static const double _buttonRadius = 5;
+  static const String _buttonText = "Get started";
 
-  static const double mobilePadding = 10;
-  static const double mobileMargin = 50;
-  static const double mobileButtonVerticalPadding = 20;
-  static const double mobileButtonHorizontalPadding = 15;
-  static const double mobileButtonFontSize = 18;
+  static const double _mobilePadding = 10;
+  static const double _mobileMargin = 50;
+  static const double _mobileButtonVerticalPadding = 20;
+  static const double _mobileButtonHorizontalPadding = 15;
+  static const double _mobileButtonFontSize = 18;
 
-  static const double desktopPadding = 20;
-  static const double desktopMargin = 100;
-  static const double desktopButtonVerticalPadding = 30;
-  static const double desktopButtonHorizontalPadding = 20;
-  static const double desktopButtonFontSize = 24;
+  static const double _desktopPadding = 20;
+  static const double _desktopMargin = 100;
+  static const double _desktopButtonVerticalPadding = 30;
+  static const double _desktopButtonHorizontalPadding = 20;
+  static const double _desktopButtonFontSize = 24;
 
-  final bool isMobile;
+  final bool _isMobile;
 
-  const _WelcomeBanner(this.isMobile);
+  const _WelcomeBanner(this._isMobile);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? _mobile(context) : _desktop(context);
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return Card(
       child: Container(
-        padding: const EdgeInsets.all(mobilePadding),
-        margin: const EdgeInsets.symmetric(vertical: mobileMargin),
+        padding: const EdgeInsets.all(_mobilePadding),
+        margin: const EdgeInsets.symmetric(vertical: _mobileMargin),
         alignment: Alignment.center,
         child: Column(
           children: [
             Text(
-              bannerText,
+              _bannerText,
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall
                   ?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: mobilePadding),
+            const SizedBox(height: _mobilePadding),
             FilledButton(
               onPressed: () => context.goNamed(Routes.login.name),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
-                  vertical: mobileButtonVerticalPadding,
-                  horizontal: mobileButtonHorizontalPadding,
+                  vertical: _mobileButtonVerticalPadding,
+                  horizontal: _mobileButtonHorizontalPadding,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(buttonRadius),
+                  borderRadius: BorderRadius.circular(_buttonRadius),
                 ),
-                textStyle: const TextStyle(fontSize: mobileButtonFontSize),
+                textStyle: const TextStyle(fontSize: _mobileButtonFontSize),
               ),
-              child: const Text(buttonText),
+              child: const Text(_buttonText),
             )
           ],
         ),
@@ -159,36 +157,36 @@ class _WelcomeBanner extends StatelessWidget {
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return Card(
       child: Container(
-        padding: const EdgeInsets.all(desktopPadding),
-        margin: const EdgeInsets.symmetric(vertical: desktopMargin),
+        padding: const EdgeInsets.all(_desktopPadding),
+        margin: const EdgeInsets.symmetric(vertical: _desktopMargin),
         alignment: Alignment.center,
         child: Column(
           children: [
             Text(
-              bannerText,
+              _bannerText,
               style: Theme.of(context)
                   .textTheme
                   .headlineLarge
                   ?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: desktopPadding),
+            const SizedBox(height: _desktopPadding),
             FilledButton(
               onPressed: () => context.goNamed(Routes.login.name),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
-                  vertical: desktopButtonVerticalPadding,
-                  horizontal: desktopButtonHorizontalPadding,
+                  vertical: _desktopButtonVerticalPadding,
+                  horizontal: _desktopButtonHorizontalPadding,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(buttonRadius),
+                  borderRadius: BorderRadius.circular(_buttonRadius),
                 ),
-                textStyle: const TextStyle(fontSize: desktopButtonFontSize),
+                textStyle: const TextStyle(fontSize: _desktopButtonFontSize),
               ),
-              child: const Text(buttonText),
+              child: const Text(_buttonText),
             ),
           ],
         ),
@@ -197,11 +195,11 @@ class _WelcomeBanner extends StatelessWidget {
   }
 }
 
-// _FeaturesDivider is applicable only to the guest home screen.
-// It shows the divider between the welcome banner and the bottom.
+// Shows the divider between the welcome banner and the rest of the content on
+// the guest home screen.
 class _FeaturesDivider extends StatelessWidget {
-  static const double mobilePadding = 20;
-  static const double desktopPadding = 30;
+  static const double _mobilePadding = 20;
+  static const double _desktopPadding = 30;
 
   const _FeaturesDivider();
 
@@ -210,8 +208,8 @@ class _FeaturesDivider extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: ResponsiveBreakpoints.of(context).isMobile
-            ? mobilePadding
-            : desktopPadding,
+            ? _mobilePadding
+            : _desktopPadding,
       ),
       child: const Column(
         children: [
@@ -226,76 +224,73 @@ class _FeaturesDivider extends StatelessWidget {
   }
 }
 
-// _Features is only applicable to the guest home screen.
-// It contains the list of feature "selling points" of OAMS.
+// Contains the list of features of OAMS on the guest home screen.
 class _Features extends StatelessWidget {
-  final bool isMobile;
+  final bool _isMobile;
 
-  const _Features(this.isMobile);
+  const _Features(this._isMobile);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop();
+    return _isMobile ? _mobile(context) : _desktop();
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return const Column(
       children: [
         _CloudBasedFeature(true),
         _DetailedSystemDashboard(true),
-        _CloudBasedFeature(true),
       ],
     );
   }
 
-  Widget desktop() {
+  Widget _desktop() {
     return const Column(
       children: [
         _CloudBasedFeature(false),
         _DetailedSystemDashboard(false),
-        _CloudBasedFeature(false),
       ],
     );
   }
 }
 
-// _FeatureCard provides the template for a feature showcase.
+// Provides the template for a feature showcase.
 class _FeatureCard extends StatelessWidget {
-  static const double mobileCardMargin = 10;
-  static const double mobilePadding = 10;
-  static const double mobileMargin = 20;
+  static const double _mobileCardMargin = 10;
+  static const double _mobilePadding = 10;
+  static const double _mobileMargin = 20;
 
-  static const double desktopPadding = 20;
-  static const double desktopMargin = 20;
+  static const double _desktopPadding = 20;
+  static const double _desktopMargin = 20;
 
-  final String title;
-  final String body;
-  final bool isMobile;
+  final String _title;
+  final String _body;
+  final bool _isMobile;
 
-  const _FeatureCard(this.title, this.body, this.isMobile);
+  const _FeatureCard(this._title, this._body, this._isMobile);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? _mobile(context) : _desktop(context);
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: mobileCardMargin),
+      margin: const EdgeInsets.symmetric(vertical: _mobileCardMargin),
       child: Container(
-        padding: const EdgeInsets.all(mobilePadding),
-        margin: const EdgeInsets.symmetric(vertical: mobileMargin),
+        padding: const EdgeInsets.all(_mobilePadding),
+        margin: const EdgeInsets.symmetric(vertical: _mobileMargin),
         alignment: Alignment.center,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              _title,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: mobilePadding),
+            const SizedBox(height: _mobilePadding),
             Text(
-              body,
+              _body,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
@@ -304,22 +299,22 @@ class _FeatureCard extends StatelessWidget {
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return Card(
       child: Container(
-        padding: const EdgeInsets.all(desktopPadding),
-        margin: const EdgeInsets.symmetric(vertical: desktopMargin),
+        padding: const EdgeInsets.all(_desktopPadding),
+        margin: const EdgeInsets.symmetric(vertical: _desktopMargin),
         alignment: Alignment.topLeft,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              _title,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            const SizedBox(height: desktopPadding),
+            const SizedBox(height: _desktopPadding),
             Text(
-              body,
+              _body,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
@@ -329,118 +324,118 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
-// _CloudBasedFeature shows the online cloud-based feature of OAMS.
+// Shows the online cloud-based feature of OAMS.
 class _CloudBasedFeature extends StatelessWidget {
-  static const String title = "Cloud-based management system";
-  static const String body =
+  static const String _title = "Cloud-based management system";
+  static const String _body =
       "Say goodbye to cumbersome paper-based attendance sheets. OAMS stores attendance data online so you can stay up-to-date wherever you are - instantly.";
 
-  final bool isMobile;
+  final bool _isMobile;
 
-  const _CloudBasedFeature(this.isMobile);
+  const _CloudBasedFeature(this._isMobile);
 
   @override
   Widget build(BuildContext context) {
-    return _FeatureCard(title, body, isMobile);
+    return _FeatureCard(_title, _body, _isMobile);
   }
 }
 
-// _DetailedSystemDashboard shows the reports and analytics feature of OAMS.
+// Shows the reports and analytics feature of OAMS.
 class _DetailedSystemDashboard extends StatelessWidget {
-  static const String title = "Detailed system dashboard";
-  static const String body =
+  static const String _title = "Detailed system dashboard";
+  static const String _body =
       "Get comprehensive access to attendance data. Our system dashboard provides you with detailed visualisations of your most important analytics - all at your fingertips.";
 
-  final bool isMobile;
+  final bool _isMobile;
 
-  const _DetailedSystemDashboard(this.isMobile);
+  const _DetailedSystemDashboard(this._isMobile);
 
   @override
   Widget build(BuildContext context) {
-    return _FeatureCard(title, body, isMobile);
+    return _FeatureCard(_title, _body, _isMobile);
   }
 }
 
-// _CallToAction is the final call to the user to sign up.
+// The final call to the user to sign up.
 class _FinalActionCall extends StatelessWidget {
-  static const String callText = "Try OAMS now.";
-  static const double buttonRadius = 5;
-  static const String buttonText = "Sign Up/Login";
+  static const String _callText = "Try OAMS now.";
+  static const double _buttonRadius = 5;
+  static const String _buttonText = "Sign Up/Login";
 
-  static const double mobilePadding = 10;
-  static const double mobileMargin = 40;
-  static const double mobileButtonFontSize = 20;
-  static const double mobileButtonVerticalPadding = 15;
-  static const double mobileButtonHorizontalPadding = 10;
+  static const double _mobilePadding = 10;
+  static const double _mobileMargin = 40;
+  static const double _mobileButtonFontSize = 20;
+  static const double _mobileButtonVerticalPadding = 15;
+  static const double _mobileButtonHorizontalPadding = 10;
 
-  static const double desktopPadding = 20;
-  static const double desktopMargin = 100;
-  static const double desktopButtonFontSize = 24;
-  static const double desktopButtonVerticalPadding = 20;
-  static const double desktopButtonHorizontalPadding = 10;
+  static const double _desktopPadding = 20;
+  static const double _desktopMargin = 100;
+  static const double _desktopButtonFontSize = 24;
+  static const double _desktopButtonVerticalPadding = 20;
+  static const double _desktopButtonHorizontalPadding = 10;
 
-  final bool isMobile;
+  final bool _isMobile;
 
-  const _FinalActionCall(this.isMobile);
+  const _FinalActionCall(this._isMobile);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? _mobile(context) : _desktop(context);
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: mobileMargin),
+      margin: const EdgeInsets.symmetric(vertical: _mobileMargin),
       child: Column(
         children: [
           Text(
-            callText,
+            _callText,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          const SizedBox(height: mobilePadding),
+          const SizedBox(height: _mobilePadding),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(
-                vertical: mobileButtonVerticalPadding,
-                horizontal: mobileButtonHorizontalPadding,
+                vertical: _mobileButtonVerticalPadding,
+                horizontal: _mobileButtonHorizontalPadding,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(buttonRadius),
+                borderRadius: BorderRadius.circular(_buttonRadius),
               ),
-              textStyle: const TextStyle(fontSize: mobileButtonFontSize),
+              textStyle: const TextStyle(fontSize: _mobileButtonFontSize),
             ),
             onPressed: () => context.goNamed(Routes.login.name),
-            child: const Text(buttonText),
+            child: const Text(_buttonText),
           )
         ],
       ),
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: desktopMargin),
+      margin: const EdgeInsets.symmetric(vertical: _desktopMargin),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            callText,
+            _callText,
             style: Theme.of(context).textTheme.headlineLarge,
           ),
-          const SizedBox(width: desktopPadding),
+          const SizedBox(width: _desktopPadding),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(
-                vertical: desktopButtonVerticalPadding,
-                horizontal: desktopButtonHorizontalPadding,
+                vertical: _desktopButtonVerticalPadding,
+                horizontal: _desktopButtonHorizontalPadding,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(buttonRadius),
+                borderRadius: BorderRadius.circular(_buttonRadius),
               ),
-              textStyle: const TextStyle(fontSize: desktopButtonFontSize),
+              textStyle: const TextStyle(fontSize: _desktopButtonFontSize),
             ),
             onPressed: () => context.goNamed(Routes.login.name),
-            child: const Text(buttonText),
+            child: const Text(_buttonText),
           ),
         ],
       ),

@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/breakpoint.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
-// main is the entry point to the app.
 void main() {
   usePathUrlStrategy();
   checkEnvVars();
@@ -19,7 +18,6 @@ void main() {
   );
 }
 
-// OAMSFrontend is the MaterialApp for OAM's frontend.
 class OAMSFrontend extends ConsumerWidget {
   static const String title = "OAMS";
 

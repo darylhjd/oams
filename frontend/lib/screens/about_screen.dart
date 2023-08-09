@@ -2,32 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/screen_template.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
-// AboutScreen shows information about the app.
+// Shows information about the app.
 class AboutScreen extends StatelessWidget {
-  static const double mobilePadding = 10;
-  static const double desktopPadding = 20;
+  static const double _mobilePadding = 10;
+  static const double _desktopPadding = 20;
 
   const AboutScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ScreenTemplate(
-      ResponsiveBreakpoints.of(context).isMobile ? mobile() : desktop(),
+      ResponsiveBreakpoints.of(context).isMobile ? _mobile() : _desktop(),
     );
   }
 
-  Widget mobile() {
+  Widget _mobile() {
     return ListView(
-      padding: const EdgeInsets.all(mobilePadding),
+      padding: const EdgeInsets.all(_mobilePadding),
       children: const [
         _PoweredByFlutter(true),
       ],
     );
   }
 
-  Widget desktop() {
+  Widget _desktop() {
     return ListView(
-      padding: const EdgeInsets.all(desktopPadding),
+      padding: const EdgeInsets.all(_desktopPadding),
       children: const [
         _PoweredByFlutter(false),
       ],
@@ -35,46 +35,46 @@ class AboutScreen extends StatelessWidget {
   }
 }
 
-// _PoweredByFlutter is the widget that shows the webpage is created with Flutter.
+// Widget that shows that the webpage is created with Flutter.
 class _PoweredByFlutter extends StatelessWidget {
-  static const double mobileSize = 100;
-  static const double desktopSize = 200;
-  static const String tagline = "Powered by:";
-  final bool isMobile;
+  static const double _mobileSize = 100;
+  static const double _desktopSize = 200;
+  static const String _tagline = "Powered by:";
+  final bool _isMobile;
 
-  const _PoweredByFlutter(this.isMobile, {Key? key}) : super(key: key);
+  const _PoweredByFlutter(this._isMobile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? _mobile(context) : _desktop(context);
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          tagline,
+          _tagline,
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const FlutterLogo(
-          size: mobileSize,
+          size: _mobileSize,
           style: FlutterLogoStyle.stacked,
         ),
       ],
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          tagline,
+          _tagline,
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const FlutterLogo(
-          size: desktopSize,
+          size: _desktopSize,
           style: FlutterLogoStyle.horizontal,
         ),
       ],

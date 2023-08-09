@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend/router.dart';
 import 'package:go_router/go_router.dart';
 
+// Shows a dialog on the screen to inform a logged session user that the session
+// has expired.
 class InvalidSession extends StatelessWidget {
   const InvalidSession({Key? key}) : super(key: key);
 
@@ -15,8 +17,9 @@ class InvalidSession extends StatelessWidget {
           context: context,
           builder: (context) {
             return AlertDialog(
-              content: const Text("You have been logged out. "
-                  "Please login again."),
+              content: const Text(
+                "Your session has been invalidated. Please login again.",
+              ),
               actions: [
                 TextButton(
                   child: const Text("Okay!"),

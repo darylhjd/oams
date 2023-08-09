@@ -6,50 +6,48 @@ import 'package:frontend/screens/screen_template.dart';
 import 'package:frontend/widgets/dialogs.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
-// ProfileScreen shows the profile screen.
+// Shows the profile screen.
 class ProfileScreen extends ConsumerWidget {
-  static const double mobilePadding = 30;
-  static const double desktopPadding = 40;
+  static const double _mobilePadding = 30;
+  static const double _desktopPadding = 40;
 
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var userAsync = ref.watch(sessionUserProvider);
-
     return ScreenTemplate(
-      userAsync.when(
-        data: (data) => ResponsiveBreakpoints.of(context).isMobile
-            ? mobile(context, data)
-            : desktop(context, data),
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (error, stackTrace) => const InvalidSession(),
-      ),
+      ref.watch(sessionUserProvider).when(
+            data: (data) => ResponsiveBreakpoints.of(context).isMobile
+                ? _mobile(context, data)
+                : _desktop(context, data),
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            error: (error, stackTrace) => const InvalidSession(),
+          ),
     );
   }
 
-  Widget mobile(BuildContext context, User user) {
+  Widget _mobile(BuildContext context, User user) {
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: mobilePadding),
+      padding: const EdgeInsets.symmetric(vertical: _mobilePadding),
       children: [
         _NameHeader(true, user),
-        const SizedBox(height: mobilePadding),
+        const SizedBox(height: _mobilePadding),
         _DetailsCard(true, user),
       ],
     );
   }
 
-  Widget desktop(BuildContext context, User user) {
+  Widget _desktop(BuildContext context, User user) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: desktopPadding),
+      padding: const EdgeInsets.symmetric(vertical: _desktopPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: const EdgeInsets.fromLTRB(0, 0, desktopPadding, 0),
+            padding: const EdgeInsets.fromLTRB(0, 0, _desktopPadding, 0),
             child: _NameHeader(false, user),
           ),
           Flexible(
@@ -65,49 +63,49 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-// _NameHeader shows as a larger text the name of a User.
+// Shows the ID and name of the user.
 class _NameHeader extends StatelessWidget {
-  final User user;
-  final bool isMobile;
+  final User _user;
+  final bool _isMobile;
 
-  const _NameHeader(this.isMobile, this.user);
+  const _NameHeader(this._isMobile, this._user);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? _mobile(context) : _desktop(context);
   }
 
-  Widget mobile(BuildContext context) {
+  Widget _mobile(BuildContext context) {
     return Column(
       children: [
         Text(
-          user.id,
+          _user.id,
           style: Theme.of(context)
               .textTheme
               .headlineLarge
               ?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
-          user.name,
+          _user.name,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
       ],
     );
   }
 
-  Widget desktop(BuildContext context) {
+  Widget _desktop(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          user.id,
+          _user.id,
           style: Theme.of(context)
               .textTheme
               .headlineLarge
               ?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
-          user.name,
+          _user.name,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
       ],
@@ -117,14 +115,14 @@ class _NameHeader extends StatelessWidget {
 
 // _DetailsCard shows the details of the user.
 class _DetailsCard extends StatelessWidget {
-  final User user;
-  final bool isMobile;
+  final User _user;
+  final bool _isMobile;
 
-  const _DetailsCard(this.isMobile, this.user);
+  const _DetailsCard(this._isMobile, this._user);
 
   @override
   Widget build(BuildContext context) {
-    return isMobile ? mobile(context) : desktop(context);
+    return _isMobile ? mobile(context) : desktop(context);
   }
 
   Widget mobile(BuildContext context) {
