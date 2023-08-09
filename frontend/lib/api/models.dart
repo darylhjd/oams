@@ -1,26 +1,27 @@
-// LoginResponse is a data class modelling the response from a login API request.
-class LoginResponse {
-  static const String redirectUrlField = "redirect_url";
+import 'package:frontend/api/client.dart';
 
-  final String redirectUrl;
+class ErrorResponse {
+  final String message;
 
-  LoginResponse(this.redirectUrl);
-
-  LoginResponse.fromJson(Map<String, dynamic> json)
-      : redirectUrl = json[redirectUrlField];
+  ErrorResponse.fromJson(Map<String, dynamic> json) : message = json["message"];
 }
 
-// User models a response returned from the users API endpoint.
-class SessionUserInfoResponse {
+class LoginResponse {
+  final String redirectUrl;
+
+  LoginResponse.fromJson(Map<String, dynamic> json)
+      : redirectUrl = json[APIClient.loginRedirectUrlParam];
+}
+
+class UserMeResponse {
   final User? sessionUser;
 
-  SessionUserInfoResponse.fromJson(Map<String, dynamic> json)
+  UserMeResponse.fromJson(Map<String, dynamic> json)
       : sessionUser = json["session_user"] == null
             ? null
             : User.fromJson(json["session_user"]);
 }
 
-// User models a user entity from the API.
 class User {
   final String id;
   final String name;
@@ -32,4 +33,11 @@ class User {
         name = json["name"],
         email = json["email"],
         role = json["role"];
+}
+
+class GetUserResponse {
+  final User user;
+
+  GetUserResponse.fromJson(Map<String, dynamic> json)
+      : user = User.fromJson(json["user"]);
 }
