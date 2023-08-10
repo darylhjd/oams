@@ -31,12 +31,12 @@ const (
 	userUrl               = "/users/"
 	classesUrl            = "/classes"
 	classUrl              = "/classes/"
-	classGroupsUrl        = "/class_groups"
-	classGroupUrl         = "/class_groups/"
-	classGroupSessionsUrl = "/class_group_sessions"
-	classGroupSessionUrl  = "/class_group_sessions/"
-	sessionEnrollmentsUrl = "/session_enrollments"
-	sessionEnrollmentUrl  = "/session_enrollments/"
+	classGroupsUrl        = "/class-groups"
+	classGroupUrl         = "/class-groups/"
+	classGroupSessionsUrl = "/class-group-sessions"
+	classGroupSessionUrl  = "/class-group-sessions/"
+	sessionEnrollmentsUrl = "/session-enrollments"
+	sessionEnrollmentUrl  = "/session-enrollments/"
 )
 
 var (
