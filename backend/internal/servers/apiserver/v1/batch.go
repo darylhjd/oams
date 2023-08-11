@@ -158,6 +158,7 @@ func (v *APIServerV1) batchPut(r *http.Request) apiResponse {
 
 // processBatchPutRequest and return a batchPutResponse and error if encountered.
 // This implementation aims to reduce database actions by sacrificing memory usage.
+// TODO: This endpoint returns an internal server error with rows not found message if the upsert does nothing.
 func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutRequest) (batchPutResponse, error) {
 	resp := batchPutResponse{
 		response: newSuccessResponse(),

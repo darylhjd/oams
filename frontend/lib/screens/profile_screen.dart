@@ -28,18 +28,18 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _mobile(BuildContext context, User user) {
+  Widget _mobile(BuildContext context, UserMeResponse data) {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: _mobilePadding),
       children: [
-        _NameHeader(true, user),
+        _NameHeader(true, data.sessionUser),
         const SizedBox(height: _mobilePadding),
-        _DetailsCard(true, user),
+        _DetailsCard(true, data.sessionUser),
       ],
     );
   }
 
-  Widget _desktop(BuildContext context, User user) {
+  Widget _desktop(BuildContext context, UserMeResponse data) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: _desktopPadding),
       child: Row(
@@ -48,12 +48,12 @@ class ProfileScreen extends ConsumerWidget {
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(0, 0, _desktopPadding, 0),
-            child: _NameHeader(false, user),
+            child: _NameHeader(false, data.sessionUser),
           ),
           Flexible(
             child: ListView(
               children: [
-                _DetailsCard(false, user),
+                _DetailsCard(false, data.sessionUser),
               ],
             ),
           ),
