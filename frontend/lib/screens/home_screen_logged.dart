@@ -26,6 +26,8 @@ class HomeScreenLoggedIn extends ConsumerWidget {
       padding: const EdgeInsets.all(_mobilePadding),
       children: [
         _UpcomingSessionsCalendar(),
+        const SizedBox(height: _mobilePadding),
+        const _SelectedDaySessionsPreview(),
       ],
     );
   }
@@ -35,6 +37,8 @@ class HomeScreenLoggedIn extends ConsumerWidget {
       padding: const EdgeInsets.all(_desktopPadding),
       children: [
         _UpcomingSessionsCalendar(),
+        const SizedBox(height: _desktopPadding),
+        const _SelectedDaySessionsPreview(),
       ],
     );
   }
@@ -132,5 +136,15 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
       },
       eventLoader: (day) => ref.watch(_selectedDayEventsProvider.notifier)[day],
     );
+  }
+}
+
+// Shows the selected day's sessions.
+class _SelectedDaySessionsPreview extends ConsumerWidget {
+  const _SelectedDaySessionsPreview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return const Placeholder();
   }
 }
