@@ -9,7 +9,8 @@ import 'package:responsive_framework/responsive_breakpoints.dart';
 // Shows the profile screen.
 class ProfileScreen extends ConsumerWidget {
   static const double _mobilePadding = 30;
-  static const double _desktopPadding = 40;
+  static const double _desktopHorizontalPadding = 20;
+  static const double _desktopVerticalPadding = 40;
 
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -32,28 +33,32 @@ class ProfileScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: _mobilePadding),
       children: [
-        _NameHeader(true, data.sessionUser),
+        const _ProfileHeader(),
         const SizedBox(height: _mobilePadding),
-        _DetailsCard(true, data.sessionUser),
+        _DetailsCard(data.sessionUser),
       ],
     );
   }
 
   Widget _desktop(BuildContext context, UserMeResponse data) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: _desktopPadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: _desktopHorizontalPadding,
+        vertical: _desktopVerticalPadding,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: const EdgeInsets.fromLTRB(0, 0, _desktopPadding, 0),
-            child: _NameHeader(false, data.sessionUser),
+            padding:
+                const EdgeInsets.fromLTRB(0, 0, _desktopVerticalPadding, 0),
+            child: const _ProfileHeader(),
           ),
           Flexible(
             child: ListView(
               children: [
-                _DetailsCard(false, data.sessionUser),
+                _DetailsCard(data.sessionUser),
               ],
             ),
           ),
@@ -64,51 +69,18 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 // Shows the ID and name of the user.
-class _NameHeader extends StatelessWidget {
-  final User _user;
-  final bool _isMobile;
-
-  const _NameHeader(this._isMobile, this._user);
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
-  }
-
-  Widget _mobile(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          _user.id,
-          style: Theme.of(context)
-              .textTheme
-              .headlineLarge
-              ?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          _user.name,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ],
-    );
-  }
-
-  Widget _desktop(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          _user.id,
-          style: Theme.of(context)
-              .textTheme
-              .headlineLarge
-              ?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          _user.name,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ],
+    return Text(
+      "Your Profile",
+      style: Theme.of(context)
+          .textTheme
+          .headlineLarge
+          ?.copyWith(fontWeight: FontWeight.bold),
+      textAlign: TextAlign.center,
     );
   }
 }
@@ -116,20 +88,39 @@ class _NameHeader extends StatelessWidget {
 // _DetailsCard shows the details of the user.
 class _DetailsCard extends StatelessWidget {
   final User _user;
-  final bool _isMobile;
 
-  const _DetailsCard(this._isMobile, this._user);
+  const _DetailsCard(this._user);
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? mobile(context) : desktop(context);
-  }
-
-  Widget mobile(BuildContext context) {
-    return const Placeholder();
-  }
-
-  Widget desktop(BuildContext context) {
-    return const Placeholder();
+    return Card(
+      child: Container(
+        padding: const EdgeInsets.all(50),
+        child: Column(
+          children: [
+            TextFormField(
+              decoration: const InputDecoration(labelText: "ID"),
+              readOnly: true,
+              initialValue: _user.id,
+            ),
+            TextFormField(
+              decoration: const InputDecoration(labelText: "Name"),
+              readOnly: true,
+              initialValue: _user.name.isEmpty ? "-" : _user.name,
+            ),
+            TextFormField(
+              decoration: const InputDecoration(labelText: "Email"),
+              readOnly: true,
+              initialValue: _user.email.isEmpty ? "-" : _user.email,
+            ),
+            TextFormField(
+              decoration: const InputDecoration(labelText: "Role"),
+              readOnly: true,
+              initialValue: _user.role.isEmpty ? "-" : _user.role,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
