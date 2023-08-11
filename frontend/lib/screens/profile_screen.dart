@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/api/models.dart';
 import 'package:frontend/providers/session.dart';
 import 'package:frontend/screens/screen_template.dart';
-import 'package:frontend/widgets/dialogs.dart';
 import 'package:responsive_framework/responsive_breakpoints.dart';
 
 // Shows the profile screen.
@@ -16,17 +15,10 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ScreenTemplate(
-      ref.watch(sessionUserProvider).when(
-            data: (data) => ResponsiveBreakpoints.of(context).isMobile
-                ? _mobile(context, data)
-                : _desktop(context, data),
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (error, stackTrace) => const InvalidSession(),
-          ),
-    );
+    final userMeResponse = ref.watch(sessionUserProvider).requireValue;
+    return ScreenTemplate(ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context, userMeResponse)
+        : _desktop(context, userMeResponse));
   }
 
   Widget _mobile(BuildContext context, UserMeResponse data) {
