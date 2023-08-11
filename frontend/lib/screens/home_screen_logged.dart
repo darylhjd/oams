@@ -40,8 +40,24 @@ class HomeScreenLoggedIn extends ConsumerWidget {
   }
 }
 
-final _currentEvents = StateProvider<List<UpcomingClassGroupSession>>((ref) {
-  return [];
+final _eventsMapProvider =
+    Provider<Map<String, List<UpcomingClassGroupSession>>>((ref) {
+  final Map<String, List<UpcomingClassGroupSession>> eventsMap = {};
+  final upcomingSessions =
+      ref.watch(sessionUserProvider).requireValue.upcomingSessions;
+
+  for (var element in upcomingSessions) {
+    eventsMap.update(
+      _UpcomingSessionsCalendarState.dateComparator.format(element.startTime),
+      (value) {
+        value.add(element);
+        return value;
+      },
+      ifAbsent: () => [element],
+    );
+  }
+
+  return eventsMap;
 });
 
 // This provides a calendar view that shows all upcoming class group sessions
@@ -62,10 +78,9 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
   // timezone are not the same in UTC time. However, the dart implementation
   // for getting information from a DateTime object works on UTC time. For example,
   // a time of 7.30+0800 will have its day field be one day before 8.00+0800.
-  static final DateFormat _dateComparator = DateFormat("yyyy-MM-dd");
+  static final DateFormat dateComparator = DateFormat("yyyy-MM-dd");
 
   late List<UpcomingClassGroupSession> _selectedEvents;
-  final Map<String, List<UpcomingClassGroupSession>> _eventsMap = {};
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
@@ -73,20 +88,6 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
   @override
   void initState() {
     super.initState();
-    final upcomingSessions =
-        ref.read(sessionUserProvider).requireValue.upcomingSessions;
-
-    for (var element in upcomingSessions) {
-      _eventsMap.update(
-        _dateComparator.format(element.startTime),
-        (value) {
-          value.add(element);
-          return value;
-        },
-        ifAbsent: () => [element],
-      );
-    }
-
     _selectedEvents = _getEventsForDay(DateTime.now());
   }
 
@@ -119,10 +120,10 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
 
   // Get all events happening on a particular day.
   List<UpcomingClassGroupSession> _getEventsForDay(DateTime day) {
-    return _eventsMap[_dateComparator.format(day)] ?? [];
+    return ref.read(_eventsMapProvider)[dateComparator.format(day)] ?? [];
   }
 
-  bool _isSameDay(DateTime d1, DateTime d2) {
-    return _dateComparator.format(d1) == _dateComparator.format(d2);
+  static bool _isSameDay(DateTime d1, DateTime d2) {
+    return dateComparator.format(d1) == dateComparator.format(d2);
   }
 }
