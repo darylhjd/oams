@@ -87,6 +87,8 @@ class _ProfileHeader extends StatelessWidget {
 
 // _DetailsCard shows the details of the user.
 class _DetailsCard extends StatelessWidget {
+  static const double _padding = 50;
+
   final User _user;
 
   const _DetailsCard(this._user);
@@ -95,7 +97,7 @@ class _DetailsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Container(
-        padding: const EdgeInsets.all(50),
+        padding: const EdgeInsets.all(_padding),
         child: Column(
           children: [
             TextFormField(
