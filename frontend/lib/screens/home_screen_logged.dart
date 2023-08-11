@@ -40,24 +40,52 @@ class HomeScreenLoggedIn extends ConsumerWidget {
   }
 }
 
-final _eventsMapProvider =
-    Provider<Map<String, List<UpcomingClassGroupSession>>>((ref) {
-  final Map<String, List<UpcomingClassGroupSession>> eventsMap = {};
-  final upcomingSessions =
-      ref.watch(sessionUserProvider).requireValue.upcomingSessions;
+// The notifier for getting the current selected day events of the calendar.
+class _SelectedDayEventsNotifier
+    extends StateNotifier<List<UpcomingClassGroupSession>> {
+  // We use the string formatting of the date as the key for the selected events
+  // map since we need to compare within a specific timezone and not UTC time.
+  // If not, we may get an edge case where days which are the same in a particular
+  // timezone are not the same in UTC time. However, the dart implementation
+  // for getting information from a DateTime object works on UTC time. For example,
+  // a time of 7.30+0800 will have its day field be one day before 8.00+0800.
+  static final DateFormat dateComparator = DateFormat("yyyy-MM-dd");
 
-  for (var element in upcomingSessions) {
-    eventsMap.update(
-      _UpcomingSessionsCalendarState.dateComparator.format(element.startTime),
-      (value) {
-        value.add(element);
-        return value;
-      },
-      ifAbsent: () => [element],
-    );
+  final Map<String, List<UpcomingClassGroupSession>> _eventsMap = {};
+
+  _SelectedDayEventsNotifier(List<UpcomingClassGroupSession> upcomingSessions)
+      : super([]) {
+    for (var element in upcomingSessions) {
+      _eventsMap.update(
+        dateComparator.format(element.startTime),
+        (value) {
+          value.add(element);
+          return value;
+        },
+        ifAbsent: () => [element],
+      );
+    }
+
+    state = this[DateTime.now()] ?? [];
   }
 
-  return eventsMap;
+  // Override the index operator.
+  operator [](DateTime d) => _eventsMap[dateComparator.format(d)] ?? [];
+
+  void setSelectedDayEvents(DateTime d) {
+    state = this[d];
+  }
+
+  static bool isSameDay(DateTime d1, DateTime d2) =>
+      dateComparator.format(d1) == dateComparator.format(d2);
+}
+
+// This provider provides the current selected day events.
+final _selectedDayEventsProvider = StateNotifierProvider<
+    _SelectedDayEventsNotifier, List<UpcomingClassGroupSession>>((ref) {
+  final upcomingSessions =
+      ref.watch(sessionUserProvider).requireValue.upcomingSessions;
+  return _SelectedDayEventsNotifier(upcomingSessions);
 });
 
 // This provides a calendar view that shows all upcoming class group sessions
@@ -72,24 +100,9 @@ class _UpcomingSessionsCalendar extends ConsumerStatefulWidget {
 class _UpcomingSessionsCalendarState extends ConsumerState {
   static const Duration _dateBuffer = Duration(days: 6 * 31);
 
-  // We use the string formatting of the date as the key for the selected events
-  // map since we need to compare within a specific timezone and not UTC time.
-  // If not, we may get an edge case where days which are the same in a particular
-  // timezone are not the same in UTC time. However, the dart implementation
-  // for getting information from a DateTime object works on UTC time. For example,
-  // a time of 7.30+0800 will have its day field be one day before 8.00+0800.
-  static final DateFormat dateComparator = DateFormat("yyyy-MM-dd");
-
-  late List<UpcomingClassGroupSession> _selectedEvents;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedEvents = _getEventsForDay(DateTime.now());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,31 +112,25 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
       focusedDay: _focusedDay,
       calendarFormat: _calendarFormat,
       weekNumbersVisible: true,
-      selectedDayPredicate: (day) => _isSameDay(day, _selectedDay),
+      selectedDayPredicate: (day) =>
+          _SelectedDayEventsNotifier.isSameDay(day, _selectedDay),
       onFormatChanged: (format) {
         setState(() {
           _calendarFormat = format;
         });
       },
       onDaySelected: (selectedDay, focusedDay) {
-        if (!_isSameDay(selectedDay, _selectedDay)) {
+        if (!_SelectedDayEventsNotifier.isSameDay(selectedDay, _selectedDay)) {
           setState(() {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
-            _selectedEvents = _getEventsForDay(selectedDay);
+            ref
+                .watch(_selectedDayEventsProvider.notifier)
+                .setSelectedDayEvents(selectedDay);
           });
         }
       },
-      eventLoader: (day) => _getEventsForDay(day),
+      eventLoader: (day) => ref.watch(_selectedDayEventsProvider.notifier)[day],
     );
-  }
-
-  // Get all events happening on a particular day.
-  List<UpcomingClassGroupSession> _getEventsForDay(DateTime day) {
-    return ref.read(_eventsMapProvider)[dateComparator.format(day)] ?? [];
-  }
-
-  static bool _isSameDay(DateTime d1, DateTime d2) {
-    return dateComparator.format(d1) == dateComparator.format(d2);
   }
 }
