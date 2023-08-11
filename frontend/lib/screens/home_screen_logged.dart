@@ -49,7 +49,7 @@ class _SelectedDayEventsNotifier
   // timezone are not the same in UTC time. However, the dart implementation
   // for getting information from a DateTime object works on UTC time. For example,
   // a time of 7.30+0800 will have its day field be one day before 8.00+0800.
-  static final DateFormat dateComparator = DateFormat("yyyy-MM-dd");
+  static final DateFormat _dateComparator = DateFormat("yyyy-MM-dd");
 
   final Map<String, List<UpcomingClassGroupSession>> _eventsMap = {};
 
@@ -57,7 +57,7 @@ class _SelectedDayEventsNotifier
       : super([]) {
     for (var element in upcomingSessions) {
       _eventsMap.update(
-        dateComparator.format(element.startTime),
+        _dateComparator.format(element.startTime),
         (value) {
           value.add(element);
           return value;
@@ -70,14 +70,14 @@ class _SelectedDayEventsNotifier
   }
 
   // Override the index operator.
-  operator [](DateTime d) => _eventsMap[dateComparator.format(d)] ?? [];
+  operator [](DateTime d) => _eventsMap[_dateComparator.format(d)] ?? [];
 
   void setSelectedDayEvents(DateTime d) {
     state = this[d];
   }
 
   static bool isSameDay(DateTime d1, DateTime d2) =>
-      dateComparator.format(d1) == dateComparator.format(d2);
+      _dateComparator.format(d1) == _dateComparator.format(d2);
 }
 
 // This provider provides the current selected day events.
