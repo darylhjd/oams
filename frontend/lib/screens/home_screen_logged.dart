@@ -159,7 +159,7 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
       Text("Sessions on selected date", textAlign: TextAlign.center);
   static const Text _footer = Text("Bottom Text", textAlign: TextAlign.center);
   static const Text _noEvents = Text(
-    "Hooray! You have no class sessions on this date. Enjoy your free day :)",
+    "No classes on this date. Hooray!",
     textAlign: TextAlign.center,
   );
 
@@ -194,10 +194,9 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
               const Divider(),
               previews.isEmpty
                   ? _noEvents
-                  : Expanded(
-                      child: ListView(
-                        children: previews,
-                      ),
+                  : ListView(
+                      shrinkWrap: true,
+                      children: previews,
                     ),
               const Divider(),
               _footer,
@@ -240,29 +239,62 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
     );
   }
 
-  List<Placeholder> _getEventPreviews(WidgetRef ref) {
-    final sessions = ref.watch(_selectedDayEventsProvider);
-    return List.generate(
-        sessions.isEmpty ? 0 : 10, (index) => const Placeholder());
+  List<_EventPreview> _getEventPreviews(WidgetRef ref) {
+    return ref
+        .watch(_selectedDayEventsProvider)
+        .map((e) => _EventPreview(e, _isMobile))
+        .toList();
   }
 }
 
 // Shows information for one upcoming session.
 class _EventPreview extends StatelessWidget {
-  final UpcomingClassGroupSession _session;
+  static const Map<ClassType, Color> _colorMap = {
+    ClassType.lec: Colors.lightBlueAccent,
+    ClassType.tut: Colors.lightGreen,
+    ClassType.lab: Colors.orangeAccent,
+  };
 
-  const _EventPreview(this._session);
+  static const double _mobilePadding = 10;
+  static const double _desktopPadding = 20;
+
+  final UpcomingClassGroupSession _session;
+  final bool _isMobile;
+
+  const _EventPreview(this._session, this._isMobile);
 
   @override
   Widget build(BuildContext context) {
-    final color = _session.classType == ClassType.lab
-        ? Colors.yellow
-        : _session.classType == ClassType.lec
-            ? Colors.blue
-            : Colors.green;
+    final timeFormatter = DateFormat("H:mm");
+
     return Card(
-        color: color,
-        child: Text(
-            "${_session.code}, ${_session.classType.name}, ${_session.startTime}"));
+      color: _colorMap[_session.classType],
+      child: Container(
+        padding: EdgeInsets.all(_isMobile ? _mobilePadding : _desktopPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${_session.code} ${_session.name}",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              _session.classType.name,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Text(
+              "${timeFormatter.format(_session.startTime)} - ${timeFormatter.format(_session.endTime)}",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
