@@ -11,6 +11,7 @@ import 'package:table_calendar/table_calendar.dart';
 class HomeScreenLoggedIn extends ConsumerWidget {
   static const double _mobilePadding = 10;
   static const double _desktopPadding = 20;
+  static const double _desktopMaxHeight = 400;
 
   const HomeScreenLoggedIn({super.key});
 
@@ -27,7 +28,9 @@ class HomeScreenLoggedIn extends ConsumerWidget {
       children: [
         _UpcomingSessionsCalendar(),
         const SizedBox(height: _mobilePadding),
-        const _SelectedDaySessionsPreview(),
+        const _SelectedDaySessionsPreview(true),
+        const SizedBox(height: _mobilePadding),
+        const Placeholder(),
       ],
     );
   }
@@ -36,9 +39,18 @@ class HomeScreenLoggedIn extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(_desktopPadding),
       children: [
-        _UpcomingSessionsCalendar(),
+        SizedBox(
+          height: _desktopMaxHeight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(child: _UpcomingSessionsCalendar()),
+              const _SelectedDaySessionsPreview(false),
+            ],
+          ),
+        ),
         const SizedBox(height: _desktopPadding),
-        const _SelectedDaySessionsPreview(),
+        const Placeholder(),
       ],
     );
   }
@@ -116,6 +128,8 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
       focusedDay: _focusedDay,
       calendarFormat: _calendarFormat,
       weekNumbersVisible: true,
+      formatAnimationCurve: Curves.easeInOutCubic,
+      availableGestures: AvailableGestures.horizontalSwipe,
       selectedDayPredicate: (day) =>
           _SelectedDayEventsNotifier.isSameDay(day, _selectedDay),
       onFormatChanged: (format) {
@@ -141,10 +155,114 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
 
 // Shows the selected day's sessions.
 class _SelectedDaySessionsPreview extends ConsumerWidget {
-  const _SelectedDaySessionsPreview();
+  static const Text _header =
+      Text("Sessions on selected date", textAlign: TextAlign.center);
+  static const Text _footer = Text("Bottom Text", textAlign: TextAlign.center);
+  static const Text _noEvents = Text(
+    "Hooray! You have no class sessions on this date. Enjoy your free day :)",
+    textAlign: TextAlign.center,
+  );
+
+  static const double _mobileMaxHeight = 400;
+  static const double _mobilePadding = 5;
+
+  static const double _desktopPadding = 10;
+  static const double _desktopWidth = 400;
+
+  final bool _isMobile;
+
+  const _SelectedDaySessionsPreview(this._isMobile);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Placeholder();
+    return _isMobile ? _mobile(context, ref) : _desktop(context, ref);
+  }
+
+  Widget _mobile(BuildContext context, WidgetRef ref) {
+    final previews = _getEventPreviews(ref);
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: _mobileMaxHeight),
+      child: Card(
+        child: Container(
+          padding: const EdgeInsets.all(_mobilePadding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _header,
+              const Divider(),
+              previews.isEmpty
+                  ? _noEvents
+                  : Expanded(
+                      child: ListView(
+                        children: previews,
+                      ),
+                    ),
+              const Divider(),
+              _footer,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _desktop(BuildContext context, WidgetRef ref) {
+    final previews = _getEventPreviews(ref);
+
+    return SizedBox(
+      width: _desktopWidth,
+      child: Card(
+        child: Container(
+          padding: const EdgeInsets.all(_desktopPadding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _header,
+              const Divider(),
+              Expanded(
+                child: previews.isEmpty
+                    ? Container(
+                        alignment: Alignment.center,
+                        child: _noEvents,
+                      )
+                    : ListView(
+                        children: previews,
+                      ),
+              ),
+              const Divider(),
+              _footer,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Placeholder> _getEventPreviews(WidgetRef ref) {
+    final sessions = ref.watch(_selectedDayEventsProvider);
+    return List.generate(
+        sessions.isEmpty ? 0 : 10, (index) => const Placeholder());
+  }
+}
+
+// Shows information for one upcoming session.
+class _EventPreview extends StatelessWidget {
+  final UpcomingClassGroupSession _session;
+
+  const _EventPreview(this._session);
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _session.classType == ClassType.lab
+        ? Colors.yellow
+        : _session.classType == ClassType.lec
+            ? Colors.blue
+            : Colors.green;
+    return Card(
+        color: color,
+        child: Text(
+            "${_session.code}, ${_session.classType.name}, ${_session.startTime}"));
   }
 }

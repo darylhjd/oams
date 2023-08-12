@@ -8,8 +8,9 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 // The navigation bar for the app.
 class NavBar extends StatelessWidget {
-  static const double _height = 70;
-  static const double _padding = 10;
+  static const double _height = 90;
+  static const double _margin = 10;
+  static const double _padding = 5;
   static final List<BoxShadow>? _boxShadow = kElevationToShadow[8];
   static const double _borderRadius = 10;
 
@@ -20,6 +21,7 @@ class NavBar extends StatelessWidget {
     return SizedBox(
       height: _height,
       child: Container(
+        margin: const EdgeInsets.all(_margin),
         padding: const EdgeInsets.all(_padding),
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColorLight,
