@@ -4,13 +4,13 @@ go 1.20
 
 require (
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.1.0
-	github.com/darylhjd/oams/frontend v0.0.0-20230803074631-9832d5736615
+	github.com/darylhjd/oams/frontend v0.0.0-20230813021118-c933b61cb160
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/google/uuid v1.3.0
-	github.com/jackc/pgx/v5 v5.4.2
+	github.com/jackc/pgx/v5 v5.4.3
 	github.com/joho/godotenv v1.5.1
-	github.com/lestrrat-go/jwx/v2 v2.0.11
+	github.com/lestrrat-go/jwx/v2 v2.0.12
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.9.0
 	github.com/stretchr/testify v1.8.4
@@ -43,10 +43,10 @@ require (
 	github.com/xuri/nfp v0.0.0-20230802015359-2d5eeba905e9 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.11.0 // indirect
-	golang.org/x/net v0.13.0 // indirect
+	golang.org/x/crypto v0.12.0 // indirect
+	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
