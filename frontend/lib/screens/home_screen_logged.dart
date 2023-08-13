@@ -162,8 +162,10 @@ const Map<ClassType, Color> _colorMap = {
 
 // Shows the selected day's sessions.
 class _SelectedDaySessionsPreviewer extends ConsumerWidget {
-  static const Text _header =
-      Text("Sessions on selected date", textAlign: TextAlign.center);
+  static const Text _header = Text(
+    "Selected date sessions",
+    textAlign: TextAlign.center,
+  );
   static const Text _noEvents = Text(
     "No classes on this date. Hooray!",
     textAlign: TextAlign.center,
@@ -253,22 +255,6 @@ class _SelectedDaySessionsPreviewer extends ConsumerWidget {
   }
 }
 
-class _SelectedDaySessionsPreviewerHeader extends StatelessWidget {
-  const _SelectedDaySessionsPreviewerHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: "Sessions on: "),
-          TextSpan(text: )
-        ]
-      )
-    );
-  }
-}
-
 // Provides a color legend on the footer of the sessions previewer.
 class _SelectedDaySessionsPreviewerFooter extends StatelessWidget {
   const _SelectedDaySessionsPreviewerFooter();
@@ -283,16 +269,14 @@ class _SelectedDaySessionsPreviewerFooter extends StatelessWidget {
               TextSpan(
                 children: [
                   WidgetSpan(
-                    alignment: PlaceholderAlignment.top,
+                    alignment: PlaceholderAlignment.middle,
                     child: Icon(
                       Icons.circle,
                       color: e.value,
                       size: 10,
                     ),
                   ),
-                  WidgetSpan(
-                    child: Text(e.key.name),
-                  ),
+                  TextSpan(text: e.key.name),
                 ],
               ),
             ),
