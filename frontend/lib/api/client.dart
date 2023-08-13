@@ -1,16 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/browser.dart';
+import 'package:dio/dio.dart';
 import 'package:frontend/api/models.dart';
 import 'package:frontend/env/env.dart';
-import 'package:http/browser_client.dart';
 
 class APIClient {
-  static final _client = () {
-    var client = BrowserClient();
-    client.withCredentials = true;
-    return client;
-  }();
+  static final _client = Dio()
+    ..httpClientAdapter = BrowserHttpClientAdapter(withCredentials: true);
 
   static final Uri _apiUri = Uri.parse("${apiServerHost()}:${apiServerPort()}");
   static final String _defaultRedirectUrl =
@@ -35,14 +32,14 @@ class APIClient {
       },
     );
 
-    final response = await _client.get(uri);
-    final body = jsonDecode(response.body);
+    final response = await _client.getUri(uri);
 
     if (response.statusCode != HttpStatus.ok) {
-      return Future.error(HttpException(ErrorResponse.fromJson(body).message));
+      return Future.error(
+          HttpException(ErrorResponse.fromJson(response.data).message));
     }
 
-    return LoginResponse.fromJson(body).redirectUrl;
+    return LoginResponse.fromJson(response.data).redirectUrl;
   }
 
   // Remove the current user session, and also helps unset the session cookie.
@@ -51,7 +48,7 @@ class APIClient {
       path: _logoutPath,
     );
 
-    final response = await _client.get(uri);
+    final response = await _client.getUri(uri);
     return response.statusCode == HttpStatus.ok;
   }
 
@@ -62,14 +59,14 @@ class APIClient {
       path: _userMePath,
     );
 
-    final response = await _client.get(uri);
-    final body = jsonDecode(response.body);
+    final response = await _client.getUri(uri);
 
     if (response.statusCode != HttpStatus.ok) {
-      return Future.error(HttpException(ErrorResponse.fromJson(body).message));
+      return Future.error(
+          HttpException(ErrorResponse.fromJson(response.data).message));
     }
 
-    return UserMeResponse.fromJson(body);
+    return UserMeResponse.fromJson(response.data);
   }
 
   // Get a user information by ID.
@@ -78,13 +75,13 @@ class APIClient {
       path: "$_userPath$id",
     );
 
-    final response = await (_client.get(uri));
-    final body = jsonDecode(response.body);
+    final response = await _client.getUri(uri);
 
     if (response.statusCode != HttpStatus.ok) {
-      return Future.error(HttpException(ErrorResponse.fromJson(body).message));
+      return Future.error(
+          HttpException(ErrorResponse.fromJson(response.data).message));
     }
 
-    return GetUserResponse.fromJson(body);
+    return GetUserResponse.fromJson(response.data);
   }
 }
