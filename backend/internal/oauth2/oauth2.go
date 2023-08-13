@@ -80,7 +80,7 @@ func SetSessionCookie(w http.ResponseWriter, res confidential.AuthResult) http.C
 		Expires:  res.ExpiresOn,
 		Secure:   true,
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 	}
 
 	http.SetCookie(w, cookie)
@@ -97,7 +97,7 @@ func DeleteSessionCookie(w http.ResponseWriter) http.Cookie {
 		MaxAge:   -1,
 		Secure:   true,
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 	}
 
 	http.SetCookie(w, cookie)

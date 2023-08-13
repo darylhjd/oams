@@ -150,6 +150,7 @@ func (v *APIServerV1) writeResponse(w http.ResponseWriter, r *http.Request, resp
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(resp.Code())
 	if _, err = w.Write(b); err != nil {
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),

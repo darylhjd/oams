@@ -4,10 +4,7 @@ const _webServerHost = "WEB_SERVER_HOST";
 const _webServerPort = "WEB_SERVER_PORT";
 
 checkEnvVars() {
-  if (apiServerHost() == "" ||
-      apiServerPort() == "" ||
-      webServerHost() == "" ||
-      webServerPort() == "") {
+  if (apiServerHost() == "" || webServerHost() == "") {
     throw Exception("environment variables not set up properly");
   }
 }
