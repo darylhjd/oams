@@ -76,7 +76,6 @@ func SetSessionCookie(w http.ResponseWriter, res confidential.AuthResult) http.C
 	cookie := &http.Cookie{
 		Name:     SessionCookieIdent,
 		Value:    res.Account.HomeAccountID,
-		Path:     "/",
 		Expires:  res.ExpiresOn,
 		Secure:   true,
 		HttpOnly: true,
@@ -92,7 +91,6 @@ func SetSessionCookie(w http.ResponseWriter, res confidential.AuthResult) http.C
 func DeleteSessionCookie(w http.ResponseWriter) http.Cookie {
 	cookie := &http.Cookie{
 		Name:     SessionCookieIdent,
-		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,
 		Secure:   true,
