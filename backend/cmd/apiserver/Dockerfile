@@ -1,21 +1,38 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.20
+FROM golang:1.20-alpine as builder
 
 ARG pat
-ARG port
 ENV github_pat $pat
-ENV apiserver_port $port
 
+RUN apk update && apk add git
+
+# Set working directory.
 WORKDIR /app
 
+# Copy go module files and get dependencies. Note that we are running this from project root!
+COPY go.* ./
+RUN echo "$github_pat"
 RUN git config --global --add url."https://darylhjd:$github_pat@github.com".insteadOf "https://github.com"  \
     && GOPRIVATE="github.com/darylhjd/*"
+RUN go mod download
 
-COPY main.go ./
-RUN go mod init && go mod tidy && go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build /apiserver
+# Copy the project local code.
+COPY . ./
 
-EXPOSE $apiserver_port
+WORKDIR /app/cmd/apiserver
+RUN CGO_ENABLED=0 GOOS=linux go build -o /out
 
-CMD ["/apiserver"]
+# Add a new user "nonroot".
+RUN addgroup -S nonrootgroup && adduser -S nonroot -G nonrootgroup
+
+FROM scratch
+COPY --from=builder /out /out
+
+# Change to non-root privilege
+COPY --from=builder /etc/passwd /etc/passwd
+USER nonroot
+
+EXPOSE 8080
+
+ENTRYPOINT ["/out"]
