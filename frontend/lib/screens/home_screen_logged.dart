@@ -28,7 +28,7 @@ class HomeScreenLoggedIn extends ConsumerWidget {
       children: [
         _UpcomingSessionsCalendar(),
         const SizedBox(height: _mobilePadding),
-        const _SelectedDaySessionsPreview(true),
+        const _SelectedDaySessionsPreviewer(true),
         const SizedBox(height: _mobilePadding),
         const Placeholder(),
       ],
@@ -45,7 +45,7 @@ class HomeScreenLoggedIn extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(child: _UpcomingSessionsCalendar()),
-              const _SelectedDaySessionsPreview(false),
+              const _SelectedDaySessionsPreviewer(false),
             ],
           ),
         ),
@@ -153,13 +153,21 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
   }
 }
 
+// This provides the mapping from a class type to the color coding.
+const Map<ClassType, Color> _colorMap = {
+  ClassType.lec: Colors.lightBlueAccent,
+  ClassType.tut: Colors.lightGreen,
+  ClassType.lab: Colors.orangeAccent,
+};
+
 // Shows the selected day's sessions.
-class _SelectedDaySessionsPreview extends ConsumerWidget {
-  static const Text _header =
-      Text("Sessions on selected date", textAlign: TextAlign.center);
-  static const Text _footer = Text("Bottom Text", textAlign: TextAlign.center);
+class _SelectedDaySessionsPreviewer extends ConsumerWidget {
+  static const Text _header = Text(
+    "Selected date sessions",
+    textAlign: TextAlign.center,
+  );
   static const Text _noEvents = Text(
-    "Hooray! You have no class sessions on this date. Enjoy your free day :)",
+    "No classes on this date. Hooray!",
     textAlign: TextAlign.center,
   );
 
@@ -171,7 +179,7 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
 
   final bool _isMobile;
 
-  const _SelectedDaySessionsPreview(this._isMobile);
+  const _SelectedDaySessionsPreviewer(this._isMobile);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -194,13 +202,12 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
               const Divider(),
               previews.isEmpty
                   ? _noEvents
-                  : Expanded(
-                      child: ListView(
-                        children: previews,
-                      ),
+                  : ListView(
+                      shrinkWrap: true,
+                      children: previews,
                     ),
               const Divider(),
-              _footer,
+              const _SelectedDaySessionsPreviewerFooter(),
             ],
           ),
         ),
@@ -232,7 +239,7 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
                       ),
               ),
               const Divider(),
-              _footer,
+              const _SelectedDaySessionsPreviewerFooter(),
             ],
           ),
         ),
@@ -240,29 +247,92 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
     );
   }
 
-  List<Placeholder> _getEventPreviews(WidgetRef ref) {
-    final sessions = ref.watch(_selectedDayEventsProvider);
-    return List.generate(
-        sessions.isEmpty ? 0 : 10, (index) => const Placeholder());
+  List<_EventPreview> _getEventPreviews(WidgetRef ref) {
+    return ref
+        .watch(_selectedDayEventsProvider)
+        .map((e) => _EventPreview(e, _isMobile))
+        .toList();
+  }
+}
+
+// Provides a color legend on the footer of the sessions previewer.
+class _SelectedDaySessionsPreviewerFooter extends StatelessWidget {
+  const _SelectedDaySessionsPreviewerFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    final children = _colorMap.entries
+        .map(
+          (e) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Icon(
+                      Icons.circle,
+                      color: e.value,
+                      size: 10,
+                    ),
+                  ),
+                  TextSpan(text: e.key.name),
+                ],
+              ),
+            ),
+          ),
+        )
+        .toList();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: children,
+    );
   }
 }
 
 // Shows information for one upcoming session.
 class _EventPreview extends StatelessWidget {
-  final UpcomingClassGroupSession _session;
+  static const double _mobilePadding = 10;
+  static const double _desktopPadding = 20;
 
-  const _EventPreview(this._session);
+  final UpcomingClassGroupSession _session;
+  final bool _isMobile;
+
+  const _EventPreview(this._session, this._isMobile);
 
   @override
   Widget build(BuildContext context) {
-    final color = _session.classType == ClassType.lab
-        ? Colors.yellow
-        : _session.classType == ClassType.lec
-            ? Colors.blue
-            : Colors.green;
+    final timeFormatter = DateFormat("H:mm");
+
     return Card(
-        color: color,
-        child: Text(
-            "${_session.code}, ${_session.classType.name}, ${_session.startTime}"));
+      color: _colorMap[_session.classType],
+      child: Container(
+        padding: EdgeInsets.all(_isMobile ? _mobilePadding : _desktopPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${_session.code} ${_session.name}",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              _session.classType.name,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Text(
+              "${timeFormatter.format(_session.startTime)} - ${timeFormatter.format(_session.endTime)}",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
