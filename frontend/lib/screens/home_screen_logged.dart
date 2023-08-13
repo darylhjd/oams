@@ -28,7 +28,7 @@ class HomeScreenLoggedIn extends ConsumerWidget {
       children: [
         _UpcomingSessionsCalendar(),
         const SizedBox(height: _mobilePadding),
-        const _SelectedDaySessionsPreview(true),
+        const _SelectedDaySessionsPreviewer(true),
         const SizedBox(height: _mobilePadding),
         const Placeholder(),
       ],
@@ -45,7 +45,7 @@ class HomeScreenLoggedIn extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(child: _UpcomingSessionsCalendar()),
-              const _SelectedDaySessionsPreview(false),
+              const _SelectedDaySessionsPreviewer(false),
             ],
           ),
         ),
@@ -153,11 +153,17 @@ class _UpcomingSessionsCalendarState extends ConsumerState {
   }
 }
 
+// This provides the mapping from a class type to the color coding.
+const Map<ClassType, Color> _colorMap = {
+  ClassType.lec: Colors.lightBlueAccent,
+  ClassType.tut: Colors.lightGreen,
+  ClassType.lab: Colors.orangeAccent,
+};
+
 // Shows the selected day's sessions.
-class _SelectedDaySessionsPreview extends ConsumerWidget {
+class _SelectedDaySessionsPreviewer extends ConsumerWidget {
   static const Text _header =
       Text("Sessions on selected date", textAlign: TextAlign.center);
-  static const Text _footer = Text("Bottom Text", textAlign: TextAlign.center);
   static const Text _noEvents = Text(
     "No classes on this date. Hooray!",
     textAlign: TextAlign.center,
@@ -171,7 +177,7 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
 
   final bool _isMobile;
 
-  const _SelectedDaySessionsPreview(this._isMobile);
+  const _SelectedDaySessionsPreviewer(this._isMobile);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -199,7 +205,7 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
                       children: previews,
                     ),
               const Divider(),
-              _footer,
+              const _SelectedDaySessionsPreviewerFooter(),
             ],
           ),
         ),
@@ -231,7 +237,7 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
                       ),
               ),
               const Divider(),
-              _footer,
+              const _SelectedDaySessionsPreviewerFooter(),
             ],
           ),
         ),
@@ -247,14 +253,62 @@ class _SelectedDaySessionsPreview extends ConsumerWidget {
   }
 }
 
+class _SelectedDaySessionsPreviewerHeader extends StatelessWidget {
+  const _SelectedDaySessionsPreviewerHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: "Sessions on: "),
+          TextSpan(text: )
+        ]
+      )
+    );
+  }
+}
+
+// Provides a color legend on the footer of the sessions previewer.
+class _SelectedDaySessionsPreviewerFooter extends StatelessWidget {
+  const _SelectedDaySessionsPreviewerFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    final children = _colorMap.entries
+        .map(
+          (e) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.top,
+                    child: Icon(
+                      Icons.circle,
+                      color: e.value,
+                      size: 10,
+                    ),
+                  ),
+                  WidgetSpan(
+                    child: Text(e.key.name),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+        .toList();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: children,
+    );
+  }
+}
+
 // Shows information for one upcoming session.
 class _EventPreview extends StatelessWidget {
-  static const Map<ClassType, Color> _colorMap = {
-    ClassType.lec: Colors.lightBlueAccent,
-    ClassType.tut: Colors.lightGreen,
-    ClassType.lab: Colors.orangeAccent,
-  };
-
   static const double _mobilePadding = 10;
   static const double _desktopPadding = 20;
 
