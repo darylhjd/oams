@@ -4,7 +4,7 @@ FROM ghcr.io/cirruslabs/flutter:3.10.6 as flutter-builder
 WORKDIR /app
 COPY ./frontend ./
 
-RUN flutter pub get && flutter build web
+RUN --mount=type=secret,id=env_json flutter pub get && flutter build web --dart-define-from-file=/run/secrets/env_json
 
 FROM golang:1.20-alpine as builder
 
