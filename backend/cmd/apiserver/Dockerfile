@@ -1,14 +1,15 @@
 # syntax=docker/dockerfile:1
+# Context: Backend.
+
+# Stage 1: Build apiserver.
 FROM golang:1.20-alpine as builder
 
 RUN apk add --no-cache git \
     openssh-client \
     ca-certificates
 
-# Set working directory.
 WORKDIR /app
 
-# Copy go module files and get dependencies. Note that the build context is in the backend folder!
 ENV GOPRIVATE="github.com/darylhjd/oams/*"
 ENV GIT_SSH_COMMAND="ssh -i /run/secrets/ssh_key"
 RUN git config --global --add url."git@github.com:".insteadOf "https://github.com/"
@@ -16,12 +17,12 @@ RUN mkdir -p -m 0700 /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_ho
 COPY go.mod go.sum ./
 RUN --mount=type=secret,id=ssh_key go mod download
 
-# Copy the project local code.
 COPY . ./
 
 WORKDIR /app/cmd/apiserver
-RUN CGO_ENABLED=0 GOOS=linux go build -o /out
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out
 
+# Stage 2: Move apiserver binary to bare container.
 FROM scratch
 COPY --from=builder /out /out
 
