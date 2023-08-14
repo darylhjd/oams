@@ -213,7 +213,7 @@ class _Features extends StatelessWidget {
 
 // Provides the template for a feature showcase.
 class _FeatureCard extends StatelessWidget {
-  static const double _mobileCardMargin = 10;
+  static const double _mobileCardMargin = 5;
   static const double _mobilePadding = 10;
   static const double _mobileMargin = 20;
 
@@ -233,7 +233,7 @@ class _FeatureCard extends StatelessWidget {
 
   Widget _mobile(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: _mobileCardMargin),
+      margin: const EdgeInsets.all(_mobileCardMargin),
       child: Container(
         padding: const EdgeInsets.all(_mobilePadding),
         margin: const EdgeInsets.symmetric(vertical: _mobileMargin),

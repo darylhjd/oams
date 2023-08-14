@@ -21,7 +21,7 @@ class NavBar extends StatelessWidget {
     return SizedBox(
       height: _height,
       child: Container(
-        margin: const EdgeInsets.all(_margin),
+        margin: const EdgeInsets.symmetric(vertical: _margin),
         padding: const EdgeInsets.all(_padding),
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColorLight,
