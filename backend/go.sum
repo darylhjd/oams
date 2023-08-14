@@ -3,8 +3,8 @@ github.com/AzureAD/microsoft-authentication-library-for-go v1.1.0 h1:HCc0+LpPfpC
 github.com/AzureAD/microsoft-authentication-library-for-go v1.1.0/go.mod h1:wP83P5OoQ5p6ip3ScPr0BAq0BvuPAvacpEuSzyouqAI=
 github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
 github.com/benbjohnson/clock v1.3.0 h1:ip6w0uFQkncKQ979AypyG0ER7mqUSBdKLOgAle/AT8A=
-github.com/darylhjd/oams/frontend v0.0.0-20230813021118-c933b61cb160 h1:GrjeRmJgw/qR2gTiXZCiHLcnp5CISrozjq5yf+1zAk4=
-github.com/darylhjd/oams/frontend v0.0.0-20230813021118-c933b61cb160/go.mod h1:epQSemrv0YJEe092xq7zARb/2ywI9HEytGLg9irRegc=
+github.com/darylhjd/oams/frontend v0.0.1 h1:57MUJOlOsnBDEfOmg7Dey8ph3zyxh225QYQxM9lQKhU=
+github.com/darylhjd/oams/frontend v0.0.1/go.mod h1:epQSemrv0YJEe092xq7zARb/2ywI9HEytGLg9irRegc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
