@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy go module files and get dependencies. Note that we are running this from project root!
 ENV GOPRIVATE="github.com/darylhjd/oams/*"
-ENV GIT_SSH_COMMAND="SSH -I /run/secrets/ssh_key"
+ENV GIT_SSH_COMMAND="ssh -i /run/secrets/ssh_key"
 RUN git config --global --add url."git@github.com:".insteadOf "https://github.com/"
 RUN mkdir -p -m 0700 /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts
 COPY go.mod go.sum ./
