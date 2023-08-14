@@ -44,7 +44,7 @@ type BundledServer struct {
 
 // ServeHTTP allows us to fulfill the http.Handler interface.
 func (b BundledServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.HasPrefix(r.URL.Path, apiserver.Url) {
+	if strings.HasPrefix(r.URL.Path, strings.TrimSuffix(apiserver.Url, "/")) {
 		b.apiServer.ServeHTTP(w, r)
 	} else {
 		b.webServer.ServeHTTP(w, r)
