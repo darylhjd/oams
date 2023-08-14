@@ -1,5 +1,4 @@
 # syntax=docker/dockerfile:1
-
 FROM golang:1.20-alpine as builder
 
 RUN apk add --no-cache git \
@@ -25,6 +24,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /out
 
 FROM scratch
 COPY --from=builder /out /out
+
+# Required for making HTTP requests in the container.
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 EXPOSE 8080

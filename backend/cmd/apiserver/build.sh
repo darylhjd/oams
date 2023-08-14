@@ -6,6 +6,4 @@ docker buildx build \
   -t apiserver \
   -f cmd/apiserver/Dockerfile \
   --secret id=ssh_key,src="$SSH_KEY_SOURCE" \
-  --progress plain \
-  --no-cache \
   .
