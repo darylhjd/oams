@@ -4,8 +4,8 @@ cd ../../
 
 docker buildx build \
   -t apiserver \
-  --build-arg pat="$GITHUB_PAT" \
   -f cmd/apiserver/Dockerfile \
+  --ssh default="$SSH_KEY_SOURCE" \
   --progress plain \
   --no-cache \
   .

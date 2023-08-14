@@ -2,20 +2,19 @@
 
 FROM golang:1.20-alpine as builder
 
-ARG pat
-ENV github_pat $pat
-
-RUN apk update && apk add git
+RUN apk add --no-cache git \
+    openssh-client \
+    ca-certificates
 
 # Set working directory.
 WORKDIR /app
 
 # Copy go module files and get dependencies. Note that we are running this from project root!
-COPY go.* ./
-RUN echo "$github_pat"
-RUN git config --global --add url."https://darylhjd:$github_pat@github.com".insteadOf "https://github.com"  \
-    && GOPRIVATE="github.com/darylhjd/*"
-RUN go mod download
+ENV GOPRIVATE="github.com/darylhjd/oams/*"
+RUN git config --global --add url."git@github.com:".insteadOf "https://github.com/"
+RUN mkdir -p -m 0700 /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts
+COPY go.mod go.sum ./
+RUN --mount=type=ssh go mod download
 
 # Copy the project local code.
 COPY . ./
