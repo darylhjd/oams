@@ -8,7 +8,7 @@ RUN apk add --no-cache git \
 # Set working directory.
 WORKDIR /app
 
-# Copy go module files and get dependencies. Note that we are running this from project root!
+# Copy go module files and get dependencies. Note that the build context is in the backend folder!
 ENV GOPRIVATE="github.com/darylhjd/oams/*"
 ENV GIT_SSH_COMMAND="ssh -i /run/secrets/ssh_key"
 RUN git config --global --add url."git@github.com:".insteadOf "https://github.com/"

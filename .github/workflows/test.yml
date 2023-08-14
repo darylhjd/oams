@@ -32,7 +32,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version-file: go.work
+          go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
 
       - name: Set up Flutter
@@ -80,4 +80,6 @@ jobs:
           DATABASE_SSL_MODE: ${{ vars.DATABASE_SSL_MODE }}
         run: |
           cd backend
+          mkdir -p internal/servers/webserver/build/web/
+          touch internal/servers/webserver/build/web/index.html
           go test ./...
