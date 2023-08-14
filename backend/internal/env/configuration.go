@@ -54,10 +54,6 @@ func verifyWebServerConfiguration() error {
 		return err
 	}
 
-	if err := verifyDatabaseConfiguration(); err != nil {
-		return err
-	}
-
 	return nil
 }
 
