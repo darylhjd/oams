@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"embed"
 	"fmt"
 	"io"
 	"io/fs"
@@ -9,8 +10,6 @@ import (
 	"strings"
 
 	"go.uber.org/zap"
-
-	"github.com/darylhjd/oams/frontend"
 
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/logger"
@@ -27,6 +26,9 @@ const (
 	appUrl = "/"
 )
 
+//go:embed build/web/*
+var website embed.FS
+
 // WebServer defines the server structure for the OAMS Web Server.
 type WebServer struct {
 	l   *zap.Logger
@@ -41,7 +43,7 @@ func New() (*WebServer, error) {
 		return nil, fmt.Errorf("%s - failed to initialise logger: %w", Namespace, err)
 	}
 
-	fileServer, err := fs.Sub(frontend.Website, buildPath)
+	fileServer, err := fs.Sub(website, buildPath)
 	if err != nil {
 		return nil, fmt.Errorf("%s - failed to initialise: %w", Namespace, err)
 	}
