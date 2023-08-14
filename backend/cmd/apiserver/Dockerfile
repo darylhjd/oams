@@ -23,15 +23,8 @@ COPY . ./
 WORKDIR /app/cmd/apiserver
 RUN CGO_ENABLED=0 GOOS=linux go build -o /out
 
-# Add a new user "nonroot".
-RUN addgroup -S nonrootgroup && adduser -S nonroot -G nonrootgroup
-
 FROM scratch
 COPY --from=builder /out /out
-
-# Change to non-root privilege
-COPY --from=builder /etc/passwd /etc/passwd
-USER nonroot
 
 EXPOSE 8080
 
