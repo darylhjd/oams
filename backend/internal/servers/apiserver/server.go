@@ -17,7 +17,10 @@ import (
 	"github.com/darylhjd/oams/backend/internal/servers/apiserver/v1"
 )
 
-const Namespace = "apiserver"
+const (
+	Namespace = "apiserver"
+	Url       = "/api/"
+)
 
 // APIServer defines the server structure for the OAMS API service.
 type APIServer struct {
@@ -67,7 +70,7 @@ func (s *APIServer) Start() error {
 }
 
 func (s *APIServer) registerHandlers() {
-	s.mux.HandleFunc("/", s.base)
+	s.mux.HandleFunc(Url, s.base)
 
 	// To add more versions for this URL, simply add another handler for it.
 	s.mux.Handle(v1.Url, http.StripPrefix(strings.TrimSuffix(v1.Url, "/"), s.v1))

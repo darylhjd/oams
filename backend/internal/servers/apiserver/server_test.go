@@ -39,9 +39,6 @@ func TestAPIServer(t *testing.T) {
 			server.ServeHTTP(rr, req)
 
 			a.Equal(tt.wantStatusCode, rr.Code)
-			if tt.wantStatusCode != http.StatusOK {
-				a.Contains(rr.Body.String(), "malformed url path")
-			}
 		})
 	}
 }
