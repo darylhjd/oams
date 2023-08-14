@@ -25,6 +25,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /out
 
 FROM scratch
 COPY --from=builder /out /out
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 EXPOSE 8080
 
