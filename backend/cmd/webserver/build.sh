@@ -5,7 +5,5 @@ cd ../../../
 docker buildx build \
   -t webserver \
   -f backend/cmd/webserver/Dockerfile \
-  --secret id=ssh_key,src="$SSH_KEY_SOURCE" \
-  --progress plain \
-  --no-cache \
+  --secret id=env_json,src="$ENV_JSON_SOURCE" \
   .
