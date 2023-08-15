@@ -7,7 +7,7 @@ import 'package:frontend/api/models.dart';
 // it directly.
 final sessionUserProvider = FutureProvider<UserMeResponse>((ref) async {
   try {
-    var resp = await APIClient.getUserMe();
+    final resp = await APIClient.getUserMe();
     ref.read(sessionProvider.notifier).update((_) => true);
     return resp;
   } catch (e) {
