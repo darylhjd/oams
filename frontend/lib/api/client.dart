@@ -18,6 +18,7 @@ class APIClient {
   static const String _logoutPath = "api/v1/logout";
   static const String _userMePath = "api/v1/users/me";
   static const String _userPath = "api/v1/users/";
+  static const String _usersPath = "api/v1/users";
 
   // Get login URL to redirect user to SSO login site.
   static Future<String> getLoginURL(String returnTo) async {
@@ -83,5 +84,19 @@ class APIClient {
     }
 
     return GetUserResponse.fromJson(response.data);
+  }
+
+  // Get users.
+  static Future<GetUsersResponse> getUsers() async {
+    final uri = _apiUri.replace(path: _usersPath);
+
+    final response = await _client.getUri(uri);
+
+    if (response.statusCode != HttpStatus.ok) {
+      return Future.error(
+          HttpException(ErrorResponse.fromJson(response.data).message));
+    }
+
+    return GetUsersResponse.fromJson(response.data);
   }
 }

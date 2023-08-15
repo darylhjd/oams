@@ -91,3 +91,13 @@ class GetUserResponse {
   GetUserResponse.fromJson(Map<String, dynamic> json)
       : user = User.fromJson(json["user"]);
 }
+
+class GetUsersResponse {
+  final bool result;
+  final List<User> users;
+
+  GetUsersResponse.fromJson(Map<String, dynamic> json)
+      : result = json["result"],
+        users = List<User>.from(
+            (json["users"] as List).map((i) => User.fromJson(i)));
+}
