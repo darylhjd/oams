@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/api/client.dart';
+import 'package:frontend/api/models.dart';
 import 'package:frontend/providers/session.dart';
 import 'package:frontend/router.dart';
 import 'package:go_router/go_router.dart';
@@ -94,11 +95,11 @@ class _Options extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoggedIn = ref.read(sessionProvider);
     return _isMobile
-        ? _mobile(context, isLoggedIn)
-        : _desktop(context, isLoggedIn);
+        ? _mobile(context, ref, isLoggedIn)
+        : _desktop(context, ref, isLoggedIn);
   }
 
-  Widget _mobile(BuildContext context, bool isLoggedIn) {
+  Widget _mobile(BuildContext context, WidgetRef ref, bool isLoggedIn) {
     var items = <PopupMenuItem<Widget>>[
       const PopupMenuItem(
         padding: EdgeInsets.zero,
@@ -107,7 +108,7 @@ class _Options extends ConsumerWidget {
     ];
 
     if (isLoggedIn) {
-      items.insertAll(0, _loggedMobileItems(context));
+      items.insertAll(0, _loggedMobileItems(context, ref));
       items.addAll([
         const PopupMenuItem(
           padding: EdgeInsets.zero,
@@ -131,11 +132,13 @@ class _Options extends ConsumerWidget {
     );
   }
 
-  Widget _desktop(BuildContext context, bool isLoggedIn) {
+  Widget _desktop(BuildContext context, WidgetRef ref, bool isLoggedIn) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        isLoggedIn ? _loggedDesktopItems(context) : const SizedBox.shrink(),
+        isLoggedIn
+            ? _loggedDesktopItems(context, ref)
+            : const SizedBox.shrink(),
         const Spacer(),
         const _AboutButton(false),
         isLoggedIn ? const _ProfileButton(false) : const _LoginButton(false),
@@ -143,37 +146,56 @@ class _Options extends ConsumerWidget {
     );
   }
 
-  Widget _loggedDesktopItems(BuildContext context) {
-    return const Row(
+  List<PopupMenuItem<Widget>> _loggedMobileItems(
+      BuildContext context, WidgetRef ref) {
+    final userRole =
+        ref.watch(sessionUserProvider).requireValue.sessionUser.role;
+    return [
+      if (userRole == UserRole.admin)
+        const PopupMenuItem(
+          padding: EdgeInsets.zero,
+          child: _AdminPanelButton(true),
+        ),
+    ];
+  }
+
+  Widget _loggedDesktopItems(BuildContext context, WidgetRef ref) {
+    final userRole =
+        ref.watch(sessionUserProvider).requireValue.sessionUser.role;
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text("this is the logged user options"),
-        Text("this is another logged user options"),
+        if (userRole == UserRole.admin) const _AdminPanelButton(false),
       ],
     );
   }
-
-  List<PopupMenuItem<Widget>> _loggedMobileItems(BuildContext context) {
-    return const [
-      PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: Text("this is the logged user options"),
-      ),
-      PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: Text("this is another logged user options"),
-      ),
-    ];
-  }
 }
 
-class _AdminPanelButton extends ConsumerWidget {
+// Shows a button to go to the admin panel. This does not check whether the
+// session user has proper permissions before showing itself. Instead, the _Options
+// widget does the checking.
+class _AdminPanelButton extends StatelessWidget {
+  static const _text = _NavBarText("Admin Panel");
+  final bool _isMobile;
+
+  const _AdminPanelButton(this._isMobile);
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userRole =
-        ref.watch(sessionUserProvider).requireValue.sessionUser.role;
-    // TODO: implement build
-    throw UnimplementedError();
+  Widget build(BuildContext context) {
+    return _isMobile ? _mobile(context) : _desktop(context);
+  }
+
+  Widget _mobile(BuildContext context) {
+    return const PopupMenuItem<Widget>(
+      child: _text,
+    );
+  }
+
+  Widget _desktop(BuildContext context) {
+    return TextButton(
+      onPressed: () {},
+      child: _text,
+    );
   }
 }
 

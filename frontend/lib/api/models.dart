@@ -29,13 +29,27 @@ class User {
   final String id;
   final String name;
   final String email;
-  final String role;
+  final UserRole role;
 
   User.fromJson(Map<String, dynamic> json)
       : id = json["id"],
         name = json["name"],
         email = json["email"],
-        role = json["role"];
+        role = UserRole.fromValue(json["role"]);
+}
+
+enum UserRole {
+  student("STUDENT"),
+  courseCoordinator("COURSE_COORDINATOR"),
+  admin("ADMIN");
+
+  final String name;
+
+  const UserRole(this.name);
+
+  factory UserRole.fromValue(String value) {
+    return UserRole.values.firstWhere((e) => e.name == value);
+  }
 }
 
 class UpcomingClassGroupSession {
