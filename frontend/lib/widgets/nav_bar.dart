@@ -186,14 +186,15 @@ class _AdminPanelButton extends StatelessWidget {
   }
 
   Widget _mobile(BuildContext context) {
-    return const PopupMenuItem<Widget>(
+    return PopupMenuItem<Widget>(
+      onTap: () => context.goNamed(Routes.adminPanel.name),
       child: _text,
     );
   }
 
   Widget _desktop(BuildContext context) {
     return TextButton(
-      onPressed: () {},
+      onPressed: () => context.goNamed(Routes.adminPanel.name),
       child: _text,
     );
   }

@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/api/client.dart';
+import 'package:frontend/api/models.dart';
 import 'package:frontend/env/env.dart';
 import 'package:frontend/providers/session.dart';
 import 'package:frontend/screens/about_screen.dart';
+import 'package:frontend/screens/admin_panel_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/profile_screen.dart';
@@ -15,6 +17,8 @@ class Routes {
   static const RouteInfo about = (name: "about", path: "about");
   static const RouteInfo login = (name: "login", path: "login");
   static const RouteInfo profile = (name: "profile", path: "profile");
+  static const RouteInfo adminPanel =
+      (name: "admin-panel", path: "admin-panel");
 }
 
 final routerProvider = Provider<GoRouter>((ref) => _indexRoute(ref));
@@ -33,6 +37,7 @@ GoRouter _indexRoute(ProviderRef<GoRouter> ref) {
           _aboutRoute(),
           _loginRoute(ref),
           _profileRoute(ref),
+          _adminPanelRoute(ref),
         ],
       ),
     ],
@@ -91,6 +96,36 @@ GoRoute _profileRoute(ProviderRef<GoRouter> ref) {
         },
       );
       return isLoggedIn ? null : to;
+    },
+  );
+}
+
+GoRoute _adminPanelRoute(ProviderRef<GoRouter> ref) {
+  final isLoggedIn = ref.watch(sessionProvider);
+
+  return GoRoute(
+    name: Routes.adminPanel.name,
+    path: Routes.adminPanel.path,
+    pageBuilder: (context, state) {
+      return NoTransitionPage(
+        key: state.pageKey,
+        child: const AdminPanelScreen(),
+      );
+    },
+    redirect: (context, state) {
+      if (!isLoggedIn) {
+        return state.namedLocation(Routes.login.name, queryParameters: {
+          APIClient.loginRedirectUrlParam:
+              "${webServerHost()}:${webServerPort()}${state.fullPath!}",
+        });
+      }
+
+      // Check user privileges.
+      final userRole =
+          ref.watch(sessionUserProvider).requireValue.sessionUser.role;
+      return userRole != UserRole.admin
+          ? state.namedLocation(Routes.index.name)
+          : null;
     },
   );
 }
