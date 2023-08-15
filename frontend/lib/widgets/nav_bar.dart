@@ -53,7 +53,9 @@ class NavBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _Logo(),
-        _Options(false),
+        Flexible(
+          child: _Options(false),
+        ),
       ],
     );
   }
@@ -105,6 +107,7 @@ class _Options extends ConsumerWidget {
     ];
 
     if (isLoggedIn) {
+      items.insertAll(0, _loggedMobileItems(context));
       items.addAll([
         const PopupMenuItem(
           padding: EdgeInsets.zero,
@@ -132,10 +135,45 @@ class _Options extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        isLoggedIn ? _loggedDesktopItems(context) : const SizedBox.shrink(),
+        const Spacer(),
         const _AboutButton(false),
         isLoggedIn ? const _ProfileButton(false) : const _LoginButton(false),
       ],
     );
+  }
+
+  Widget _loggedDesktopItems(BuildContext context) {
+    return const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text("this is the logged user options"),
+        Text("this is another logged user options"),
+      ],
+    );
+  }
+
+  List<PopupMenuItem<Widget>> _loggedMobileItems(BuildContext context) {
+    return const [
+      PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: Text("this is the logged user options"),
+      ),
+      PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: Text("this is another logged user options"),
+      ),
+    ];
+  }
+}
+
+class _AdminPanelButton extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userRole =
+        ref.watch(sessionUserProvider).requireValue.sessionUser.role;
+    // TODO: implement build
+    throw UnimplementedError();
   }
 }
 
