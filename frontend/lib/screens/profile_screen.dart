@@ -110,7 +110,7 @@ class _DetailsCard extends StatelessWidget {
             TextFormField(
               decoration: const InputDecoration(labelText: "Role"),
               readOnly: true,
-              initialValue: _user.role.isEmpty ? "-" : _user.role,
+              initialValue: _user.role.name,
             ),
           ],
         ),
