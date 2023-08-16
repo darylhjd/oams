@@ -11,27 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const deleteUser = `-- name: DeleteUser :one
-DELETE
-FROM users
-WHERE id = $1
-RETURNING id, name, email, role, created_at, updated_at
-`
-
-func (q *Queries) DeleteUser(ctx context.Context, id string) (User, error) {
-	row := q.db.QueryRow(ctx, deleteUser, id)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Email,
-		&i.Role,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getUserUpcomingClassGroupSessions = `-- name: GetUserUpcomingClassGroupSessions :many
 SELECT c.code,
        c.year,

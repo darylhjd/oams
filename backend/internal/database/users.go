@@ -65,3 +65,17 @@ func (d *DB) CreateUser(ctx context.Context, arg CreateUserParams) (model.User, 
 	err := stmt.QueryContext(ctx, d.Conn, &res)
 	return res, err
 }
+
+// DeleteUser by ID.
+func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
+	var res model.User
+
+	stmt := Users.DELETE().
+		WHERE(
+			Users.ID.EQ(String(id)),
+		).
+		RETURNING(Users.AllColumns)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}

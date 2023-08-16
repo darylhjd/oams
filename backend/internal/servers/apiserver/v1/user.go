@@ -157,10 +157,10 @@ type userDeleteResponse struct {
 }
 
 func (v *APIServerV1) userDelete(r *http.Request, id string) apiResponse {
-	_, err := v.db.Q.DeleteUser(r.Context(), id)
+	_, err := v.db.DeleteUser(r.Context(), id)
 	if err != nil {
 		switch {
-		case errors.Is(err, pgx.ErrNoRows):
+		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "user to delete does not exist")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
 			return newErrorResponse(http.StatusConflict, "user to delete is still referenced")

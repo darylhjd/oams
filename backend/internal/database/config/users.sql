@@ -14,12 +14,6 @@ SET name       = COALESCE(sqlc.narg('name'), name),
 WHERE id = $1
 RETURNING id, name, email, role, updated_at;
 
--- name: DeleteUser :one
-DELETE
-FROM users
-WHERE id = $1
-RETURNING *;
-
 -- name: UpsertUsers :batchone
 -- Insert a user into the database. If the user already exists, then only update the name and email.
 INSERT INTO users (id, name, email, role, created_at, updated_at)
