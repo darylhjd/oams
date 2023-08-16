@@ -1,8 +1,3 @@
--- name: CreateUser :one
-INSERT INTO users (id, name, email, role, created_at, updated_at)
-VALUES ($1, $2, $3, $4, NOW(), NOW())
-RETURNING id, name, email, role, created_at;
-
 -- name: UpdateUser :one
 UPDATE users
 SET name       = COALESCE(sqlc.narg('name'), name),

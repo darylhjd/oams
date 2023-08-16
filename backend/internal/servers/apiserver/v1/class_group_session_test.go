@@ -392,7 +392,7 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 			var sessionId int64
 			switch {
 			case tt.withForeignKeyDependency:
-				createdSessionEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, true)
+				createdSessionEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, true)
 				sessionId = createdSessionEnrollment.SessionID
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(

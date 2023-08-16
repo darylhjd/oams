@@ -150,7 +150,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withStubAuthUser {
-				tests.StubAuthContextUser(t, ctx, v1.db.Q)
+				tests.StubAuthContextUser(t, ctx, v1.db)
 			}
 
 			if tt.withUpcomingClassGroupSession {
@@ -242,9 +242,9 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				createdUser := tests.StubUser(t, ctx, v1.db.Q, tt.wantResponse.User.ID, database.UserRole(tt.wantResponse.User.Role))
-				tt.wantResponse.User.CreatedAt = createdUser.CreatedAt.Time
-				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt.Time
+				createdUser := tests.StubUser(t, ctx, v1.db, tt.wantResponse.User.ID, tt.wantResponse.User.Role)
+				tt.wantResponse.User.CreatedAt = createdUser.CreatedAt
+				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
 			}
 
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, tt.wantResponse.User.ID), nil)
@@ -348,8 +348,8 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 
 			userId := tt.wantResponse.User.ID
 			if tt.withExistingUser {
-				createdUser := tests.StubUser(t, ctx, v1.db.Q, userId, tt.wantResponse.User.Role)
-				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
+				createdUser := tests.StubUser(t, ctx, v1.db, userId, model.UserRole(tt.wantResponse.User.Role))
+				tt.wantResponse.User.UpdatedAt = pgtype.Timestamptz{Time: createdUser.CreatedAt, Valid: true}
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
@@ -435,10 +435,10 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 			var userId string
 			switch {
 			case tt.withForeignKeyDependency:
-				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, true)
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, true)
 				userId = createdEnrollment.UserID
 			case tt.withExistingUser:
-				_ = tests.StubUser(t, ctx, v1.db.Q, userId, database.UserRoleSTUDENT)
+				_ = tests.StubUser(t, ctx, v1.db, userId, model.UserRole_Student)
 			default:
 				userId = uuid.NewString()
 			}

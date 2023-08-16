@@ -3,6 +3,7 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
@@ -50,7 +51,15 @@ type usersPostRequest struct {
 
 type usersPostResponse struct {
 	response
-	User database.CreateUserRow `json:"user"`
+	User usersPostUserFields `json:"user"`
+}
+
+type usersPostUserFields struct {
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Email     string         `json:"email"`
+	Role      model.UserRole `json:"role"`
+	CreatedAt time.Time      `json:"created_at"`
 }
 
 func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
@@ -63,7 +72,7 @@ func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusUnprocessableEntity, "id is not allowed")
 	}
 
-	user, err := v.db.Q.CreateUser(r.Context(), req.User)
+	user, err := v.db.CreateUser(r.Context(), req.User)
 	if err != nil {
 		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
 			return newErrorResponse(http.StatusConflict, "user with same id already exists")
@@ -76,6 +85,12 @@ func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 
 	return usersPostResponse{
 		newSuccessResponse(),
-		user,
+		usersPostUserFields{
+			user.ID,
+			user.Name,
+			user.Email,
+			user.Role,
+			user.CreatedAt,
+		},
 	}
 }

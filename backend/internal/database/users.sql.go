@@ -11,45 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, name, email, role, created_at, updated_at)
-VALUES ($1, $2, $3, $4, NOW(), NOW())
-RETURNING id, name, email, role, created_at
-`
-
-type CreateUserParams struct {
-	ID    string   `json:"id"`
-	Name  string   `json:"name"`
-	Email string   `json:"email"`
-	Role  UserRole `json:"role"`
-}
-
-type CreateUserRow struct {
-	ID        string             `json:"id"`
-	Name      string             `json:"name"`
-	Email     string             `json:"email"`
-	Role      UserRole           `json:"role"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
-	row := q.db.QueryRow(ctx, createUser,
-		arg.ID,
-		arg.Name,
-		arg.Email,
-		arg.Role,
-	)
-	var i CreateUserRow
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Email,
-		&i.Role,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
 const deleteUser = `-- name: DeleteUser :one
 DELETE
 FROM users

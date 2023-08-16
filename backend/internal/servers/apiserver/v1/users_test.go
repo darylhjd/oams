@@ -105,9 +105,9 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 
 			if tt.withExistingUser {
 				for idx, user := range tt.wantResponse.Users {
-					createdUser := tests.StubUser(t, ctx, v1.db.Q, user.ID, database.UserRole(user.Role))
+					createdUser := tests.StubUser(t, ctx, v1.db, user.ID, user.Role)
 					userPtr := &tt.wantResponse.Users[idx]
-					userPtr.CreatedAt, userPtr.UpdatedAt = createdUser.CreatedAt.Time, createdUser.CreatedAt.Time
+					userPtr.CreatedAt, userPtr.UpdatedAt = createdUser.CreatedAt, createdUser.CreatedAt
 				}
 			}
 
@@ -135,15 +135,15 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			usersPostRequest{
 				database.CreateUserParams{
 					ID:   "NEW_USER",
-					Role: database.UserRoleSTUDENT,
+					Role: model.UserRole_Student,
 				},
 			},
 			false,
 			usersPostResponse{
 				newSuccessResponse(),
-				database.CreateUserRow{
+				usersPostUserFields{
 					ID:   "NEW_USER",
-					Role: database.UserRoleSTUDENT,
+					Role: model.UserRole_Student,
 				},
 			},
 			http.StatusOK,
@@ -154,7 +154,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			usersPostRequest{
 				database.CreateUserParams{
 					ID:   "EXISTING_USER",
-					Role: database.UserRoleSTUDENT,
+					Role: model.UserRole_Student,
 				},
 			},
 			true,
@@ -167,7 +167,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			usersPostRequest{
 				database.CreateUserParams{
 					ID:   sessionUserId,
-					Role: database.UserRoleSTUDENT,
+					Role: model.UserRole_Student,
 				},
 			},
 			false,
@@ -190,7 +190,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				_ = tests.StubUser(t, ctx, v1.db.Q, tt.withRequest.User.ID, tt.withRequest.User.Role)
+				_ = tests.StubUser(t, ctx, v1.db, tt.withRequest.User.ID, tt.withRequest.User.Role)
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)

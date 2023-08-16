@@ -53,7 +53,7 @@ func TestAPIServerV1_logOut(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			tests.StubAuthContextUser(t, ctx, v1.db.Q)
+			tests.StubAuthContextUser(t, ctx, v1.db)
 
 			req := httptest.NewRequest(http.MethodGet, logoutUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))

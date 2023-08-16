@@ -7,18 +7,19 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // StubAuthContextUser inserts the mock auth context user into the database.
-func StubAuthContextUser(t *testing.T, ctx context.Context, q *database.Queries) {
+func StubAuthContextUser(t *testing.T, ctx context.Context, db *database.DB) {
 	t.Helper()
 
-	_, err := q.CreateUser(ctx, database.CreateUserParams{
+	_, err := db.CreateUser(ctx, database.CreateUserParams{
 		ID:    MockAuthenticatorIDTokenName,
 		Email: MockAuthenticatorAccountPreferredUsername,
-		Role:  database.UserRoleSTUDENT,
+		Role:  model.UserRole_Student,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -26,10 +27,10 @@ func StubAuthContextUser(t *testing.T, ctx context.Context, q *database.Queries)
 }
 
 // StubUser inserts a mock user with the given ID into the database.
-func StubUser(t *testing.T, ctx context.Context, q *database.Queries, id string, role database.UserRole) database.CreateUserRow {
+func StubUser(t *testing.T, ctx context.Context, db *database.DB, id string, role model.UserRole) model.User {
 	t.Helper()
 
-	user, err := q.CreateUser(ctx, database.CreateUserParams{
+	user, err := db.CreateUser(ctx, database.CreateUserParams{
 		ID:   id,
 		Name: "",
 		Role: role,
@@ -130,21 +131,21 @@ func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q 
 }
 
 // StubSessionEnrollment inserts a mock class group session, user, and corresponding session enrollment into the database.
-func StubSessionEnrollment(t *testing.T, ctx context.Context, q *database.Queries, attended bool) database.CreateSessionEnrollmentRow {
+func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, attended bool) database.CreateSessionEnrollmentRow {
 	t.Helper()
 
-	session := StubClassGroupSession(t, ctx, q,
+	session := StubClassGroupSession(t, ctx, db.Q,
 		pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
 		pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 		"VENUE+66",
 	)
 
-	user := StubUser(t, ctx, q,
+	user := StubUser(t, ctx, db,
 		uuid.NewString(),
-		database.UserRoleSTUDENT,
+		model.UserRole_Student,
 	)
 
-	enrollment, err := q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
+	enrollment, err := db.Q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
 		SessionID: session.ID,
 		UserID:    user.ID,
 		Attended:  attended,

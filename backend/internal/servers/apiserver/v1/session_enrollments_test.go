@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -105,7 +106,7 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 
 			if tt.withExistingSessionEnrollment {
 				for idx, enrollment := range tt.wantResponse.SessionEnrollments {
-					createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, enrollment.Attended)
+					createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, enrollment.Attended)
 					sessionPtr := &tt.wantResponse.SessionEnrollments[idx]
 					sessionPtr.ID = createdEnrollment.ID
 					sessionPtr.SessionID = createdEnrollment.SessionID
@@ -226,7 +227,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 
 			switch {
 			case tt.withExistingSessionEnrollment:
-				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, tt.withRequest.SessionEnrollment.Attended)
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, tt.withRequest.SessionEnrollment.Attended)
 				tt.withRequest.SessionEnrollment.SessionID = createdEnrollment.SessionID
 				tt.withRequest.SessionEnrollment.UserID = createdEnrollment.UserID
 			default:
@@ -241,7 +242,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 				}
 
 				if tt.withExistingUser {
-					createdUser := tests.StubUser(t, ctx, v1.db.Q, uuid.NewString(), database.UserRoleSTUDENT)
+					createdUser := tests.StubUser(t, ctx, v1.db, uuid.NewString(), model.UserRole_Student)
 					tt.withRequest.SessionEnrollment.UserID = createdUser.ID
 				}
 			}
