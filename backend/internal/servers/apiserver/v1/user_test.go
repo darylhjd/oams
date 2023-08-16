@@ -161,7 +161,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 					uuid.NewString(),
 				)
 
-				_, err := v1.db.Q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
+				_, err := v1.db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
 					SessionID: createdSession.ID,
 					UserID:    tests.MockAuthenticatorIDTokenName,
 					Attended:  false,

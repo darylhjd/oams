@@ -9,7 +9,6 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-// ListUsers returns a list of users.
 func (d *DB) ListUsers(ctx context.Context) ([]model.User, error) {
 	var res []model.User
 
@@ -25,7 +24,6 @@ func (d *DB) ListUsers(ctx context.Context) ([]model.User, error) {
 	return res, err
 }
 
-// GetUser using ID.
 func (d *DB) GetUser(ctx context.Context, id string) (model.User, error) {
 	var res model.User
 
@@ -41,7 +39,6 @@ func (d *DB) GetUser(ctx context.Context, id string) (model.User, error) {
 	return res, err
 }
 
-// CreateUserParams holds the fields required for CreateUser.
 type CreateUserParams struct {
 	ID    string         `json:"id"`
 	Name  string         `json:"name"`
@@ -49,25 +46,30 @@ type CreateUserParams struct {
 	Role  model.UserRole `json:"role"`
 }
 
-// CreateUser with specified args.
 func (d *DB) CreateUser(ctx context.Context, arg CreateUserParams) (model.User, error) {
 	var res model.User
 
 	now := time.Now()
 
 	stmt := Users.INSERT(
-		Users.ID, Users.Name, Users.Email, Users.Role, Users.CreatedAt, Users.UpdatedAt,
+		Users.AllColumns,
 	).MODEL(
-		model.User{ID: arg.ID, Email: arg.Email, Role: arg.Role, CreatedAt: now, UpdatedAt: now},
+		model.User{
+			ID:        arg.ID,
+			Name:      arg.Name,
+			Email:     arg.Email,
+			Role:      arg.Role,
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
 	).RETURNING(
-		Users.ID, Users.Name, Users.Email, Users.Role, Users.CreatedAt,
+		Users.AllColumns,
 	)
 
 	err := stmt.QueryContext(ctx, d.Conn, &res)
 	return res, err
 }
 
-// DeleteUser by ID.
 func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
 	var res model.User
 
@@ -81,7 +83,6 @@ func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
 	return res, err
 }
 
-// UpcomingClassGroupSession holds the fields for a user's upcoming class group session.
 type UpcomingClassGroupSession struct {
 	model.Class
 	model.ClassGroup

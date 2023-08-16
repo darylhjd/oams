@@ -10,8 +10,10 @@ import (
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -80,7 +82,7 @@ func TestAPIServerV1_sessionEnrollmentGet(t *testing.T) {
 			true,
 			sessionEnrollmentGetResponse{
 				newSuccessResponse(),
-				database.SessionEnrollment{
+				model.SessionEnrollment{
 					Attended: true,
 				},
 			},
@@ -219,7 +221,7 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 				tt.wantResponse.SessionEnrollment.ID = createdEnrollment.ID
 				tt.wantResponse.SessionEnrollment.SessionID = createdEnrollment.SessionID
 				tt.wantResponse.SessionEnrollment.UserID = createdEnrollment.UserID
-				tt.wantResponse.SessionEnrollment.UpdatedAt = createdEnrollment.CreatedAt
+				tt.wantResponse.SessionEnrollment.UpdatedAt = pgtype.Timestamptz{Time: createdEnrollment.CreatedAt, Valid: true}
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)

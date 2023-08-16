@@ -75,7 +75,7 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 			true,
 			sessionEnrollmentsGetResponse{
 				newSuccessResponse(),
-				[]database.SessionEnrollment{
+				[]model.SessionEnrollment{
 					{
 						Attended: false,
 					},
@@ -87,7 +87,7 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 			false,
 			sessionEnrollmentsGetResponse{
 				newSuccessResponse(),
-				[]database.SessionEnrollment{},
+				[]model.SessionEnrollment{},
 			},
 		},
 	}
@@ -148,7 +148,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 			true,
 			sessionEnrollmentsPostResponse{
 				newSuccessResponse(),
-				database.CreateSessionEnrollmentRow{
+				sessionEnrollmentsPostSessionEnrollmentFields{
 					Attended: true,
 				},
 			},

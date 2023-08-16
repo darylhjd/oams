@@ -131,7 +131,7 @@ func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q 
 }
 
 // StubSessionEnrollment inserts a mock class group session, user, and corresponding session enrollment into the database.
-func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, attended bool) database.CreateSessionEnrollmentRow {
+func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, attended bool) model.SessionEnrollment {
 	t.Helper()
 
 	session := StubClassGroupSession(t, ctx, db.Q,
@@ -145,7 +145,7 @@ func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, a
 		model.UserRole_Student,
 	)
 
-	enrollment, err := db.Q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
+	enrollment, err := db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
 		SessionID: session.ID,
 		UserID:    user.ID,
 		Attended:  attended,
