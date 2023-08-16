@@ -13,7 +13,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -156,14 +155,14 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 		{
 			"request with field changes",
 			sessionEnrollmentPatchRequest{
-				sessionEnrollmentPatchSessionEnrollmentRequestFields{
+				database.UpdateSessionEnrollmentParams{
 					Attended: ptr(true),
 				},
 			},
 			true,
 			sessionEnrollmentPatchResponse{
 				newSuccessResponse(),
-				database.UpdateSessionEnrollmentRow{
+				sessionEnrollmentPatchSessionEnrollmentResponseFields{
 					Attended: true,
 				},
 			},
@@ -174,12 +173,12 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 		{
 			"request with no field changes",
 			sessionEnrollmentPatchRequest{
-				sessionEnrollmentPatchSessionEnrollmentRequestFields{},
+				database.UpdateSessionEnrollmentParams{},
 			},
 			true,
 			sessionEnrollmentPatchResponse{
 				newSuccessResponse(),
-				database.UpdateSessionEnrollmentRow{
+				sessionEnrollmentPatchSessionEnrollmentResponseFields{
 					Attended: true,
 				},
 			},
@@ -190,11 +189,11 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 		{
 			"request updating non-existent session enrollment",
 			sessionEnrollmentPatchRequest{
-				sessionEnrollmentPatchSessionEnrollmentRequestFields{},
+				database.UpdateSessionEnrollmentParams{},
 			},
 			false,
 			sessionEnrollmentPatchResponse{
-				SessionEnrollment: database.UpdateSessionEnrollmentRow{
+				SessionEnrollment: sessionEnrollmentPatchSessionEnrollmentResponseFields{
 					ID: 6666,
 				},
 			},
@@ -221,7 +220,7 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 				tt.wantResponse.SessionEnrollment.ID = createdEnrollment.ID
 				tt.wantResponse.SessionEnrollment.SessionID = createdEnrollment.SessionID
 				tt.wantResponse.SessionEnrollment.UserID = createdEnrollment.UserID
-				tt.wantResponse.SessionEnrollment.UpdatedAt = pgtype.Timestamptz{Time: createdEnrollment.CreatedAt, Valid: true}
+				tt.wantResponse.SessionEnrollment.UpdatedAt = createdEnrollment.CreatedAt
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)

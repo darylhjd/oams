@@ -5,41 +5,4 @@
 
 package database
 
-import (
-	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
-)
-
-const updateSessionEnrollment = `-- name: UpdateSessionEnrollment :one
-UPDATE session_enrollments
-SET attended   = COALESCE($2, attended)
-WHERE id = $1
-RETURNING id, session_id, user_id, attended, updated_at
-`
-
-type UpdateSessionEnrollmentParams struct {
-	ID       int64       `json:"id"`
-	Attended pgtype.Bool `json:"attended"`
-}
-
-type UpdateSessionEnrollmentRow struct {
-	ID        int64              `json:"id"`
-	SessionID int64              `json:"session_id"`
-	UserID    string             `json:"user_id"`
-	Attended  bool               `json:"attended"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-}
-
-func (q *Queries) UpdateSessionEnrollment(ctx context.Context, arg UpdateSessionEnrollmentParams) (UpdateSessionEnrollmentRow, error) {
-	row := q.db.QueryRow(ctx, updateSessionEnrollment, arg.ID, arg.Attended)
-	var i UpdateSessionEnrollmentRow
-	err := row.Scan(
-		&i.ID,
-		&i.SessionID,
-		&i.UserID,
-		&i.Attended,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
+import ()
