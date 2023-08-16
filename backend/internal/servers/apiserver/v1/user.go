@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
@@ -40,8 +41,19 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 
 type userMeResponse struct {
 	response
-	SessionUser                model.User                                      `json:"session_user"`
-	UpcomingClassGroupSessions []database.GetUserUpcomingClassGroupSessionsRow `json:"upcoming_class_group_sessions"`
+	SessionUser                model.User                         `json:"session_user"`
+	UpcomingClassGroupSessions []userMeUpcomingClassGroupSessions `json:"upcoming_class_group_sessions"`
+}
+
+type userMeUpcomingClassGroupSessions struct {
+	Code      string          `json:"code"`
+	Year      int32           `json:"year"`
+	Semester  string          `json:"semester"`
+	Name      string          `json:"name"`
+	ClassType model.ClassType `json:"class_type"`
+	StartTime time.Time       `json:"start_time"`
+	EndTime   time.Time       `json:"end_time"`
+	Venue     string          `json:"venue"`
 }
 
 func (v *APIServerV1) userMe(r *http.Request) apiResponse {
@@ -62,16 +74,26 @@ func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusUnauthorized, "client lacks authentication credentials")
 	}
 
-	upcomingClassGroupSessions, err := v.db.Q.GetUserUpcomingClassGroupSessions(r.Context(), resp.SessionUser.ID)
+	upcomingClassGroupSessions, err := v.db.GetUserUpcomingClassGroupSessions(r.Context(), resp.SessionUser.ID)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not get session user upcoming class group sessions")
 	}
 
-	resp.UpcomingClassGroupSessions = append(
-		make([]database.GetUserUpcomingClassGroupSessionsRow, 0, len(upcomingClassGroupSessions)),
-		upcomingClassGroupSessions...,
-	)
+	resp.UpcomingClassGroupSessions = make([]userMeUpcomingClassGroupSessions, 0, len(upcomingClassGroupSessions))
+	for _, session := range upcomingClassGroupSessions {
+		resp.UpcomingClassGroupSessions = append(resp.UpcomingClassGroupSessions, userMeUpcomingClassGroupSessions{
+			Code:      session.Code,
+			Year:      session.Year,
+			Semester:  session.Semester,
+			Name:      session.Name,
+			ClassType: session.ClassType,
+			StartTime: session.StartTime,
+			EndTime:   session.EndTime,
+			Venue:     session.Venue,
+		})
+	}
+
 	return resp
 }
 

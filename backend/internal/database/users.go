@@ -41,6 +41,7 @@ func (d *DB) GetUser(ctx context.Context, id string) (model.User, error) {
 	return res, err
 }
 
+// CreateUserParams holds the fields required for CreateUser.
 type CreateUserParams struct {
 	ID    string         `json:"id"`
 	Name  string         `json:"name"`
@@ -75,6 +76,42 @@ func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
 			Users.ID.EQ(String(id)),
 		).
 		RETURNING(Users.AllColumns)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}
+
+// UpcomingClassGroupSession holds the fields for a user's upcoming class group session.
+type UpcomingClassGroupSession struct {
+	model.Class
+	model.ClassGroup
+	model.ClassGroupSession
+}
+
+// GetUserUpcomingClassGroupSessions gets information on a user's upcoming classes. This query returns all session
+// enrollments for that user that are currently happening or will happen in the future. The sessions are returned in
+// ascending order of start time and then end time.
+func (d *DB) GetUserUpcomingClassGroupSessions(ctx context.Context, id string) ([]UpcomingClassGroupSession, error) {
+	var res []UpcomingClassGroupSession
+
+	stmt := SELECT(
+		Classes.AllColumns, ClassGroups.AllColumns, ClassGroupSessions.AllColumns,
+	).FROM(
+		ClassGroupSessions.
+			INNER_JOIN(ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID)).
+			INNER_JOIN(Classes, Classes.ID.EQ(ClassGroups.ClassID)),
+	).WHERE(
+		ClassGroupSessions.ID.IN(
+			SELECT(SessionEnrollments.SessionID).
+				FROM(SessionEnrollments).
+				WHERE(SessionEnrollments.UserID.EQ(String(id))),
+		).AND(
+			ClassGroupSessions.EndTime.GT(TimestampzT(time.Now())),
+		),
+	).ORDER_BY(
+		ClassGroupSessions.StartTime.ASC(),
+		ClassGroupSessions.EndTime.ASC(),
+	)
 
 	err := stmt.QueryContext(ctx, d.Conn, &res)
 	return res, err
