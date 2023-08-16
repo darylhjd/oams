@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (v *APIServerV1) classGroup(w http.ResponseWriter, r *http.Request) {
@@ -60,36 +59,20 @@ func (v *APIServerV1) classGroupGet(r *http.Request, id int64) apiResponse {
 }
 
 type classGroupPatchRequest struct {
-	ClassGroup classGroupPatchClassGroupRequestFields `json:"class_group"`
-}
-
-type classGroupPatchClassGroupRequestFields struct {
-	ClassID   *int64              `json:"class_id"`
-	Name      *string             `json:"name"`
-	ClassType *database.ClassType `json:"class_type"`
-}
-
-func (r classGroupPatchRequest) updateClassGroupParams(classGroupId int64) database.UpdateClassGroupParams {
-	params := database.UpdateClassGroupParams{ID: classGroupId}
-
-	if r.ClassGroup.ClassID != nil {
-		params.ClassID = pgtype.Int8{Int64: *r.ClassGroup.ClassID, Valid: true}
-	}
-
-	if r.ClassGroup.Name != nil {
-		params.Name = pgtype.Text{String: *r.ClassGroup.Name, Valid: true}
-	}
-
-	if r.ClassGroup.ClassType != nil {
-		params.ClassType = database.NullClassType{ClassType: *r.ClassGroup.ClassType, Valid: true}
-	}
-
-	return params
+	ClassGroup database.UpdateClassGroupParams `json:"class_group"`
 }
 
 type classGroupPatchResponse struct {
 	response
-	ClassGroup database.UpdateClassGroupRow `json:"class_group"`
+	ClassGroup classGroupPatchClassGroupResponseFields `json:"class_group"`
+}
+
+type classGroupPatchClassGroupResponseFields struct {
+	ID        int64           `json:"id"`
+	ClassID   int64           `json:"class_id"`
+	Name      string          `json:"name"`
+	ClassType model.ClassType `json:"class_type"`
+	UpdatedAt time.Time       `json:"updated_at"`
 }
 
 func (v *APIServerV1) classGroupPatch(r *http.Request, id int64) apiResponse {
@@ -98,10 +81,10 @@ func (v *APIServerV1) classGroupPatch(r *http.Request, id int64) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	group, err := v.db.Q.UpdateClassGroup(r.Context(), req.updateClassGroupParams(id))
+	group, err := v.db.UpdateClassGroup(r.Context(), id, req.ClassGroup)
 	if err != nil {
 		switch {
-		case errors.Is(err, pgx.ErrNoRows):
+		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group to update does not exist")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
 			return newErrorResponse(http.StatusBadRequest, "class_id does not exist")
@@ -115,7 +98,13 @@ func (v *APIServerV1) classGroupPatch(r *http.Request, id int64) apiResponse {
 
 	return classGroupPatchResponse{
 		newSuccessResponse(),
-		group,
+		classGroupPatchClassGroupResponseFields{
+			group.ID,
+			group.ClassID,
+			group.Name,
+			group.ClassType,
+			group.UpdatedAt,
+		},
 	}
 }
 

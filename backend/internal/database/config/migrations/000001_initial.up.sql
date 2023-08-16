@@ -4,6 +4,15 @@ CREATE TYPE CLASS_TYPE AS ENUM ('LEC', 'TUT', 'LAB');
 
 CREATE TYPE USER_ROLE AS ENUM ('STUDENT', 'COURSE_COORDINATOR', 'ADMIN');
 
+CREATE FUNCTION update_updated_at() RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW <> OLD THEN
+        NEW.updated_at := NOW();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TABLE users
 (
     id         TEXT PRIMARY KEY, -- VCS Account No.
@@ -13,6 +22,10 @@ CREATE TABLE users
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 CREATE TABLE classes
 (
@@ -28,6 +41,10 @@ CREATE TABLE classes
         UNIQUE (code, year, semester)
 );
 
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE ON classes
+    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
 CREATE TABLE class_groups
 (
     id         BIGSERIAL PRIMARY KEY,
@@ -42,6 +59,10 @@ CREATE TABLE class_groups
         FOREIGN KEY (class_id)
             REFERENCES classes (id)
 );
+
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE ON class_groups
+    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 CREATE TABLE class_group_sessions
 (
@@ -61,6 +82,10 @@ CREATE TABLE class_group_sessions
         CHECK (start_time < end_time)
 );
 
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE ON class_group_sessions
+    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
 CREATE TABLE session_enrollments
 (
     id         BIGSERIAL PRIMARY KEY,
@@ -79,27 +104,8 @@ CREATE TABLE session_enrollments
             REFERENCES users (id)
 );
 
-CREATE FUNCTION update_updated_at() RETURNS TRIGGER AS $$
-    BEGIN
-        IF NEW <> OLD THEN
-            NEW.updated_at := NOW();
-        END IF;
-        RETURN NEW;
-    END;
-$$ LANGUAGE plpgsql;
-
-DO $$
-DECLARE T TEXT;
-BEGIN
-    FOR T IN
-        SELECT table_name FROM information_schema.columns
-        WHERE column_name = 'updated_at'
-    LOOP
-        EXECUTE FORMAT('CREATE TRIGGER update_updated_at
-                        BEFORE UPDATE ON %I
-                        FOR EACH ROW EXECUTE PROCEDURE update_updated_at()', T);
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE ON session_enrollments
+    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 COMMIT;

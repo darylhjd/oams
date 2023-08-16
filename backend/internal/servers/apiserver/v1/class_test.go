@@ -14,7 +14,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -160,19 +159,19 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 		{
 			"request with field changes",
 			classPatchRequest{
-				classPatchClassRequestFields{
-					ptr("CZ9999"),
-					ptr(int32(1999)),
-					ptr("1"),
-					ptr("CSC Full-time"),
-					ptr(int16(3)),
+				database.UpdateClassParams{
+					Code:      ptr("CZ9999"),
+					Year:      ptr(int32(1999)),
+					Semester:  ptr("1"),
+					Programme: ptr("CSC Full-time"),
+					Au:        ptr(int16(3)),
 				},
 			},
 			true,
 			false,
 			classPatchResponse{
 				newSuccessResponse(),
-				database.UpdateClassRow{
+				classPatchClassResponseFields{
 					Code:      "CZ9999",
 					Year:      1999,
 					Semester:  "1",
@@ -187,13 +186,13 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 		{
 			"request with no field changes",
 			classPatchRequest{
-				classPatchClassRequestFields{},
+				database.UpdateClassParams{},
 			},
 			true,
 			false,
 			classPatchResponse{
 				newSuccessResponse(),
-				database.UpdateClassRow{
+				classPatchClassResponseFields{
 					Code:     "EXISTING123",
 					Year:     2023,
 					Semester: "1",
@@ -206,7 +205,7 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 		{
 			"request updating non-existent class",
 			classPatchRequest{
-				classPatchClassRequestFields{},
+				database.UpdateClassParams{},
 			},
 			false,
 			false,
@@ -218,7 +217,7 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 		{
 			"request with update conflict",
 			classPatchRequest{
-				classPatchClassRequestFields{
+				database.UpdateClassParams{
 					Code:      ptr("EXISTING2023"),
 					Year:      ptr(int32(2023)),
 					Semester:  ptr("1"),
@@ -276,7 +275,7 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 
 				classId = createdClass.ID
 				tt.wantResponse.Class.ID = createdClass.ID
-				tt.wantResponse.Class.UpdatedAt = pgtype.Timestamptz{Time: createdClass.CreatedAt, Valid: true}
+				tt.wantResponse.Class.UpdatedAt = createdClass.CreatedAt
 			default:
 				classId = rand.Int63()
 			}

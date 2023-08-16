@@ -15,7 +15,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -163,11 +162,11 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 		{
 			"request with field changes",
 			classGroupSessionPatchRequest{
-				classGroupSessionPatchClassGroupSessionRequestFields{
-					ptr(int64(1)),
-					ptr(int64(99999999999)),
-					ptr(int64(9999999999999)),
-					ptr("NEW_VENUE+99"),
+				database.UpdateClassGroupSessionParams{
+					ClassGroupID: ptr(int64(1)),
+					StartTime:    ptr(int64(99999999999)),
+					EndTime:      ptr(int64(9999999999999)),
+					Venue:        ptr("NEW_VENUE+99"),
 				},
 			},
 			true,
@@ -175,10 +174,10 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			true,
 			classGroupSessionPatchResponse{
 				newSuccessResponse(),
-				database.UpdateClassGroupSessionRow{
+				classGroupSessionPatchClassGroupSessionResponseFields{
 					ClassGroupID: 1,
-					StartTime:    pgtype.Timestamptz{Time: time.UnixMicro(99999999999), Valid: true},
-					EndTime:      pgtype.Timestamptz{Time: time.UnixMicro(9999999999999), Valid: true},
+					StartTime:    time.UnixMicro(99999999999),
+					EndTime:      time.UnixMicro(9999999999999),
 					Venue:        "NEW_VENUE+99",
 				},
 			},
@@ -189,16 +188,16 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 		{
 			"request with no field changes",
 			classGroupSessionPatchRequest{
-				classGroupSessionPatchClassGroupSessionRequestFields{},
+				database.UpdateClassGroupSessionParams{},
 			},
 			true,
 			false,
 			true,
 			classGroupSessionPatchResponse{
 				newSuccessResponse(),
-				database.UpdateClassGroupSessionRow{
-					StartTime: pgtype.Timestamptz{Time: time.UnixMicro(99999999999), Valid: true},
-					EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(9999999999999), Valid: true},
+				classGroupSessionPatchClassGroupSessionResponseFields{
+					StartTime: time.UnixMicro(99999999999),
+					EndTime:   time.UnixMicro(9999999999999),
 					Venue:     "EXISTING_VENUE+99",
 				},
 			},
@@ -209,13 +208,13 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 		{
 			"request updating non-existent class group session",
 			classGroupSessionPatchRequest{
-				classGroupSessionPatchClassGroupSessionRequestFields{},
+				database.UpdateClassGroupSessionParams{},
 			},
 			false,
 			false,
 			false,
 			classGroupSessionPatchResponse{
-				ClassGroupSession: database.UpdateClassGroupSessionRow{
+				ClassGroupSession: classGroupSessionPatchClassGroupSessionResponseFields{
 					ID: 6666,
 				},
 			},
@@ -226,7 +225,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 		{
 			"request with update conflict",
 			classGroupSessionPatchRequest{
-				classGroupSessionPatchClassGroupSessionRequestFields{
+				database.UpdateClassGroupSessionParams{
 					StartTime: ptr(int64(2)),
 					EndTime:   ptr(int64(3)),
 				},
@@ -297,15 +296,15 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db,
-					tt.wantResponse.ClassGroupSession.StartTime.Time,
-					tt.wantResponse.ClassGroupSession.EndTime.Time,
+					tt.wantResponse.ClassGroupSession.StartTime,
+					tt.wantResponse.ClassGroupSession.EndTime,
 					tt.wantResponse.ClassGroupSession.Venue,
 				)
 
 				sessionId = createdSession.ID
 				tt.wantResponse.ClassGroupSession.ID = createdSession.ID
 				tt.wantResponse.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
-				tt.wantResponse.ClassGroupSession.UpdatedAt = pgtype.Timestamptz{Time: createdSession.CreatedAt, Valid: true}
+				tt.wantResponse.ClassGroupSession.UpdatedAt = createdSession.CreatedAt
 			default:
 				sessionId = rand.Int63()
 			}

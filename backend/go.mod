@@ -3,7 +3,7 @@ module github.com/darylhjd/oams/backend
 go 1.20
 
 require (
-	github.com/AzureAD/microsoft-authentication-library-for-go v1.1.0
+	github.com/AzureAD/microsoft-authentication-library-for-go v1.1.1
 	github.com/go-jet/jet/v2 v2.10.2-0.20230803110858-33333585e957
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
@@ -26,7 +26,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
-	github.com/jackc/pgconn v1.14.0 // indirect
+	github.com/jackc/pgconn v1.14.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.2 // indirect

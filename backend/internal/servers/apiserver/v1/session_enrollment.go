@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) {
@@ -60,26 +59,20 @@ func (v *APIServerV1) sessionEnrollmentGet(r *http.Request, id int64) apiRespons
 }
 
 type sessionEnrollmentPatchRequest struct {
-	SessionEnrollment sessionEnrollmentPatchSessionEnrollmentRequestFields `json:"session_enrollment"`
-}
-
-type sessionEnrollmentPatchSessionEnrollmentRequestFields struct {
-	Attended *bool `json:"attended"`
-}
-
-func (r sessionEnrollmentPatchRequest) updateSessionEnrollmentParams(enrollmentId int64) database.UpdateSessionEnrollmentParams {
-	params := database.UpdateSessionEnrollmentParams{ID: enrollmentId}
-
-	if r.SessionEnrollment.Attended != nil {
-		params.Attended = pgtype.Bool{Bool: *r.SessionEnrollment.Attended, Valid: true}
-	}
-
-	return params
+	SessionEnrollment database.UpdateSessionEnrollmentParams `json:"session_enrollment"`
 }
 
 type sessionEnrollmentPatchResponse struct {
 	response
-	SessionEnrollment database.UpdateSessionEnrollmentRow `json:"session_enrollment"`
+	SessionEnrollment sessionEnrollmentPatchSessionEnrollmentResponseFields `json:"session_enrollment"`
+}
+
+type sessionEnrollmentPatchSessionEnrollmentResponseFields struct {
+	ID        int64     `json:"id"`
+	SessionID int64     `json:"session_id"`
+	UserID    string    `json:"user_id"`
+	Attended  bool      `json:"attended"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (v *APIServerV1) sessionEnrollmentPatch(r *http.Request, id int64) apiResponse {
@@ -88,9 +81,9 @@ func (v *APIServerV1) sessionEnrollmentPatch(r *http.Request, id int64) apiRespo
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	enrollment, err := v.db.Q.UpdateSessionEnrollment(r.Context(), req.updateSessionEnrollmentParams(id))
+	enrollment, err := v.db.UpdateSessionEnrollment(r.Context(), id, req.SessionEnrollment)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "session enrollment to update does not exist")
 		}
 
@@ -100,7 +93,13 @@ func (v *APIServerV1) sessionEnrollmentPatch(r *http.Request, id int64) apiRespo
 
 	return sessionEnrollmentPatchResponse{
 		newSuccessResponse(),
-		enrollment,
+		sessionEnrollmentPatchSessionEnrollmentResponseFields{
+			enrollment.ID,
+			enrollment.SessionID,
+			enrollment.UserID,
+			enrollment.Attended,
+			enrollment.UpdatedAt,
+		},
 	}
 }
 
