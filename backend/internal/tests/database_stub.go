@@ -7,18 +7,18 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // StubAuthContextUser inserts the mock auth context user into the database.
-func StubAuthContextUser(t *testing.T, ctx context.Context, q *database.Queries) {
+func StubAuthContextUser(t *testing.T, ctx context.Context, db *database.DB) {
 	t.Helper()
 
-	_, err := q.CreateUser(ctx, database.CreateUserParams{
+	_, err := db.CreateUser(ctx, database.CreateUserParams{
 		ID:    MockAuthenticatorIDTokenName,
 		Email: MockAuthenticatorAccountPreferredUsername,
-		Role:  database.UserRoleSTUDENT,
+		Role:  model.UserRole_Student,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -26,10 +26,10 @@ func StubAuthContextUser(t *testing.T, ctx context.Context, q *database.Queries)
 }
 
 // StubUser inserts a mock user with the given ID into the database.
-func StubUser(t *testing.T, ctx context.Context, q *database.Queries, id string, role database.UserRole) database.CreateUserRow {
+func StubUser(t *testing.T, ctx context.Context, db *database.DB, id string, role model.UserRole) model.User {
 	t.Helper()
 
-	user, err := q.CreateUser(ctx, database.CreateUserParams{
+	user, err := db.CreateUser(ctx, database.CreateUserParams{
 		ID:   id,
 		Name: "",
 		Role: role,
@@ -42,10 +42,10 @@ func StubUser(t *testing.T, ctx context.Context, q *database.Queries, id string,
 }
 
 // StubClass inserts a mock class with the given fields into the database.
-func StubClass(t *testing.T, ctx context.Context, q *database.Queries, code string, year int32, semester string) database.CreateClassRow {
+func StubClass(t *testing.T, ctx context.Context, db *database.DB, code string, year int32, semester string) model.Class {
 	t.Helper()
 
-	class, err := q.CreateClass(ctx, database.CreateClassParams{
+	class, err := db.CreateClass(ctx, database.CreateClassParams{
 		Code:      code,
 		Year:      year,
 		Semester:  semester,
@@ -60,12 +60,12 @@ func StubClass(t *testing.T, ctx context.Context, q *database.Queries, code stri
 }
 
 // StubClassGroup inserts a mock class and a corresponding class group into the database.
-func StubClassGroup(t *testing.T, ctx context.Context, q *database.Queries, name string, classType database.ClassType) database.CreateClassGroupRow {
+func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name string, classType model.ClassType) model.ClassGroup {
 	t.Helper()
 
-	class := StubClass(t, ctx, q, uuid.NewString(), rand.Int31(), uuid.NewString())
+	class := StubClass(t, ctx, db, uuid.NewString(), rand.Int31(), uuid.NewString())
 
-	group, err := q.CreateClassGroup(ctx, database.CreateClassGroupParams{
+	group, err := db.CreateClassGroup(ctx, database.CreateClassGroupParams{
 		ClassID:   class.ID,
 		Name:      name,
 		ClassType: classType,
@@ -78,10 +78,10 @@ func StubClassGroup(t *testing.T, ctx context.Context, q *database.Queries, name
 }
 
 // StubClassGroupWithClassID creates a mock class group using an existing class ID.
-func StubClassGroupWithClassID(t *testing.T, ctx context.Context, q *database.Queries, classId int64, name string, classType database.ClassType) database.CreateClassGroupRow {
+func StubClassGroupWithClassID(t *testing.T, ctx context.Context, db *database.DB, classId int64, name string, classType model.ClassType) model.ClassGroup {
 	t.Helper()
 
-	group, err := q.CreateClassGroup(ctx, database.CreateClassGroupParams{
+	group, err := db.CreateClassGroup(ctx, database.CreateClassGroupParams{
 		ClassID:   classId,
 		Name:      name,
 		ClassType: classType,
@@ -94,12 +94,12 @@ func StubClassGroupWithClassID(t *testing.T, ctx context.Context, q *database.Qu
 }
 
 // StubClassGroupSession inserts a mock class, class group and corresponding class group session into the database.
-func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Queries, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
+func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, startTime, endTime time.Time, venue string) model.ClassGroupSession {
 	t.Helper()
 
-	classGroup := StubClassGroup(t, ctx, q, uuid.NewString(), database.ClassTypeLEC)
+	classGroup := StubClassGroup(t, ctx, db, uuid.NewString(), model.ClassType_Lec)
 
-	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
+	session, err := db.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
 		ClassGroupID: classGroup.ID,
 		StartTime:    startTime,
 		EndTime:      endTime,
@@ -113,10 +113,10 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Querie
 }
 
 // StubClassGroupSessionWithClassGroupID creates a mock class group session using an existing class group ID.
-func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q *database.Queries, classGroupId int64, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
+func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, db *database.DB, classGroupId int64, startTime, endTime time.Time, venue string) model.ClassGroupSession {
 	t.Helper()
 
-	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
+	session, err := db.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
 		ClassGroupID: classGroupId,
 		StartTime:    startTime,
 		EndTime:      endTime,
@@ -130,21 +130,21 @@ func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q 
 }
 
 // StubSessionEnrollment inserts a mock class group session, user, and corresponding session enrollment into the database.
-func StubSessionEnrollment(t *testing.T, ctx context.Context, q *database.Queries, attended bool) database.CreateSessionEnrollmentRow {
+func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, attended bool) model.SessionEnrollment {
 	t.Helper()
 
-	session := StubClassGroupSession(t, ctx, q,
-		pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-		pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+	session := StubClassGroupSession(t, ctx, db,
+		time.UnixMicro(1),
+		time.UnixMicro(2),
 		"VENUE+66",
 	)
 
-	user := StubUser(t, ctx, q,
+	user := StubUser(t, ctx, db,
 		uuid.NewString(),
-		database.UserRoleSTUDENT,
+		model.UserRole_Student,
 	)
 
-	enrollment, err := q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
+	enrollment, err := db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
 		SessionID: session.ID,
 		UserID:    user.ID,
 		Attended:  attended,

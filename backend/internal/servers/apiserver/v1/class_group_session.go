@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -38,13 +40,13 @@ func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) 
 
 type classGroupSessionGetResponse struct {
 	response
-	ClassGroupSession database.ClassGroupSession `json:"class_group_session"`
+	ClassGroupSession model.ClassGroupSession `json:"class_group_session"`
 }
 
 func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiResponse {
-	session, err := v.db.Q.GetClassGroupSession(r.Context(), id)
+	session, err := v.db.GetClassGroupSession(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested class group session does not exist")
 		}
 
@@ -130,10 +132,10 @@ type classGroupSessionDeleteResponse struct {
 }
 
 func (v *APIServerV1) classGroupSessionDelete(r *http.Request, id int64) apiResponse {
-	_, err := v.db.Q.DeleteClassGroupSession(r.Context(), id)
+	_, err := v.db.DeleteClassGroupSession(r.Context(), id)
 	if err != nil {
 		switch {
-		case errors.Is(err, pgx.ErrNoRows):
+		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group session to delete does not exist")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
 			return newErrorResponse(http.StatusConflict, "class group session to delete is still referenced")

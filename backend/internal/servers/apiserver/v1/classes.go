@@ -3,8 +3,10 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 )
 
 func (v *APIServerV1) classes(w http.ResponseWriter, r *http.Request) {
@@ -24,11 +26,11 @@ func (v *APIServerV1) classes(w http.ResponseWriter, r *http.Request) {
 
 type classesGetResponse struct {
 	response
-	Classes []database.Class `json:"classes"`
+	Classes []model.Class `json:"classes"`
 }
 
 func (v *APIServerV1) classesGet(r *http.Request) apiResponse {
-	classes, err := v.db.Q.ListClasses(r.Context())
+	classes, err := v.db.ListClasses(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process classes get database action")
@@ -36,7 +38,7 @@ func (v *APIServerV1) classesGet(r *http.Request) apiResponse {
 
 	resp := classesGetResponse{
 		newSuccessResponse(),
-		make([]database.Class, 0, len(classes)),
+		make([]model.Class, 0, len(classes)),
 	}
 
 	resp.Classes = append(resp.Classes, classes...)
@@ -49,7 +51,17 @@ type classesPostRequest struct {
 
 type classesPostResponse struct {
 	response
-	Class database.CreateClassRow `json:"class"`
+	Class classesPostClassResponseFields `json:"class"`
+}
+
+type classesPostClassResponseFields struct {
+	ID        int64     `json:"id"`
+	Code      string    `json:"code"`
+	Year      int32     `json:"year"`
+	Semester  string    `json:"semester"`
+	Programme string    `json:"programme"`
+	Au        int16     `json:"au"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (v *APIServerV1) classesPost(r *http.Request) apiResponse {
@@ -58,7 +70,7 @@ func (v *APIServerV1) classesPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	class, err := v.db.Q.CreateClass(r.Context(), req.Class)
+	class, err := v.db.CreateClass(r.Context(), req.Class)
 	if err != nil {
 		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
 			return newErrorResponse(http.StatusConflict, "class with same code, year, and semester already exists")
@@ -70,6 +82,14 @@ func (v *APIServerV1) classesPost(r *http.Request) apiResponse {
 
 	return classesPostResponse{
 		newSuccessResponse(),
-		class,
+		classesPostClassResponseFields{
+			class.ID,
+			class.Code,
+			class.Year,
+			class.Semester,
+			class.Programme,
+			class.Au,
+			class.CreatedAt,
+		},
 	}
 }

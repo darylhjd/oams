@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"log"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -55,15 +56,19 @@ func Create(ctx context.Context, dbName string, truncate bool) error {
 	if err != nil {
 		return fmt.Errorf("%s - could not establish database connection for creation: %w", MigrationNamespace, err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("%s - %s", MigrationNamespace, err)
+		}
+	}()
 
 	if truncate {
-		if _, err = db.C.Exec(ctx, dropDatabaseIfExists+pq.QuoteIdentifier(dbName)); err != nil {
+		if _, err = db.Conn.ExecContext(ctx, dropDatabaseIfExists+pq.QuoteIdentifier(dbName)); err != nil {
 			return fmt.Errorf("%s - could not drop database before creation: %w", MigrationNamespace, err)
 		}
 	}
 
-	if _, err = db.C.Exec(ctx, createDatabase+pq.QuoteIdentifier(dbName)); err != nil {
+	if _, err = db.Conn.ExecContext(ctx, createDatabase+pq.QuoteIdentifier(dbName)); err != nil {
 		return fmt.Errorf("%s - could not create database: %w", MigrationNamespace, err)
 	}
 
@@ -78,14 +83,18 @@ func Drop(ctx context.Context, dbName string, mustExist bool) error {
 	if err != nil {
 		return fmt.Errorf("%s - could not establish database connection for dropping: %w", MigrationNamespace, err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("%s - %s", MigrationNamespace, err)
+		}
+	}()
 
 	statement := dropDatabaseIfExists
 	if mustExist {
 		statement = dropDatabase
 	}
 
-	if _, err = db.C.Exec(ctx, statement+pq.QuoteIdentifier(dbName)); err != nil {
+	if _, err = db.Conn.ExecContext(ctx, statement+pq.QuoteIdentifier(dbName)); err != nil {
 		return fmt.Errorf("%s - could not drop database: %w", MigrationNamespace, err)
 	}
 

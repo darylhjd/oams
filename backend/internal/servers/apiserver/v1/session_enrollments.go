@@ -3,8 +3,10 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 )
 
 func (v *APIServerV1) sessionEnrollments(w http.ResponseWriter, r *http.Request) {
@@ -24,11 +26,11 @@ func (v *APIServerV1) sessionEnrollments(w http.ResponseWriter, r *http.Request)
 
 type sessionEnrollmentsGetResponse struct {
 	response
-	SessionEnrollments []database.SessionEnrollment `json:"session_enrollments"`
+	SessionEnrollments []model.SessionEnrollment `json:"session_enrollments"`
 }
 
 func (v *APIServerV1) sessionEnrollmentsGet(r *http.Request) apiResponse {
-	enrollments, err := v.db.Q.ListSessionEnrollments(r.Context())
+	enrollments, err := v.db.ListSessionEnrollments(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollments get database action")
@@ -36,7 +38,7 @@ func (v *APIServerV1) sessionEnrollmentsGet(r *http.Request) apiResponse {
 
 	resp := sessionEnrollmentsGetResponse{
 		newSuccessResponse(),
-		make([]database.SessionEnrollment, 0, len(enrollments)),
+		make([]model.SessionEnrollment, 0, len(enrollments)),
 	}
 
 	resp.SessionEnrollments = append(resp.SessionEnrollments, enrollments...)
@@ -49,7 +51,15 @@ type sessionEnrollmentsPostRequest struct {
 
 type sessionEnrollmentsPostResponse struct {
 	response
-	SessionEnrollment database.CreateSessionEnrollmentRow `json:"session_enrollment"`
+	SessionEnrollment sessionEnrollmentsPostSessionEnrollmentResponseFields `json:"session_enrollment"`
+}
+
+type sessionEnrollmentsPostSessionEnrollmentResponseFields struct {
+	ID        int64     `json:"id"`
+	SessionID int64     `json:"session_id"`
+	UserID    string    `json:"user_id"`
+	Attended  bool      `json:"attended"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (v *APIServerV1) sessionEnrollmentsPost(r *http.Request) apiResponse {
@@ -58,7 +68,7 @@ func (v *APIServerV1) sessionEnrollmentsPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	session, err := v.db.Q.CreateSessionEnrollment(r.Context(), req.SessionEnrollment)
+	session, err := v.db.CreateSessionEnrollment(r.Context(), req.SessionEnrollment)
 	if err != nil {
 		switch {
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
@@ -73,6 +83,12 @@ func (v *APIServerV1) sessionEnrollmentsPost(r *http.Request) apiResponse {
 
 	return sessionEnrollmentsPostResponse{
 		newSuccessResponse(),
-		session,
+		sessionEnrollmentsPostSessionEnrollmentResponseFields{
+			session.ID,
+			session.SessionID,
+			session.UserID,
+			session.Attended,
+			session.CreatedAt,
+		},
 	}
 }

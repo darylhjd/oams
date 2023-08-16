@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
@@ -87,13 +88,13 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			false,
 			userMeResponse{
 				newSuccessResponse(),
-				database.User{
+				model.User{
 					ID:    tests.MockAuthenticatorIDTokenName,
 					Name:  "",
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  database.UserRoleSTUDENT,
+					Role:  model.UserRole_Student,
 				},
-				[]database.GetUserUpcomingClassGroupSessionsRow{},
+				[]userMeUpcomingClassGroupSessions{},
 			},
 			http.StatusOK,
 			"",
@@ -105,13 +106,13 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			true,
 			userMeResponse{
 				newSuccessResponse(),
-				database.User{
+				model.User{
 					ID:    tests.MockAuthenticatorIDTokenName,
 					Name:  "",
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  database.UserRoleSTUDENT,
+					Role:  model.UserRole_Student,
 				},
-				[]database.GetUserUpcomingClassGroupSessionsRow{},
+				[]userMeUpcomingClassGroupSessions{},
 			},
 			http.StatusOK,
 			"",
@@ -149,18 +150,18 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withStubAuthUser {
-				tests.StubAuthContextUser(t, ctx, v1.db.Q)
+				tests.StubAuthContextUser(t, ctx, v1.db)
 			}
 
 			if tt.withUpcomingClassGroupSession {
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
-					pgtype.Timestamptz{Time: time.Now().Add(-time.Hour), Valid: true}, // Test ongoing session.
-					pgtype.Timestamptz{Time: time.Now().Add(time.Hour * 24), Valid: true},
+					t, ctx, v1.db,
+					time.Now().Add(-time.Hour), // Test ongoing session.
+					time.Now().Add(time.Hour*24),
 					uuid.NewString(),
 				)
 
-				_, err := v1.db.Q.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
+				_, err := v1.db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
 					SessionID: createdSession.ID,
 					UserID:    tests.MockAuthenticatorIDTokenName,
 					Attended:  false,
@@ -211,9 +212,9 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			true,
 			userGetResponse{
 				newSuccessResponse(),
-				database.User{
+				model.User{
 					ID:   "EXISTING_USER",
-					Role: database.UserRoleSTUDENT,
+					Role: model.UserRole_Student,
 				},
 			},
 			http.StatusOK,
@@ -241,7 +242,7 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				createdUser := tests.StubUser(t, ctx, v1.db.Q, tt.wantResponse.User.ID, tt.wantResponse.User.Role)
+				createdUser := tests.StubUser(t, ctx, v1.db, tt.wantResponse.User.ID, tt.wantResponse.User.Role)
 				tt.wantResponse.User.CreatedAt = createdUser.CreatedAt
 				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
 			}
@@ -347,8 +348,8 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 
 			userId := tt.wantResponse.User.ID
 			if tt.withExistingUser {
-				createdUser := tests.StubUser(t, ctx, v1.db.Q, userId, tt.wantResponse.User.Role)
-				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
+				createdUser := tests.StubUser(t, ctx, v1.db, userId, model.UserRole(tt.wantResponse.User.Role))
+				tt.wantResponse.User.UpdatedAt = pgtype.Timestamptz{Time: createdUser.CreatedAt, Valid: true}
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
@@ -434,10 +435,10 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 			var userId string
 			switch {
 			case tt.withForeignKeyDependency:
-				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, true)
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, true)
 				userId = createdEnrollment.UserID
 			case tt.withExistingUser:
-				_ = tests.StubUser(t, ctx, v1.db.Q, userId, database.UserRoleSTUDENT)
+				_ = tests.StubUser(t, ctx, v1.db, userId, model.UserRole_Student)
 			default:
 				userId = uuid.NewString()
 			}

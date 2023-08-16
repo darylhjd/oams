@@ -2,10 +2,12 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/url"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"github.com/darylhjd/oams/backend/internal/env"
 )
@@ -19,15 +21,15 @@ const (
 	sslRootCert = "sslrootcert"
 )
 
-// DB contains the database connection pool and the query interface to the database.
 type DB struct {
-	C *pgxpool.Pool
-	Q *Queries
+	Conn *sql.DB
+	Q    *Queries
+	C    *pgxpool.Pool
 }
 
-// Close the database connection.
-func (d *DB) Close() {
+func (d *DB) Close() error {
 	d.C.Close()
+	return d.Conn.Close()
 }
 
 // Connect and return an interface to the OAMS database.
@@ -39,17 +41,22 @@ func Connect(ctx context.Context) (*DB, error) {
 func ConnectDB(ctx context.Context, dbName string) (*DB, error) {
 	_, connString := GetConnectionProperties(dbName)
 
+	conn, err := sql.Open("pgx", connString)
+	if err != nil {
+		return nil, fmt.Errorf("%s - error creating connection pool: %w", connectionNamespace, err)
+	}
+
 	pool, err := pgxpool.New(ctx, connString)
 	if err != nil {
 		return nil, fmt.Errorf("%s - error creating connection pool: %w", connectionNamespace, err)
 	}
 
 	// Check that connection is successful.
-	if err = pool.Ping(ctx); err != nil {
+	if err = conn.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("%s - could not ping database connection: %w", connectionNamespace, err)
 	}
 
-	return &DB{pool, New(pool)}, nil
+	return &DB{conn, New(pool), pool}, nil
 }
 
 // GetConnectionProperties returns the connection strings required to connect to a database.

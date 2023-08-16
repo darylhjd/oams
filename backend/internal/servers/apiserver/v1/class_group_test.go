@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -83,9 +84,9 @@ func TestAPIServerV1_classGroupGet(t *testing.T) {
 			true,
 			classGroupGetResponse{
 				newSuccessResponse(),
-				database.ClassGroup{
+				model.ClassGroup{
 					Name:      "EXISTING21",
-					ClassType: database.ClassTypeLEC,
+					ClassType: model.ClassType_Lec,
 				},
 			},
 			http.StatusOK,
@@ -114,7 +115,7 @@ func TestAPIServerV1_classGroupGet(t *testing.T) {
 
 			if tt.withExistingClassGroup {
 				createdClassGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.ClassGroup.Name,
 					tt.wantResponse.ClassGroup.ClassType,
 				)
@@ -256,36 +257,36 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			switch {
 			case tt.withUpdateConflict:
 				// Create group to update.
-				updateClassGroup := tests.StubClassGroup(t, ctx, v1.db.Q, uuid.NewString(), database.ClassTypeTUT)
+				updateClassGroup := tests.StubClassGroup(t, ctx, v1.db, uuid.NewString(), model.ClassType_Tut)
 				groupId = updateClassGroup.ID
 
 				// Also create group to conflict with.
 				_ = tests.StubClassGroupWithClassID(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					updateClassGroup.ClassID,
 					*tt.withRequest.ClassGroup.Name,
-					*tt.withRequest.ClassGroup.ClassType,
+					model.ClassType(*tt.withRequest.ClassGroup.ClassType),
 				)
 			case tt.withExistingClassGroup && !tt.withExistingUpdateClass:
 				createdClassGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					uuid.NewString(),
-					database.ClassTypeTUT,
+					model.ClassType_Tut,
 				)
 
 				groupId = createdClassGroup.ID
 				tt.withRequest.ClassGroup.ClassID = ptr(createdClassGroup.ClassID + 1)
 			case tt.withExistingClassGroup:
 				createdClassGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.ClassGroup.Name,
-					tt.wantResponse.ClassGroup.ClassType,
+					model.ClassType(tt.wantResponse.ClassGroup.ClassType),
 				)
 
 				groupId = createdClassGroup.ID
 				tt.wantResponse.ClassGroup.ID = createdClassGroup.ID
 				tt.wantResponse.ClassGroup.ClassID = createdClassGroup.ClassID
-				tt.wantResponse.ClassGroup.UpdatedAt = createdClassGroup.CreatedAt
+				tt.wantResponse.ClassGroup.UpdatedAt = pgtype.Timestamptz{Time: createdClassGroup.CreatedAt, Valid: true}
 			default:
 				groupId = rand.Int63()
 			}
@@ -374,17 +375,17 @@ func TestAPIServerV1_classGroupDelete(t *testing.T) {
 			switch {
 			case tt.withForeignKeyDependency:
 				createdClassGroupSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
-					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+					t, ctx, v1.db,
+					time.UnixMicro(1),
+					time.UnixMicro(2),
 					uuid.NewString(),
 				)
 				groupId = createdClassGroupSession.ClassGroupID
 			case tt.withExistingClassGroup:
 				createdClassGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					uuid.NewString(),
-					database.ClassTypeTUT,
+					model.ClassType_Tut,
 				)
 				groupId = createdClassGroup.ID
 			default:

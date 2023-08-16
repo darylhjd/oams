@@ -10,8 +10,10 @@ import (
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -80,7 +82,7 @@ func TestAPIServerV1_sessionEnrollmentGet(t *testing.T) {
 			true,
 			sessionEnrollmentGetResponse{
 				newSuccessResponse(),
-				database.SessionEnrollment{
+				model.SessionEnrollment{
 					Attended: true,
 				},
 			},
@@ -110,7 +112,7 @@ func TestAPIServerV1_sessionEnrollmentGet(t *testing.T) {
 
 			if tt.withExistingSessionEnrollment {
 				createdEnrollment := tests.StubSessionEnrollment(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.SessionEnrollment.Attended,
 				)
 
@@ -215,11 +217,11 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingSessionEnrollment {
-				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, tt.wantResponse.SessionEnrollment.Attended)
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, tt.wantResponse.SessionEnrollment.Attended)
 				tt.wantResponse.SessionEnrollment.ID = createdEnrollment.ID
 				tt.wantResponse.SessionEnrollment.SessionID = createdEnrollment.SessionID
 				tt.wantResponse.SessionEnrollment.UserID = createdEnrollment.UserID
-				tt.wantResponse.SessionEnrollment.UpdatedAt = createdEnrollment.CreatedAt
+				tt.wantResponse.SessionEnrollment.UpdatedAt = pgtype.Timestamptz{Time: createdEnrollment.CreatedAt, Valid: true}
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
@@ -294,7 +296,7 @@ func TestAPIServerV1_sessionEnrollmentDelete(t *testing.T) {
 
 			var enrollmentId int64 = 6666 // Choose a random ID that does not exist.
 			if tt.withExistingSessionEnrollment {
-				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, false)
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, false)
 				enrollmentId = createdEnrollment.ID
 			}
 

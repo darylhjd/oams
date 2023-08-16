@@ -3,8 +3,10 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 )
 
 func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
@@ -24,11 +26,11 @@ func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
 
 type usersGetResponse struct {
 	response
-	Users []database.User `json:"users"`
+	Users []model.User `json:"users"`
 }
 
 func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
-	users, err := v.db.Q.ListUsers(r.Context())
+	users, err := v.db.ListUsers(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process users get database action")
@@ -36,7 +38,7 @@ func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 
 	resp := usersGetResponse{
 		newSuccessResponse(),
-		make([]database.User, 0, len(users)),
+		make([]model.User, 0, len(users)),
 	}
 
 	resp.Users = append(resp.Users, users...)
@@ -49,7 +51,15 @@ type usersPostRequest struct {
 
 type usersPostResponse struct {
 	response
-	User database.CreateUserRow `json:"user"`
+	User usersPostUserResponseFields `json:"user"`
+}
+
+type usersPostUserResponseFields struct {
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Email     string         `json:"email"`
+	Role      model.UserRole `json:"role"`
+	CreatedAt time.Time      `json:"created_at"`
 }
 
 func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
@@ -62,7 +72,7 @@ func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusUnprocessableEntity, "id is not allowed")
 	}
 
-	user, err := v.db.Q.CreateUser(r.Context(), req.User)
+	user, err := v.db.CreateUser(r.Context(), req.User)
 	if err != nil {
 		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
 			return newErrorResponse(http.StatusConflict, "user with same id already exists")
@@ -75,6 +85,12 @@ func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 
 	return usersPostResponse{
 		newSuccessResponse(),
-		user,
+		usersPostUserResponseFields{
+			user.ID,
+			user.Name,
+			user.Email,
+			user.Role,
+			user.CreatedAt,
+		},
 	}
 }

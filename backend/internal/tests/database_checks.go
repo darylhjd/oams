@@ -8,7 +8,7 @@ import (
 )
 
 // CheckUserExists checks that a user with the specified id exists in the test database.
-func CheckUserExists(a *assert.Assertions, ctx context.Context, q *database.Queries, id string) {
-	_, err := q.GetUser(ctx, id)
+func CheckUserExists(a *assert.Assertions, ctx context.Context, db *database.DB, id string) {
+	_, err := db.GetUser(ctx, id)
 	a.Nil(err)
 }

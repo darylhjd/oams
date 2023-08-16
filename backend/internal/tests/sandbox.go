@@ -45,7 +45,9 @@ func SetUp(t *testing.T, id string) *database.DB {
 
 // TearDown is a helper function to tear down the given test environment.
 func TearDown(t *testing.T, db *database.DB, id string) {
-	db.Close()
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
 
 	if err := database.Drop(context.Background(), id, true); err != nil {
 		t.Fatal(err)

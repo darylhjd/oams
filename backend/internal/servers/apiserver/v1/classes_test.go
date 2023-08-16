@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -72,7 +73,7 @@ func TestAPIServerV1_classesGet(t *testing.T) {
 			true,
 			classesGetResponse{
 				newSuccessResponse(),
-				[]database.Class{
+				[]model.Class{
 					{
 						Code:     "CZ1115",
 						Year:     2023,
@@ -86,7 +87,7 @@ func TestAPIServerV1_classesGet(t *testing.T) {
 			false,
 			classesGetResponse{
 				newSuccessResponse(),
-				[]database.Class{},
+				[]model.Class{},
 			},
 		},
 	}
@@ -105,7 +106,7 @@ func TestAPIServerV1_classesGet(t *testing.T) {
 
 			if tt.withExistingClass {
 				for idx, class := range tt.wantResponse.Classes {
-					createdClass := tests.StubClass(t, ctx, v1.db.Q, class.Code, class.Year, class.Semester)
+					createdClass := tests.StubClass(t, ctx, v1.db, class.Code, class.Year, class.Semester)
 					classPtr := &tt.wantResponse.Classes[idx]
 					classPtr.ID = createdClass.ID
 					classPtr.CreatedAt, classPtr.UpdatedAt = createdClass.CreatedAt, createdClass.CreatedAt
@@ -143,7 +144,7 @@ func TestAPIServerV1_classesPost(t *testing.T) {
 			false,
 			classesPostResponse{
 				newSuccessResponse(),
-				database.CreateClassRow{
+				classesPostClassResponseFields{
 					Code:     "CZ1115",
 					Year:     2023,
 					Semester: "2",
@@ -182,7 +183,7 @@ func TestAPIServerV1_classesPost(t *testing.T) {
 
 			if tt.withExistingClass {
 				_ = tests.StubClass(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.withRequest.Class.Code,
 					tt.withRequest.Class.Year,
 					tt.withRequest.Class.Semester,

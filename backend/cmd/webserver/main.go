@@ -13,6 +13,6 @@ func main() {
 	}
 
 	if err = webServer.Start(); err != nil {
-		webServer.GetLogger().Error(err.Error())
+		log.Fatalf("%s - %s", webserver.Namespace, err)
 	}
 }

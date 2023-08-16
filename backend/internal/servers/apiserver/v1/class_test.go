@@ -11,8 +11,10 @@ import (
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -81,7 +83,7 @@ func TestAPIServerV1_classGet(t *testing.T) {
 			true,
 			classGetResponse{
 				newSuccessResponse(),
-				database.Class{
+				model.Class{
 					Code:     "CZ3454",
 					Year:     2023,
 					Semester: "1",
@@ -113,7 +115,7 @@ func TestAPIServerV1_classGet(t *testing.T) {
 
 			if tt.withExistingClass {
 				createdClass := tests.StubClass(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.Class.Code,
 					tt.wantResponse.Class.Year,
 					tt.wantResponse.Class.Semester,
@@ -250,7 +252,7 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			case tt.withUpdateConflict:
 				// Create the class to update.
 				updateClass := tests.StubClass(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					uuid.NewString(),
 					2222,
 					uuid.NewString(),
@@ -259,14 +261,14 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 
 				// Also create the class to conflict with.
 				_ = tests.StubClass(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					*tt.withRequest.Class.Code,
 					*tt.withRequest.Class.Year,
 					*tt.withRequest.Class.Semester,
 				)
 			case tt.withExistingClass:
 				createdClass := tests.StubClass(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.Class.Code,
 					tt.wantResponse.Class.Year,
 					tt.wantResponse.Class.Semester,
@@ -274,7 +276,7 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 
 				classId = createdClass.ID
 				tt.wantResponse.Class.ID = createdClass.ID
-				tt.wantResponse.Class.UpdatedAt = createdClass.CreatedAt
+				tt.wantResponse.Class.UpdatedAt = pgtype.Timestamptz{Time: createdClass.CreatedAt, Valid: true}
 			default:
 				classId = rand.Int63()
 			}
@@ -362,10 +364,10 @@ func TestAPIServerV1_classDelete(t *testing.T) {
 			var classId int64
 			switch {
 			case tt.withForeignKeyDependency:
-				createdClassGroup := tests.StubClassGroup(t, ctx, v1.db.Q, uuid.NewString(), database.ClassTypeLAB)
+				createdClassGroup := tests.StubClassGroup(t, ctx, v1.db, uuid.NewString(), model.ClassType_Lab)
 				classId = createdClassGroup.ClassID
 			case tt.withExistingClass:
-				createdClass := tests.StubClass(t, ctx, v1.db.Q, "RANDOM_CODE", 9999, "22")
+				createdClass := tests.StubClass(t, ctx, v1.db, "RANDOM_CODE", 9999, "22")
 				classId = createdClass.ID
 			default:
 				classId = rand.Int63()

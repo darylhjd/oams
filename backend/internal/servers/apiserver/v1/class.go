@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -37,13 +39,13 @@ func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
 
 type classGetResponse struct {
 	response
-	Class database.Class `json:"class"`
+	Class model.Class `json:"class"`
 }
 
 func (v *APIServerV1) classGet(r *http.Request, id int64) apiResponse {
-	class, err := v.db.Q.GetClass(r.Context(), id)
+	class, err := v.db.GetClass(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested class does not exist")
 		}
 
@@ -130,10 +132,10 @@ type classDeleteResponse struct {
 }
 
 func (v *APIServerV1) classDelete(r *http.Request, id int64) apiResponse {
-	_, err := v.db.Q.DeleteClass(r.Context(), id)
+	_, err := v.db.DeleteClass(r.Context(), id)
 	if err != nil {
 		switch {
-		case errors.Is(err, pgx.ErrNoRows):
+		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class to delete does not exist")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
 			return newErrorResponse(http.StatusConflict, "class to delete is still referenced")

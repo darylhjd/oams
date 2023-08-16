@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -37,13 +39,13 @@ func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) 
 
 type sessionEnrollmentGetResponse struct {
 	response
-	SessionEnrollment database.SessionEnrollment `json:"session_enrollment"`
+	SessionEnrollment model.SessionEnrollment `json:"session_enrollment"`
 }
 
 func (v *APIServerV1) sessionEnrollmentGet(r *http.Request, id int64) apiResponse {
-	enrollment, err := v.db.Q.GetSessionEnrollment(r.Context(), id)
+	enrollment, err := v.db.GetSessionEnrollment(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested session enrollment does not exist")
 		}
 
@@ -107,9 +109,9 @@ type sessionEnrollmentDeleteResponse struct {
 }
 
 func (v *APIServerV1) sessionEnrollmentDelete(r *http.Request, id int64) apiResponse {
-	_, err := v.db.Q.DeleteSessionEnrollment(r.Context(), id)
+	_, err := v.db.DeleteSessionEnrollment(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "session enrollment to delete does not exist")
 		}
 

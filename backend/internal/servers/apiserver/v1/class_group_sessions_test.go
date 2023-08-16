@@ -9,10 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -74,10 +73,10 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 			true,
 			classGroupSessionsGetResponse{
 				newSuccessResponse(),
-				[]database.ClassGroupSession{
+				[]model.ClassGroupSession{
 					{
-						StartTime: pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-						EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+						StartTime: time.UnixMicro(1),
+						EndTime:   time.UnixMicro(2),
 						Venue:     "CLASS+22",
 					},
 				},
@@ -88,7 +87,7 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 			false,
 			classGroupSessionsGetResponse{
 				newSuccessResponse(),
-				[]database.ClassGroupSession{},
+				[]model.ClassGroupSession{},
 			},
 		},
 	}
@@ -107,7 +106,7 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 
 			if tt.withExistingClassGroupSession {
 				for idx, session := range tt.wantResponse.ClassGroupSessions {
-					createdSession := tests.StubClassGroupSession(t, ctx, v1.db.Q, session.StartTime, session.EndTime, session.Venue)
+					createdSession := tests.StubClassGroupSession(t, ctx, v1.db, session.StartTime, session.EndTime, session.Venue)
 					sessionPtr := &tt.wantResponse.ClassGroupSessions[idx]
 					sessionPtr.ID = createdSession.ID
 					sessionPtr.ClassGroupID = createdSession.ClassGroupID
@@ -148,9 +147,9 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			true,
 			classGroupSessionsPostResponse{
 				newSuccessResponse(),
-				database.CreateClassGroupSessionRow{
-					StartTime: pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-					EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+				classGroupSessionsPostClassGroupSessionResponseFields{
+					StartTime: time.UnixMicro(1),
+					EndTime:   time.UnixMicro(2),
 					Venue:     "NEW_CLASS+22",
 				},
 			},
@@ -234,7 +233,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			switch {
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.withRequest.createClassGroupSessionParams().StartTime,
 					tt.withRequest.createClassGroupSessionParams().EndTime,
 					tt.withRequest.ClassGroupSession.Venue,
@@ -242,9 +241,9 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 				tt.withRequest.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
 			case tt.withExistingClassGroup:
 				createdGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					uuid.NewString(),
-					database.ClassTypeLAB,
+					model.ClassType_Lab,
 				)
 				tt.withRequest.ClassGroupSession.ClassGroupID = createdGroup.ID
 			}

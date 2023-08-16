@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -74,7 +74,7 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 			true,
 			sessionEnrollmentsGetResponse{
 				newSuccessResponse(),
-				[]database.SessionEnrollment{
+				[]model.SessionEnrollment{
 					{
 						Attended: false,
 					},
@@ -86,7 +86,7 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 			false,
 			sessionEnrollmentsGetResponse{
 				newSuccessResponse(),
-				[]database.SessionEnrollment{},
+				[]model.SessionEnrollment{},
 			},
 		},
 	}
@@ -105,7 +105,7 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 
 			if tt.withExistingSessionEnrollment {
 				for idx, enrollment := range tt.wantResponse.SessionEnrollments {
-					createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, enrollment.Attended)
+					createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, enrollment.Attended)
 					sessionPtr := &tt.wantResponse.SessionEnrollments[idx]
 					sessionPtr.ID = createdEnrollment.ID
 					sessionPtr.SessionID = createdEnrollment.SessionID
@@ -147,7 +147,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 			true,
 			sessionEnrollmentsPostResponse{
 				newSuccessResponse(),
-				database.CreateSessionEnrollmentRow{
+				sessionEnrollmentsPostSessionEnrollmentResponseFields{
 					Attended: true,
 				},
 			},
@@ -226,22 +226,22 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 
 			switch {
 			case tt.withExistingSessionEnrollment:
-				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, tt.withRequest.SessionEnrollment.Attended)
+				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, tt.withRequest.SessionEnrollment.Attended)
 				tt.withRequest.SessionEnrollment.SessionID = createdEnrollment.SessionID
 				tt.withRequest.SessionEnrollment.UserID = createdEnrollment.UserID
 			default:
 				if tt.withExistingClassGroupSession {
 					createdSession := tests.StubClassGroupSession(
-						t, ctx, v1.db.Q,
-						pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-						pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+						t, ctx, v1.db,
+						time.UnixMicro(1),
+						time.UnixMicro(2),
 						"VENUE+00",
 					)
 					tt.withRequest.SessionEnrollment.SessionID = createdSession.ID
 				}
 
 				if tt.withExistingUser {
-					createdUser := tests.StubUser(t, ctx, v1.db.Q, uuid.NewString(), database.UserRoleSTUDENT)
+					createdUser := tests.StubUser(t, ctx, v1.db, uuid.NewString(), model.UserRole_Student)
 					tt.withRequest.SessionEnrollment.UserID = createdUser.ID
 				}
 			}

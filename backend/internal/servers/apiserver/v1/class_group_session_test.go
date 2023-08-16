@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -83,9 +84,9 @@ func TestAPIServerV1_classGroupSessionGet(t *testing.T) {
 			true,
 			classGroupSessionGetResponse{
 				newSuccessResponse(),
-				database.ClassGroupSession{
-					StartTime: pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-					EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+				model.ClassGroupSession{
+					StartTime: time.UnixMicro(1),
+					EndTime:   time.UnixMicro(2),
 					Venue:     "EXISTING+46",
 				},
 			},
@@ -115,7 +116,7 @@ func TestAPIServerV1_classGroupSessionGet(t *testing.T) {
 
 			if tt.withExistingClassGroupSession {
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.ClassGroupSession.StartTime,
 					tt.wantResponse.ClassGroupSession.EndTime,
 					tt.wantResponse.ClassGroupSession.Venue,
@@ -268,26 +269,26 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			case tt.withUpdateConflict:
 				// Create session to update.
 				updateClassGroupSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
-					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+					t, ctx, v1.db,
+					time.UnixMicro(1),
+					time.UnixMicro(2),
 					uuid.NewString(),
 				)
 				sessionId = updateClassGroupSession.ID
 
 				// Also create session to conflict with.
 				_ = tests.StubClassGroupSessionWithClassGroupID(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					updateClassGroupSession.ClassGroupID,
-					pgtype.Timestamptz{Time: time.UnixMicro(*tt.withRequest.ClassGroupSession.StartTime), Valid: true},
-					pgtype.Timestamptz{Time: time.UnixMicro(*tt.withRequest.ClassGroupSession.EndTime), Valid: true},
+					time.UnixMicro(*tt.withRequest.ClassGroupSession.StartTime),
+					time.UnixMicro(*tt.withRequest.ClassGroupSession.EndTime),
 					uuid.NewString(),
 				)
 			case tt.withExistingClassGroupSession && !tt.withExistingUpdateClassGroup:
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
-					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+					t, ctx, v1.db,
+					time.UnixMicro(1),
+					time.UnixMicro(2),
 					uuid.NewString(),
 				)
 
@@ -295,16 +296,16 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				tt.withRequest.ClassGroupSession.ClassGroupID = ptr(createdSession.ClassGroupID + 1)
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
-					tt.wantResponse.ClassGroupSession.StartTime,
-					tt.wantResponse.ClassGroupSession.EndTime,
+					t, ctx, v1.db,
+					tt.wantResponse.ClassGroupSession.StartTime.Time,
+					tt.wantResponse.ClassGroupSession.EndTime.Time,
 					tt.wantResponse.ClassGroupSession.Venue,
 				)
 
 				sessionId = createdSession.ID
 				tt.wantResponse.ClassGroupSession.ID = createdSession.ID
 				tt.wantResponse.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
-				tt.wantResponse.ClassGroupSession.UpdatedAt = createdSession.CreatedAt
+				tt.wantResponse.ClassGroupSession.UpdatedAt = pgtype.Timestamptz{Time: createdSession.CreatedAt, Valid: true}
 			default:
 				sessionId = rand.Int63()
 			}
@@ -392,13 +393,13 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 			var sessionId int64
 			switch {
 			case tt.withForeignKeyDependency:
-				createdSessionEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db.Q, true)
+				createdSessionEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, true)
 				sessionId = createdSessionEnrollment.SessionID
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
-					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+					t, ctx, v1.db,
+					time.UnixMicro(1),
+					time.UnixMicro(2),
 					uuid.NewString(),
 				)
 				sessionId = createdSession.ID

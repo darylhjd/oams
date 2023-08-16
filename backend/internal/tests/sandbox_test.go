@@ -20,10 +20,10 @@ func TestSetUpTearDown(t *testing.T) {
 	testDb := SetUp(t, id)
 
 	// Check that the database is created.
-	a.Nil(testDb.C.Ping(ctx))
+	a.Nil(testDb.Conn.PingContext(ctx))
 
 	// Check that the migration ran correctly.
-	_, err := testDb.Q.ListUsers(context.Background())
+	_, err := testDb.ListUsers(context.Background())
 	a.Nil(err)
 
 	// Run teardown.
