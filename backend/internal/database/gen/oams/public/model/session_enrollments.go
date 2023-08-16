@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-type SessionEnrollments struct {
-	ID        int64 `sql:"primary_key"`
-	SessionID int64
-	UserID    string
-	Attended  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type SessionEnrollment struct {
+	ID        int64     `sql:"primary_key" json:"id"`
+	SessionID int64     `json:"session_id"`
+	UserID    string    `json:"user_id"`
+	Attended  bool      `json:"attended"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

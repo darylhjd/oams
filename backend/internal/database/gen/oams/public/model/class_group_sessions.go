@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-type ClassGroupSessions struct {
-	ID           int64 `sql:"primary_key"`
-	ClassGroupID int64
-	StartTime    time.Time
-	EndTime      time.Time
-	Venue        string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+type ClassGroupSession struct {
+	ID           int64     `sql:"primary_key" json:"id"`
+	ClassGroupID int64     `json:"class_group_id"`
+	StartTime    time.Time `json:"start_time"`
+	EndTime      time.Time `json:"end_time"`
+	Venue        string    `json:"venue"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }

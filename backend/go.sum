@@ -27,6 +27,8 @@ github.com/felixge/fgprof v0.9.3/go.mod h1:RdbpDgzqYVh/T9fPELJyV7EYJuHB55UTEULNu
 github.com/friendsofgo/errors v0.9.2/go.mod h1:yCvFW5AkDIL9qn7suHVLiI/gH228n7PC4Pn44IGoTOI=
 github.com/go-jet/jet/v2 v2.10.1 h1:mOKE5S+mt5bM/xNiuD7Dcz+FdqM83zg1FpOzfTJGJNw=
 github.com/go-jet/jet/v2 v2.10.1/go.mod h1:XF5x5l7W4g7S9Rok9aXfPARFUyurl61nc+UNhuxKlYA=
+github.com/go-jet/jet/v2 v2.10.2-0.20230803110858-33333585e957 h1:4uT+4hOv+nXuNk6U6XvxSRTKZyrB6+onbjrlQ/FwAm4=
+github.com/go-jet/jet/v2 v2.10.2-0.20230803110858-33333585e957/go.mod h1:XF5x5l7W4g7S9Rok9aXfPARFUyurl61nc+UNhuxKlYA=
 github.com/go-kit/log v0.1.0/go.mod h1:zbhenjAZHb184qTLMA9ZjW7ThYL0H2mk7Q6pNt4vbaY=
 github.com/go-logfmt/logfmt v0.5.0/go.mod h1:wCYkCAKZfumFQihp8CzCvQ3paCTfi41vtzG1KdI/P7A=
 github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=

@@ -11,13 +11,13 @@ import (
 	"time"
 )
 
-type Classes struct {
-	ID        int64 `sql:"primary_key"`
-	Code      string
-	Year      int32
-	Semester  string
-	Programme string
-	Au        int16
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type Class struct {
+	ID        int64     `sql:"primary_key" json:"id"`
+	Code      string    `json:"code"`
+	Year      int32     `json:"year"`
+	Semester  string    `json:"semester"`
+	Programme string    `json:"programme"`
+	Au        int16     `json:"au"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

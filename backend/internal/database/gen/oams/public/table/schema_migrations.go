@@ -11,7 +11,7 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 )
 
-var SchemaMigrations = newSchemaMigrationsTable("public", "schema_migrations", "")
+var SchemaMigrations = newSchemaMigrationsTable("public", "schema_migrations", "schema_migration")
 
 type schemaMigrationsTable struct {
 	postgres.Table

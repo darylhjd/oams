@@ -22,7 +22,7 @@ func TestConnectDB(t *testing.T) {
 	db := tests.SetUp(t, id)
 	defer tests.TearDown(t, db, id)
 
-	a.Nil(db.C.Ping(context.Background()))
+	a.Nil(db.Conn.PingContext(context.Background()))
 }
 
 func TestGetConnectionProperties(t *testing.T) {

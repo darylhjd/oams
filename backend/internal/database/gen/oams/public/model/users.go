@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-type Users struct {
-	ID        string `sql:"primary_key"`
-	Name      string
-	Email     string
-	Role      UserRole
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type User struct {
+	ID        string    `sql:"primary_key" json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Role      UserRole  `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

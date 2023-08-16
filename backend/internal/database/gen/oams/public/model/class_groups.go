@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-type ClassGroups struct {
-	ID        int64 `sql:"primary_key"`
-	ClassID   int64
-	Name      string
-	ClassType ClassType
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type ClassGroup struct {
+	ID        int64     `sql:"primary_key" json:"id"`
+	ClassID   int64     `json:"class_id"`
+	Name      string    `json:"name"`
+	ClassType ClassType `json:"class_type"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

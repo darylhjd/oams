@@ -11,7 +11,7 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 )
 
-var SessionEnrollments = newSessionEnrollmentsTable("public", "session_enrollments", "")
+var SessionEnrollments = newSessionEnrollmentsTable("public", "session_enrollments", "session_enrollment")
 
 type sessionEnrollmentsTable struct {
 	postgres.Table

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 )
 
 func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
@@ -24,11 +25,11 @@ func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
 
 type usersGetResponse struct {
 	response
-	Users []database.User `json:"users"`
+	Users []model.User `json:"users"`
 }
 
 func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
-	users, err := v.db.Q.ListUsers(r.Context())
+	users, err := v.db.ListUsers(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process users get database action")
@@ -36,7 +37,7 @@ func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 
 	resp := usersGetResponse{
 		newSuccessResponse(),
-		make([]database.User, 0, len(users)),
+		make([]model.User, 0, len(users)),
 	}
 
 	resp.Users = append(resp.Users, users...)

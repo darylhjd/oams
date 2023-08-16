@@ -11,7 +11,7 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 )
 
-var ClassGroups = newClassGroupsTable("public", "class_groups", "")
+var ClassGroups = newClassGroupsTable("public", "class_groups", "class_group")
 
 type classGroupsTable struct {
 	postgres.Table

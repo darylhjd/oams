@@ -102,8 +102,8 @@ func (s *APIServer) base(w http.ResponseWriter, _ *http.Request) {
 }
 
 // Stop closes any external connections (e.g. database) and stops the server gracefully.
-func (s *APIServer) Stop() {
-	s.db.Close()
+func (s *APIServer) Stop() error {
+	return s.db.Close()
 }
 
 func (s *APIServer) GetLogger() *zap.Logger {

@@ -14,8 +14,10 @@ func main() {
 	}
 
 	if err = apiServer.Start(); err != nil {
-		apiServer.GetLogger().Error(err.Error())
+		log.Fatalf("%s - %s", apiserver.Namespace, err)
 	}
 
-	apiServer.Stop()
+	if err = apiServer.Stop(); err != nil {
+		log.Fatalf("%s - %s", apiserver.Namespace, err)
+	}
 }

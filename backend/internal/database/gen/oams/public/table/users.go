@@ -11,7 +11,7 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 )
 
-var Users = newUsersTable("public", "users", "")
+var Users = newUsersTable("public", "users", "user")
 
 type usersTable struct {
 	postgres.Table
