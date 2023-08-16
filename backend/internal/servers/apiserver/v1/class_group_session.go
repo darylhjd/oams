@@ -11,8 +11,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (v *APIServerV1) classGroupSession(w http.ResponseWriter, r *http.Request) {
@@ -61,41 +59,21 @@ func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiRespons
 }
 
 type classGroupSessionPatchRequest struct {
-	ClassGroupSession classGroupSessionPatchClassGroupSessionRequestFields `json:"class_group_session"`
-}
-
-type classGroupSessionPatchClassGroupSessionRequestFields struct {
-	ClassGroupID *int64  `json:"class_group_id"`
-	StartTime    *int64  `json:"start_time"`
-	EndTime      *int64  `json:"end_time"`
-	Venue        *string `json:"venue"`
-}
-
-func (r classGroupSessionPatchRequest) updateClassGroupParams(classGroupSessionId int64) database.UpdateClassGroupSessionParams {
-	params := database.UpdateClassGroupSessionParams{ID: classGroupSessionId}
-
-	if r.ClassGroupSession.ClassGroupID != nil {
-		params.ClassGroupID = pgtype.Int8{Int64: *r.ClassGroupSession.ClassGroupID, Valid: true}
-	}
-
-	if r.ClassGroupSession.StartTime != nil {
-		params.StartTime = pgtype.Timestamptz{Time: time.UnixMicro(*r.ClassGroupSession.StartTime), Valid: true}
-	}
-
-	if r.ClassGroupSession.EndTime != nil {
-		params.EndTime = pgtype.Timestamptz{Time: time.UnixMicro(*r.ClassGroupSession.EndTime), Valid: true}
-	}
-
-	if r.ClassGroupSession.Venue != nil {
-		params.Venue = pgtype.Text{String: *r.ClassGroupSession.Venue, Valid: true}
-	}
-
-	return params
+	ClassGroupSession database.UpdateClassGroupSessionParams `json:"class_group_session"`
 }
 
 type classGroupSessionPatchResponse struct {
 	response
-	ClassGroupSession database.UpdateClassGroupSessionRow `json:"class_group_session"`
+	ClassGroupSession classGroupSessionPatchClassGroupSessionResponseFields `json:"class_group_session"`
+}
+
+type classGroupSessionPatchClassGroupSessionResponseFields struct {
+	ID           int64     `json:"id"`
+	ClassGroupID int64     `json:"class_group_id"`
+	StartTime    time.Time `json:"start_time"`
+	EndTime      time.Time `json:"end_time"`
+	Venue        string    `json:"venue"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiResponse {
@@ -104,10 +82,10 @@ func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiRespo
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	session, err := v.db.Q.UpdateClassGroupSession(r.Context(), req.updateClassGroupParams(id))
+	session, err := v.db.UpdateClassGroupSession(r.Context(), id, req.ClassGroupSession)
 	if err != nil {
 		switch {
-		case errors.Is(err, pgx.ErrNoRows):
+		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group session to update does not exist")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
 			return newErrorResponse(http.StatusBadRequest, "class_group_id does not exist")
@@ -123,7 +101,14 @@ func (v *APIServerV1) classGroupSessionPatch(r *http.Request, id int64) apiRespo
 
 	return classGroupSessionPatchResponse{
 		newSuccessResponse(),
-		session,
+		classGroupSessionPatchClassGroupSessionResponseFields{
+			session.ID,
+			session.ClassGroupID,
+			session.StartTime,
+			session.EndTime,
+			session.Venue,
+			session.UpdatedAt,
+		},
 	}
 }
 

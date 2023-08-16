@@ -15,7 +15,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -161,9 +160,9 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 		{
 			"request with field changes",
 			classGroupPatchRequest{
-				classGroupPatchClassGroupRequestFields{
+				database.UpdateClassGroupParams{
 					Name:      ptr("NEW21"),
-					ClassType: ptr(database.ClassTypeLAB),
+					ClassType: ptr(model.ClassType_Lab),
 				},
 			},
 			true,
@@ -171,9 +170,9 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			true,
 			classGroupPatchResponse{
 				newSuccessResponse(),
-				database.UpdateClassGroupRow{
+				classGroupPatchClassGroupResponseFields{
 					Name:      "NEW21",
-					ClassType: database.ClassTypeLAB,
+					ClassType: model.ClassType_Lab,
 				},
 			},
 			false,
@@ -183,16 +182,16 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 		{
 			"request with no field changes",
 			classGroupPatchRequest{
-				classGroupPatchClassGroupRequestFields{},
+				database.UpdateClassGroupParams{},
 			},
 			true,
 			false,
 			true,
 			classGroupPatchResponse{
 				newSuccessResponse(),
-				database.UpdateClassGroupRow{
+				classGroupPatchClassGroupResponseFields{
 					Name:      "EXISTING21",
-					ClassType: database.ClassTypeLEC,
+					ClassType: model.ClassType_Lec,
 				},
 			},
 			true,
@@ -202,7 +201,7 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 		{
 			"request updating non-existent class group",
 			classGroupPatchRequest{
-				classGroupPatchClassGroupRequestFields{},
+				database.UpdateClassGroupParams{},
 			},
 			false,
 			false,
@@ -215,9 +214,9 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 		{
 			"request with update conflict",
 			classGroupPatchRequest{
-				classGroupPatchClassGroupRequestFields{
+				database.UpdateClassGroupParams{
 					Name:      ptr("EXISTING32"),
-					ClassType: ptr(database.ClassTypeLAB),
+					ClassType: ptr(model.ClassType_Lab),
 				},
 			},
 			true,
@@ -265,7 +264,7 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 					t, ctx, v1.db,
 					updateClassGroup.ClassID,
 					*tt.withRequest.ClassGroup.Name,
-					model.ClassType(*tt.withRequest.ClassGroup.ClassType),
+					*tt.withRequest.ClassGroup.ClassType,
 				)
 			case tt.withExistingClassGroup && !tt.withExistingUpdateClass:
 				createdClassGroup := tests.StubClassGroup(
@@ -280,13 +279,13 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 				createdClassGroup := tests.StubClassGroup(
 					t, ctx, v1.db,
 					tt.wantResponse.ClassGroup.Name,
-					model.ClassType(tt.wantResponse.ClassGroup.ClassType),
+					tt.wantResponse.ClassGroup.ClassType,
 				)
 
 				groupId = createdClassGroup.ID
 				tt.wantResponse.ClassGroup.ID = createdClassGroup.ID
 				tt.wantResponse.ClassGroup.ClassID = createdClassGroup.ClassID
-				tt.wantResponse.ClassGroup.UpdatedAt = pgtype.Timestamptz{Time: createdClassGroup.CreatedAt, Valid: true}
+				tt.wantResponse.ClassGroup.UpdatedAt = createdClassGroup.CreatedAt
 			default:
 				groupId = rand.Int63()
 			}

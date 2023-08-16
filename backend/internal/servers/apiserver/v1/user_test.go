@@ -347,7 +347,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 
 			userId := tt.wantResponse.User.ID
 			if tt.withExistingUser {
-				createdUser := tests.StubUser(t, ctx, v1.db, userId, model.UserRole(tt.wantResponse.User.Role))
+				createdUser := tests.StubUser(t, ctx, v1.db, userId, tt.wantResponse.User.Role)
 				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
 			}
 

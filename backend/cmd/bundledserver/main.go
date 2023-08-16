@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -31,8 +32,7 @@ func main() {
 
 	// Default to the APIServer port.
 	if err = http.ListenAndServe(fmt.Sprintf(":%s", env.GetAPIServerPort()), b); err != nil {
-		b.apiServer.Stop()
-		log.Fatalf("%s - %s", namespace, err)
+		log.Fatalf("%s - %s", namespace, errors.Join(err, b.apiServer.Stop()))
 	}
 }
 
