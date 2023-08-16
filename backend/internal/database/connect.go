@@ -46,12 +46,17 @@ func ConnectDB(ctx context.Context, dbName string) (*DB, error) {
 		return nil, fmt.Errorf("%s - error creating connection pool: %w", connectionNamespace, err)
 	}
 
+	pool, err := pgxpool.New(ctx, connString)
+	if err != nil {
+		return nil, fmt.Errorf("%s - error creating connection pool: %w", connectionNamespace, err)
+	}
+
 	// Check that connection is successful.
 	if err = conn.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("%s - could not ping database connection: %w", connectionNamespace, err)
 	}
 
-	return &DB{conn, New(nil), nil}, nil
+	return &DB{conn, New(pool), pool}, nil
 }
 
 // GetConnectionProperties returns the connection strings required to connect to a database.
