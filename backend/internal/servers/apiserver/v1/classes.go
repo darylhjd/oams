@@ -51,10 +51,10 @@ type classesPostRequest struct {
 
 type classesPostResponse struct {
 	response
-	Class classesPostClassFields `json:"class"`
+	Class classesPostClassResponseFields `json:"class"`
 }
 
-type classesPostClassFields struct {
+type classesPostClassResponseFields struct {
 	ID        int64     `json:"id"`
 	Code      string    `json:"code"`
 	Year      int32     `json:"year"`
@@ -82,7 +82,7 @@ func (v *APIServerV1) classesPost(r *http.Request) apiResponse {
 
 	return classesPostResponse{
 		newSuccessResponse(),
-		classesPostClassFields{
+		classesPostClassResponseFields{
 			class.ID,
 			class.Code,
 			class.Year,

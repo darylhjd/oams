@@ -51,10 +51,10 @@ type usersPostRequest struct {
 
 type usersPostResponse struct {
 	response
-	User usersPostUserFields `json:"user"`
+	User usersPostUserResponseFields `json:"user"`
 }
 
-type usersPostUserFields struct {
+type usersPostUserResponseFields struct {
 	ID        string         `json:"id"`
 	Name      string         `json:"name"`
 	Email     string         `json:"email"`
@@ -85,7 +85,7 @@ func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
 
 	return usersPostResponse{
 		newSuccessResponse(),
-		usersPostUserFields{
+		usersPostUserResponseFields{
 			user.ID,
 			user.Name,
 			user.Email,

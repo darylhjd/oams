@@ -147,7 +147,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			true,
 			classGroupSessionsPostResponse{
 				newSuccessResponse(),
-				classGroupSessionsPostClassGroupSessionFields{
+				classGroupSessionsPostClassGroupSessionResponseFields{
 					StartTime: time.UnixMicro(1),
 					EndTime:   time.UnixMicro(2),
 					Venue:     "NEW_CLASS+22",

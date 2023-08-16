@@ -141,7 +141,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			false,
 			usersPostResponse{
 				newSuccessResponse(),
-				usersPostUserFields{
+				usersPostUserResponseFields{
 					ID:   "NEW_USER",
 					Role: model.UserRole_Student,
 				},

@@ -51,10 +51,10 @@ type sessionEnrollmentsPostRequest struct {
 
 type sessionEnrollmentsPostResponse struct {
 	response
-	SessionEnrollment sessionEnrollmentsPostSessionEnrollmentFields `json:"session_enrollment"`
+	SessionEnrollment sessionEnrollmentsPostSessionEnrollmentResponseFields `json:"session_enrollment"`
 }
 
-type sessionEnrollmentsPostSessionEnrollmentFields struct {
+type sessionEnrollmentsPostSessionEnrollmentResponseFields struct {
 	ID        int64     `json:"id"`
 	SessionID int64     `json:"session_id"`
 	UserID    string    `json:"user_id"`
@@ -83,7 +83,7 @@ func (v *APIServerV1) sessionEnrollmentsPost(r *http.Request) apiResponse {
 
 	return sessionEnrollmentsPostResponse{
 		newSuccessResponse(),
-		sessionEnrollmentsPostSessionEnrollmentFields{
+		sessionEnrollmentsPostSessionEnrollmentResponseFields{
 			session.ID,
 			session.SessionID,
 			session.UserID,

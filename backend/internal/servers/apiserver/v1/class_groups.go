@@ -51,11 +51,11 @@ type classGroupsPostRequest struct {
 
 type classGroupsPostResponse struct {
 	response
-	ClassGroup classGroupsPostClassGroupFields `json:"class_group"`
+	ClassGroup classGroupsPostClassGroupResponseFields `json:"class_group"`
 }
 
-type classGroupsPostClassGroupFields struct {
-	ID        int64           `sql:"primary_key" json:"id"`
+type classGroupsPostClassGroupResponseFields struct {
+	ID        int64           `json:"id"`
 	ClassID   int64           `json:"class_id"`
 	Name      string          `json:"name"`
 	ClassType model.ClassType `json:"class_type"`
@@ -83,7 +83,7 @@ func (v *APIServerV1) classGroupsPost(r *http.Request) apiResponse {
 
 	return classGroupsPostResponse{
 		newSuccessResponse(),
-		classGroupsPostClassGroupFields{
+		classGroupsPostClassGroupResponseFields{
 			group.ID,
 			group.ClassID,
 			group.Name,

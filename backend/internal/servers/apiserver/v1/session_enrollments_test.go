@@ -147,7 +147,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 			true,
 			sessionEnrollmentsPostResponse{
 				newSuccessResponse(),
-				sessionEnrollmentsPostSessionEnrollmentFields{
+				sessionEnrollmentsPostSessionEnrollmentResponseFields{
 					Attended: true,
 				},
 			},

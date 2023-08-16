@@ -146,7 +146,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			true,
 			classGroupsPostResponse{
 				newSuccessResponse(),
-				classGroupsPostClassGroupFields{
+				classGroupsPostClassGroupResponseFields{
 					Name:      "NEW21",
 					ClassType: model.ClassType_Lab,
 				},

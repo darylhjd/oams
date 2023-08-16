@@ -67,10 +67,10 @@ func (r classGroupSessionsPostRequest) createClassGroupSessionParams() database.
 
 type classGroupSessionsPostResponse struct {
 	response
-	ClassGroupSession classGroupSessionsPostClassGroupSessionFields `json:"class_group_session"`
+	ClassGroupSession classGroupSessionsPostClassGroupSessionResponseFields `json:"class_group_session"`
 }
 
-type classGroupSessionsPostClassGroupSessionFields struct {
+type classGroupSessionsPostClassGroupSessionResponseFields struct {
 	ID           int64     `json:"id"`
 	ClassGroupID int64     `json:"class_group_id"`
 	StartTime    time.Time `json:"start_time"`
@@ -102,7 +102,7 @@ func (v *APIServerV1) classGroupSessionsPost(r *http.Request) apiResponse {
 
 	return classGroupSessionsPostResponse{
 		newSuccessResponse(),
-		classGroupSessionsPostClassGroupSessionFields{
+		classGroupSessionsPostClassGroupSessionResponseFields{
 			ClassGroupID: session.ClassGroupID,
 			StartTime:    session.StartTime,
 			EndTime:      session.EndTime,

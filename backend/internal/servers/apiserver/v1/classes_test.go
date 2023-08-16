@@ -144,7 +144,7 @@ func TestAPIServerV1_classesPost(t *testing.T) {
 			false,
 			classesPostResponse{
 				newSuccessResponse(),
-				classesPostClassFields{
+				classesPostClassResponseFields{
 					Code:     "CZ1115",
 					Year:     2023,
 					Semester: "2",
