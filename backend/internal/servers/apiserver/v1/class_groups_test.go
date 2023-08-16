@@ -105,7 +105,7 @@ func TestAPIServerV1_classGroupsGet(t *testing.T) {
 
 			if tt.withExistingClassGroup {
 				for idx, group := range tt.wantResponse.ClassGroups {
-					createdGroup := tests.StubClassGroup(t, ctx, v1.db.Q, group.Name, group.ClassType)
+					createdGroup := tests.StubClassGroup(t, ctx, v1.db, group.Name, group.ClassType)
 					groupPtr := &tt.wantResponse.ClassGroups[idx]
 					groupPtr.ID = createdGroup.ID
 					groupPtr.ClassID = createdGroup.ClassID
@@ -199,14 +199,14 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			switch {
 			case tt.withExistingClassGroup:
 				createdGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.withRequest.ClassGroup.Name,
 					tt.withRequest.ClassGroup.ClassType,
 				)
 				tt.withRequest.ClassGroup.ClassID = createdGroup.ClassID
 			case tt.withExistingClass:
 				createdClass := tests.StubClass(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					uuid.NewString(),
 					rand.Int31(),
 					uuid.NewString(),

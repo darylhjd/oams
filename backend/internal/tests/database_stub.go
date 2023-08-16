@@ -43,10 +43,10 @@ func StubUser(t *testing.T, ctx context.Context, db *database.DB, id string, rol
 }
 
 // StubClass inserts a mock class with the given fields into the database.
-func StubClass(t *testing.T, ctx context.Context, q *database.Queries, code string, year int32, semester string) database.CreateClassRow {
+func StubClass(t *testing.T, ctx context.Context, db *database.DB, code string, year int32, semester string) model.Class {
 	t.Helper()
 
-	class, err := q.CreateClass(ctx, database.CreateClassParams{
+	class, err := db.CreateClass(ctx, database.CreateClassParams{
 		Code:      code,
 		Year:      year,
 		Semester:  semester,
@@ -61,12 +61,12 @@ func StubClass(t *testing.T, ctx context.Context, q *database.Queries, code stri
 }
 
 // StubClassGroup inserts a mock class and a corresponding class group into the database.
-func StubClassGroup(t *testing.T, ctx context.Context, q *database.Queries, name string, classType database.ClassType) database.CreateClassGroupRow {
+func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name string, classType database.ClassType) database.CreateClassGroupRow {
 	t.Helper()
 
-	class := StubClass(t, ctx, q, uuid.NewString(), rand.Int31(), uuid.NewString())
+	class := StubClass(t, ctx, db, uuid.NewString(), rand.Int31(), uuid.NewString())
 
-	group, err := q.CreateClassGroup(ctx, database.CreateClassGroupParams{
+	group, err := db.Q.CreateClassGroup(ctx, database.CreateClassGroupParams{
 		ClassID:   class.ID,
 		Name:      name,
 		ClassType: classType,
@@ -95,12 +95,12 @@ func StubClassGroupWithClassID(t *testing.T, ctx context.Context, q *database.Qu
 }
 
 // StubClassGroupSession inserts a mock class, class group and corresponding class group session into the database.
-func StubClassGroupSession(t *testing.T, ctx context.Context, q *database.Queries, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
+func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
 	t.Helper()
 
-	classGroup := StubClassGroup(t, ctx, q, uuid.NewString(), database.ClassTypeLEC)
+	classGroup := StubClassGroup(t, ctx, db, uuid.NewString(), database.ClassTypeLEC)
 
-	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
+	session, err := db.Q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
 		ClassGroupID: classGroup.ID,
 		StartTime:    startTime,
 		EndTime:      endTime,
@@ -134,7 +134,7 @@ func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q 
 func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, attended bool) model.SessionEnrollment {
 	t.Helper()
 
-	session := StubClassGroupSession(t, ctx, db.Q,
+	session := StubClassGroupSession(t, ctx, db,
 		pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
 		pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 		"VENUE+66",

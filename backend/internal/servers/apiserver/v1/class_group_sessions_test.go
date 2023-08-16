@@ -107,7 +107,7 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 
 			if tt.withExistingClassGroupSession {
 				for idx, session := range tt.wantResponse.ClassGroupSessions {
-					createdSession := tests.StubClassGroupSession(t, ctx, v1.db.Q, session.StartTime, session.EndTime, session.Venue)
+					createdSession := tests.StubClassGroupSession(t, ctx, v1.db, session.StartTime, session.EndTime, session.Venue)
 					sessionPtr := &tt.wantResponse.ClassGroupSessions[idx]
 					sessionPtr.ID = createdSession.ID
 					sessionPtr.ClassGroupID = createdSession.ClassGroupID
@@ -234,7 +234,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			switch {
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.withRequest.createClassGroupSessionParams().StartTime,
 					tt.withRequest.createClassGroupSessionParams().EndTime,
 					tt.withRequest.ClassGroupSession.Venue,
@@ -242,7 +242,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 				tt.withRequest.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
 			case tt.withExistingClassGroup:
 				createdGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					uuid.NewString(),
 					database.ClassTypeLAB,
 				)

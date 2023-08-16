@@ -1,19 +1,3 @@
--- name: ListClasses :many
-SELECT *
-FROM classes
-ORDER BY code, year, semester;
-
--- name: GetClass :one
-SELECT *
-FROM classes
-WHERE id = $1
-LIMIT 1;
-
--- name: CreateClass :one
-INSERT INTO classes (code, year, semester, programme, au, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-RETURNING id, code, year, semester, programme, au, created_at;
-
 -- name: UpdateClass :one
 UPDATE classes
 SET code       = COALESCE(sqlc.narg('code'), code),
@@ -33,12 +17,6 @@ SET code       = COALESCE(sqlc.narg('code'), code),
             END
 WHERE id = $1
 RETURNING id, code, year, semester, programme, au, updated_at;
-
--- name: DeleteClass :one
-DELETE
-FROM classes
-WHERE id = $1
-RETURNING *;
 
 -- name: UpsertClasses :batchone
 -- Insert a class into the database. If the class already exists, then only update the programme and au.

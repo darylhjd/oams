@@ -233,7 +233,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 			default:
 				if tt.withExistingClassGroupSession {
 					createdSession := tests.StubClassGroupSession(
-						t, ctx, v1.db.Q,
+						t, ctx, v1.db,
 						pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
 						pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 						"VENUE+00",

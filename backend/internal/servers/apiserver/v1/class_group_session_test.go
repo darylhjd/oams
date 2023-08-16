@@ -115,7 +115,7 @@ func TestAPIServerV1_classGroupSessionGet(t *testing.T) {
 
 			if tt.withExistingClassGroupSession {
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.ClassGroupSession.StartTime,
 					tt.wantResponse.ClassGroupSession.EndTime,
 					tt.wantResponse.ClassGroupSession.Venue,
@@ -268,7 +268,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			case tt.withUpdateConflict:
 				// Create session to update.
 				updateClassGroupSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
 					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					uuid.NewString(),
@@ -285,7 +285,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				)
 			case tt.withExistingClassGroupSession && !tt.withExistingUpdateClassGroup:
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
 					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					uuid.NewString(),
@@ -295,7 +295,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				tt.withRequest.ClassGroupSession.ClassGroupID = ptr(createdSession.ClassGroupID + 1)
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.ClassGroupSession.StartTime,
 					tt.wantResponse.ClassGroupSession.EndTime,
 					tt.wantResponse.ClassGroupSession.Venue,
@@ -396,7 +396,7 @@ func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
 				sessionId = createdSessionEnrollment.SessionID
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
 					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					uuid.NewString(),

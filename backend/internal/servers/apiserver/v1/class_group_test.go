@@ -114,7 +114,7 @@ func TestAPIServerV1_classGroupGet(t *testing.T) {
 
 			if tt.withExistingClassGroup {
 				createdClassGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.ClassGroup.Name,
 					tt.wantResponse.ClassGroup.ClassType,
 				)
@@ -256,7 +256,7 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			switch {
 			case tt.withUpdateConflict:
 				// Create group to update.
-				updateClassGroup := tests.StubClassGroup(t, ctx, v1.db.Q, uuid.NewString(), database.ClassTypeTUT)
+				updateClassGroup := tests.StubClassGroup(t, ctx, v1.db, uuid.NewString(), database.ClassTypeTUT)
 				groupId = updateClassGroup.ID
 
 				// Also create group to conflict with.
@@ -268,7 +268,7 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 				)
 			case tt.withExistingClassGroup && !tt.withExistingUpdateClass:
 				createdClassGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					uuid.NewString(),
 					database.ClassTypeTUT,
 				)
@@ -277,7 +277,7 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 				tt.withRequest.ClassGroup.ClassID = ptr(createdClassGroup.ClassID + 1)
 			case tt.withExistingClassGroup:
 				createdClassGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					tt.wantResponse.ClassGroup.Name,
 					tt.wantResponse.ClassGroup.ClassType,
 				)
@@ -374,7 +374,7 @@ func TestAPIServerV1_classGroupDelete(t *testing.T) {
 			switch {
 			case tt.withForeignKeyDependency:
 				createdClassGroupSession := tests.StubClassGroupSession(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
 					pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
 					uuid.NewString(),
@@ -382,7 +382,7 @@ func TestAPIServerV1_classGroupDelete(t *testing.T) {
 				groupId = createdClassGroupSession.ClassGroupID
 			case tt.withExistingClassGroup:
 				createdClassGroup := tests.StubClassGroup(
-					t, ctx, v1.db.Q,
+					t, ctx, v1.db,
 					uuid.NewString(),
 					database.ClassTypeTUT,
 				)
