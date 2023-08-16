@@ -73,6 +73,64 @@ func (d *DB) CreateClass(ctx context.Context, arg CreateClassParams) (model.Clas
 	return res, err
 }
 
+type UpdateClassParams struct {
+	Code      *string `json:"code"`
+	Year      *int32  `json:"year"`
+	Semester  *string `json:"semester"`
+	Programme *string `json:"programme"`
+	Au        *int16  `json:"au"`
+}
+
+func (d *DB) UpdateClass(ctx context.Context, id int64, arg UpdateClassParams) (model.Class, error) {
+	var (
+		res    model.Class
+		cols   ColumnList
+		update model.Class
+	)
+
+	if arg.Code != nil {
+		cols = append(cols, Classes.Code)
+		update.Code = *arg.Code
+	}
+
+	if arg.Year != nil {
+		cols = append(cols, Classes.Year)
+		update.Year = *arg.Year
+	}
+
+	if arg.Semester != nil {
+		cols = append(cols, Classes.Semester)
+		update.Semester = *arg.Semester
+	}
+
+	if arg.Programme != nil {
+		cols = append(cols, Classes.Programme)
+		update.Programme = *arg.Programme
+	}
+
+	if arg.Au != nil {
+		cols = append(cols, Classes.Au)
+		update.Au = *arg.Au
+	}
+
+	if len(cols) == 0 {
+		return d.GetClass(ctx, id)
+	}
+
+	stmt := Classes.UPDATE(
+		cols,
+	).MODEL(
+		update,
+	).WHERE(
+		Classes.ID.EQ(Int64(id)),
+	).RETURNING(
+		Classes.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}
+
 func (d *DB) DeleteClass(ctx context.Context, id int64) (model.Class, error) {
 	var res model.Class
 

@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
@@ -60,46 +59,22 @@ func (v *APIServerV1) classGet(r *http.Request, id int64) apiResponse {
 }
 
 type classPatchRequest struct {
-	Class classPatchClassRequestFields `json:"class"`
-}
-
-type classPatchClassRequestFields struct {
-	Code      *string `json:"code"`
-	Year      *int32  `json:"year"`
-	Semester  *string `json:"semester"`
-	Programme *string `json:"programme"`
-	Au        *int16  `json:"au"`
-}
-
-func (r classPatchRequest) updateClassParams(classId int64) database.UpdateClassParams {
-	params := database.UpdateClassParams{ID: classId}
-
-	if r.Class.Code != nil {
-		params.Code = pgtype.Text{String: *r.Class.Code, Valid: true}
-	}
-
-	if r.Class.Year != nil {
-		params.Year = pgtype.Int4{Int32: *r.Class.Year, Valid: true}
-	}
-
-	if r.Class.Semester != nil {
-		params.Semester = pgtype.Text{String: *r.Class.Semester, Valid: true}
-	}
-
-	if r.Class.Programme != nil {
-		params.Programme = pgtype.Text{String: *r.Class.Programme, Valid: true}
-	}
-
-	if r.Class.Au != nil {
-		params.Au = pgtype.Int2{Int16: *r.Class.Au, Valid: true}
-	}
-
-	return params
+	Class database.UpdateClassParams `json:"class"`
 }
 
 type classPatchResponse struct {
 	response
-	Class database.UpdateClassRow `json:"class"`
+	Class classPatchClassResponseFields `json:"class"`
+}
+
+type classPatchClassResponseFields struct {
+	ID        int64     `json:"id"`
+	Code      string    `json:"code"`
+	Year      int32     `json:"year"`
+	Semester  string    `json:"semester"`
+	Programme string    `json:"programme"`
+	Au        int16     `json:"au"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (v *APIServerV1) classPatch(r *http.Request, id int64) apiResponse {
@@ -108,10 +83,10 @@ func (v *APIServerV1) classPatch(r *http.Request, id int64) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	class, err := v.db.Q.UpdateClass(r.Context(), req.updateClassParams(id))
+	class, err := v.db.UpdateClass(r.Context(), id, req.Class)
 	if err != nil {
 		switch {
-		case errors.Is(err, pgx.ErrNoRows):
+		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class to update does not exist")
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
 			return newErrorResponse(http.StatusConflict, "class with same code, year, and semester already exists")
@@ -123,7 +98,15 @@ func (v *APIServerV1) classPatch(r *http.Request, id int64) apiResponse {
 
 	return classPatchResponse{
 		newSuccessResponse(),
-		class,
+		classPatchClassResponseFields{
+			class.ID,
+			class.Code,
+			class.Year,
+			class.Semester,
+			class.Programme,
+			class.Au,
+			class.UpdatedAt,
+		},
 	}
 }
 
