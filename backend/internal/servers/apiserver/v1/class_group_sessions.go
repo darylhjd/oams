@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 )
 
 func (v *APIServerV1) classGroupSessions(w http.ResponseWriter, r *http.Request) {
@@ -26,11 +26,11 @@ func (v *APIServerV1) classGroupSessions(w http.ResponseWriter, r *http.Request)
 
 type classGroupSessionsGetResponse struct {
 	response
-	ClassGroupSessions []database.ClassGroupSession `json:"class_group_sessions"`
+	ClassGroupSessions []model.ClassGroupSession `json:"class_group_sessions"`
 }
 
 func (v *APIServerV1) classGroupSessionsGet(r *http.Request) apiResponse {
-	sessions, err := v.db.Q.ListClassGroupSessions(r.Context())
+	sessions, err := v.db.ListClassGroupSessions(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group sessions get database action")
@@ -38,7 +38,7 @@ func (v *APIServerV1) classGroupSessionsGet(r *http.Request) apiResponse {
 
 	resp := classGroupSessionsGetResponse{
 		newSuccessResponse(),
-		make([]database.ClassGroupSession, 0, len(sessions)),
+		make([]model.ClassGroupSession, 0, len(sessions)),
 	}
 
 	resp.ClassGroupSessions = append(resp.ClassGroupSessions, sessions...)
@@ -59,15 +59,24 @@ type classGroupSessionsPostClassGroupSessionRequestFields struct {
 func (r classGroupSessionsPostRequest) createClassGroupSessionParams() database.CreateClassGroupSessionParams {
 	return database.CreateClassGroupSessionParams{
 		ClassGroupID: r.ClassGroupSession.ClassGroupID,
-		StartTime:    pgtype.Timestamptz{Time: time.UnixMicro(r.ClassGroupSession.StartTime), Valid: true},
-		EndTime:      pgtype.Timestamptz{Time: time.UnixMicro(r.ClassGroupSession.EndTime), Valid: true},
+		StartTime:    time.UnixMicro(r.ClassGroupSession.StartTime),
+		EndTime:      time.UnixMicro(r.ClassGroupSession.EndTime),
 		Venue:        r.ClassGroupSession.Venue,
 	}
 }
 
 type classGroupSessionsPostResponse struct {
 	response
-	ClassGroupSession database.CreateClassGroupSessionRow `json:"class_group_session"`
+	ClassGroupSession classGroupSessionsPostClassGroupSessionFields `json:"class_group_session"`
+}
+
+type classGroupSessionsPostClassGroupSessionFields struct {
+	ID           int64     `json:"id"`
+	ClassGroupID int64     `json:"class_group_id"`
+	StartTime    time.Time `json:"start_time"`
+	EndTime      time.Time `json:"end_time"`
+	Venue        string    `json:"venue"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 func (v *APIServerV1) classGroupSessionsPost(r *http.Request) apiResponse {
@@ -76,7 +85,7 @@ func (v *APIServerV1) classGroupSessionsPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	session, err := v.db.Q.CreateClassGroupSession(r.Context(), req.createClassGroupSessionParams())
+	session, err := v.db.CreateClassGroupSession(r.Context(), req.createClassGroupSessionParams())
 	if err != nil {
 		switch {
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
@@ -93,6 +102,12 @@ func (v *APIServerV1) classGroupSessionsPost(r *http.Request) apiResponse {
 
 	return classGroupSessionsPostResponse{
 		newSuccessResponse(),
-		session,
+		classGroupSessionsPostClassGroupSessionFields{
+			ClassGroupID: session.ClassGroupID,
+			StartTime:    session.StartTime,
+			EndTime:      session.EndTime,
+			Venue:        session.Venue,
+			CreatedAt:    session.CreatedAt,
+		},
 	}
 }

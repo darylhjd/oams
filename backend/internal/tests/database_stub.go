@@ -9,7 +9,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // StubAuthContextUser inserts the mock auth context user into the database.
@@ -95,12 +94,12 @@ func StubClassGroupWithClassID(t *testing.T, ctx context.Context, db *database.D
 }
 
 // StubClassGroupSession inserts a mock class, class group and corresponding class group session into the database.
-func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
+func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, startTime, endTime time.Time, venue string) model.ClassGroupSession {
 	t.Helper()
 
 	classGroup := StubClassGroup(t, ctx, db, uuid.NewString(), model.ClassType_Lec)
 
-	session, err := db.Q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
+	session, err := db.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
 		ClassGroupID: classGroup.ID,
 		StartTime:    startTime,
 		EndTime:      endTime,
@@ -114,10 +113,10 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, s
 }
 
 // StubClassGroupSessionWithClassGroupID creates a mock class group session using an existing class group ID.
-func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, q *database.Queries, classGroupId int64, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
+func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, db *database.DB, classGroupId int64, startTime, endTime time.Time, venue string) model.ClassGroupSession {
 	t.Helper()
 
-	session, err := q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
+	session, err := db.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
 		ClassGroupID: classGroupId,
 		StartTime:    startTime,
 		EndTime:      endTime,
@@ -135,8 +134,8 @@ func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, a
 	t.Helper()
 
 	session := StubClassGroupSession(t, ctx, db,
-		pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-		pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+		time.UnixMicro(1),
+		time.UnixMicro(2),
 		"VENUE+66",
 	)
 

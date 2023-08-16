@@ -9,11 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -75,10 +73,10 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 			true,
 			classGroupSessionsGetResponse{
 				newSuccessResponse(),
-				[]database.ClassGroupSession{
+				[]model.ClassGroupSession{
 					{
-						StartTime: pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-						EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+						StartTime: time.UnixMicro(1),
+						EndTime:   time.UnixMicro(2),
 						Venue:     "CLASS+22",
 					},
 				},
@@ -89,7 +87,7 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 			false,
 			classGroupSessionsGetResponse{
 				newSuccessResponse(),
-				[]database.ClassGroupSession{},
+				[]model.ClassGroupSession{},
 			},
 		},
 	}
@@ -149,9 +147,9 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 			true,
 			classGroupSessionsPostResponse{
 				newSuccessResponse(),
-				database.CreateClassGroupSessionRow{
-					StartTime: pgtype.Timestamptz{Time: time.UnixMicro(1), Valid: true},
-					EndTime:   pgtype.Timestamptz{Time: time.UnixMicro(2), Valid: true},
+				classGroupSessionsPostClassGroupSessionFields{
+					StartTime: time.UnixMicro(1),
+					EndTime:   time.UnixMicro(2),
 					Venue:     "NEW_CLASS+22",
 				},
 			},

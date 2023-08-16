@@ -156,8 +156,8 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			if tt.withUpcomingClassGroupSession {
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db,
-					pgtype.Timestamptz{Time: time.Now().Add(-time.Hour), Valid: true}, // Test ongoing session.
-					pgtype.Timestamptz{Time: time.Now().Add(time.Hour * 24), Valid: true},
+					time.Now().Add(-time.Hour), // Test ongoing session.
+					time.Now().Add(time.Hour*24),
 					uuid.NewString(),
 				)
 
