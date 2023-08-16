@@ -8,6 +8,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
+// ListUsers returns a list of users.
 func (d *DB) ListUsers(ctx context.Context) ([]model.User, error) {
 	var res []model.User
 

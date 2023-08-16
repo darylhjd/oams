@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -72,10 +73,10 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			true,
 			usersGetResponse{
 				newSuccessResponse(),
-				[]database.User{
+				[]model.User{
 					{
 						ID:   "EXISTING_USER",
-						Role: database.UserRoleSTUDENT,
+						Role: model.UserRole_Student,
 					},
 				},
 			},
@@ -85,7 +86,7 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			false,
 			usersGetResponse{
 				newSuccessResponse(),
-				[]database.User{},
+				[]model.User{},
 			},
 		},
 	}
@@ -104,9 +105,9 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 
 			if tt.withExistingUser {
 				for idx, user := range tt.wantResponse.Users {
-					createdUser := tests.StubUser(t, ctx, v1.db.Q, user.ID, user.Role)
+					createdUser := tests.StubUser(t, ctx, v1.db.Q, user.ID, database.UserRole(user.Role))
 					userPtr := &tt.wantResponse.Users[idx]
-					userPtr.CreatedAt, userPtr.UpdatedAt = createdUser.CreatedAt, createdUser.CreatedAt
+					userPtr.CreatedAt, userPtr.UpdatedAt = createdUser.CreatedAt.Time, createdUser.CreatedAt.Time
 				}
 			}
 
