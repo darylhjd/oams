@@ -25,8 +25,6 @@ github.com/docker/go-connections v0.4.0 h1:El9xVISelRB7BuFusrZozjnkIM5YnzCViNKoh
 github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4=
 github.com/felixge/fgprof v0.9.3/go.mod h1:RdbpDgzqYVh/T9fPELJyV7EYJuHB55UTEULNun8eiPw=
 github.com/friendsofgo/errors v0.9.2/go.mod h1:yCvFW5AkDIL9qn7suHVLiI/gH228n7PC4Pn44IGoTOI=
-github.com/go-jet/jet/v2 v2.10.1 h1:mOKE5S+mt5bM/xNiuD7Dcz+FdqM83zg1FpOzfTJGJNw=
-github.com/go-jet/jet/v2 v2.10.1/go.mod h1:XF5x5l7W4g7S9Rok9aXfPARFUyurl61nc+UNhuxKlYA=
 github.com/go-jet/jet/v2 v2.10.2-0.20230803110858-33333585e957 h1:4uT+4hOv+nXuNk6U6XvxSRTKZyrB6+onbjrlQ/FwAm4=
 github.com/go-jet/jet/v2 v2.10.2-0.20230803110858-33333585e957/go.mod h1:XF5x5l7W4g7S9Rok9aXfPARFUyurl61nc+UNhuxKlYA=
 github.com/go-kit/log v0.1.0/go.mod h1:zbhenjAZHb184qTLMA9ZjW7ThYL0H2mk7Q6pNt4vbaY=
