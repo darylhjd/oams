@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -244,7 +245,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 				createdGroup := tests.StubClassGroup(
 					t, ctx, v1.db,
 					uuid.NewString(),
-					database.ClassTypeLAB,
+					model.ClassType_Lab,
 				)
 				tt.withRequest.ClassGroupSession.ClassGroupID = createdGroup.ID
 			}

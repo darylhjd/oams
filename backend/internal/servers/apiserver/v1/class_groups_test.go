@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -73,10 +74,10 @@ func TestAPIServerV1_classGroupsGet(t *testing.T) {
 			true,
 			classGroupsGetResponse{
 				newSuccessResponse(),
-				[]database.ClassGroup{
+				[]model.ClassGroup{
 					{
 						Name:      "NEW21",
-						ClassType: database.ClassTypeLEC,
+						ClassType: model.ClassType_Lec,
 					},
 				},
 			},
@@ -86,7 +87,7 @@ func TestAPIServerV1_classGroupsGet(t *testing.T) {
 			false,
 			classGroupsGetResponse{
 				newSuccessResponse(),
-				[]database.ClassGroup{},
+				[]model.ClassGroup{},
 			},
 		},
 	}
@@ -138,16 +139,16 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			classGroupsPostRequest{
 				database.CreateClassGroupParams{
 					Name:      "NEW21",
-					ClassType: database.ClassTypeLAB,
+					ClassType: model.ClassType_Lab,
 				},
 			},
 			false,
 			true,
 			classGroupsPostResponse{
 				newSuccessResponse(),
-				database.CreateClassGroupRow{
+				classGroupsPostClassGroupFields{
 					Name:      "NEW21",
-					ClassType: database.ClassTypeLAB,
+					ClassType: model.ClassType_Lab,
 				},
 			},
 			http.StatusOK,
@@ -158,7 +159,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			classGroupsPostRequest{
 				database.CreateClassGroupParams{
 					Name:      "EXISTING22",
-					ClassType: database.ClassTypeLEC,
+					ClassType: model.ClassType_Lec,
 				},
 			},
 			true,
@@ -173,7 +174,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 				database.CreateClassGroupParams{
 					ClassID:   rand.Int63(),
 					Name:      "FAIL_INSERT22",
-					ClassType: database.ClassTypeTUT,
+					ClassType: model.ClassType_Tut,
 				},
 			},
 			false,

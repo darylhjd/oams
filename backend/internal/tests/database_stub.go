@@ -61,12 +61,12 @@ func StubClass(t *testing.T, ctx context.Context, db *database.DB, code string, 
 }
 
 // StubClassGroup inserts a mock class and a corresponding class group into the database.
-func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name string, classType database.ClassType) database.CreateClassGroupRow {
+func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name string, classType model.ClassType) model.ClassGroup {
 	t.Helper()
 
 	class := StubClass(t, ctx, db, uuid.NewString(), rand.Int31(), uuid.NewString())
 
-	group, err := db.Q.CreateClassGroup(ctx, database.CreateClassGroupParams{
+	group, err := db.CreateClassGroup(ctx, database.CreateClassGroupParams{
 		ClassID:   class.ID,
 		Name:      name,
 		ClassType: classType,
@@ -79,10 +79,10 @@ func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name str
 }
 
 // StubClassGroupWithClassID creates a mock class group using an existing class ID.
-func StubClassGroupWithClassID(t *testing.T, ctx context.Context, q *database.Queries, classId int64, name string, classType database.ClassType) database.CreateClassGroupRow {
+func StubClassGroupWithClassID(t *testing.T, ctx context.Context, db *database.DB, classId int64, name string, classType model.ClassType) model.ClassGroup {
 	t.Helper()
 
-	group, err := q.CreateClassGroup(ctx, database.CreateClassGroupParams{
+	group, err := db.CreateClassGroup(ctx, database.CreateClassGroupParams{
 		ClassID:   classId,
 		Name:      name,
 		ClassType: classType,
@@ -98,7 +98,7 @@ func StubClassGroupWithClassID(t *testing.T, ctx context.Context, q *database.Qu
 func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, startTime, endTime pgtype.Timestamptz, venue string) database.CreateClassGroupSessionRow {
 	t.Helper()
 
-	classGroup := StubClassGroup(t, ctx, db, uuid.NewString(), database.ClassTypeLEC)
+	classGroup := StubClassGroup(t, ctx, db, uuid.NewString(), model.ClassType_Lec)
 
 	session, err := db.Q.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
 		ClassGroupID: classGroup.ID,

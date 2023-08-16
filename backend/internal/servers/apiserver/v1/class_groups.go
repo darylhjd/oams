@@ -3,8 +3,10 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 )
 
 func (v *APIServerV1) classGroups(w http.ResponseWriter, r *http.Request) {
@@ -24,11 +26,11 @@ func (v *APIServerV1) classGroups(w http.ResponseWriter, r *http.Request) {
 
 type classGroupsGetResponse struct {
 	response
-	ClassGroups []database.ClassGroup `json:"class_groups"`
+	ClassGroups []model.ClassGroup `json:"class_groups"`
 }
 
 func (v *APIServerV1) classGroupsGet(r *http.Request) apiResponse {
-	groups, err := v.db.Q.ListClassGroups(r.Context())
+	groups, err := v.db.ListClassGroups(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class groups get database action")
@@ -36,7 +38,7 @@ func (v *APIServerV1) classGroupsGet(r *http.Request) apiResponse {
 
 	resp := classGroupsGetResponse{
 		newSuccessResponse(),
-		make([]database.ClassGroup, 0, len(groups)),
+		make([]model.ClassGroup, 0, len(groups)),
 	}
 
 	resp.ClassGroups = append(resp.ClassGroups, groups...)
@@ -49,7 +51,15 @@ type classGroupsPostRequest struct {
 
 type classGroupsPostResponse struct {
 	response
-	ClassGroup database.CreateClassGroupRow `json:"class_group"`
+	ClassGroup classGroupsPostClassGroupFields `json:"class_group"`
+}
+
+type classGroupsPostClassGroupFields struct {
+	ID        int64           `sql:"primary_key" json:"id"`
+	ClassID   int64           `json:"class_id"`
+	Name      string          `json:"name"`
+	ClassType model.ClassType `json:"class_type"`
+	CreatedAt time.Time       `json:"created_at"`
 }
 
 func (v *APIServerV1) classGroupsPost(r *http.Request) apiResponse {
@@ -58,7 +68,7 @@ func (v *APIServerV1) classGroupsPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	group, err := v.db.Q.CreateClassGroup(r.Context(), req.ClassGroup)
+	group, err := v.db.CreateClassGroup(r.Context(), req.ClassGroup)
 	if err != nil {
 		switch {
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
@@ -73,6 +83,12 @@ func (v *APIServerV1) classGroupsPost(r *http.Request) apiResponse {
 
 	return classGroupsPostResponse{
 		newSuccessResponse(),
-		group,
+		classGroupsPostClassGroupFields{
+			group.ID,
+			group.ClassID,
+			group.Name,
+			group.ClassType,
+			group.CreatedAt,
+		},
 	}
 }

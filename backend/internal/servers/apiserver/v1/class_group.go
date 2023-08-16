@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -37,13 +39,13 @@ func (v *APIServerV1) classGroup(w http.ResponseWriter, r *http.Request) {
 
 type classGroupGetResponse struct {
 	response
-	ClassGroup database.ClassGroup `json:"class_group"`
+	ClassGroup model.ClassGroup `json:"class_group"`
 }
 
 func (v *APIServerV1) classGroupGet(r *http.Request, id int64) apiResponse {
-	group, err := v.db.Q.GetClassGroup(r.Context(), id)
+	group, err := v.db.GetClassGroup(r.Context(), id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested class group does not exist")
 		}
 
@@ -122,10 +124,10 @@ type classGroupDeleteResponse struct {
 }
 
 func (v *APIServerV1) classGroupDelete(r *http.Request, id int64) apiResponse {
-	_, err := v.db.Q.DeleteClassGroup(r.Context(), id)
+	_, err := v.db.DeleteClassGroup(r.Context(), id)
 	if err != nil {
 		switch {
-		case errors.Is(err, pgx.ErrNoRows):
+		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusNotFound, "class group to delete does not exist")
 		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
 			return newErrorResponse(http.StatusConflict, "class group to delete is still referenced")

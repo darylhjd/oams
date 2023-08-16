@@ -364,7 +364,7 @@ func TestAPIServerV1_classDelete(t *testing.T) {
 			var classId int64
 			switch {
 			case tt.withForeignKeyDependency:
-				createdClassGroup := tests.StubClassGroup(t, ctx, v1.db, uuid.NewString(), database.ClassTypeLAB)
+				createdClassGroup := tests.StubClassGroup(t, ctx, v1.db, uuid.NewString(), model.ClassType_Lab)
 				classId = createdClassGroup.ClassID
 			case tt.withExistingClass:
 				createdClass := tests.StubClass(t, ctx, v1.db, "RANDOM_CODE", 9999, "22")
