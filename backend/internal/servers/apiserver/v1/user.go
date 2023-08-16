@@ -11,8 +11,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const (
@@ -120,36 +118,20 @@ func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
 }
 
 type userPatchRequest struct {
-	User userPatchUserRequestFields `json:"user"`
-}
-
-type userPatchUserRequestFields struct {
-	Name  *string            `json:"name"`
-	Email *string            `json:"email"`
-	Role  *database.UserRole `json:"role"`
-}
-
-func (r userPatchRequest) updateUserParams(userId string) database.UpdateUserParams {
-	params := database.UpdateUserParams{ID: userId}
-
-	if r.User.Name != nil {
-		params.Name = pgtype.Text{String: *r.User.Name, Valid: true}
-	}
-
-	if r.User.Email != nil {
-		params.Email = pgtype.Text{String: *r.User.Email, Valid: true}
-	}
-
-	if r.User.Role != nil {
-		params.Role = database.NullUserRole{UserRole: *r.User.Role, Valid: true}
-	}
-
-	return params
+	User database.UpdateUserParams `json:"user"`
 }
 
 type userPatchResponse struct {
 	response
-	User database.UpdateUserRow `json:"user"`
+	User userPatchUserResponseFields `json:"user"`
+}
+
+type userPatchUserResponseFields struct {
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Email     string         `json:"email"`
+	Role      model.UserRole `json:"role"`
+	UpdatedAt time.Time      `json:"updated_at"`
 }
 
 func (v *APIServerV1) userPatch(r *http.Request, id string) apiResponse {
@@ -158,9 +140,9 @@ func (v *APIServerV1) userPatch(r *http.Request, id string) apiResponse {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	user, err := v.db.Q.UpdateUser(r.Context(), req.updateUserParams(id))
+	user, err := v.db.UpdateUser(r.Context(), id, req.User)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "user to update does not exist")
 		}
 
@@ -170,7 +152,13 @@ func (v *APIServerV1) userPatch(r *http.Request, id string) apiResponse {
 
 	return userPatchResponse{
 		newSuccessResponse(),
-		user,
+		userPatchUserResponseFields{
+			user.ID,
+			user.Name,
+			user.Email,
+			user.Role,
+			user.UpdatedAt,
+		},
 	}
 }
 

@@ -15,7 +15,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -280,20 +279,20 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 		{
 			"request with field changes",
 			userPatchRequest{
-				userPatchUserRequestFields{
-					ptr("NEW NAME"),
-					ptr("NEW EMAIL"),
-					ptr(database.UserRoleSTUDENT),
+				database.UpdateUserParams{
+					Name:  ptr("NEW NAME"),
+					Email: ptr("NEW EMAIL"),
+					Role:  ptr(model.UserRole_Student),
 				},
 			},
 			true,
 			userPatchResponse{
 				newSuccessResponse(),
-				database.UpdateUserRow{
+				userPatchUserResponseFields{
 					ID:    "EXISTING_ID",
 					Name:  "NEW NAME",
 					Email: "NEW EMAIL",
-					Role:  database.UserRoleSTUDENT,
+					Role:  model.UserRole_Student,
 				},
 			},
 			false,
@@ -303,14 +302,14 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 		{
 			"request with no field changes",
 			userPatchRequest{
-				userPatchUserRequestFields{},
+				database.UpdateUserParams{},
 			},
 			true,
 			userPatchResponse{
 				newSuccessResponse(),
-				database.UpdateUserRow{
+				userPatchUserResponseFields{
 					ID:   "EXISTING_ID",
-					Role: database.UserRoleSTUDENT,
+					Role: model.UserRole_Student,
 				},
 			},
 			true,
@@ -320,11 +319,11 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 		{
 			"request updating non-existent user",
 			userPatchRequest{
-				userPatchUserRequestFields{},
+				database.UpdateUserParams{},
 			},
 			false,
 			userPatchResponse{
-				User: database.UpdateUserRow{
+				User: userPatchUserResponseFields{
 					ID: "NON_EXISTENT_ID",
 				},
 			},
@@ -349,7 +348,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 			userId := tt.wantResponse.User.ID
 			if tt.withExistingUser {
 				createdUser := tests.StubUser(t, ctx, v1.db, userId, model.UserRole(tt.wantResponse.User.Role))
-				tt.wantResponse.User.UpdatedAt = pgtype.Timestamptz{Time: createdUser.CreatedAt, Valid: true}
+				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
