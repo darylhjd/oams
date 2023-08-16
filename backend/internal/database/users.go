@@ -49,18 +49,17 @@ type CreateUserParams struct {
 func (d *DB) CreateUser(ctx context.Context, arg CreateUserParams) (model.User, error) {
 	var res model.User
 
-	now := time.Now()
-
 	stmt := Users.INSERT(
-		Users.AllColumns,
+		Users.ID,
+		Users.Name,
+		Users.Email,
+		Users.Role,
 	).MODEL(
 		model.User{
-			ID:        arg.ID,
-			Name:      arg.Name,
-			Email:     arg.Email,
-			Role:      arg.Role,
-			CreatedAt: now,
-			UpdatedAt: now,
+			ID:    arg.ID,
+			Name:  arg.Name,
+			Email: arg.Email,
+			Role:  arg.Role,
 		},
 	).RETURNING(
 		Users.AllColumns,

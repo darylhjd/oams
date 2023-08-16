@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
@@ -52,16 +51,12 @@ type CreateClassParams struct {
 func (d *DB) CreateClass(ctx context.Context, arg CreateClassParams) (model.Class, error) {
 	var res model.Class
 
-	now := time.Now()
-
 	stmt := Classes.INSERT(
 		Classes.Code,
 		Classes.Year,
 		Classes.Semester,
 		Classes.Programme,
 		Classes.Au,
-		Classes.CreatedAt,
-		Classes.UpdatedAt,
 	).MODEL(
 		model.Class{
 			Code:      arg.Code,
@@ -69,8 +64,6 @@ func (d *DB) CreateClass(ctx context.Context, arg CreateClassParams) (model.Clas
 			Semester:  arg.Semester,
 			Programme: arg.Programme,
 			Au:        arg.Au,
-			CreatedAt: now,
-			UpdatedAt: now,
 		},
 	).RETURNING(
 		Classes.AllColumns,

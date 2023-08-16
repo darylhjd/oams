@@ -10,8 +10,8 @@ CREATE TABLE users
     name       TEXT        NOT NULL,
     email      TEXT        NOT NULL,
     role       USER_ROLE   NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE classes
@@ -22,8 +22,8 @@ CREATE TABLE classes
     semester   TEXT        NOT NULL,
     programme  TEXT        NOT NULL,
     au         SMALLINT    NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT ux_code_year_semester
         UNIQUE (code, year, semester)
 );
@@ -34,8 +34,8 @@ CREATE TABLE class_groups
     class_id   BIGINT      NOT NULL,
     name       TEXT        NOT NULL,
     class_type CLASS_TYPE  NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT ux_class_id_name_class_type
         UNIQUE (class_id, name, class_type),
     CONSTRAINT fk_class_id
@@ -50,8 +50,8 @@ CREATE TABLE class_group_sessions
     start_time     TIMESTAMPTZ NOT NULL,
     end_time       TIMESTAMPTZ NOT NULL,
     venue          TEXT        NOT NULL,
-    created_at     TIMESTAMPTZ NOT NULL,
-    updated_at     TIMESTAMPTZ NOT NULL,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT ux_class_group_id_start_time
         UNIQUE (class_group_id, start_time),
     CONSTRAINT fk_class_group_id
@@ -67,8 +67,8 @@ CREATE TABLE session_enrollments
     session_id BIGINT      NOT NULL,
     user_id    TEXT        NOT NULL,
     attended   BOOLEAN     NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT ux_session_id_user_id
         UNIQUE (session_id, user_id),
     CONSTRAINT fk_session_id
