@@ -71,27 +71,6 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) (User, error) {
 	return i, err
 }
 
-const getUser = `-- name: GetUser :one
-SELECT id, name, email, role, created_at, updated_at
-FROM users
-WHERE id = $1
-LIMIT 1
-`
-
-func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
-	row := q.db.QueryRow(ctx, getUser, id)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Email,
-		&i.Role,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getUserUpcomingClassGroupSessions = `-- name: GetUserUpcomingClassGroupSessions :many
 SELECT c.code,
        c.year,

@@ -23,3 +23,19 @@ func (d *DB) ListUsers(ctx context.Context) ([]model.User, error) {
 	err := stmt.QueryContext(ctx, d.Conn, &res)
 	return res, err
 }
+
+// GetUser using ID.
+func (d *DB) GetUser(ctx context.Context, id string) (model.User, error) {
+	var res model.User
+
+	stmt := SELECT(
+		Users.AllColumns,
+	).FROM(
+		Users.Table,
+	).WHERE(
+		Users.ID.EQ(String(id)),
+	).LIMIT(1)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
@@ -87,11 +88,11 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			false,
 			userMeResponse{
 				newSuccessResponse(),
-				database.User{
+				model.User{
 					ID:    tests.MockAuthenticatorIDTokenName,
 					Name:  "",
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  database.UserRoleSTUDENT,
+					Role:  model.UserRole_Student,
 				},
 				[]database.GetUserUpcomingClassGroupSessionsRow{},
 			},
@@ -105,11 +106,11 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			true,
 			userMeResponse{
 				newSuccessResponse(),
-				database.User{
+				model.User{
 					ID:    tests.MockAuthenticatorIDTokenName,
 					Name:  "",
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  database.UserRoleSTUDENT,
+					Role:  model.UserRole_Student,
 				},
 				[]database.GetUserUpcomingClassGroupSessionsRow{},
 			},
@@ -211,9 +212,9 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			true,
 			userGetResponse{
 				newSuccessResponse(),
-				database.User{
+				model.User{
 					ID:   "EXISTING_USER",
-					Role: database.UserRoleSTUDENT,
+					Role: model.UserRole_Student,
 				},
 			},
 			http.StatusOK,
@@ -241,9 +242,9 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				createdUser := tests.StubUser(t, ctx, v1.db.Q, tt.wantResponse.User.ID, tt.wantResponse.User.Role)
-				tt.wantResponse.User.CreatedAt = createdUser.CreatedAt
-				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
+				createdUser := tests.StubUser(t, ctx, v1.db.Q, tt.wantResponse.User.ID, database.UserRole(tt.wantResponse.User.Role))
+				tt.wantResponse.User.CreatedAt = createdUser.CreatedAt.Time
+				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt.Time
 			}
 
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, tt.wantResponse.User.ID), nil)

@@ -89,7 +89,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			}
 
 			// Check that user that logged in exists in the database.
-			tests.CheckUserExists(a, context.Background(), v1.db.Q, tests.MockAuthenticatorIDTokenName)
+			tests.CheckUserExists(a, context.Background(), v1.db, tests.MockAuthenticatorIDTokenName)
 
 			// Check that session cookie exists.
 			for _, cookie := range rr.Result().Cookies() {
