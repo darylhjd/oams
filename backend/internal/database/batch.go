@@ -22,14 +22,7 @@ INSERT INTO class_group_sessions (class_group_id, start_time, end_time, venue, c
 VALUES ($1, $2, $3, $4, NOW(), NOW())
 ON CONFLICT ON CONSTRAINT ux_class_group_id_start_time
     DO UPDATE SET end_time   = $3,
-                  venue      = $4,
-                  updated_at =
-                      CASE
-                          WHEN $3 <> class_group_sessions.end_time OR
-                               $4 <> class_group_sessions.venue
-                              THEN NOW()
-                          ELSE class_group_sessions.updated_at
-                          END
+                  venue      = $4
 RETURNING id, class_group_id, start_time, end_time, venue, created_at, updated_at
 `
 
@@ -164,14 +157,7 @@ VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 ON CONFLICT
     ON CONSTRAINT ux_code_year_semester
     DO UPDATE SET programme  = $4,
-                  au         = $5,
-                  updated_at =
-                      CASE
-                          WHEN $4 <> classes.programme OR
-                               $5 <> classes.au
-                              THEN NOW()
-                          ELSE classes.updated_at
-                          END
+                  au         = $5
 RETURNING id, code, year, semester, programme, au, created_at, updated_at
 `
 
@@ -307,15 +293,7 @@ INSERT INTO users (id, name, email, role, created_at, updated_at)
 VALUES ($1, $2, $3, $4, NOW(), NOW())
 ON CONFLICT (id)
     DO UPDATE SET name       = $2,
-                  email      = $3,
-                  updated_at =
-                      CASE
-                          WHEN $2 <> users.name OR
-                               $3 <> users.email OR
-                               $4 <> users.role
-                              THEN NOW()
-                          ELSE users.updated_at
-                          END
+                  email      = $3
 RETURNING id, name, email, role, created_at, updated_at
 `
 

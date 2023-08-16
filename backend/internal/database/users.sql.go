@@ -15,15 +15,7 @@ const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET name       = COALESCE($2, name),
     email      = COALESCE($3, email),
-    role       = COALESCE($4, role),
-    updated_at =
-        CASE
-            WHEN (COALESCE($2, name) <> name OR
-                  COALESCE($3, email) <> email OR
-                  COALESCE($4, role) <> role)
-                THEN NOW()
-            ELSE updated_at
-            END
+    role       = COALESCE($4, role)
 WHERE id = $1
 RETURNING id, name, email, role, updated_at
 `

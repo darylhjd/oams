@@ -15,14 +15,7 @@ const updateClassGroup = `-- name: UpdateClassGroup :one
 UPDATE class_groups
 SET class_id   = COALESCE($2, class_id),
     name       = COALESCE($3, name),
-    class_type = COALESCE($4, class_type),
-    updated_at =
-        CASE
-            WHEN (COALESCE($2, class_id) <> class_id OR
-                  COALESCE($3, name) <> name OR
-                  COALESCE($4, class_type) <> class_type)
-                THEN NOW()
-            ELSE updated_at END
+    class_type = COALESCE($4, class_type)
 WHERE id = $1
 RETURNING id, class_id, name, class_type, updated_at
 `

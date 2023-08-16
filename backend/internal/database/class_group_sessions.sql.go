@@ -16,16 +16,7 @@ UPDATE class_group_sessions
 SET class_group_id = COALESCE($2, class_group_id),
     start_time     = COALESCE($3, start_time),
     end_time       = COALESCE($4, end_time),
-    venue          = COALESCE($5, venue),
-    updated_at     =
-        CASE
-            WHEN (COALESCE($2, class_group_id) <> class_group_id OR
-                  COALESCE($3, start_time) <> start_time OR
-                  COALESCE($4, end_time) <> end_time OR
-                  COALESCE($5, venue) <> venue)
-                THEN NOW()
-            ELSE updated_at
-            END
+    venue          = COALESCE($5, venue)
 WHERE id = $1
 RETURNING id, class_group_id, start_time, end_time, venue, updated_at
 `
