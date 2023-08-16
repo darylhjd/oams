@@ -79,4 +79,27 @@ CREATE TABLE session_enrollments
             REFERENCES users (id)
 );
 
+CREATE FUNCTION update_updated_at() RETURNS TRIGGER AS $$
+    BEGIN
+        IF NEW <> OLD THEN
+            NEW.updated_at := NOW();
+        END IF;
+        RETURN NEW;
+    END;
+$$ LANGUAGE plpgsql;
+
+DO $$
+DECLARE T TEXT;
+BEGIN
+    FOR T IN
+        SELECT table_name FROM information_schema.columns
+        WHERE column_name = 'updated_at'
+    LOOP
+        EXECUTE FORMAT('CREATE TRIGGER update_updated_at
+                        BEFORE UPDATE ON %I
+                        FOR EACH ROW EXECUTE PROCEDURE update_updated_at()', T);
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
 COMMIT;

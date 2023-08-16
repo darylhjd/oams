@@ -17,17 +17,7 @@ SET code       = COALESCE($2, code),
     year       = COALESCE($3, year),
     semester   = COALESCE($4, semester),
     programme  = COALESCE($5, programme),
-    au         = COALESCE($6, au),
-    updated_at =
-        CASE
-            WHEN (COALESCE($2, code) <> code OR
-                  COALESCE($3, year) <> year OR
-                  COALESCE($4, semester) <> semester OR
-                  COALESCE($5, programme) <> programme OR
-                  COALESCE($6, au) <> au)
-                THEN NOW()
-            ELSE updated_at
-            END
+    au         = COALESCE($6, au)
 WHERE id = $1
 RETURNING id, code, year, semester, programme, au, updated_at
 `

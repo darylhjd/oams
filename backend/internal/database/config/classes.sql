@@ -4,17 +4,7 @@ SET code       = COALESCE(sqlc.narg('code'), code),
     year       = COALESCE(sqlc.narg('year'), year),
     semester   = COALESCE(sqlc.narg('semester'), semester),
     programme  = COALESCE(sqlc.narg('programme'), programme),
-    au         = COALESCE(sqlc.narg('au'), au),
-    updated_at =
-        CASE
-            WHEN (COALESCE(sqlc.narg('code'), code) <> code OR
-                  COALESCE(sqlc.narg('year'), year) <> year OR
-                  COALESCE(sqlc.narg('semester'), semester) <> semester OR
-                  COALESCE(sqlc.narg('programme'), programme) <> programme OR
-                  COALESCE(sqlc.narg('au'), au) <> au)
-                THEN NOW()
-            ELSE updated_at
-            END
+    au         = COALESCE(sqlc.narg('au'), au)
 WHERE id = $1
 RETURNING id, code, year, semester, programme, au, updated_at;
 
@@ -25,12 +15,5 @@ VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 ON CONFLICT
     ON CONSTRAINT ux_code_year_semester
     DO UPDATE SET programme  = $4,
-                  au         = $5,
-                  updated_at =
-                      CASE
-                          WHEN $4 <> classes.programme OR
-                               $5 <> classes.au
-                              THEN NOW()
-                          ELSE classes.updated_at
-                          END
+                  au         = $5
 RETURNING *;

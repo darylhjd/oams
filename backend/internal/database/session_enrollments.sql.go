@@ -13,12 +13,7 @@ import (
 
 const updateSessionEnrollment = `-- name: UpdateSessionEnrollment :one
 UPDATE session_enrollments
-SET attended   = COALESCE($2, attended),
-    updated_at =
-        CASE
-            WHEN COALESCE($2, attended) <> attended
-                THEN NOW()
-            ELSE updated_at END
+SET attended   = COALESCE($2, attended)
 WHERE id = $1
 RETURNING id, session_id, user_id, attended, updated_at
 `

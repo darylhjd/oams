@@ -1,11 +1,6 @@
 -- name: UpdateSessionEnrollment :one
 UPDATE session_enrollments
-SET attended   = COALESCE(sqlc.narg('attended'), attended),
-    updated_at =
-        CASE
-            WHEN COALESCE(sqlc.narg('attended'), attended) <> attended
-                THEN NOW()
-            ELSE updated_at END
+SET attended   = COALESCE(sqlc.narg('attended'), attended)
 WHERE id = $1
 RETURNING id, session_id, user_id, attended, updated_at;
 

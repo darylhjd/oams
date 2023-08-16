@@ -2,14 +2,7 @@
 UPDATE class_groups
 SET class_id   = COALESCE(sqlc.narg('class_id'), class_id),
     name       = COALESCE(sqlc.narg('name'), name),
-    class_type = COALESCE(sqlc.narg('class_type'), class_type),
-    updated_at =
-        CASE
-            WHEN (COALESCE(sqlc.narg('class_id'), class_id) <> class_id OR
-                  COALESCE(sqlc.narg('name'), name) <> name OR
-                  COALESCE(sqlc.narg('class_type'), class_type) <> class_type)
-                THEN NOW()
-            ELSE updated_at END
+    class_type = COALESCE(sqlc.narg('class_type'), class_type)
 WHERE id = $1
 RETURNING id, class_id, name, class_type, updated_at;
 

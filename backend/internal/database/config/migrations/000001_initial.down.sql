@@ -10,6 +10,8 @@ DROP TABLE classes;
 
 DROP TABLE users;
 
+DROP FUNCTION update_updated_at;
+
 DROP TYPE USER_ROLE;
 
 DROP TYPE CLASS_TYPE;
