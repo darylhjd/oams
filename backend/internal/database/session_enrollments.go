@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
@@ -49,21 +48,15 @@ type CreateSessionEnrollmentParams struct {
 func (d *DB) CreateSessionEnrollment(ctx context.Context, arg CreateSessionEnrollmentParams) (model.SessionEnrollment, error) {
 	var res model.SessionEnrollment
 
-	now := time.Now()
-
 	stmt := SessionEnrollments.INSERT(
 		SessionEnrollments.SessionID,
 		SessionEnrollments.UserID,
 		SessionEnrollments.Attended,
-		SessionEnrollments.CreatedAt,
-		SessionEnrollments.UpdatedAt,
 	).MODEL(
 		model.SessionEnrollment{
 			SessionID: arg.SessionID,
 			UserID:    arg.UserID,
 			Attended:  arg.Attended,
-			CreatedAt: now,
-			UpdatedAt: now,
 		},
 	).RETURNING(
 		SessionEnrollments.AllColumns,

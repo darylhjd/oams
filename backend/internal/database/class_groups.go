@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
@@ -49,21 +48,15 @@ type CreateClassGroupParams struct {
 func (d *DB) CreateClassGroup(ctx context.Context, arg CreateClassGroupParams) (model.ClassGroup, error) {
 	var res model.ClassGroup
 
-	now := time.Now()
-
 	stmt := ClassGroups.INSERT(
 		ClassGroups.ClassID,
 		ClassGroups.Name,
 		ClassGroups.ClassType,
-		ClassGroups.CreatedAt,
-		ClassGroups.UpdatedAt,
 	).MODEL(
 		model.ClassGroup{
 			ClassID:   arg.ClassID,
 			Name:      arg.Name,
 			ClassType: arg.ClassType,
-			CreatedAt: now,
-			UpdatedAt: now,
 		},
 	).RETURNING(
 		ClassGroups.AllColumns,

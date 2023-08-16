@@ -50,23 +50,17 @@ type CreateClassGroupSessionParams struct {
 func (d *DB) CreateClassGroupSession(ctx context.Context, arg CreateClassGroupSessionParams) (model.ClassGroupSession, error) {
 	var res model.ClassGroupSession
 
-	now := time.Now()
-
 	stmt := ClassGroupSessions.INSERT(
 		ClassGroupSessions.ClassGroupID,
 		ClassGroupSessions.StartTime,
 		ClassGroupSessions.EndTime,
 		ClassGroupSessions.Venue,
-		ClassGroupSessions.CreatedAt,
-		ClassGroupSessions.UpdatedAt,
 	).MODEL(
 		model.ClassGroupSession{
 			ClassGroupID: arg.ClassGroupID,
 			StartTime:    arg.StartTime,
 			EndTime:      arg.EndTime,
 			Venue:        arg.Venue,
-			CreatedAt:    now,
-			UpdatedAt:    now,
 		},
 	).RETURNING(
 		ClassGroupSessions.AllColumns,
