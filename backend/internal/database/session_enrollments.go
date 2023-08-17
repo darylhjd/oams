@@ -136,7 +136,9 @@ func (d *DB) UpsertSessionEnrollments(ctx context.Context, args []UpsertSessionE
 		SessionEnrollments.Attended,
 	).MODELS(
 		inserts,
-	).ON_CONFLICT().ON_CONSTRAINT("ux_session_id_user_id").DO_NOTHING().RETURNING(
+	).ON_CONFLICT().ON_CONSTRAINT(
+		"ux_session_id_user_id",
+	).DO_NOTHING().RETURNING(
 		SessionEnrollments.AllColumns,
 	)
 
