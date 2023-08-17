@@ -23,7 +23,7 @@ func TestSetUpTearDown(t *testing.T) {
 	a.Nil(testDb.Conn.PingContext(ctx))
 
 	// Check that the migration ran correctly.
-	_, err := testDb.ListUsers(context.Background())
+	_, err := testDb.ListUsers(context.Background(), database.ListUsersQueryParameters{})
 	a.Nil(err)
 
 	// Run teardown.
