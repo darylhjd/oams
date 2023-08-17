@@ -42,13 +42,12 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Upsert user into database.
-	err = v.db.Q.UpsertUsers(r.Context(), []database.UpsertUsersParams{
+	_, err = v.db.UpsertUsers(r.Context(), []database.UpsertUserParams{
 		{
 			ID:    authResult.IDToken.Name,
 			Email: authResult.Account.PreferredUsername,
-			Role:  database.UserRoleSTUDENT, // Basic role given to all users on first login.
 		},
-	}).Close()
+	})
 	if err != nil {
 		v.logInternalServerError(r, err)
 		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "could not update login user details"))

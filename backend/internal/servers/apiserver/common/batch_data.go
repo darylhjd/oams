@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 )
 
 // BatchData is a struct containing data for processing a batch of entities.
@@ -12,18 +13,18 @@ type BatchData struct {
 	Filename         string    `json:"filename"`
 	FileCreationDate time.Time `json:"file_creation_date"`
 
-	Class       database.UpsertClassesParams `json:"class"`
-	ClassGroups []ClassGroupData             `json:"class_groups"`
+	Class       database.UpsertClassParams `json:"class"`
+	ClassGroups []ClassGroupData           `json:"class_groups"`
 
 	// classType allows each class group to have access to class type information during processing.
 	// The class type information is discovered only when processing a class' metadata, which only occurs once
 	// and happens before processing for class groups can begin.
-	classType database.ClassType
+	classType model.ClassType
 }
 
 // ClassGroupData is a struct containing data for creating a class group and its associated sessions and students.
 type ClassGroupData struct {
-	database.UpsertClassGroupsParams
-	Sessions []database.UpsertClassGroupSessionsParams `json:"sessions"`
-	Students []database.UpsertUsersParams              `json:"students"`
+	database.UpsertClassGroupParams
+	Sessions []database.UpsertClassGroupSessionParams `json:"sessions"`
+	Students []database.UpsertUserParams              `json:"students"`
 }

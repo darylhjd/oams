@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/go-jet/jet/v2/qrm"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"github.com/darylhjd/oams/backend/internal/env"
@@ -22,13 +22,21 @@ const (
 )
 
 type DB struct {
+	// Conn holds the base connection to the database. Usually, one will not directly use this for interactions with
+	// the database.
 	Conn *sql.DB
-	Q    *Queries
-	C    *pgxpool.Pool
+
+	// queryable is used to support transactions.
+	queryable qrm.Queryable
+}
+
+// WithTx returns a new DB object with following transaction. The new DB should not be used once the transaction has
+// been committed.
+func (d *DB) WithTx(tx *sql.Tx) *DB {
+	return &DB{d.Conn, tx}
 }
 
 func (d *DB) Close() error {
-	d.C.Close()
 	return d.Conn.Close()
 }
 
@@ -46,17 +54,12 @@ func ConnectDB(ctx context.Context, dbName string) (*DB, error) {
 		return nil, fmt.Errorf("%s - error creating connection pool: %w", connectionNamespace, err)
 	}
 
-	pool, err := pgxpool.New(ctx, connString)
-	if err != nil {
-		return nil, fmt.Errorf("%s - error creating connection pool: %w", connectionNamespace, err)
-	}
-
 	// Check that connection is successful.
 	if err = conn.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("%s - could not ping database connection: %w", connectionNamespace, err)
 	}
 
-	return &DB{conn, New(pool), pool}, nil
+	return &DB{conn, conn}, nil
 }
 
 // GetConnectionProperties returns the connection strings required to connect to a database.

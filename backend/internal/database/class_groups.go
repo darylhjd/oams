@@ -20,7 +20,7 @@ func (d *DB) ListClassGroups(ctx context.Context) ([]model.ClassGroup, error) {
 		ClassGroups.Name,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -35,7 +35,7 @@ func (d *DB) GetClassGroup(ctx context.Context, id int64) (model.ClassGroup, err
 		ClassGroups.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -62,7 +62,7 @@ func (d *DB) CreateClassGroup(ctx context.Context, arg CreateClassGroupParams) (
 		ClassGroups.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -108,7 +108,7 @@ func (d *DB) UpdateClassGroup(ctx context.Context, id int64, arg UpdateClassGrou
 		ClassGroups.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -120,11 +120,17 @@ func (d *DB) DeleteClassGroup(ctx context.Context, id int64) (model.ClassGroup, 
 			ClassGroups.ID.EQ(Int64(id)),
 		).RETURNING(ClassGroups.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
-func (d *DB) UpsertClassGroups(ctx context.Context, args []UpsertClassGroupsParams) ([]model.ClassGroup, error) {
+type UpsertClassGroupParams struct {
+	ClassID   int64           `json:"class_id"`
+	Name      string          `json:"name"`
+	ClassType model.ClassType `json:"class_type"`
+}
+
+func (d *DB) UpsertClassGroups(ctx context.Context, args []UpsertClassGroupParams) ([]model.ClassGroup, error) {
 	var res []model.ClassGroup
 
 	inserts := make([]model.ClassGroup, 0, len(args))
@@ -132,7 +138,7 @@ func (d *DB) UpsertClassGroups(ctx context.Context, args []UpsertClassGroupsPara
 		inserts = append(inserts, model.ClassGroup{
 			ClassID:   param.ClassID,
 			Name:      param.Name,
-			ClassType: model.ClassType(param.ClassType),
+			ClassType: param.ClassType,
 		})
 	}
 
@@ -146,6 +152,6 @@ func (d *DB) UpsertClassGroups(ctx context.Context, args []UpsertClassGroupsPara
 		ClassGroups.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

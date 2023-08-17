@@ -17,7 +17,7 @@ func (v *APIServerV1) ping(w http.ResponseWriter, r *http.Request) {
 		Message:  "Pong~ OAMS API Service is running normally!",
 	}
 
-	if err := v.db.C.Ping(r.Context()); err != nil {
+	if err := v.db.Conn.PingContext(r.Context()); err != nil {
 		v.logInternalServerError(r, err)
 		resp = newErrorResponse(http.StatusInternalServerError, "database cannot be contacted")
 	}

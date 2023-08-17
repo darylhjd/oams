@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -167,7 +167,7 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 				body := batchPutRequest{
 					[]common.BatchData{
 						{
-							Class: database.UpsertClassesParams{
+							Class: database.UpsertClassParams{
 								Code:      "SC1015",
 								Year:      2022,
 								Semester:  "2",
@@ -176,72 +176,54 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 							},
 							ClassGroups: []common.ClassGroupData{
 								{
-									database.UpsertClassGroupsParams{
+									database.UpsertClassGroupParams{
 										Name:      "A21",
-										ClassType: database.ClassTypeLAB,
+										ClassType: model.ClassType_Lab,
 									},
-									[]database.UpsertClassGroupSessionsParams{
+									[]database.UpsertClassGroupSessionParams{
 										{
-											StartTime: pgtype.Timestamptz{
-												Time:  now,
-												Valid: true,
-											},
-											EndTime: pgtype.Timestamptz{
-												Time:  now.Add(2 * time.Hour),
-												Valid: true,
-											},
-											Venue: "",
+											StartTime: now,
+											EndTime:   now.Add(2 * time.Hour),
+											Venue:     "",
 										},
 									},
-									[]database.UpsertUsersParams{
-										{"CHUL6789", "CHUA LI TING", "", database.UserRoleSTUDENT},
-										{"YAPW9087", "YAP WEN LI", "", database.UserRoleSTUDENT},
+									[]database.UpsertUserParams{
+										{"CHUL6789", "CHUA LI TING", ""},
+										{"YAPW9087", "YAP WEN LI", ""},
 									},
 								},
 								{
-									database.UpsertClassGroupsParams{
+									database.UpsertClassGroupParams{
 										Name:      "A26",
-										ClassType: database.ClassTypeLAB,
+										ClassType: model.ClassType_Lab,
 									},
-									[]database.UpsertClassGroupSessionsParams{
+									[]database.UpsertClassGroupSessionParams{
 										{
-											StartTime: pgtype.Timestamptz{
-												Time:  now,
-												Valid: true,
-											},
-											EndTime: pgtype.Timestamptz{
-												Time:  now.Add(2 * time.Hour),
-												Valid: true,
-											},
-											Venue: "",
+											StartTime: now,
+											EndTime:   now.Add(2 * time.Hour),
+											Venue:     "",
 										},
 									},
-									[]database.UpsertUsersParams{
-										{"BENST129", "BENJAMIN SANTOS", "", database.UserRoleSTUDENT},
-										{"YAPW9088", "YAP WEI LING", "", database.UserRoleSTUDENT},
+									[]database.UpsertUserParams{
+										{"BENST129", "BENJAMIN SANTOS", ""},
+										{"YAPW9088", "YAP WEI LING", ""},
 									},
 								},
 								{
-									database.UpsertClassGroupsParams{
+									database.UpsertClassGroupParams{
 										Name:      "A32",
-										ClassType: database.ClassTypeLAB,
+										ClassType: model.ClassType_Lab,
 									},
-									[]database.UpsertClassGroupSessionsParams{
+									[]database.UpsertClassGroupSessionParams{
 										{
-											StartTime: pgtype.Timestamptz{
-												Time:  now,
-												Valid: true,
-											},
-											EndTime: pgtype.Timestamptz{
-												Time:  now.Add(2 * time.Hour),
-												Valid: true,
-											},
-											Venue: "",
+											StartTime: now,
+											EndTime:   now.Add(2 * time.Hour),
+											Venue:     "",
 										},
 									},
-									[]database.UpsertUsersParams{
-										{"PATELAR14", "ARJUN PATEL", "", database.UserRoleSTUDENT},
-										{"YAPX9087", "YAP XIN TING", "", database.UserRoleSTUDENT},
+									[]database.UpsertUserParams{
+										{"PATELAR14", "ARJUN PATEL", ""},
+										{"YAPX9087", "YAP XIN TING", ""},
 									},
 								},
 							},

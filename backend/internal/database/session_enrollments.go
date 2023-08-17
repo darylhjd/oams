@@ -20,7 +20,7 @@ func (d *DB) ListSessionEnrollments(ctx context.Context) ([]model.SessionEnrollm
 		SessionEnrollments.UserID,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -35,7 +35,7 @@ func (d *DB) GetSessionEnrollment(ctx context.Context, id int64) (model.SessionE
 		SessionEnrollments.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -62,7 +62,7 @@ func (d *DB) CreateSessionEnrollment(ctx context.Context, arg CreateSessionEnrol
 		SessionEnrollments.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -96,7 +96,7 @@ func (d *DB) UpdateSessionEnrollment(ctx context.Context, id int64, arg UpdateSe
 		SessionEnrollments.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -108,11 +108,17 @@ func (d *DB) DeleteSessionEnrollment(ctx context.Context, id int64) (model.Sessi
 			SessionEnrollments.ID.EQ(Int64(id)),
 		).RETURNING(SessionEnrollments.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
-func (d *DB) UpsertSessionEnrollments(ctx context.Context, args []UpsertSessionEnrollmentsParams) ([]model.SessionEnrollment, error) {
+type UpsertSessionEnrollmentParams struct {
+	SessionID int64  `json:"session_id"`
+	UserID    string `json:"user_id"`
+	Attended  bool   `json:"attended"`
+}
+
+func (d *DB) UpsertSessionEnrollments(ctx context.Context, args []UpsertSessionEnrollmentParams) ([]model.SessionEnrollment, error) {
 	var res []model.SessionEnrollment
 
 	inserts := make([]model.SessionEnrollment, 0, len(args))
@@ -134,6 +140,6 @@ func (d *DB) UpsertSessionEnrollments(ctx context.Context, args []UpsertSessionE
 		SessionEnrollments.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

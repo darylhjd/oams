@@ -21,7 +21,7 @@ func (d *DB) ListClassGroupSessions(ctx context.Context) ([]model.ClassGroupSess
 		ClassGroupSessions.StartTime,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -36,7 +36,7 @@ func (d *DB) GetClassGroupSession(ctx context.Context, id int64) (model.ClassGro
 		ClassGroupSessions.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -66,7 +66,7 @@ func (d *DB) CreateClassGroupSession(ctx context.Context, arg CreateClassGroupSe
 		ClassGroupSessions.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -118,7 +118,7 @@ func (d *DB) UpdateClassGroupSession(ctx context.Context, id int64, arg UpdateCl
 		ClassGroupSessions.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -130,19 +130,26 @@ func (d *DB) DeleteClassGroupSession(ctx context.Context, id int64) (model.Class
 			ClassGroupSessions.ID.EQ(Int64(id)),
 		).RETURNING(ClassGroupSessions.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
-func (d *DB) UpsertClassGroupSessions(ctx context.Context, args []UpsertClassGroupSessionsParams) ([]model.ClassGroupSession, error) {
+type UpsertClassGroupSessionParams struct {
+	ClassGroupID int64     `json:"class_group_id"`
+	StartTime    time.Time `json:"start_time"`
+	EndTime      time.Time `json:"end_time"`
+	Venue        string    `json:"venue"`
+}
+
+func (d *DB) UpsertClassGroupSessions(ctx context.Context, args []UpsertClassGroupSessionParams) ([]model.ClassGroupSession, error) {
 	var res []model.ClassGroupSession
 
 	inserts := make([]model.ClassGroupSession, 0, len(args))
 	for _, param := range args {
 		inserts = append(inserts, model.ClassGroupSession{
 			ClassGroupID: param.ClassGroupID,
-			StartTime:    param.StartTime.Time,
-			EndTime:      param.EndTime.Time,
+			StartTime:    param.StartTime,
+			EndTime:      param.EndTime,
 			Venue:        param.Venue,
 		})
 	}
@@ -165,6 +172,6 @@ func (d *DB) UpsertClassGroupSessions(ctx context.Context, args []UpsertClassGro
 		ClassGroupSessions.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
