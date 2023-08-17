@@ -133,3 +133,38 @@ func (d *DB) DeleteClassGroupSession(ctx context.Context, id int64) (model.Class
 	err := stmt.QueryContext(ctx, d.Conn, &res)
 	return res, err
 }
+
+func (d *DB) UpsertClassGroupSessions(ctx context.Context, args []UpsertClassGroupSessionsParams) ([]model.ClassGroupSession, error) {
+	var res []model.ClassGroupSession
+
+	inserts := make([]model.ClassGroupSession, 0, len(args))
+	for _, param := range args {
+		inserts = append(inserts, model.ClassGroupSession{
+			ClassGroupID: param.ClassGroupID,
+			StartTime:    param.StartTime.Time,
+			EndTime:      param.EndTime.Time,
+			Venue:        param.Venue,
+		})
+	}
+
+	stmt := ClassGroupSessions.INSERT(
+		ClassGroupSessions.ClassGroupID,
+		ClassGroupSessions.StartTime,
+		ClassGroupSessions.EndTime,
+		ClassGroupSessions.Venue,
+	).MODELS(
+		inserts,
+	).ON_CONFLICT().ON_CONSTRAINT(
+		"ux_class_group_id_start_time",
+	).DO_UPDATE(
+		SET(
+			ClassGroupSessions.EndTime.SET(ClassGroupSessions.EXCLUDED.EndTime),
+			ClassGroupSessions.Venue.SET(ClassGroupSessions.EXCLUDED.Venue),
+		),
+	).RETURNING(
+		ClassGroupSessions.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}

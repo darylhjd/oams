@@ -111,3 +111,29 @@ func (d *DB) DeleteSessionEnrollment(ctx context.Context, id int64) (model.Sessi
 	err := stmt.QueryContext(ctx, d.Conn, &res)
 	return res, err
 }
+
+func (d *DB) UpsertSessionEnrollments(ctx context.Context, args []UpsertSessionEnrollmentsParams) ([]model.SessionEnrollment, error) {
+	var res []model.SessionEnrollment
+
+	inserts := make([]model.SessionEnrollment, 0, len(args))
+	for _, param := range args {
+		inserts = append(inserts, model.SessionEnrollment{
+			SessionID: param.SessionID,
+			UserID:    param.UserID,
+			Attended:  param.Attended,
+		})
+	}
+
+	stmt := SessionEnrollments.INSERT(
+		SessionEnrollments.SessionID,
+		SessionEnrollments.UserID,
+		SessionEnrollments.Attended,
+	).MODELS(
+		inserts,
+	).ON_CONFLICT().ON_CONSTRAINT("ux_session_id_user_id").DO_NOTHING().RETURNING(
+		SessionEnrollments.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}

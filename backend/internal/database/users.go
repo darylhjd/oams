@@ -128,6 +128,40 @@ func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
 	return res, err
 }
 
+// UpsertUsers inserts a user into the database. If the user already exists, then only update the name and email.
+func (d *DB) UpsertUsers(ctx context.Context, args []UpsertUsersParams) ([]model.User, error) {
+	var res []model.User
+
+	inserts := make([]model.User, 0, len(args))
+	for _, param := range args {
+		inserts = append(inserts, model.User{
+			ID:    param.ID,
+			Name:  param.Name,
+			Email: param.Email,
+		})
+	}
+
+	stmt := Users.INSERT(
+		Users.ID,
+		Users.Name,
+		Users.Email,
+	).MODELS(
+		inserts,
+	).ON_CONFLICT(
+		Users.ID,
+	).DO_UPDATE(
+		SET(
+			Users.Name.SET(Users.EXCLUDED.Name),
+			Users.Email.SET(Users.EXCLUDED.Email),
+		),
+	).RETURNING(
+		Users.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}
+
 type UpcomingClassGroupSession struct {
 	model.Class
 	model.ClassGroup

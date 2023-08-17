@@ -123,3 +123,29 @@ func (d *DB) DeleteClassGroup(ctx context.Context, id int64) (model.ClassGroup, 
 	err := stmt.QueryContext(ctx, d.Conn, &res)
 	return res, err
 }
+
+func (d *DB) UpsertClassGroups(ctx context.Context, args []UpsertClassGroupsParams) ([]model.ClassGroup, error) {
+	var res []model.ClassGroup
+
+	inserts := make([]model.ClassGroup, 0, len(args))
+	for _, param := range args {
+		inserts = append(inserts, model.ClassGroup{
+			ClassID:   param.ClassID,
+			Name:      param.Name,
+			ClassType: model.ClassType(param.ClassType),
+		})
+	}
+
+	stmt := ClassGroups.INSERT(
+		ClassGroups.ClassID,
+		ClassGroups.Name,
+		ClassGroups.ClassType,
+	).MODELS(
+		inserts,
+	).ON_CONFLICT().DO_NOTHING().RETURNING(
+		ClassGroups.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}

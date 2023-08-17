@@ -142,3 +142,40 @@ func (d *DB) DeleteClass(ctx context.Context, id int64) (model.Class, error) {
 	err := stmt.QueryContext(ctx, d.Conn, &res)
 	return res, err
 }
+
+func (d *DB) UpsertClasses(ctx context.Context, args []UpsertClassesParams) ([]model.Class, error) {
+	var res []model.Class
+
+	inserts := make([]model.Class, 0, len(args))
+	for _, param := range args {
+		inserts = append(inserts, model.Class{
+			Code:      param.Code,
+			Year:      param.Year,
+			Semester:  param.Semester,
+			Programme: param.Programme,
+			Au:        param.Au,
+		})
+	}
+
+	stmt := Classes.INSERT(
+		Classes.Code,
+		Classes.Year,
+		Classes.Semester,
+		Classes.Programme,
+		Classes.Au,
+	).MODELS(
+		inserts,
+	).ON_CONFLICT().ON_CONSTRAINT(
+		"ux_code_year_semester",
+	).DO_UPDATE(
+		SET(
+			Classes.Programme.SET(Classes.EXCLUDED.Programme),
+			Classes.Au.SET(Classes.EXCLUDED.Au),
+		),
+	).RETURNING(
+		Classes.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.Conn, &res)
+	return res, err
+}
