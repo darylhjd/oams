@@ -164,16 +164,15 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		response: newSuccessResponse(),
 	}
 
-	var dbErr error
-	tx, err := v.db.C.Begin(r.Context())
+	tx, err := v.db.Conn.BeginTx(r.Context(), nil)
 	if err != nil {
 		return resp, err
 	}
 	defer func() {
-		_ = tx.Rollback(r.Context())
+		_ = tx.Rollback()
 	}()
 
-	q := v.db.Q.WithTx(tx)
+	txDb := v.db.WithTx(tx)
 
 	// Collect all class params into one slice.
 	// Insert classes.
@@ -186,57 +185,50 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 	// Then insert the students.
 	// Then for each of the sessions, insert an enrollment for each student.
 	var (
-		classesParams     []database.UpsertClassesParams     // Store class params.
-		classGroupsParams []database.UpsertClassGroupsParams // Store class group params.
+		classesParams     []database.UpsertClassParams      // Store class params.
+		classGroupsParams []database.UpsertClassGroupParams // Store class group params.
 
-		// classGroups is a helper for class group session processing. The array is in the same order in which each
+		// upsertClassGroups is a helper for class group session processing. The array is in the same order in which each
 		// class group is created. This allows us to access and set variables within the class group using values
 		// that are available to us only during creation of each class group.
 		classGroups []*common.ClassGroupData
 
-		classGroupSessionsParams []database.UpsertClassGroupSessionsParams // Store class group session params.
+		classGroupSessionsParams []database.UpsertClassGroupSessionParams // Store class group session params.
 
 		// users is a helper for session enrollment processing. This is a two-dimensional array, and is simply
 		// an array of lists of students corresponding to each class group session.
 		users [][]string
 
-		usersParams       []database.UpsertUsersParams              // Store user params.
-		enrollmentsParams []database.UpsertSessionEnrollmentsParams // Store session enrollment params/
+		usersParams       []database.UpsertUserParams              // Store user params.
+		enrollmentsParams []database.UpsertSessionEnrollmentParams // Store session enrollment params/
 	)
 
 	for _, class := range req.Batches {
 		classesParams = append(classesParams, class.Class)
 	}
 
-	q.UpsertClasses(r.Context(), classesParams).QueryRow(func(i int, class database.Class, err error) {
-		if dbErr != nil {
-			return
-		} else if err != nil {
-			dbErr = err
-			return
-		}
+	upsertClasses, err := txDb.UpsertClasses(r.Context(), classesParams)
+	if err != nil {
+		return resp, err
+	}
 
+	for i, class := range upsertClasses {
 		resp.ClassIDs = append(resp.ClassIDs, class.ID)
 
 		classData := &req.Batches[i]
 		for idx := range classData.ClassGroups {
-			classData.ClassGroups[idx].UpsertClassGroupsParams.ClassID = class.ID
-			classGroupsParams = append(classGroupsParams, classData.ClassGroups[idx].UpsertClassGroupsParams)
+			classData.ClassGroups[idx].UpsertClassGroupParams.ClassID = class.ID
+			classGroupsParams = append(classGroupsParams, classData.ClassGroups[idx].UpsertClassGroupParams)
 			classGroups = append(classGroups, &classData.ClassGroups[idx])
 		}
-	})
-	if dbErr != nil {
-		return resp, dbErr
 	}
 
-	q.UpsertClassGroups(r.Context(), classGroupsParams).QueryRow(func(i int, group database.ClassGroup, err error) {
-		if dbErr != nil {
-			return
-		} else if err != nil {
-			dbErr = err
-			return
-		}
+	upsertClassGroups, err := txDb.UpsertClassGroups(r.Context(), classGroupsParams)
+	if err != nil {
+		return resp, err
+	}
 
+	for i, group := range upsertClassGroups {
 		classGroup := classGroups[i]
 		usersParams = append(usersParams, classGroup.Students...)
 		userIds := make([]string, 0, len(classGroup.Students))
@@ -249,37 +241,29 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 			classGroupSessionsParams = append(classGroupSessionsParams, classGroup.Sessions[idx])
 			users = append(users, userIds)
 		}
-	})
-	if dbErr != nil {
-		return resp, dbErr
 	}
 
-	q.UpsertClassGroupSessions(r.Context(), classGroupSessionsParams).QueryRow(func(i int, session database.ClassGroupSession, err error) {
-		if dbErr != nil {
-			return
-		} else if err != nil {
-			dbErr = err
-			return
-		}
+	upsertClassGroupSessions, err := txDb.UpsertClassGroupSessions(r.Context(), classGroupSessionsParams)
+	if err != nil {
+		return resp, err
+	}
 
+	for i, session := range upsertClassGroupSessions {
 		for idx := range users[i] {
-			enrollmentsParams = append(enrollmentsParams, database.UpsertSessionEnrollmentsParams{
+			enrollmentsParams = append(enrollmentsParams, database.UpsertSessionEnrollmentParams{
 				SessionID: session.ID,
 				UserID:    users[i][idx],
 			})
 		}
-	})
-	if dbErr != nil {
-		return resp, dbErr
 	}
 
-	if dbErr = q.UpsertUsers(r.Context(), usersParams).Close(); dbErr != nil {
-		return resp, dbErr
+	if _, err = txDb.UpsertUsers(r.Context(), usersParams); err != nil {
+		return resp, err
 	}
 
-	if dbErr = q.UpsertSessionEnrollments(r.Context(), enrollmentsParams).Close(); dbErr != nil {
-		return resp, dbErr
+	if _, err = txDb.UpsertSessionEnrollments(r.Context(), enrollmentsParams); err != nil {
+		return resp, err
 	}
 
-	return resp, tx.Commit(r.Context())
+	return resp, tx.Commit()
 }

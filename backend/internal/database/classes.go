@@ -21,7 +21,7 @@ func (d *DB) ListClasses(ctx context.Context) ([]model.Class, error) {
 		Classes.Semester,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -36,7 +36,7 @@ func (d *DB) GetClass(ctx context.Context, id int64) (model.Class, error) {
 		Classes.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -69,7 +69,7 @@ func (d *DB) CreateClass(ctx context.Context, arg CreateClassParams) (model.Clas
 		Classes.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -127,7 +127,7 @@ func (d *DB) UpdateClass(ctx context.Context, id int64, arg UpdateClassParams) (
 		Classes.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -139,6 +139,51 @@ func (d *DB) DeleteClass(ctx context.Context, id int64) (model.Class, error) {
 			Classes.ID.EQ(Int64(id)),
 		).RETURNING(Classes.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
+	return res, err
+}
+
+type UpsertClassParams struct {
+	Code      string `json:"code"`
+	Year      int32  `json:"year"`
+	Semester  string `json:"semester"`
+	Programme string `json:"programme"`
+	Au        int16  `json:"au"`
+}
+
+func (d *DB) UpsertClasses(ctx context.Context, args []UpsertClassParams) ([]model.Class, error) {
+	var res []model.Class
+
+	inserts := make([]model.Class, 0, len(args))
+	for _, param := range args {
+		inserts = append(inserts, model.Class{
+			Code:      param.Code,
+			Year:      param.Year,
+			Semester:  param.Semester,
+			Programme: param.Programme,
+			Au:        param.Au,
+		})
+	}
+
+	stmt := Classes.INSERT(
+		Classes.Code,
+		Classes.Year,
+		Classes.Semester,
+		Classes.Programme,
+		Classes.Au,
+	).MODELS(
+		inserts,
+	).ON_CONFLICT().ON_CONSTRAINT(
+		"ux_code_year_semester",
+	).DO_UPDATE(
+		SET(
+			Classes.Programme.SET(Classes.EXCLUDED.Programme),
+			Classes.Au.SET(Classes.EXCLUDED.Au),
+		),
+	).RETURNING(
+		Classes.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

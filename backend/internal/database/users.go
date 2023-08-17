@@ -20,7 +20,7 @@ func (d *DB) ListUsers(ctx context.Context) ([]model.User, error) {
 		Users.ID.ASC(),
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -35,7 +35,7 @@ func (d *DB) GetUser(ctx context.Context, id string) (model.User, error) {
 		Users.ID.EQ(String(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -65,7 +65,7 @@ func (d *DB) CreateUser(ctx context.Context, arg CreateUserParams) (model.User, 
 		Users.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -111,7 +111,7 @@ func (d *DB) UpdateUser(ctx context.Context, id string, arg UpdateUserParams) (m
 		Users.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -124,7 +124,47 @@ func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
 		).
 		RETURNING(Users.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
+	return res, err
+}
+
+type UpsertUserParams struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+// UpsertUsers inserts a user into the database. If the user already exists, then only update the name and email.
+func (d *DB) UpsertUsers(ctx context.Context, args []UpsertUserParams) ([]model.User, error) {
+	var res []model.User
+
+	inserts := make([]model.User, 0, len(args))
+	for _, param := range args {
+		inserts = append(inserts, model.User{
+			ID:    param.ID,
+			Name:  param.Name,
+			Email: param.Email,
+		})
+	}
+
+	stmt := Users.INSERT(
+		Users.ID,
+		Users.Name,
+		Users.Email,
+	).MODELS(
+		inserts,
+	).ON_CONFLICT(
+		Users.ID,
+	).DO_UPDATE(
+		SET(
+			Users.Name.SET(Users.EXCLUDED.Name),
+			Users.Email.SET(Users.EXCLUDED.Email),
+		),
+	).RETURNING(
+		Users.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }
 
@@ -159,6 +199,6 @@ func (d *DB) GetUserUpcomingClassGroupSessions(ctx context.Context, id string) (
 		ClassGroupSessions.EndTime.ASC(),
 	)
 
-	err := stmt.QueryContext(ctx, d.Conn, &res)
+	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

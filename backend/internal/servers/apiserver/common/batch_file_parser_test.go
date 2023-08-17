@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -25,7 +25,7 @@ func TestParseBatchFile(t *testing.T) {
 			&BatchData{
 				"batch_file_well_formatted.xlsx",
 				time.Date(2023, time.June, 15, 13, 1, 0, 0, location),
-				database.UpsertClassesParams{
+				database.UpsertClassParams{
 					Code:      "SC1015",
 					Year:      2022,
 					Semester:  "2",
@@ -34,153 +34,93 @@ func TestParseBatchFile(t *testing.T) {
 				},
 				[]ClassGroupData{
 					{
-						database.UpsertClassGroupsParams{
+						database.UpsertClassGroupParams{
 							Name:      "A21",
-							ClassType: database.ClassTypeTUT,
+							ClassType: model.ClassType_Tut,
 						},
-						[]database.UpsertClassGroupSessionsParams{
+						[]database.UpsertClassGroupSessionParams{
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 16, 8, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 16, 9, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+15 NORTH,NS4-05-93",
+								StartTime: time.Date(2023, time.January, 16, 8, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.January, 16, 9, 20, 0, 0, location),
+								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.April, 10, 8, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.April, 10, 9, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+15 NORTH,NS4-05-93",
+								StartTime: time.Date(2023, time.April, 10, 8, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.April, 10, 9, 20, 0, 0, location),
+								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 17, 9, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 17, 10, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+15 NORTH,NS4-05-93",
+								StartTime: time.Date(2023, time.January, 17, 9, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.January, 17, 10, 20, 0, 0, location),
+								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.April, 11, 9, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.April, 11, 10, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+15 NORTH,NS4-05-93",
+								StartTime: time.Date(2023, time.April, 11, 9, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.April, 11, 10, 20, 0, 0, location),
+								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 						},
-						[]database.UpsertUsersParams{
-							{"CHUL6789", "CHUA LI TING", "", database.UserRoleSTUDENT},
-							{"YAPW9087", "YAP WEN LI", "", database.UserRoleSTUDENT},
+						[]database.UpsertUserParams{
+							{"CHUL6789", "CHUA LI TING", ""},
+							{"YAPW9087", "YAP WEN LI", ""},
 						},
 					},
 					{
-						database.UpsertClassGroupsParams{
+						database.UpsertClassGroupParams{
 							Name:      "A26",
-							ClassType: database.ClassTypeTUT,
+							ClassType: model.ClassType_Tut,
 						},
-						[]database.UpsertClassGroupSessionsParams{
+						[]database.UpsertClassGroupSessionParams{
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 16, 1, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 16, 2, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+19 NORTH,NS4-05-97",
+								StartTime: time.Date(2023, time.January, 16, 1, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.January, 16, 2, 20, 0, 0, location),
+								Venue:     "TR+19 NORTH,NS4-05-97",
 							},
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.April, 10, 1, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.April, 10, 2, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+19 NORTH,NS4-05-97",
+								StartTime: time.Date(2023, time.April, 10, 1, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.April, 10, 2, 20, 0, 0, location),
+								Venue:     "TR+19 NORTH,NS4-05-97",
 							},
 						},
-						[]database.UpsertUsersParams{
-							{"BENST129", "BENJAMIN SANTOS", "", database.UserRoleSTUDENT},
-							{"YAPW9088", "YAP WEI LING", "", database.UserRoleSTUDENT},
+						[]database.UpsertUserParams{
+							{"BENST129", "BENJAMIN SANTOS", ""},
+							{"YAPW9088", "YAP WEI LING", ""},
 						},
 					},
 					{
-						database.UpsertClassGroupsParams{
+						database.UpsertClassGroupParams{
 							Name:      "A32",
-							ClassType: database.ClassTypeTUT,
+							ClassType: model.ClassType_Tut,
 						},
-						[]database.UpsertClassGroupSessionsParams{
+						[]database.UpsertClassGroupSessionParams{
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 17, 11, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 17, 12, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+37 NORTH,NS2-05-30",
+								StartTime: time.Date(2023, time.January, 17, 11, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.January, 17, 12, 20, 0, 0, location),
+								Venue:     "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 31, 11, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.January, 31, 12, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+37 NORTH,NS2-05-30",
+								StartTime: time.Date(2023, time.January, 31, 11, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.January, 31, 12, 20, 0, 0, location),
+								Venue:     "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.March, 21, 11, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.March, 21, 12, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+37 NORTH,NS2-05-30",
+								StartTime: time.Date(2023, time.March, 21, 11, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.March, 21, 12, 20, 0, 0, location),
+								Venue:     "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								StartTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.April, 4, 11, 30, 0, 0, location),
-									Valid: true,
-								},
-								EndTime: pgtype.Timestamptz{
-									Time:  time.Date(2023, time.April, 4, 12, 20, 0, 0, location),
-									Valid: true,
-								},
-								Venue: "TR+37 NORTH,NS2-05-30",
+								StartTime: time.Date(2023, time.April, 4, 11, 30, 0, 0, location),
+								EndTime:   time.Date(2023, time.April, 4, 12, 20, 0, 0, location),
+								Venue:     "TR+37 NORTH,NS2-05-30",
 							},
 						},
-						[]database.UpsertUsersParams{
-							{"PATELAR14", "ARJUN PATEL", "", database.UserRoleSTUDENT},
-							{"YAPX9087", "YAP XIN TING", "", database.UserRoleSTUDENT},
+						[]database.UpsertUserParams{
+							{"PATELAR14", "ARJUN PATEL", ""},
+							{"YAPX9087", "YAP XIN TING", ""},
 						},
 					},
 				},
-				database.ClassTypeTUT,
+				model.ClassType_Tut,
 			},
 		},
 		{

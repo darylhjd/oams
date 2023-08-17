@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/pkg/datetime"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/xuri/excelize/v2"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -157,10 +156,9 @@ func parseClassGroups(batchData *BatchData, rows [][]string) error {
 				return errors.New("unexpected number of columns for student enrollment row")
 			}
 
-			group.Students = append(group.Students, database.UpsertUsersParams{
+			group.Students = append(group.Students, database.UpsertUserParams{
 				ID:   rows[index][studentIdColumn],
 				Name: rows[index][studentNameColumn],
-				Role: database.UserRoleSTUDENT,
 			})
 
 			index += 1
@@ -174,7 +172,7 @@ func parseClassGroups(batchData *BatchData, rows [][]string) error {
 }
 
 // parseClassGroupSessions is a helper function to create the appropriate sessions for a given class group session.
-func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr, venue string) ([]database.UpsertClassGroupSessionsParams, error) {
+func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr, venue string) ([]database.UpsertClassGroupSessionParams, error) {
 	var firstSessionStartDateTime, firstSessionEndDateTime time.Time
 	{
 		var year, week int
@@ -260,19 +258,13 @@ func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr
 	}
 
 	// Create all sessions.
-	sessions := make([]database.UpsertClassGroupSessionsParams, 0, len(weeks))
+	sessions := make([]database.UpsertClassGroupSessionParams, 0, len(weeks))
 	for _, week := range weeks {
 		daysToAdd := 7 * (week - 1) // Since week count starts from 1.
-		sessions = append(sessions, database.UpsertClassGroupSessionsParams{
-			StartTime: pgtype.Timestamptz{
-				Time:  firstSessionStartDateTime.AddDate(0, 0, daysToAdd),
-				Valid: true,
-			},
-			EndTime: pgtype.Timestamptz{
-				Time:  firstSessionEndDateTime.AddDate(0, 0, daysToAdd),
-				Valid: true,
-			},
-			Venue: venue,
+		sessions = append(sessions, database.UpsertClassGroupSessionParams{
+			StartTime: firstSessionStartDateTime.AddDate(0, 0, daysToAdd),
+			EndTime:   firstSessionEndDateTime.AddDate(0, 0, daysToAdd),
+			Venue:     venue,
 		})
 	}
 

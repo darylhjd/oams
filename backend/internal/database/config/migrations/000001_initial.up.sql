@@ -18,7 +18,7 @@ CREATE TABLE users
     id         TEXT PRIMARY KEY, -- VCS Account No.
     name       TEXT        NOT NULL,
     email      TEXT        NOT NULL,
-    role       USER_ROLE   NOT NULL,
+    role       USER_ROLE   NOT NULL DEFAULT 'STUDENT',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
