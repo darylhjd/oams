@@ -30,7 +30,13 @@ type sessionEnrollmentsGetResponse struct {
 }
 
 func (v *APIServerV1) sessionEnrollmentsGet(r *http.Request) apiResponse {
-	enrollments, err := v.db.ListSessionEnrollments(r.Context())
+	var params ListQueryParameters
+	err := decoder.Decode(&params, r.URL.Query())
+	if err != nil {
+		return newErrorResponse(http.StatusBadRequest, "could not process session enrollments get query parameters")
+	}
+
+	enrollments, err := v.db.ListSessionEnrollments(r.Context(), params)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollments get database action")

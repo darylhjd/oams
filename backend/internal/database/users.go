@@ -9,12 +9,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-type ListUsersQueryParameters struct {
-	Limit  *int64 `schema:"limit"`
-	Offset *int64 `schema:"offset"`
-}
-
-func (d *DB) ListUsers(ctx context.Context, params ListUsersQueryParameters) ([]model.User, error) {
+func (d *DB) ListUsers(ctx context.Context, params limitOffsetter) ([]model.User, error) {
 	var res []model.User
 
 	stmt := SELECT(
@@ -25,15 +20,8 @@ func (d *DB) ListUsers(ctx context.Context, params ListUsersQueryParameters) ([]
 		Users.ID.ASC(),
 	)
 
-	if params.Limit != nil && *params.Limit > 0 {
-		stmt = stmt.LIMIT(*params.Limit)
-	} else {
-		stmt = stmt.LIMIT(ListDefaultLimit)
-	}
-
-	if params.Offset != nil && *params.Offset > 0 {
-		stmt = stmt.OFFSET(*params.Offset)
-	}
+	stmt = setLimit(stmt, params)
+	stmt = setOffset(stmt, params)
 
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err

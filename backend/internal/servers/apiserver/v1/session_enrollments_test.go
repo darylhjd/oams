@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strconv"
 	"testing"
 	"time"
 
@@ -118,6 +120,147 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 			actualResp, ok := v1.sessionEnrollmentsGet(req).(sessionEnrollmentsGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
+		})
+	}
+}
+
+func TestAPIServerV1_sessionEnrollmentsGetQueryParams(t *testing.T) {
+	t.Parallel()
+
+	baseRecords := database.ListDefaultLimit
+
+	limitTts := []struct {
+		name            string
+		limit           string
+		expectedRecords int
+	}{
+		{
+			"limit less than total records",
+			strconv.Itoa(baseRecords - 1),
+			baseRecords - 1,
+		},
+		{
+			"limit equal total records",
+			strconv.Itoa(baseRecords),
+			baseRecords,
+		},
+		{
+			"limit more than total records",
+			strconv.Itoa(baseRecords + 1),
+			baseRecords,
+		},
+		{
+			"limit is 0",
+			"0",
+			baseRecords,
+		},
+		{
+			"limit is negative",
+			"-1",
+			baseRecords,
+		},
+		{
+			"limit not specified",
+			"",
+			baseRecords,
+		},
+	}
+
+	for _, tt := range limitTts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			for i := 0; i < baseRecords; i++ {
+				tests.StubSessionEnrollment(t, ctx, v1.db, false)
+			}
+
+			u := url.URL{Path: sessionEnrollmentsUrl}
+			values := u.Query()
+			values.Set("limit", tt.limit)
+			u.RawQuery = values.Encode()
+
+			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
+			resp, ok := v1.sessionEnrollmentsGet(req).(sessionEnrollmentsGetResponse)
+			a.True(ok)
+			a.Equal(tt.expectedRecords, len(resp.SessionEnrollments))
+		})
+	}
+
+	offsetTts := []struct {
+		name      string
+		offset    int
+		wantUsers bool
+	}{
+		{
+			"offset less than total records",
+			baseRecords - 1,
+			true,
+		},
+		{
+			"offset equal total records",
+			baseRecords,
+			false,
+		},
+		{
+			"offset more than total records",
+			baseRecords + 1,
+			false,
+		},
+		{
+			"offset is 0",
+			0,
+			true,
+		},
+		{
+			"offset is negative",
+			-1,
+			true,
+		},
+	}
+
+	for _, tt := range offsetTts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			sessionEnrollments := make([]model.SessionEnrollment, 0, baseRecords)
+			for i := 0; i < baseRecords; i++ {
+				sessionEnrollments = append(sessionEnrollments, tests.StubSessionEnrollment(t, ctx, v1.db, false))
+			}
+
+			u := url.URL{Path: sessionEnrollmentsUrl}
+			values := u.Query()
+			values.Set("offset", strconv.Itoa(tt.offset))
+			u.RawQuery = values.Encode()
+
+			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
+			resp, ok := v1.sessionEnrollmentsGet(req).(sessionEnrollmentsGetResponse)
+			a.True(ok)
+
+			if tt.wantUsers {
+				if tt.offset < 0 {
+					tt.offset = 0
+				}
+
+				a.Equal(sessionEnrollments[tt.offset].ID, resp.SessionEnrollments[0].ID)
+			} else {
+				a.Empty(resp.SessionEnrollments)
+			}
 		})
 	}
 }

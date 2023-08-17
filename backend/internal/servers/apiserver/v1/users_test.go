@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -124,7 +125,7 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
 	t.Parallel()
 
-	baseRecords := 100
+	baseRecords := database.ListDefaultLimit
 
 	limitTts := []struct {
 		name            string
@@ -133,28 +134,33 @@ func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
 	}{
 		{
 			"limit less than total records",
-			"99",
-			99,
+			strconv.Itoa(baseRecords - 1),
+			baseRecords - 1,
 		},
 		{
 			"limit equal total records",
-			"100",
-			100,
+			strconv.Itoa(baseRecords),
+			baseRecords,
 		},
 		{
 			"limit more than total records",
-			"101",
-			100,
+			strconv.Itoa(baseRecords + 1),
+			baseRecords,
 		},
 		{
 			"limit is 0",
 			"0",
-			database.ListDefaultLimit,
+			baseRecords,
 		},
 		{
 			"limit is negative",
 			"-1",
-			database.ListDefaultLimit,
+			baseRecords,
+		},
+		{
+			"limit not specified",
+			"",
+			baseRecords,
 		},
 	}
 
@@ -186,6 +192,7 @@ func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
 		})
 	}
 
+	fmtString := "%03d"
 	offsetTts := []struct {
 		name        string
 		offset      string
@@ -194,25 +201,19 @@ func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
 	}{
 		{
 			"offset less than total records",
-			"50",
+			strconv.Itoa(baseRecords - 1),
 			true,
-			"051",
-		},
-		{
-			"offset one less than total records",
-			"99",
-			true,
-			"100",
+			fmt.Sprintf(fmtString, baseRecords),
 		},
 		{
 			"offset equal total records",
-			"100",
+			strconv.Itoa(baseRecords),
 			false,
 			"",
 		},
 		{
 			"offset more than total records",
-			"101",
+			strconv.Itoa(baseRecords + 1),
 			false,
 			"",
 		},
@@ -220,13 +221,13 @@ func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
 			"offset is 0",
 			"0",
 			true,
-			"001",
+			fmt.Sprintf(fmtString, 1),
 		},
 		{
 			"offset is negative",
 			"-1",
 			true,
-			"001",
+			fmt.Sprintf(fmtString, 1),
 		},
 	}
 
@@ -244,7 +245,7 @@ func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
 
 			for i := 0; i < baseRecords; i++ {
 				// Preserve semantic ordering from numbers.
-				tests.StubUser(t, ctx, v1.db, fmt.Sprintf("%03d", i+1), model.UserRole_Student)
+				tests.StubUser(t, ctx, v1.db, fmt.Sprintf(fmtString, i+1), model.UserRole_Student)
 			}
 
 			u := url.URL{Path: usersUrl}
