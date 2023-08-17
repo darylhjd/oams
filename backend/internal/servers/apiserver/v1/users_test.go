@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -115,6 +117,150 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			actualResp, ok := v1.usersGet(req).(usersGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
+		})
+	}
+}
+
+func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
+	t.Parallel()
+
+	baseRecords := 100
+
+	limitTts := []struct {
+		name            string
+		limit           string
+		expectedRecords int
+	}{
+		{
+			"limit less than total records",
+			"99",
+			99,
+		},
+		{
+			"limit equal total records",
+			"100",
+			100,
+		},
+		{
+			"limit more than total records",
+			"101",
+			100,
+		},
+		{
+			"limit is 0",
+			"0",
+			database.ListDefaultLimit,
+		},
+		{
+			"limit is negative",
+			"-1",
+			database.ListDefaultLimit,
+		},
+	}
+
+	for _, tt := range limitTts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			for i := 0; i < baseRecords; i++ {
+				tests.StubUser(t, ctx, v1.db, uuid.NewString(), model.UserRole_Student)
+			}
+
+			u := url.URL{Path: usersUrl}
+			values := u.Query()
+			values.Set("limit", tt.limit)
+			u.RawQuery = values.Encode()
+
+			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
+			resp, ok := v1.usersGet(req).(usersGetResponse)
+			a.True(ok)
+			a.Equal(tt.expectedRecords, len(resp.Users))
+		})
+	}
+
+	offsetTts := []struct {
+		name        string
+		offset      string
+		wantUsers   bool
+		wantFirstID string
+	}{
+		{
+			"offset less than total records",
+			"50",
+			true,
+			"051",
+		},
+		{
+			"offset one less than total records",
+			"99",
+			true,
+			"100",
+		},
+		{
+			"offset equal total records",
+			"100",
+			false,
+			"",
+		},
+		{
+			"offset more than total records",
+			"101",
+			false,
+			"",
+		},
+		{
+			"offset is 0",
+			"0",
+			true,
+			"001",
+		},
+		{
+			"offset is negative",
+			"-1",
+			true,
+			"001",
+		},
+	}
+
+	for _, tt := range offsetTts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			for i := 0; i < baseRecords; i++ {
+				// Preserve semantic ordering from numbers.
+				tests.StubUser(t, ctx, v1.db, fmt.Sprintf("%03d", i+1), model.UserRole_Student)
+			}
+
+			u := url.URL{Path: usersUrl}
+			values := u.Query()
+			values.Set("offset", tt.offset)
+			u.RawQuery = values.Encode()
+
+			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
+			resp, ok := v1.usersGet(req).(usersGetResponse)
+			a.True(ok)
+
+			if tt.wantUsers {
+				a.Equal(tt.wantFirstID, resp.Users[0].ID)
+			} else {
+				a.Empty(resp.Users)
+			}
 		})
 	}
 }

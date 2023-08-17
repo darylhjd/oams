@@ -30,7 +30,13 @@ type usersGetResponse struct {
 }
 
 func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
-	users, err := v.db.ListUsers(r.Context())
+	var params database.ListUsersQueryParameters
+	err := decoder.Decode(&params, r.URL.Query())
+	if err != nil {
+		return newErrorResponse(http.StatusBadRequest, "could not process users get query parameters")
+	}
+
+	users, err := v.db.ListUsers(r.Context(), params)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process users get database action")

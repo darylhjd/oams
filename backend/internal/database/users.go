@@ -9,7 +9,12 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListUsers(ctx context.Context) ([]model.User, error) {
+type ListUsersQueryParameters struct {
+	Limit  *int64 `schema:"limit"`
+	Offset *int64 `schema:"offset"`
+}
+
+func (d *DB) ListUsers(ctx context.Context, params ListUsersQueryParameters) ([]model.User, error) {
 	var res []model.User
 
 	stmt := SELECT(
@@ -19,6 +24,16 @@ func (d *DB) ListUsers(ctx context.Context) ([]model.User, error) {
 	).ORDER_BY(
 		Users.ID.ASC(),
 	)
+
+	if params.Limit != nil && *params.Limit > 0 {
+		stmt = stmt.LIMIT(*params.Limit)
+	} else {
+		stmt = stmt.LIMIT(ListDefaultLimit)
+	}
+
+	if params.Offset != nil && *params.Offset > 0 {
+		stmt = stmt.OFFSET(*params.Offset)
+	}
 
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err

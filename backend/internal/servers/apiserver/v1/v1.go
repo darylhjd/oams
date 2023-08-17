@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/gorilla/schema"
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -41,6 +42,7 @@ const (
 
 var (
 	internalErrorMsg = fmt.Sprintf("%s - internal server error", namespace)
+	decoder          = schema.NewDecoder()
 )
 
 type APIServerV1 struct {
