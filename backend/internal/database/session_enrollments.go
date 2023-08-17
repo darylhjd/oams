@@ -8,7 +8,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListSessionEnrollments(ctx context.Context) ([]model.SessionEnrollment, error) {
+func (d *DB) ListSessionEnrollments(ctx context.Context, params limitOffsetter) ([]model.SessionEnrollment, error) {
 	var res []model.SessionEnrollment
 
 	stmt := SELECT(
@@ -19,6 +19,9 @@ func (d *DB) ListSessionEnrollments(ctx context.Context) ([]model.SessionEnrollm
 		SessionEnrollments.SessionID,
 		SessionEnrollments.UserID,
 	)
+
+	stmt = setLimit(stmt, params)
+	stmt = setOffset(stmt, params)
 
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err

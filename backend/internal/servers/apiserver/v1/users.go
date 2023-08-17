@@ -30,7 +30,7 @@ type usersGetResponse struct {
 }
 
 func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
-	var params database.ListUsersQueryParameters
+	var params ListQueryParameters
 	err := decoder.Decode(&params, r.URL.Query())
 	if err != nil {
 		return newErrorResponse(http.StatusBadRequest, "could not process users get query parameters")
