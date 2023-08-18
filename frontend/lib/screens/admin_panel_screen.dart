@@ -26,7 +26,7 @@ class _EntityViewerState extends State<_EntityViewer>
     with SingleTickerProviderStateMixin {
   static const List<Widget> _tabs = [
     Tab(text: "Users"),
-    Tab(text: "Placeholder"),
+    Tab(text: "Classes"),
   ];
   late final TabController _controller;
 
@@ -57,7 +57,7 @@ class _EntityViewerState extends State<_EntityViewer>
             controller: _controller,
             children: [
               _UserEntities(),
-              const Placeholder(),
+              _ClassEntities(),
             ],
           ),
         ),
@@ -66,28 +66,87 @@ class _EntityViewerState extends State<_EntityViewer>
   }
 }
 
-// _UsersSource holds the source for the users data.
-class _UsersSource extends AsyncDataTableSource {
-  int _rowCount = 1000;
-  bool _isApproximateCount = true;
+// _DataSource provides default values for a data source.
+abstract class _DataSource extends AsyncDataTableSource {
+  int estimatedRowCount = 1000;
+  bool isApproximateCount = true;
 
   @override
-  Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
-    final response = await APIClient.getUsers(startIndex, limit);
+  int get rowCount => estimatedRowCount;
 
+  @override
+  bool get isRowCountApproximate => isApproximateCount;
+
+  // Call this method after getting the paginated data from your data source
+  // to ensure that the row estimations are up to date.
+  void updateRowEstimationState(int startIndex, int limit, int dataRowCount) {
     // Last index from this request.
-    final cursorEnd = startIndex + response.users.length;
+    final cursorEnd = startIndex + dataRowCount;
 
     // If last index is more than current row count, set it to the last index,
     // else leave it.
-    _rowCount = cursorEnd > _rowCount ? cursorEnd : _rowCount;
+    estimatedRowCount =
+        cursorEnd > estimatedRowCount ? cursorEnd : estimatedRowCount;
 
     // If the length of the users list is less than the limit, then we know
     // we have reached the max number.
-    if (response.users.length < limit) {
-      _rowCount = cursorEnd;
-      _isApproximateCount = false;
+    if (dataRowCount < limit) {
+      estimatedRowCount = cursorEnd;
+      isApproximateCount = false;
     }
+  }
+}
+
+// This provides a base implementation for the paginated data table.
+abstract class _DataTableState extends State
+    with AutomaticKeepAliveClientMixin {
+  static final TableBorder tableBorder = TableBorder(
+    top: const BorderSide(color: Colors.black),
+    bottom: BorderSide(color: Colors.grey[300]!),
+    left: BorderSide(color: Colors.grey[300]!),
+    right: BorderSide(color: Colors.grey[300]!),
+    verticalInside: BorderSide(color: Colors.grey[300]!),
+    horizontalInside: const BorderSide(color: Colors.grey, width: 1),
+  );
+  static const defaultNumRowsPerPage = 50;
+
+  final _DataSource source;
+
+  _DataTableState(this.source);
+
+  Widget withDefaultAsyncPaginatedTable({
+    required List<DataColumn2> cols,
+    required int rowsPerPage,
+    required void Function(int?) onRowsPerPageChanged,
+  }) {
+    return AsyncPaginatedDataTable2(
+      columnSpacing: 10,
+      minWidth: 800,
+      border: tableBorder,
+      renderEmptyRowsInTheEnd: false,
+      availableRowsPerPage: const [
+        defaultNumRowsPerPage ~/ 5,
+        defaultNumRowsPerPage,
+        defaultNumRowsPerPage * 2
+      ],
+      fixedLeftColumns: 1,
+      rowsPerPage: rowsPerPage,
+      onRowsPerPageChanged: onRowsPerPageChanged,
+      columns: cols,
+      source: source,
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+// Holds the source for the users data.
+class _UsersSource extends _DataSource {
+  @override
+  Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
+    final response = await APIClient.getUsers(limit, startIndex);
+    updateRowEstimationState(startIndex, limit, response.users.length);
 
     return AsyncRowsResponse(
       response.users.length,
@@ -112,36 +171,20 @@ class _UsersSource extends AsyncDataTableSource {
           .toList(),
     );
   }
-
-  @override
-  int get rowCount => _rowCount;
-
-  @override
-  bool get isRowCountApproximate => _isApproximateCount;
 }
 
-// _UserEntities provides the paginated table to show the users data.
+// Provides the paginated table to show the users data.
 class _UserEntities extends StatefulWidget {
   @override
   _UserEntitiesState createState() => _UserEntitiesState();
 }
 
 // This holds the state for the _UserEntities widget.
-class _UserEntitiesState extends State<_UserEntities>
-    with AutomaticKeepAliveClientMixin {
-  static final TableBorder _border = TableBorder(
-    top: const BorderSide(color: Colors.black),
-    bottom: BorderSide(color: Colors.grey[300]!),
-    left: BorderSide(color: Colors.grey[300]!),
-    right: BorderSide(color: Colors.grey[300]!),
-    verticalInside: BorderSide(color: Colors.grey[300]!),
-    horizontalInside: const BorderSide(color: Colors.grey, width: 1),
-  );
-  static const defaultRowsPerPage = 50;
-
-  final _UsersSource _source = _UsersSource();
+class _UserEntitiesState extends _DataTableState {
   late final List<DataColumn2> _columns;
-  int _rowsPerPage = defaultRowsPerPage;
+  int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
+
+  _UserEntitiesState() : super(_UsersSource());
 
   @override
   void initState() {
@@ -164,22 +207,89 @@ class _UserEntitiesState extends State<_UserEntities>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return AsyncPaginatedDataTable2(
-      columnSpacing: 10,
-      minWidth: 800,
-      border: _border,
-      renderEmptyRowsInTheEnd: false,
+    return withDefaultAsyncPaginatedTable(
+      cols: _columns,
       rowsPerPage: _rowsPerPage,
-      availableRowsPerPage: const [10, defaultRowsPerPage, 100],
       onRowsPerPageChanged: (value) {
         _rowsPerPage = value!;
       },
-      fixedLeftColumns: 1,
-      columns: _columns,
-      source: _source,
     );
+  }
+}
+
+// Holds the source for the classes data.
+class _ClassesSource extends _DataSource {
+  @override
+  Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
+    final response = await APIClient.getClasses(limit, startIndex);
+    updateRowEstimationState(startIndex, limit, response.classes.length);
+
+    return AsyncRowsResponse(
+        response.classes.length,
+        response.classes
+            .map((c) => DataRow2(
+                  cells: [
+                    DataCell(
+                      Text(
+                        c.id.toString(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataCell(Text(c.code)),
+                    DataCell(Text(c.year.toString())),
+                    DataCell(Text(c.semester)),
+                    DataCell(Text(c.programme)),
+                    DataCell(Text(c.au.toString())),
+                    DataCell(Text(c.createdAt.toString())),
+                    DataCell(Text(c.updatedAt.toString())),
+                  ],
+                ))
+            .toList());
+  }
+}
+
+// Provides the paginated table to show the classes data.
+class _ClassEntities extends StatefulWidget {
+  @override
+  _ClassEntitiesState createState() => _ClassEntitiesState();
+}
+
+// This holds the state for the _ClassEntities widget.
+class _ClassEntitiesState extends _DataTableState {
+  late final List<DataColumn2> _columns;
+  int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
+
+  _ClassEntitiesState() : super(_ClassesSource());
+
+  @override
+  void initState() {
+    super.initState();
+    _columns = [
+      "ID",
+      "Code",
+      "Year",
+      "Semester",
+      "Programme",
+      "AU",
+      "Created At",
+      "Updated At",
+    ]
+        .map((s) => DataColumn2(
+              label:
+                  Text(s, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ))
+        .toList();
   }
 
   @override
-  bool get wantKeepAlive => true;
+  Widget build(BuildContext context) {
+    super.build(context);
+    return withDefaultAsyncPaginatedTable(
+      cols: _columns,
+      rowsPerPage: _rowsPerPage,
+      onRowsPerPageChanged: (value) {
+        _rowsPerPage = value!;
+      },
+    );
+  }
 }
