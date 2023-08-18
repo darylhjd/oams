@@ -30,12 +30,16 @@ class User {
   final String name;
   final String email;
   final UserRole role;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   User.fromJson(Map<String, dynamic> json)
       : id = json["id"],
         name = json["name"],
         email = json["email"],
-        role = UserRole.fromValue(json["role"]);
+        role = UserRole.fromValue(json["role"]),
+        createdAt = DateTime.parse(json["created_at"]).toLocal(),
+        updatedAt = DateTime.parse(json["updated_at"]).toLocal();
 }
 
 enum UserRole {
@@ -100,4 +104,35 @@ class GetUsersResponse {
       : result = json["result"],
         users = List<User>.from(
             (json["users"] as List).map((i) => User.fromJson(i)));
+}
+
+class Class {
+  final int id;
+  final String code;
+  final int year;
+  final String semester;
+  final String programme;
+  final int au;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  Class.fromJson(Map<String, dynamic> json)
+      : id = json["id"],
+        code = json["code"],
+        year = json["year"],
+        semester = json["semester"],
+        programme = json["programme"],
+        au = json["au"],
+        createdAt = DateTime.parse(json["created_at"]).toLocal(),
+        updatedAt = DateTime.parse(json["updated_at"]).toLocal();
+}
+
+class GetClassesResponse {
+  final bool result;
+  final List<Class> classes;
+
+  GetClassesResponse.fromJson(Map<String, dynamic> json)
+      : result = json["result"],
+        classes = List<Class>.from(
+            (json["classes"] as List).map((i) => Class.fromJson(i)));
 }

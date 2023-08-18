@@ -16,9 +16,12 @@ class APIClient {
 
   static const String _loginPath = "api/v1/login";
   static const String _logoutPath = "api/v1/logout";
-  static const String _userMePath = "api/v1/users/me";
-  static const String _userPath = "api/v1/users/";
+
   static const String _usersPath = "api/v1/users";
+  static const String _userPath = "api/v1/users/";
+  static const String _userMePath = "api/v1/users/me";
+
+  static const String _classesPath = "api/v1/classes";
 
   // Get login URL to redirect user to SSO login site.
   static Future<String> getLoginURL(String returnTo) async {
@@ -34,12 +37,6 @@ class APIClient {
     );
 
     final response = await _client.getUri(uri);
-
-    if (response.statusCode != HttpStatus.ok) {
-      return Future.error(
-          HttpException(ErrorResponse.fromJson(response.data).message));
-    }
-
     return LoginResponse.fromJson(response.data).redirectUrl;
   }
 
@@ -61,12 +58,6 @@ class APIClient {
     );
 
     final response = await _client.getUri(uri);
-
-    if (response.statusCode != HttpStatus.ok) {
-      return Future.error(
-          HttpException(ErrorResponse.fromJson(response.data).message));
-    }
-
     return UserMeResponse.fromJson(response.data);
   }
 
@@ -77,26 +68,30 @@ class APIClient {
     );
 
     final response = await _client.getUri(uri);
-
-    if (response.statusCode != HttpStatus.ok) {
-      return Future.error(
-          HttpException(ErrorResponse.fromJson(response.data).message));
-    }
-
     return GetUserResponse.fromJson(response.data);
   }
 
   // Get users.
-  static Future<GetUsersResponse> getUsers() async {
-    final uri = _apiUri.replace(path: _usersPath);
+  static Future<GetUsersResponse> getUsers(int limit, int offset) async {
+    final uri = _apiUri.replace(
+      path: _usersPath,
+      queryParameters: {
+        "limit": limit.toString(),
+        "offset": offset.toString(),
+      },
+    );
 
     final response = await _client.getUri(uri);
-
-    if (response.statusCode != HttpStatus.ok) {
-      return Future.error(
-          HttpException(ErrorResponse.fromJson(response.data).message));
-    }
-
     return GetUsersResponse.fromJson(response.data);
+  }
+
+  static Future<GetClassesResponse> getClasses(int limit, int offset) async {
+    final uri = _apiUri.replace(path: _classesPath, queryParameters: {
+      "limit": limit.toString(),
+      "offset": offset.toString(),
+    });
+
+    final response = await _client.getUri(uri);
+    return GetClassesResponse.fromJson(response.data);
   }
 }

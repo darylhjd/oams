@@ -2,7 +2,7 @@
 # Context: Project root.
 
 # Stage 1: Build flutter web.
-FROM ghcr.io/cirruslabs/flutter:3.10.6 as flutter-builder
+FROM ghcr.io/cirruslabs/flutter:3.13.0 as flutter-builder
 
 WORKDIR /app
 COPY ./frontend ./
