@@ -7,6 +7,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
 )
 
 func (v *APIServerV1) sessionEnrollments(w http.ResponseWriter, r *http.Request) {
@@ -30,10 +31,9 @@ type sessionEnrollmentsGetResponse struct {
 }
 
 func (v *APIServerV1) sessionEnrollmentsGet(r *http.Request) apiResponse {
-	var params ListQueryParameters
-	err := decoder.Decode(&params, r.URL.Query())
+	params, err := v.decodeListQueryParameters(r.URL.Query(), table.SessionEnrollments.AllColumns)
 	if err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not process session enrollments get query parameters")
+		return newErrorResponse(http.StatusBadRequest, err.Error())
 	}
 
 	enrollments, err := v.db.ListSessionEnrollments(r.Context(), params)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
 )
 
 func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
@@ -30,10 +31,9 @@ type usersGetResponse struct {
 }
 
 func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
-	var params ListQueryParameters
-	err := decoder.Decode(&params, r.URL.Query())
+	params, err := v.decodeListQueryParameters(r.URL.Query(), table.Users.AllColumns)
 	if err != nil {
-		return newErrorResponse(http.StatusBadRequest, "could not process users get query parameters")
+		return newErrorResponse(http.StatusBadRequest, err.Error())
 	}
 
 	users, err := v.db.ListUsers(r.Context(), params)

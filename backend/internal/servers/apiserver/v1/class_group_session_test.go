@@ -14,6 +14,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -163,10 +164,10 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			"request with field changes",
 			classGroupSessionPatchRequest{
 				database.UpdateClassGroupSessionParams{
-					ClassGroupID: ptr(int64(1)),
-					StartTime:    ptr(int64(99999999999)),
-					EndTime:      ptr(int64(9999999999999)),
-					Venue:        ptr("NEW_VENUE+99"),
+					ClassGroupID: to.Ptr(int64(1)),
+					StartTime:    to.Ptr(int64(99999999999)),
+					EndTime:      to.Ptr(int64(9999999999999)),
+					Venue:        to.Ptr("NEW_VENUE+99"),
 				},
 			},
 			true,
@@ -226,8 +227,8 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			"request with update conflict",
 			classGroupSessionPatchRequest{
 				database.UpdateClassGroupSessionParams{
-					StartTime: ptr(int64(2)),
-					EndTime:   ptr(int64(3)),
+					StartTime: to.Ptr(int64(2)),
+					EndTime:   to.Ptr(int64(3)),
 				},
 			},
 			true,
@@ -292,7 +293,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				)
 
 				sessionId = createdSession.ID
-				tt.withRequest.ClassGroupSession.ClassGroupID = ptr(createdSession.ClassGroupID + 1)
+				tt.withRequest.ClassGroupSession.ClassGroupID = to.Ptr(createdSession.ClassGroupID + 1)
 			case tt.withExistingClassGroupSession:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db,

@@ -14,6 +14,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -280,9 +281,9 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 			"request with field changes",
 			userPatchRequest{
 				database.UpdateUserParams{
-					Name:  ptr("NEW NAME"),
-					Email: ptr("NEW EMAIL"),
-					Role:  ptr(model.UserRole_Student),
+					Name:  to.Ptr("NEW NAME"),
+					Email: to.Ptr("NEW EMAIL"),
+					Role:  to.Ptr(model.UserRole_Student),
 				},
 			},
 			true,

@@ -14,6 +14,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -161,8 +162,8 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			"request with field changes",
 			classGroupPatchRequest{
 				database.UpdateClassGroupParams{
-					Name:      ptr("NEW21"),
-					ClassType: ptr(model.ClassType_Lab),
+					Name:      to.Ptr("NEW21"),
+					ClassType: to.Ptr(model.ClassType_Lab),
 				},
 			},
 			true,
@@ -215,8 +216,8 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			"request with update conflict",
 			classGroupPatchRequest{
 				database.UpdateClassGroupParams{
-					Name:      ptr("EXISTING32"),
-					ClassType: ptr(model.ClassType_Lab),
+					Name:      to.Ptr("EXISTING32"),
+					ClassType: to.Ptr(model.ClassType_Lab),
 				},
 			},
 			true,
@@ -274,7 +275,7 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 				)
 
 				groupId = createdClassGroup.ID
-				tt.withRequest.ClassGroup.ClassID = ptr(createdClassGroup.ClassID + 1)
+				tt.withRequest.ClassGroup.ClassID = to.Ptr(createdClassGroup.ClassID + 1)
 			case tt.withExistingClassGroup:
 				createdClassGroup := tests.StubClassGroup(
 					t, ctx, v1.db,

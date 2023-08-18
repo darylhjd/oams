@@ -42,7 +42,6 @@ const (
 
 var (
 	internalErrorMsg = fmt.Sprintf("%s - internal server error", namespace)
-	decoder          = schema.NewDecoder()
 )
 
 type APIServerV1 struct {
@@ -50,12 +49,14 @@ type APIServerV1 struct {
 	db  *database.DB
 	mux *http.ServeMux
 
+	decoder *schema.Decoder
+
 	azure oauth2.Authenticator
 }
 
 // New creates a new APIServerV1. This is a sub-router and should not be used as a base router.
 func New(l *zap.Logger, db *database.DB, azureClient oauth2.Authenticator) *APIServerV1 {
-	server := APIServerV1{l, db, http.NewServeMux(), azureClient}
+	server := APIServerV1{l, db, http.NewServeMux(), schema.NewDecoder(), azureClient}
 	server.registerHandlers()
 
 	return &server

@@ -14,8 +14,3 @@ func newTestAPIServerV1(t *testing.T, dbId string) *APIServerV1 {
 	testDb := tests.SetUp(t, dbId)
 	return New(zap.NewNop(), testDb, tests.NewMockAzureAuthenticator())
 }
-
-// ptr is a helper function to return a pointer to a type.
-func ptr[T any](t T) *T {
-	return &t
-}

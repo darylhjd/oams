@@ -8,7 +8,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListSessionEnrollments(ctx context.Context, params limitOffsetter) ([]model.SessionEnrollment, error) {
+func (d *DB) ListSessionEnrollments(ctx context.Context, params listParams) ([]model.SessionEnrollment, error) {
 	var res []model.SessionEnrollment
 
 	stmt := SELECT(
@@ -20,6 +20,7 @@ func (d *DB) ListSessionEnrollments(ctx context.Context, params limitOffsetter) 
 		SessionEnrollments.UserID,
 	)
 
+	stmt = setSorts(stmt, params)
 	stmt = setLimit(stmt, params)
 	stmt = setOffset(stmt, params)
 

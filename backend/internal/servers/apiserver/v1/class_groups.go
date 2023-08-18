@@ -7,6 +7,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
 )
 
 func (v *APIServerV1) classGroups(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,12 @@ type classGroupsGetResponse struct {
 }
 
 func (v *APIServerV1) classGroupsGet(r *http.Request) apiResponse {
-	groups, err := v.db.ListClassGroups(r.Context())
+	params, err := v.decodeListQueryParameters(r.URL.Query(), table.ClassGroups.AllColumns)
+	if err != nil {
+		return newErrorResponse(http.StatusBadRequest, err.Error())
+	}
+
+	groups, err := v.db.ListClassGroups(r.Context(), params)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class groups get database action")

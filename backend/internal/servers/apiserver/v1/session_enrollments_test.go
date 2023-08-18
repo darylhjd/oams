@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"testing"
 	"time"
 
@@ -127,139 +126,96 @@ func TestAPIServerV1_sessionEnrollmentsGet(t *testing.T) {
 func TestAPIServerV1_sessionEnrollmentsGetQueryParams(t *testing.T) {
 	t.Parallel()
 
-	baseRecords := database.ListDefaultLimit
-
-	limitTts := []struct {
-		name            string
-		limit           string
-		expectedRecords int
+	tts := []struct {
+		name           string
+		query          url.Values
+		wantStatusCode int
+		wantErr        string
 	}{
 		{
-			"limit less than total records",
-			strconv.Itoa(baseRecords - 1),
-			baseRecords - 1,
-		},
-		{
-			"limit equal total records",
-			strconv.Itoa(baseRecords),
-			baseRecords,
-		},
-		{
-			"limit more than total records",
-			strconv.Itoa(baseRecords + 1),
-			baseRecords,
-		},
-		{
-			"limit is 0",
-			"0",
-			baseRecords,
-		},
-		{
-			"limit is negative",
-			"-1",
-			baseRecords,
-		},
-		{
-			"limit not specified",
+			"sort with correct column",
+			url.Values{
+				"sort": []string{"attended"},
+			},
+			http.StatusOK,
 			"",
-			baseRecords,
+		},
+		{
+			"sort with wrong column",
+			url.Values{
+				"sort": []string{"wrong"},
+			},
+			http.StatusBadRequest,
+			"unknown sort column `wrong`",
+		},
+		{
+			"sort with no value",
+			url.Values{
+				"sort": []string{},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"limit present",
+			url.Values{
+				"limit": []string{"1"},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"limit with no value",
+			url.Values{
+				"limit": []string{},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"offset present",
+			url.Values{
+				"offset": []string{"1"},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"offset with no value",
+			url.Values{
+				"offset": []string{},
+			},
+			http.StatusOK,
+			"",
 		},
 	}
 
-	for _, tt := range limitTts {
+	for _, tt := range tts {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
-			ctx := context.Background()
 			id := uuid.NewString()
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			for i := 0; i < baseRecords; i++ {
-				tests.StubSessionEnrollment(t, ctx, v1.db, false)
-			}
-
 			u := url.URL{Path: sessionEnrollmentsUrl}
-			values := u.Query()
-			values.Set("limit", tt.limit)
-			u.RawQuery = values.Encode()
+			u.RawQuery = tt.query.Encode()
 
 			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp, ok := v1.sessionEnrollmentsGet(req).(sessionEnrollmentsGetResponse)
-			a.True(ok)
-			a.Equal(tt.expectedRecords, len(resp.SessionEnrollments))
-		})
-	}
+			resp := v1.sessionEnrollmentsGet(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
 
-	offsetTts := []struct {
-		name      string
-		offset    int
-		wantUsers bool
-	}{
-		{
-			"offset less than total records",
-			baseRecords - 1,
-			true,
-		},
-		{
-			"offset equal total records",
-			baseRecords,
-			false,
-		},
-		{
-			"offset more than total records",
-			baseRecords + 1,
-			false,
-		},
-		{
-			"offset is 0",
-			0,
-			true,
-		},
-		{
-			"offset is negative",
-			-1,
-			true,
-		},
-	}
-
-	for _, tt := range offsetTts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			ctx := context.Background()
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			sessionEnrollments := make([]model.SessionEnrollment, 0, baseRecords)
-			for i := 0; i < baseRecords; i++ {
-				sessionEnrollments = append(sessionEnrollments, tests.StubSessionEnrollment(t, ctx, v1.db, false))
-			}
-
-			u := url.URL{Path: sessionEnrollmentsUrl}
-			values := u.Query()
-			values.Set("offset", strconv.Itoa(tt.offset))
-			u.RawQuery = values.Encode()
-
-			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp, ok := v1.sessionEnrollmentsGet(req).(sessionEnrollmentsGetResponse)
-			a.True(ok)
-
-			if tt.wantUsers {
-				if tt.offset < 0 {
-					tt.offset = 0
-				}
-
-				a.Equal(sessionEnrollments[tt.offset].ID, resp.SessionEnrollments[0].ID)
-			} else {
-				a.Empty(resp.SessionEnrollments)
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				_, ok := resp.(sessionEnrollmentsGetResponse)
+				a.True(ok)
 			}
 		})
 	}

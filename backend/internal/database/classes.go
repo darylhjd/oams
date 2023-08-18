@@ -8,7 +8,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListClasses(ctx context.Context) ([]model.Class, error) {
+func (d *DB) ListClasses(ctx context.Context, params listParams) ([]model.Class, error) {
 	var res []model.Class
 
 	stmt := SELECT(
@@ -20,6 +20,10 @@ func (d *DB) ListClasses(ctx context.Context) ([]model.Class, error) {
 		Classes.Year,
 		Classes.Semester,
 	)
+
+	stmt = setSorts(stmt, params)
+	stmt = setLimit(stmt, params)
+	stmt = setOffset(stmt, params)
 
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
