@@ -9,7 +9,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListClassGroupSessions(ctx context.Context) ([]model.ClassGroupSession, error) {
+func (d *DB) ListClassGroupSessions(ctx context.Context, params listParams) ([]model.ClassGroupSession, error) {
 	var res []model.ClassGroupSession
 
 	stmt := SELECT(
@@ -20,6 +20,10 @@ func (d *DB) ListClassGroupSessions(ctx context.Context) ([]model.ClassGroupSess
 		ClassGroupSessions.ClassGroupID,
 		ClassGroupSessions.StartTime,
 	)
+
+	stmt = setSorts(stmt, params)
+	stmt = setLimit(stmt, params)
+	stmt = setOffset(stmt, params)
 
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err

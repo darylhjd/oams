@@ -9,7 +9,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListUsers(ctx context.Context, params limitOffsetter) ([]model.User, error) {
+func (d *DB) ListUsers(ctx context.Context, params listParams) ([]model.User, error) {
 	var res []model.User
 
 	stmt := SELECT(
@@ -20,6 +20,7 @@ func (d *DB) ListUsers(ctx context.Context, params limitOffsetter) ([]model.User
 		Users.ID.ASC(),
 	)
 
+	stmt = setSorts(stmt, params)
 	stmt = setLimit(stmt, params)
 	stmt = setOffset(stmt, params)
 

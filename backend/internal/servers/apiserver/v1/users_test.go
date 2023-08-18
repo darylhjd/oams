@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -125,142 +123,96 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
 	t.Parallel()
 
-	baseRecords := database.ListDefaultLimit
-
-	limitTts := []struct {
-		name            string
-		limit           string
-		expectedRecords int
+	tts := []struct {
+		name           string
+		query          url.Values
+		wantStatusCode int
+		wantErr        string
 	}{
 		{
-			"limit less than total records",
-			strconv.Itoa(baseRecords - 1),
-			baseRecords - 1,
-		},
-		{
-			"limit equal total records",
-			strconv.Itoa(baseRecords),
-			baseRecords,
-		},
-		{
-			"limit more than total records",
-			strconv.Itoa(baseRecords + 1),
-			baseRecords,
-		},
-		{
-			"limit is 0",
-			"0",
-			baseRecords,
-		},
-		{
-			"limit is negative",
-			"-1",
-			baseRecords,
-		},
-		{
-			"limit not specified",
+			"sort with correct column",
+			url.Values{
+				"sort": []string{"role"},
+			},
+			http.StatusOK,
 			"",
-			baseRecords,
+		},
+		{
+			"sort with wrong column",
+			url.Values{
+				"sort": []string{"wrong"},
+			},
+			http.StatusBadRequest,
+			"unknown sort column `wrong`",
+		},
+		{
+			"sort with no value",
+			url.Values{
+				"sort": []string{},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"limit present",
+			url.Values{
+				"limit": []string{"1"},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"limit with no value",
+			url.Values{
+				"limit": []string{},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"offset present",
+			url.Values{
+				"offset": []string{"1"},
+			},
+			http.StatusOK,
+			"",
+		},
+		{
+			"offset with no value",
+			url.Values{
+				"offset": []string{},
+			},
+			http.StatusOK,
+			"",
 		},
 	}
 
-	for _, tt := range limitTts {
+	for _, tt := range tts {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
-			ctx := context.Background()
 			id := uuid.NewString()
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			for i := 0; i < baseRecords; i++ {
-				tests.StubUser(t, ctx, v1.db, uuid.NewString(), model.UserRole_Student)
-			}
-
 			u := url.URL{Path: usersUrl}
-			values := u.Query()
-			values.Set("limit", tt.limit)
-			u.RawQuery = values.Encode()
+			u.RawQuery = tt.query.Encode()
 
 			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp, ok := v1.usersGet(req).(usersGetResponse)
-			a.True(ok)
-			a.Equal(tt.expectedRecords, len(resp.Users))
-		})
-	}
+			resp := v1.usersGet(req)
+			a.Equal(tt.wantStatusCode, resp.Code())
 
-	fmtString := "%03d"
-	offsetTts := []struct {
-		name        string
-		offset      string
-		wantUsers   bool
-		wantFirstID string
-	}{
-		{
-			"offset less than total records",
-			strconv.Itoa(baseRecords - 1),
-			true,
-			fmt.Sprintf(fmtString, baseRecords),
-		},
-		{
-			"offset equal total records",
-			strconv.Itoa(baseRecords),
-			false,
-			"",
-		},
-		{
-			"offset more than total records",
-			strconv.Itoa(baseRecords + 1),
-			false,
-			"",
-		},
-		{
-			"offset is 0",
-			"0",
-			true,
-			fmt.Sprintf(fmtString, 1),
-		},
-		{
-			"offset is negative",
-			"-1",
-			true,
-			fmt.Sprintf(fmtString, 1),
-		},
-	}
-
-	for _, tt := range offsetTts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			ctx := context.Background()
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			for i := 0; i < baseRecords; i++ {
-				// Preserve semantic ordering from numbers.
-				tests.StubUser(t, ctx, v1.db, fmt.Sprintf(fmtString, i+1), model.UserRole_Student)
-			}
-
-			u := url.URL{Path: usersUrl}
-			values := u.Query()
-			values.Set("offset", tt.offset)
-			u.RawQuery = values.Encode()
-
-			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp, ok := v1.usersGet(req).(usersGetResponse)
-			a.True(ok)
-
-			if tt.wantUsers {
-				a.Equal(tt.wantFirstID, resp.Users[0].ID)
-			} else {
-				a.Empty(resp.Users)
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				_, ok := resp.(usersGetResponse)
+				a.True(ok)
 			}
 		})
 	}

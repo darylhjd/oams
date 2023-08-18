@@ -7,6 +7,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
 )
 
 func (v *APIServerV1) classes(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,12 @@ type classesGetResponse struct {
 }
 
 func (v *APIServerV1) classesGet(r *http.Request) apiResponse {
-	classes, err := v.db.ListClasses(r.Context())
+	params, err := v.decodeListQueryParameters(r.URL.Query(), table.Classes.AllColumns)
+	if err != nil {
+		return newErrorResponse(http.StatusBadRequest, err.Error())
+	}
+
+	classes, err := v.db.ListClasses(r.Context(), params)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process classes get database action")

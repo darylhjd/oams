@@ -12,6 +12,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -156,7 +157,7 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 			"request with field changes",
 			sessionEnrollmentPatchRequest{
 				database.UpdateSessionEnrollmentParams{
-					Attended: ptr(true),
+					Attended: to.Ptr(true),
 				},
 			},
 			true,

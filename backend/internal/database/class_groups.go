@@ -8,7 +8,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListClassGroups(ctx context.Context) ([]model.ClassGroup, error) {
+func (d *DB) ListClassGroups(ctx context.Context, params listParams) ([]model.ClassGroup, error) {
 	var res []model.ClassGroup
 
 	stmt := SELECT(
@@ -19,6 +19,10 @@ func (d *DB) ListClassGroups(ctx context.Context) ([]model.ClassGroup, error) {
 		ClassGroups.ClassID,
 		ClassGroups.Name,
 	)
+
+	stmt = setSorts(stmt, params)
+	stmt = setLimit(stmt, params)
+	stmt = setOffset(stmt, params)
 
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err

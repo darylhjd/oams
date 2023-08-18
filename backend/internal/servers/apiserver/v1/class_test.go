@@ -13,6 +13,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -160,11 +161,11 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			"request with field changes",
 			classPatchRequest{
 				database.UpdateClassParams{
-					Code:      ptr("CZ9999"),
-					Year:      ptr(int32(1999)),
-					Semester:  ptr("1"),
-					Programme: ptr("CSC Full-time"),
-					Au:        ptr(int16(3)),
+					Code:      to.Ptr("CZ9999"),
+					Year:      to.Ptr(int32(1999)),
+					Semester:  to.Ptr("1"),
+					Programme: to.Ptr("CSC Full-time"),
+					Au:        to.Ptr(int16(3)),
 				},
 			},
 			true,
@@ -218,11 +219,11 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			"request with update conflict",
 			classPatchRequest{
 				database.UpdateClassParams{
-					Code:      ptr("EXISTING2023"),
-					Year:      ptr(int32(2023)),
-					Semester:  ptr("1"),
-					Programme: ptr("CSC Full-time"),
-					Au:        ptr(int16(2)),
+					Code:      to.Ptr("EXISTING2023"),
+					Year:      to.Ptr(int32(2023)),
+					Semester:  to.Ptr("1"),
+					Programme: to.Ptr("CSC Full-time"),
+					Au:        to.Ptr(int16(2)),
 				},
 			},
 			true,

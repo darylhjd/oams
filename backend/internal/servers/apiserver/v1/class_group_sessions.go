@@ -7,6 +7,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
 )
 
 func (v *APIServerV1) classGroupSessions(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,12 @@ type classGroupSessionsGetResponse struct {
 }
 
 func (v *APIServerV1) classGroupSessionsGet(r *http.Request) apiResponse {
-	sessions, err := v.db.ListClassGroupSessions(r.Context())
+	params, err := v.decodeListQueryParameters(r.URL.Query(), table.ClassGroupSessions.AllColumns)
+	if err != nil {
+		return newErrorResponse(http.StatusBadRequest, err.Error())
+	}
+
+	sessions, err := v.db.ListClassGroupSessions(r.Context(), params)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group sessions get database action")
