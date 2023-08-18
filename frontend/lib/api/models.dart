@@ -30,12 +30,16 @@ class User {
   final String name;
   final String email;
   final UserRole role;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   User.fromJson(Map<String, dynamic> json)
       : id = json["id"],
         name = json["name"],
         email = json["email"],
-        role = UserRole.fromValue(json["role"]);
+        role = UserRole.fromValue(json["role"]),
+        createdAt = DateTime.parse(json["created_at"]).toLocal(),
+        updatedAt = DateTime.parse(json["updated_at"]).toLocal();
 }
 
 enum UserRole {

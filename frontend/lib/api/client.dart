@@ -87,8 +87,14 @@ class APIClient {
   }
 
   // Get users.
-  static Future<GetUsersResponse> getUsers() async {
-    final uri = _apiUri.replace(path: _usersPath);
+  static Future<GetUsersResponse> getUsers(int offset, int limit) async {
+    final uri = _apiUri.replace(
+      path: _usersPath,
+      queryParameters: {
+        "offset": offset.toString(),
+        "limit": limit.toString(),
+      },
+    );
 
     final response = await _client.getUri(uri);
 
