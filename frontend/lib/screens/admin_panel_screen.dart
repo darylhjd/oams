@@ -29,6 +29,7 @@ class _EntityViewerState extends State<_EntityViewer>
     Tab(text: "Classes"),
     Tab(text: "Class Groups"),
     Tab(text: "Class Group Sessions"),
+    Tab(text: "Session Enrollments"),
   ];
   late final TabController _controller;
 
@@ -62,6 +63,7 @@ class _EntityViewerState extends State<_EntityViewer>
               _ClassEntities(),
               _ClassGroupEntities(),
               _ClassGroupSessionEntities(),
+              _SessionEnrollmentEntities(),
             ],
           ),
         ),
@@ -436,6 +438,84 @@ class _ClassGroupSessionEntitiesState extends _DataTableState {
       "Start Time",
       "End Time",
       "Venue",
+      "Created At",
+      "Updated At",
+    ]
+        .map((s) => DataColumn2(
+              label:
+                  Text(s, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return withDefaultAsyncPaginatedTable(
+      cols: _columns,
+      minWidth: _minWidth,
+      rowsPerPage: _rowsPerPage,
+      onRowsPerPageChanged: (value) {
+        _rowsPerPage = value!;
+      },
+    );
+  }
+}
+
+// The source for the session enrollments data.
+class _SessionEnrollmentsSource extends _DataSource {
+  @override
+  Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
+    final response = await APIClient.getSessionEnrollments(limit, startIndex);
+    updateRowEstimationState(
+        startIndex, limit, response.sessionEnrollments.length);
+
+    return AsyncRowsResponse(
+      response.sessionEnrollments.length,
+      response.sessionEnrollments
+          .map((c) => DataRow2(
+                cells: [
+                  DataCell(
+                    Text(
+                      c.id.toString(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataCell(Text(c.sessionId.toString())),
+                  DataCell(Text(c.userId)),
+                  DataCell(Text(c.attended.toString())),
+                  DataCell(Text(c.createdAt.toString())),
+                  DataCell(Text(c.updatedAt.toString())),
+                ],
+              ))
+          .toList(),
+    );
+  }
+}
+
+// Provides the paginated table to show the session enrollments data.
+class _SessionEnrollmentEntities extends StatefulWidget {
+  @override
+  _SessionEnrollmentEntitiesState createState() =>
+      _SessionEnrollmentEntitiesState();
+}
+
+// This holds the state for the _SessionEnrollmentEntities widget.
+class _SessionEnrollmentEntitiesState extends _DataTableState {
+  static const double _minWidth = 650;
+  late final List<DataColumn2> _columns;
+  int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
+
+  _SessionEnrollmentEntitiesState() : super(_SessionEnrollmentsSource());
+
+  @override
+  void initState() {
+    super.initState();
+    _columns = [
+      "ID",
+      "Session ID",
+      "User ID",
+      "Attended",
       "Created At",
       "Updated At",
     ]

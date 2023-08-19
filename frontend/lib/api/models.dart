@@ -193,3 +193,31 @@ class GetClassGroupSessionsResponse {
             (json["class_group_sessions"] as List)
                 .map((i) => ClassGroupSession.fromJson(i)));
 }
+
+class SessionEnrollment {
+  final int id;
+  final int sessionId;
+  final String userId;
+  final bool attended;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  SessionEnrollment.fromJson(Map<String, dynamic> json)
+      : id = json["id"],
+        sessionId = json["session_id"],
+        userId = json["user_id"],
+        attended = json["attended"],
+        createdAt = DateTime.parse(json["created_at"]).toLocal(),
+        updatedAt = DateTime.parse(json["updated_at"]).toLocal();
+}
+
+class GetSessionEnrollmentsResponse {
+  final bool result;
+  final List<SessionEnrollment> sessionEnrollments;
+
+  GetSessionEnrollmentsResponse.fromJson(Map<String, dynamic> json)
+      : result = json["result"],
+        sessionEnrollments = List<SessionEnrollment>.from(
+            (json["session_enrollments"] as List)
+                .map((i) => SessionEnrollment.fromJson(i)));
+}
