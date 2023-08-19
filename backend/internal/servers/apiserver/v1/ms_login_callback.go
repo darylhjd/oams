@@ -41,12 +41,10 @@ func (v *APIServerV1) msLoginCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Upsert user into database.
-	_, err = v.db.UpsertUsers(r.Context(), []database.UpsertUserParams{
-		{
-			ID:    authResult.IDToken.Name,
-			Email: authResult.Account.PreferredUsername,
-		},
+	// Register user. If user has logged in before, then nothing is done.
+	_, err = v.db.RegisterUser(r.Context(), database.RegisterUserParams{
+		ID:    authResult.IDToken.Name,
+		Email: authResult.Account.PreferredUsername,
 	})
 	if err != nil {
 		v.logInternalServerError(r, err)

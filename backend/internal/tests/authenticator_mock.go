@@ -13,8 +13,8 @@ import (
 const (
 	MockAuthenticatorAccessToken              = "mock-access-token"
 	MockAuthenticatorAccountHomeAccountID     = "mock-home-account-id"
-	MockAuthenticatorAccountPreferredUsername = "NTU0001@e.ntu.edu.sg"
 	MockAuthenticatorIDTokenName              = "TESTACC001"
+	MockAuthenticatorAccountPreferredUsername = "NTU0001@e.ntu.edu.sg"
 )
 
 // MockAzureAuthenticator allows us to mock the calls to Microsoft's Azure AD APIs.

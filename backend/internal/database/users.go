@@ -2,11 +2,13 @@ package database
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/go-jet/jet/v2/qrm"
 )
 
 func (d *DB) ListUsers(ctx context.Context, params listParams) ([]model.User, error) {
@@ -176,6 +178,36 @@ type UpcomingClassGroupSession struct {
 	model.Class
 	model.ClassGroup
 	model.ClassGroupSession
+}
+
+type RegisterUserParams struct {
+	ID    string
+	Email string
+}
+
+// RegisterUser is used to register a user into the database on login. If the user already exists, then nothing is done.
+func (d *DB) RegisterUser(ctx context.Context, arg RegisterUserParams) (model.User, error) {
+	var res model.User
+
+	stmt := Users.INSERT(
+		Users.ID,
+		Users.Name,
+		Users.Email,
+	).MODEL(
+		model.User{
+			ID:    arg.ID,
+			Email: arg.Email,
+		},
+	).ON_CONFLICT(
+		Users.ID,
+	).DO_NOTHING().RETURNING(Users.AllColumns)
+
+	err := stmt.QueryContext(ctx, d.queryable, &res)
+	if err != nil && errors.Is(err, qrm.ErrNoRows) {
+		return res, nil
+	}
+
+	return res, err
 }
 
 // GetUserUpcomingClassGroupSessions gets information on a user's upcoming classes. This query returns all session
