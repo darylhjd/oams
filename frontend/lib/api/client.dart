@@ -25,6 +25,10 @@ class APIClient {
 
   static const String _classGroupsPath = "api/v1/class-groups";
 
+  static const String _classGroupSessionsPath = "api/v1/class-group-sessions";
+
+  static const String _sessionEnrollmentsPath = "api/v1/session-enrollments";
+
   // Get login URL to redirect user to SSO login site.
   static Future<String> getLoginURL(String returnTo) async {
     if (returnTo.isEmpty) {
@@ -112,5 +116,33 @@ class APIClient {
 
     final response = await _client.getUri(uri);
     return GetClassGroupsResponse.fromJson(response.data);
+  }
+
+  static Future<GetClassGroupSessionsResponse> getClassGroupSessions(
+      int limit, int offset) async {
+    final uri = _apiUri.replace(
+      path: _classGroupSessionsPath,
+      queryParameters: {
+        "limit": limit.toString(),
+        "offset": offset.toString(),
+      },
+    );
+
+    final response = await _client.getUri(uri);
+    return GetClassGroupSessionsResponse.fromJson(response.data);
+  }
+
+  static Future<GetSessionEnrollmentsResponse> getSessionEnrollments(
+      int limit, int offset) async {
+    final uri = _apiUri.replace(
+      path: _sessionEnrollmentsPath,
+      queryParameters: {
+        "limit": limit.toString(),
+        "offset": offset.toString(),
+      },
+    );
+
+    final response = await _client.getUri(uri);
+    return GetSessionEnrollmentsResponse.fromJson(response.data);
   }
 }

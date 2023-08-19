@@ -163,3 +163,61 @@ class GetClassGroupsResponse {
         classGroups = List<ClassGroup>.from(
             (json["class_groups"] as List).map((i) => ClassGroup.fromJson(i)));
 }
+
+class ClassGroupSession {
+  final int id;
+  final int classGroupId;
+  final DateTime startTime;
+  final DateTime endTime;
+  final String venue;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  ClassGroupSession.fromJson(Map<String, dynamic> json)
+      : id = json["id"],
+        classGroupId = json["class_group_id"],
+        startTime = DateTime.parse(json["start_time"]).toLocal(),
+        endTime = DateTime.parse(json["end_time"]).toLocal(),
+        venue = json["venue"],
+        createdAt = DateTime.parse(json["created_at"]).toLocal(),
+        updatedAt = DateTime.parse(json["updated_at"]).toLocal();
+}
+
+class GetClassGroupSessionsResponse {
+  final bool result;
+  final List<ClassGroupSession> classGroupSessions;
+
+  GetClassGroupSessionsResponse.fromJson(Map<String, dynamic> json)
+      : result = json["result"],
+        classGroupSessions = List<ClassGroupSession>.from(
+            (json["class_group_sessions"] as List)
+                .map((i) => ClassGroupSession.fromJson(i)));
+}
+
+class SessionEnrollment {
+  final int id;
+  final int sessionId;
+  final String userId;
+  final bool attended;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  SessionEnrollment.fromJson(Map<String, dynamic> json)
+      : id = json["id"],
+        sessionId = json["session_id"],
+        userId = json["user_id"],
+        attended = json["attended"],
+        createdAt = DateTime.parse(json["created_at"]).toLocal(),
+        updatedAt = DateTime.parse(json["updated_at"]).toLocal();
+}
+
+class GetSessionEnrollmentsResponse {
+  final bool result;
+  final List<SessionEnrollment> sessionEnrollments;
+
+  GetSessionEnrollmentsResponse.fromJson(Map<String, dynamic> json)
+      : result = json["result"],
+        sessionEnrollments = List<SessionEnrollment>.from(
+            (json["session_enrollments"] as List)
+                .map((i) => SessionEnrollment.fromJson(i)));
+}
