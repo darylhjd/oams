@@ -28,6 +28,7 @@ class _EntityViewerState extends State<_EntityViewer>
     Tab(text: "Users"),
     Tab(text: "Classes"),
     Tab(text: "Class Groups"),
+    Tab(text: "Class Group Sessions"),
   ];
   late final TabController _controller;
 
@@ -60,6 +61,7 @@ class _EntityViewerState extends State<_EntityViewer>
               _UserEntities(),
               _ClassEntities(),
               _ClassGroupEntities(),
+              _ClassGroupSessionEntities(),
             ],
           ),
         ),
@@ -354,6 +356,86 @@ class _ClassGroupEntitiesState extends _DataTableState {
       "Class ID",
       "Name",
       "Class Type",
+      "Created At",
+      "Updated At",
+    ]
+        .map((s) => DataColumn2(
+              label:
+                  Text(s, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return withDefaultAsyncPaginatedTable(
+      cols: _columns,
+      minWidth: _minWidth,
+      rowsPerPage: _rowsPerPage,
+      onRowsPerPageChanged: (value) {
+        _rowsPerPage = value!;
+      },
+    );
+  }
+}
+
+// The source for the class group sessions data.
+class _ClassGroupSessionsSource extends _DataSource {
+  @override
+  Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
+    final response = await APIClient.getClassGroupSessions(limit, startIndex);
+    updateRowEstimationState(
+        startIndex, limit, response.classGroupSessions.length);
+
+    return AsyncRowsResponse(
+      response.classGroupSessions.length,
+      response.classGroupSessions
+          .map((c) => DataRow2(
+                cells: [
+                  DataCell(
+                    Text(
+                      c.id.toString(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataCell(Text(c.classGroupId.toString())),
+                  DataCell(Text(c.startTime.toString())),
+                  DataCell(Text(c.endTime.toString())),
+                  DataCell(Text(c.venue)),
+                  DataCell(Text(c.createdAt.toString())),
+                  DataCell(Text(c.updatedAt.toString())),
+                ],
+              ))
+          .toList(),
+    );
+  }
+}
+
+// Provides the paginated table to show the class group sessions data.
+class _ClassGroupSessionEntities extends StatefulWidget {
+  @override
+  _ClassGroupSessionEntitiesState createState() =>
+      _ClassGroupSessionEntitiesState();
+}
+
+// This holds the state for the _ClassGroupSessionEntities widget.
+class _ClassGroupSessionEntitiesState extends _DataTableState {
+  static const double _minWidth = 1000;
+  late final List<DataColumn2> _columns;
+  int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
+
+  _ClassGroupSessionEntitiesState() : super(_ClassGroupSessionsSource());
+
+  @override
+  void initState() {
+    super.initState();
+    _columns = [
+      "ID",
+      "Class Group ID",
+      "Start Time",
+      "End Time",
+      "Venue",
       "Created At",
       "Updated At",
     ]
