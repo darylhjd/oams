@@ -136,3 +136,30 @@ class GetClassesResponse {
         classes = List<Class>.from(
             (json["classes"] as List).map((i) => Class.fromJson(i)));
 }
+
+class ClassGroup {
+  final int id;
+  final int classId;
+  final String name;
+  final ClassType classType;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  ClassGroup.fromJson(Map<String, dynamic> json)
+      : id = json["id"],
+        classId = json["class_id"],
+        name = json["name"],
+        classType = ClassType.fromValue(json["class_type"]),
+        createdAt = DateTime.parse(json["created_at"]).toLocal(),
+        updatedAt = DateTime.parse(json["updated_at"]).toLocal();
+}
+
+class GetClassGroupsResponse {
+  final bool result;
+  final List<ClassGroup> classGroups;
+
+  GetClassGroupsResponse.fromJson(Map<String, dynamic> json)
+      : result = json["result"],
+        classGroups = List<ClassGroup>.from(
+            (json["class_groups"] as List).map((i) => ClassGroup.fromJson(i)));
+}

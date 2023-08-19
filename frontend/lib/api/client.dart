@@ -23,6 +23,8 @@ class APIClient {
 
   static const String _classesPath = "api/v1/classes";
 
+  static const String _classGroupsPath = "api/v1/class-groups";
+
   // Get login URL to redirect user to SSO login site.
   static Future<String> getLoginURL(String returnTo) async {
     if (returnTo.isEmpty) {
@@ -86,12 +88,29 @@ class APIClient {
   }
 
   static Future<GetClassesResponse> getClasses(int limit, int offset) async {
-    final uri = _apiUri.replace(path: _classesPath, queryParameters: {
-      "limit": limit.toString(),
-      "offset": offset.toString(),
-    });
+    final uri = _apiUri.replace(
+      path: _classesPath,
+      queryParameters: {
+        "limit": limit.toString(),
+        "offset": offset.toString(),
+      },
+    );
 
     final response = await _client.getUri(uri);
     return GetClassesResponse.fromJson(response.data);
+  }
+
+  static Future<GetClassGroupsResponse> getClassGroups(
+      int limit, int offset) async {
+    final uri = _apiUri.replace(
+      path: _classGroupsPath,
+      queryParameters: {
+        "limit": limit.toString(),
+        "offset": offset.toString(),
+      },
+    );
+
+    final response = await _client.getUri(uri);
+    return GetClassGroupsResponse.fromJson(response.data);
   }
 }
