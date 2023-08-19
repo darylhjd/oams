@@ -27,6 +27,7 @@ class _EntityViewerState extends State<_EntityViewer>
   static const List<Widget> _tabs = [
     Tab(text: "Users"),
     Tab(text: "Classes"),
+    Tab(text: "Class Groups"),
   ];
   late final TabController _controller;
 
@@ -58,6 +59,7 @@ class _EntityViewerState extends State<_EntityViewer>
             children: [
               _UserEntities(),
               _ClassEntities(),
+              _ClassGroupEntities(),
             ],
           ),
         ),
@@ -116,12 +118,14 @@ abstract class _DataTableState extends State
 
   Widget withDefaultAsyncPaginatedTable({
     required List<DataColumn2> cols,
+    required double minWidth,
     required int rowsPerPage,
     required void Function(int?) onRowsPerPageChanged,
   }) {
     return AsyncPaginatedDataTable2(
       columnSpacing: 10,
-      minWidth: 800,
+      dataRowHeight: 60,
+      minWidth: minWidth,
       border: tableBorder,
       renderEmptyRowsInTheEnd: false,
       availableRowsPerPage: const [
@@ -181,6 +185,7 @@ class _UserEntities extends StatefulWidget {
 
 // This holds the state for the _UserEntities widget.
 class _UserEntitiesState extends _DataTableState {
+  static const double _minWidth = 700;
   late final List<DataColumn2> _columns;
   int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
 
@@ -209,6 +214,7 @@ class _UserEntitiesState extends _DataTableState {
     super.build(context);
     return withDefaultAsyncPaginatedTable(
       cols: _columns,
+      minWidth: _minWidth,
       rowsPerPage: _rowsPerPage,
       onRowsPerPageChanged: (value) {
         _rowsPerPage = value!;
@@ -256,6 +262,7 @@ class _ClassEntities extends StatefulWidget {
 
 // This holds the state for the _ClassEntities widget.
 class _ClassEntitiesState extends _DataTableState {
+  static const double _minWidth = 850;
   late final List<DataColumn2> _columns;
   int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
 
@@ -286,6 +293,83 @@ class _ClassEntitiesState extends _DataTableState {
     super.build(context);
     return withDefaultAsyncPaginatedTable(
       cols: _columns,
+      minWidth: _minWidth,
+      rowsPerPage: _rowsPerPage,
+      onRowsPerPageChanged: (value) {
+        _rowsPerPage = value!;
+      },
+    );
+  }
+}
+
+// The source for the class groups data.
+class _ClassGroupsSource extends _DataSource {
+  @override
+  Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
+    final response = await APIClient.getClassGroups(limit, startIndex);
+    updateRowEstimationState(startIndex, limit, response.classGroups.length);
+
+    return AsyncRowsResponse(
+      response.classGroups.length,
+      response.classGroups
+          .map((c) => DataRow2(
+                cells: [
+                  DataCell(
+                    Text(
+                      c.id.toString(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataCell(Text(c.classId.toString())),
+                  DataCell(Text(c.name)),
+                  DataCell(Text(c.classType.name)),
+                  DataCell(Text(c.createdAt.toString())),
+                  DataCell(Text(c.updatedAt.toString())),
+                ],
+              ))
+          .toList(),
+    );
+  }
+}
+
+// Provides the paginated table to show the class groups data.
+class _ClassGroupEntities extends StatefulWidget {
+  @override
+  _ClassGroupEntitiesState createState() => _ClassGroupEntitiesState();
+}
+
+// This holds the state for the _ClassGroupEntities widget.
+class _ClassGroupEntitiesState extends _DataTableState {
+  static const double _minWidth = 620;
+  late final List<DataColumn2> _columns;
+  int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
+
+  _ClassGroupEntitiesState() : super(_ClassGroupsSource());
+
+  @override
+  void initState() {
+    super.initState();
+    _columns = [
+      "ID",
+      "Class ID",
+      "Name",
+      "Class Type",
+      "Created At",
+      "Updated At",
+    ]
+        .map((s) => DataColumn2(
+              label:
+                  Text(s, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return withDefaultAsyncPaginatedTable(
+      cols: _columns,
+      minWidth: _minWidth,
       rowsPerPage: _rowsPerPage,
       onRowsPerPageChanged: (value) {
         _rowsPerPage = value!;
