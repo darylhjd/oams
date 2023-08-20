@@ -1,7 +1,9 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/api/client.dart';
+import 'package:frontend/router.dart';
 import 'package:frontend/screens/screen_template.dart';
+import 'package:go_router/go_router.dart';
 
 // Shows the admin panel screen.
 class AdminPanelScreen extends StatelessWidget {
@@ -76,6 +78,9 @@ class _EntityViewerState extends State<_EntityViewer>
 abstract class _DataSource extends AsyncDataTableSource {
   int estimatedRowCount = 1000;
   bool isApproximateCount = true;
+  BuildContext context;
+
+  _DataSource(this.context);
 
   @override
   int get rowCount => estimatedRowCount;
@@ -116,9 +121,7 @@ abstract class _DataTableState extends State
   );
   static const defaultNumRowsPerPage = 50;
 
-  final _DataSource source;
-
-  _DataTableState(this.source);
+  late final _DataSource source;
 
   Widget withDefaultAsyncPaginatedTable({
     required List<DataColumn2> cols,
@@ -151,6 +154,8 @@ abstract class _DataTableState extends State
 
 // Holds the source for the users data.
 class _UsersSource extends _DataSource {
+  _UsersSource(BuildContext context) : super(context);
+
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
     final response = await APIClient.getUsers(limit, startIndex);
@@ -167,6 +172,11 @@ class _UsersSource extends _DataSource {
                     u.id,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
+                  onTap: () {
+                    context.goNamed(Routes.user.name, pathParameters: {
+                      "userId": u.id,
+                    });
+                  },
                 ),
                 DataCell(Text(u.name)),
                 DataCell(Text(u.email)),
@@ -193,8 +203,6 @@ class _UserEntitiesState extends _DataTableState {
   late final List<DataColumn2> _columns;
   int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
 
-  _UserEntitiesState() : super(_UsersSource());
-
   @override
   void initState() {
     super.initState();
@@ -214,6 +222,18 @@ class _UserEntitiesState extends _DataTableState {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    source = _UsersSource(context);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    source.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return withDefaultAsyncPaginatedTable(
@@ -229,6 +249,8 @@ class _UserEntitiesState extends _DataTableState {
 
 // Holds the source for the classes data.
 class _ClassesSource extends _DataSource {
+  _ClassesSource(BuildContext context) : super(context);
+
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
     final response = await APIClient.getClasses(limit, startIndex);
@@ -270,8 +292,6 @@ class _ClassEntitiesState extends _DataTableState {
   late final List<DataColumn2> _columns;
   int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
 
-  _ClassEntitiesState() : super(_ClassesSource());
-
   @override
   void initState() {
     super.initState();
@@ -293,6 +313,18 @@ class _ClassEntitiesState extends _DataTableState {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    source = _ClassesSource(context);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    source.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return withDefaultAsyncPaginatedTable(
@@ -308,6 +340,8 @@ class _ClassEntitiesState extends _DataTableState {
 
 // The source for the class groups data.
 class _ClassGroupsSource extends _DataSource {
+  _ClassGroupsSource(BuildContext context) : super(context);
+
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
     final response = await APIClient.getClassGroups(limit, startIndex);
@@ -348,8 +382,6 @@ class _ClassGroupEntitiesState extends _DataTableState {
   late final List<DataColumn2> _columns;
   int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
 
-  _ClassGroupEntitiesState() : super(_ClassGroupsSource());
-
   @override
   void initState() {
     super.initState();
@@ -369,6 +401,18 @@ class _ClassGroupEntitiesState extends _DataTableState {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    source = _ClassGroupsSource(context);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    source.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return withDefaultAsyncPaginatedTable(
@@ -384,6 +428,8 @@ class _ClassGroupEntitiesState extends _DataTableState {
 
 // The source for the class group sessions data.
 class _ClassGroupSessionsSource extends _DataSource {
+  _ClassGroupSessionsSource(BuildContext context) : super(context);
+
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
     final response = await APIClient.getClassGroupSessions(limit, startIndex);
@@ -427,8 +473,6 @@ class _ClassGroupSessionEntitiesState extends _DataTableState {
   late final List<DataColumn2> _columns;
   int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
 
-  _ClassGroupSessionEntitiesState() : super(_ClassGroupSessionsSource());
-
   @override
   void initState() {
     super.initState();
@@ -449,6 +493,18 @@ class _ClassGroupSessionEntitiesState extends _DataTableState {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    source = _ClassGroupSessionsSource(context);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    source.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return withDefaultAsyncPaginatedTable(
@@ -464,6 +520,8 @@ class _ClassGroupSessionEntitiesState extends _DataTableState {
 
 // The source for the session enrollments data.
 class _SessionEnrollmentsSource extends _DataSource {
+  _SessionEnrollmentsSource(BuildContext context) : super(context);
+
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int limit) async {
     final response = await APIClient.getSessionEnrollments(limit, startIndex);
@@ -506,8 +564,6 @@ class _SessionEnrollmentEntitiesState extends _DataTableState {
   late final List<DataColumn2> _columns;
   int _rowsPerPage = _DataTableState.defaultNumRowsPerPage;
 
-  _SessionEnrollmentEntitiesState() : super(_SessionEnrollmentsSource());
-
   @override
   void initState() {
     super.initState();
@@ -524,6 +580,18 @@ class _SessionEnrollmentEntitiesState extends _DataTableState {
                   Text(s, style: const TextStyle(fontWeight: FontWeight.bold)),
             ))
         .toList();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    source = _SessionEnrollmentsSource(context);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    source.dispose();
   }
 
   @override
