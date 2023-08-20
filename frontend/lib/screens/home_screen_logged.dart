@@ -28,7 +28,7 @@ class HomeScreenLoggedIn extends ConsumerWidget {
       children: [
         _UpcomingSessionsCalendar(),
         const SizedBox(height: _mobilePadding),
-        const _SelectedDaySessionsPreviewer(true),
+        const _SelectedDaySessionsPreviewer(),
         const SizedBox(height: _mobilePadding),
         const Placeholder(),
       ],
@@ -45,7 +45,7 @@ class HomeScreenLoggedIn extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(child: _UpcomingSessionsCalendar()),
-              const _SelectedDaySessionsPreviewer(false),
+              const _SelectedDaySessionsPreviewer(),
             ],
           ),
         ),
@@ -177,13 +177,13 @@ class _SelectedDaySessionsPreviewer extends ConsumerWidget {
   static const double _desktopPadding = 10;
   static const double _desktopWidth = 400;
 
-  final bool _isMobile;
-
-  const _SelectedDaySessionsPreviewer(this._isMobile);
+  const _SelectedDaySessionsPreviewer();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return _isMobile ? _mobile(context, ref) : _desktop(context, ref);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context, ref)
+        : _desktop(context, ref);
   }
 
   Widget _mobile(BuildContext context, WidgetRef ref) {
@@ -250,7 +250,7 @@ class _SelectedDaySessionsPreviewer extends ConsumerWidget {
   List<_EventPreview> _getEventPreviews(WidgetRef ref) {
     return ref
         .watch(_selectedDayEventsProvider)
-        .map((e) => _EventPreview(e, _isMobile))
+        .map((e) => _EventPreview(e))
         .toList();
   }
 }
@@ -297,9 +297,8 @@ class _EventPreview extends StatelessWidget {
   static const double _desktopPadding = 20;
 
   final UpcomingClassGroupSession _session;
-  final bool _isMobile;
 
-  const _EventPreview(this._session, this._isMobile);
+  const _EventPreview(this._session);
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +307,11 @@ class _EventPreview extends StatelessWidget {
     return Card(
       color: _colorMap[_session.classType],
       child: Container(
-        padding: EdgeInsets.all(_isMobile ? _mobilePadding : _desktopPadding),
+        padding: EdgeInsets.all(
+          ResponsiveBreakpoints.of(context).isMobile
+              ? _mobilePadding
+              : _desktopPadding,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
