@@ -39,23 +39,15 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 
 type userMeResponse struct {
 	response
-	SessionUser                model.User                         `json:"session_user"`
-	UpcomingClassGroupSessions []userMeUpcomingClassGroupSessions `json:"upcoming_class_group_sessions"`
-}
-
-type userMeUpcomingClassGroupSessions struct {
-	Code      string          `json:"code"`
-	Year      int32           `json:"year"`
-	Semester  string          `json:"semester"`
-	Name      string          `json:"name"`
-	ClassType model.ClassType `json:"class_type"`
-	StartTime time.Time       `json:"start_time"`
-	EndTime   time.Time       `json:"end_time"`
-	Venue     string          `json:"venue"`
+	SessionUser                model.User                           `json:"session_user"`
+	UpcomingClassGroupSessions []database.UpcomingClassGroupSession `json:"upcoming_class_group_sessions"`
 }
 
 func (v *APIServerV1) userMe(r *http.Request) apiResponse {
-	resp := userMeResponse{response: newSuccessResponse()}
+	resp := userMeResponse{
+		response:                   newSuccessResponse(),
+		UpcomingClassGroupSessions: []database.UpcomingClassGroupSession{},
+	}
 
 	authContext, isSignedIn, err := middleware.GetAuthContext(r)
 	switch {
@@ -78,20 +70,7 @@ func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not get session user upcoming class group sessions")
 	}
 
-	resp.UpcomingClassGroupSessions = make([]userMeUpcomingClassGroupSessions, 0, len(upcomingClassGroupSessions))
-	for _, session := range upcomingClassGroupSessions {
-		resp.UpcomingClassGroupSessions = append(resp.UpcomingClassGroupSessions, userMeUpcomingClassGroupSessions{
-			Code:      session.Code,
-			Year:      session.Year,
-			Semester:  session.Semester,
-			Name:      session.Name,
-			ClassType: session.ClassType,
-			StartTime: session.StartTime,
-			EndTime:   session.EndTime,
-			Venue:     session.Venue,
-		})
-	}
-
+	resp.UpcomingClassGroupSessions = append(resp.UpcomingClassGroupSessions, upcomingClassGroupSessions...)
 	return resp
 }
 
