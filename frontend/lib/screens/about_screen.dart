@@ -7,7 +7,7 @@ class AboutScreen extends StatelessWidget {
   static const double _mobilePadding = 10;
   static const double _desktopPadding = 20;
 
-  const AboutScreen({Key? key}) : super(key: key);
+  const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class AboutScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(_mobilePadding),
       children: const [
-        _PoweredByFlutter(true),
+        _PoweredByFlutter(),
       ],
     );
   }
@@ -29,7 +29,7 @@ class AboutScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(_desktopPadding),
       children: const [
-        _PoweredByFlutter(false),
+        _PoweredByFlutter(),
       ],
     );
   }
@@ -40,13 +40,14 @@ class _PoweredByFlutter extends StatelessWidget {
   static const double _mobileSize = 100;
   static const double _desktopSize = 200;
   static const String _tagline = "Powered by:";
-  final bool _isMobile;
 
-  const _PoweredByFlutter(this._isMobile, {Key? key}) : super(key: key);
+  const _PoweredByFlutter();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
   }
 
   Widget _mobile(BuildContext context) {

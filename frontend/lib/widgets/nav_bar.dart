@@ -15,7 +15,7 @@ class NavBar extends StatelessWidget {
   static final List<BoxShadow>? _boxShadow = kElevationToShadow[8];
   static const double _borderRadius = 10;
 
-  const NavBar({Key? key}) : super(key: key);
+  const NavBar();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class NavBar extends StatelessWidget {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _Options(true),
+        _Options(),
         _Logo(),
       ],
     );
@@ -55,7 +55,7 @@ class NavBar extends StatelessWidget {
       children: [
         _Logo(),
         Flexible(
-          child: _Options(false),
+          child: _Options(),
         ),
       ],
     );
@@ -70,7 +70,7 @@ class _Logo extends StatelessWidget {
 
   static const String _logoPath = "assets/logo.png";
 
-  const _Logo({Key? key}) : super(key: key);
+  const _Logo();
 
   @override
   Widget build(BuildContext context) {
@@ -87,14 +87,12 @@ class _Logo extends StatelessWidget {
 
 // Stores all the navigation bar items except the logo.
 class _Options extends ConsumerWidget {
-  final bool _isMobile;
-
-  const _Options(this._isMobile, {Key? key}) : super(key: key);
+  const _Options();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoggedIn = ref.read(sessionProvider);
-    return _isMobile
+    return ResponsiveBreakpoints.of(context).isMobile
         ? _mobile(context, ref, isLoggedIn)
         : _desktop(context, ref, isLoggedIn);
   }
@@ -103,7 +101,7 @@ class _Options extends ConsumerWidget {
     var items = <PopupMenuItem<Widget>>[
       const PopupMenuItem(
         padding: EdgeInsets.zero,
-        child: _AboutButton(true),
+        child: _AboutButton(),
       ),
     ];
 
@@ -112,7 +110,7 @@ class _Options extends ConsumerWidget {
       items.addAll([
         const PopupMenuItem(
           padding: EdgeInsets.zero,
-          child: _ProfileButton(true),
+          child: _ProfileButton(),
         ),
         const PopupMenuItem(
           padding: EdgeInsets.zero,
@@ -122,7 +120,7 @@ class _Options extends ConsumerWidget {
     } else {
       items.add(const PopupMenuItem(
         padding: EdgeInsets.zero,
-        child: _LoginButton(true),
+        child: _LoginButton(),
       ));
     }
 
@@ -140,8 +138,8 @@ class _Options extends ConsumerWidget {
             ? _loggedDesktopItems(context, ref)
             : const SizedBox.shrink(),
         const Spacer(),
-        const _AboutButton(false),
-        isLoggedIn ? const _ProfileButton(false) : const _LoginButton(false),
+        const _AboutButton(),
+        isLoggedIn ? const _ProfileButton() : const _LoginButton(),
       ],
     );
   }
@@ -154,7 +152,7 @@ class _Options extends ConsumerWidget {
       if (userRole == UserRole.admin)
         const PopupMenuItem(
           padding: EdgeInsets.zero,
-          child: _AdminPanelButton(true),
+          child: _AdminPanelButton(),
         ),
     ];
   }
@@ -165,7 +163,7 @@ class _Options extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (userRole == UserRole.admin) const _AdminPanelButton(false),
+        if (userRole == UserRole.admin) const _AdminPanelButton(),
       ],
     );
   }
@@ -176,13 +174,14 @@ class _Options extends ConsumerWidget {
 // widget does the checking.
 class _AdminPanelButton extends StatelessWidget {
   static const _text = _NavBarText("Admin Panel");
-  final bool _isMobile;
 
-  const _AdminPanelButton(this._isMobile);
+  const _AdminPanelButton();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
   }
 
   Widget _mobile(BuildContext context) {
@@ -203,13 +202,14 @@ class _AdminPanelButton extends StatelessWidget {
 // Shows the About button on the navigation bar.
 class _AboutButton extends StatelessWidget {
   final Widget _text = const _NavBarText("About");
-  final bool _isMobile;
 
-  const _AboutButton(this._isMobile, {Key? key}) : super(key: key);
+  const _AboutButton();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
   }
 
   Widget _mobile(BuildContext context) {
@@ -230,13 +230,14 @@ class _AboutButton extends StatelessWidget {
 // Shows the Profile button on the navigation bar.
 class _ProfileButton extends StatelessWidget {
   final Widget _text = const _NavBarText("Profile");
-  final bool _isMobile;
 
-  const _ProfileButton(this._isMobile, {Key? key}) : super(key: key);
+  const _ProfileButton();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
   }
 
   Widget _mobile(BuildContext context) {
@@ -266,13 +267,14 @@ class _ProfileButton extends StatelessWidget {
 // Shows the Login button on the navigation bar.
 class _LoginButton extends StatelessWidget {
   final Widget _text = const _NavBarText("Login");
-  final bool _isMobile;
 
-  const _LoginButton(this._isMobile, {Key? key}) : super(key: key);
+  const _LoginButton();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
   }
 
   Widget _mobile(BuildContext context) {
@@ -294,7 +296,7 @@ class _LoginButton extends StatelessWidget {
 class _LogoutButton extends ConsumerWidget {
   final Widget _text = const _NavBarText("Logout", color: Colors.red);
 
-  const _LogoutButton({Key? key}) : super(key: key);
+  const _LogoutButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -331,9 +333,9 @@ class _NavBarText extends StatelessWidget {
   final String _text;
   final Color? _color;
 
-  const _NavBarText(this._text, {Key? key, Color? color})
+  const _NavBarText(this._text, {Color? color})
       : _color = color,
-        super(key: key);
+        super();
 
   @override
   Widget build(BuildContext context) {

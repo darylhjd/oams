@@ -14,37 +14,21 @@ class HomeScreenGuest extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenTemplate(
-      ResponsiveBreakpoints.of(context).isMobile
-          ? _mobile(context)
-          : _desktop(context),
-    );
-  }
-
-  Widget _mobile(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: _mobilePadding),
-      children: const [
-        _WelcomeBanner(true),
-        _FeaturesDivider(),
-        _Features(true),
-        Divider(),
-        _FinalActionCall(true),
-        Divider(),
-      ],
-    );
-  }
-
-  Widget _desktop(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: _desktopPadding),
-      children: const [
-        _WelcomeBanner(false),
-        _FeaturesDivider(),
-        _Features(false),
-        Divider(),
-        _FinalActionCall(false),
-        Divider(),
-      ],
+      ListView(
+        padding: EdgeInsets.symmetric(
+          vertical: ResponsiveBreakpoints.of(context).isMobile
+              ? _mobilePadding
+              : _desktopPadding,
+        ),
+        children: const [
+          _WelcomeBanner(),
+          _FeaturesDivider(),
+          _Features(),
+          Divider(),
+          _FinalActionCall(),
+          Divider(),
+        ],
+      ),
     );
   }
 }
@@ -68,13 +52,13 @@ class _WelcomeBanner extends StatelessWidget {
   static const double _desktopButtonHorizontalPadding = 20;
   static const double _desktopButtonFontSize = 24;
 
-  final bool _isMobile;
-
-  const _WelcomeBanner(this._isMobile);
+  const _WelcomeBanner();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
   }
 
   Widget _mobile(BuildContext context) {
@@ -183,29 +167,14 @@ class _FeaturesDivider extends StatelessWidget {
 
 // Contains the list of features of OAMS on the guest home screen.
 class _Features extends StatelessWidget {
-  final bool _isMobile;
-
-  const _Features(this._isMobile);
+  const _Features();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop();
-  }
-
-  Widget _mobile(BuildContext context) {
     return const Column(
       children: [
-        _CloudBasedFeature(true),
-        _DetailedSystemDashboard(true),
-      ],
-    );
-  }
-
-  Widget _desktop() {
-    return const Column(
-      children: [
-        _CloudBasedFeature(false),
-        _DetailedSystemDashboard(false),
+        _CloudBasedFeature(),
+        _DetailedSystemDashboard(),
       ],
     );
   }
@@ -222,13 +191,14 @@ class _FeatureCard extends StatelessWidget {
 
   final String _title;
   final String _body;
-  final bool _isMobile;
 
-  const _FeatureCard(this._title, this._body, this._isMobile);
+  const _FeatureCard(this._title, this._body);
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
   }
 
   Widget _mobile(BuildContext context) {
@@ -287,13 +257,11 @@ class _CloudBasedFeature extends StatelessWidget {
   static const String _body =
       "Say goodbye to cumbersome paper-based attendance sheets. OAMS stores attendance data online so you can stay up-to-date wherever you are - instantly.";
 
-  final bool _isMobile;
-
-  const _CloudBasedFeature(this._isMobile);
+  const _CloudBasedFeature();
 
   @override
   Widget build(BuildContext context) {
-    return _FeatureCard(_title, _body, _isMobile);
+    return const _FeatureCard(_title, _body);
   }
 }
 
@@ -303,13 +271,11 @@ class _DetailedSystemDashboard extends StatelessWidget {
   static const String _body =
       "Get comprehensive access to attendance data. Our system dashboard provides you with detailed visualisations of your most important analytics - all at your fingertips.";
 
-  final bool _isMobile;
-
-  const _DetailedSystemDashboard(this._isMobile);
+  const _DetailedSystemDashboard();
 
   @override
   Widget build(BuildContext context) {
-    return _FeatureCard(_title, _body, _isMobile);
+    return const _FeatureCard(_title, _body);
   }
 }
 
@@ -331,13 +297,13 @@ class _FinalActionCall extends StatelessWidget {
   static const double _desktopButtonVerticalPadding = 20;
   static const double _desktopButtonHorizontalPadding = 10;
 
-  final bool _isMobile;
-
-  const _FinalActionCall(this._isMobile);
+  const _FinalActionCall();
 
   @override
   Widget build(BuildContext context) {
-    return _isMobile ? _mobile(context) : _desktop(context);
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
   }
 
   Widget _mobile(BuildContext context) {
