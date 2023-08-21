@@ -94,7 +94,3 @@ func (s *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
-
-func (s *WebServer) GetLogger() *zap.Logger {
-	return s.l
-}

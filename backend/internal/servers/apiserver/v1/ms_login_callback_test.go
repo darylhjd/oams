@@ -90,7 +90,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				err          error
 			)
 			if tt.withExistingUser {
-				tests.StubAuthContextUser(t, ctx, v1.db)
+				tests.StubAuthContextUser(t, ctx, v1.db, model.UserRole_SystemAdmin)
 				// Set a name to the auth context user, so we can check for no change. We also unset the email, and check
 				// that it is later set since it is different.
 				expectedUser, err = v1.db.UpdateUser(ctx, tests.MockAuthenticatorIDTokenName, database.UpdateUserParams{
