@@ -91,7 +91,7 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			)
 			if tt.withExistingUser {
 				tests.StubAuthContextUser(t, ctx, v1.db)
-				// Set a name to the auth context user so we can check for no change.
+				// Set a name to the auth context user, so we can check for no change.
 				expectedUser, err = v1.db.UpdateUser(ctx, tests.MockAuthenticatorIDTokenName, database.UpdateUserParams{
 					Name: to.Ptr("TEST ACCOUNT NAME LIM"),
 				})
