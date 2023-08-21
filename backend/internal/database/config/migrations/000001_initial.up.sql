@@ -4,6 +4,8 @@ CREATE TYPE CLASS_TYPE AS ENUM ('LEC', 'TUT', 'LAB');
 
 CREATE TYPE USER_ROLE AS ENUM ('USER', 'SYSTEM_ADMIN');
 
+CREATE TYPE MANAGING_ROLE AS ENUM ('COURSE_COORDINATOR');
+
 CREATE FUNCTION update_updated_at() RETURNS TRIGGER AS $$
 BEGIN
     IF NEW <> OLD THEN
@@ -43,6 +45,28 @@ CREATE TABLE classes
 
 CREATE TRIGGER update_updated_at
     BEFORE UPDATE ON classes
+    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+
+CREATE TABLE class_managers
+(
+    id            BIGSERIAL PRIMARY KEY,
+    user_id       TEXT          NOT NULL,
+    class_id      BIGINT        NOT NULL,
+    managing_role MANAGING_ROLE NOT NULL,
+    created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    CONSTRAINT ux_user_id_class_id
+        UNIQUE (user_id, class_id),
+    CONSTRAINT fk_user_id
+        FOREIGN KEY (user_id)
+            REFERENCES users (id),
+    CONSTRAINT fk_class_id
+        FOREIGN KEY (class_id)
+            REFERENCES classes (id)
+);
+
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE ON class_managers
     FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
 
 CREATE TABLE class_groups

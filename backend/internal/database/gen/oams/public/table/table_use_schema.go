@@ -12,6 +12,7 @@ package table
 func UseSchema(schema string) {
 	ClassGroupSessions = ClassGroupSessions.FromSchema(schema)
 	ClassGroups = ClassGroups.FromSchema(schema)
+	ClassManagers = ClassManagers.FromSchema(schema)
 	Classes = Classes.FromSchema(schema)
 	SchemaMigrations = SchemaMigrations.FromSchema(schema)
 	SessionEnrollments = SessionEnrollments.FromSchema(schema)
