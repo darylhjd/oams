@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
@@ -122,16 +123,26 @@ type UpsertSessionEnrollmentParams struct {
 	Attended  bool   `json:"attended"`
 }
 
-func (d *DB) UpsertSessionEnrollments(ctx context.Context, args []UpsertSessionEnrollmentParams) ([]model.SessionEnrollment, error) {
-	var res []model.SessionEnrollment
+// BatchUpsertSessionEnrollments inserts a batch of session enrollments into the database. If the session enrollment
+// already exists, then nothing is done. Note that the attended field is ignored in this operation.
+func (d *DB) BatchUpsertSessionEnrollments(ctx context.Context, args []UpsertSessionEnrollmentParams) ([]model.SessionEnrollment, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
 
 	inserts := make([]model.SessionEnrollment, 0, len(args))
-	for _, param := range args {
-		inserts = append(inserts, model.SessionEnrollment{
-			SessionID: param.SessionID,
-			UserID:    param.UserID,
-			Attended:  param.Attended,
-		})
+	{
+		dupFinder := map[UpsertSessionEnrollmentParams]struct{}{}
+		for _, param := range args {
+			if _, ok := dupFinder[param]; !ok {
+				dupFinder[param] = struct{}{}
+				inserts = append(inserts, model.SessionEnrollment{
+					SessionID: param.SessionID,
+					UserID:    param.UserID,
+					Attended:  param.Attended,
+				})
+			}
+		}
 	}
 
 	stmt := SessionEnrollments.INSERT(
@@ -142,10 +153,15 @@ func (d *DB) UpsertSessionEnrollments(ctx context.Context, args []UpsertSessionE
 		inserts,
 	).ON_CONFLICT().ON_CONSTRAINT(
 		"ux_session_id_user_id",
-	).DO_NOTHING().RETURNING(
+	).DO_UPDATE(
+		SET(
+			SessionEnrollments.UpdatedAt.SET(TimestampzT(time.Now())),
+		),
+	).RETURNING(
 		SessionEnrollments.AllColumns,
 	)
 
+	res := make([]model.SessionEnrollment, 0, len(inserts))
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

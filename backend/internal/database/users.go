@@ -140,17 +140,26 @@ type UpsertUserParams struct {
 	Email string `json:"email"`
 }
 
-// UpsertUsers inserts a user into the database. If the user already exists, then only update the name and email.
-func (d *DB) UpsertUsers(ctx context.Context, args []UpsertUserParams) ([]model.User, error) {
-	var res []model.User
+// BatchUpsertUsers inserts a batch of users into the database. If the user already exists, then update the name and
+// email. Note that the role field is ignored in this operation.
+func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]model.User, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
 
 	inserts := make([]model.User, 0, len(args))
-	for _, param := range args {
-		inserts = append(inserts, model.User{
-			ID:    param.ID,
-			Name:  param.Name,
-			Email: param.Email,
-		})
+	{
+		dupFinder := map[UpsertUserParams]struct{}{}
+		for _, param := range args {
+			if _, ok := dupFinder[param]; !ok {
+				dupFinder[param] = struct{}{}
+				inserts = append(inserts, model.User{
+					ID:    param.ID,
+					Name:  param.Name,
+					Email: param.Email,
+				})
+			}
+		}
 	}
 
 	stmt := Users.INSERT(
@@ -170,6 +179,7 @@ func (d *DB) UpsertUsers(ctx context.Context, args []UpsertUserParams) ([]model.
 		Users.AllColumns,
 	)
 
+	res := make([]model.User, 0, len(inserts))
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

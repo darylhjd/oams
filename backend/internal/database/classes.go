@@ -155,18 +155,29 @@ type UpsertClassParams struct {
 	Au        int16  `json:"au"`
 }
 
-func (d *DB) UpsertClasses(ctx context.Context, args []UpsertClassParams) ([]model.Class, error) {
-	var res []model.Class
+// BatchUpsertClasses inserts a batch of classes into the database. If a class already exists, then the programme and
+// au fields are updated. This operation is mainly used by the batch endpoint. Note that this operation helps removes any
+// potential duplicate UpsertClassParams provided to it.
+func (d *DB) BatchUpsertClasses(ctx context.Context, args []UpsertClassParams) ([]model.Class, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
 
 	inserts := make([]model.Class, 0, len(args))
-	for _, param := range args {
-		inserts = append(inserts, model.Class{
-			Code:      param.Code,
-			Year:      param.Year,
-			Semester:  param.Semester,
-			Programme: param.Programme,
-			Au:        param.Au,
-		})
+	{
+		dupFinder := map[UpsertClassParams]struct{}{}
+		for _, param := range args {
+			if _, ok := dupFinder[param]; !ok {
+				dupFinder[param] = struct{}{}
+				inserts = append(inserts, model.Class{
+					Code:      param.Code,
+					Year:      param.Year,
+					Semester:  param.Semester,
+					Programme: param.Programme,
+					Au:        param.Au,
+				})
+			}
+		}
 	}
 
 	stmt := Classes.INSERT(
@@ -188,6 +199,7 @@ func (d *DB) UpsertClasses(ctx context.Context, args []UpsertClassParams) ([]mod
 		Classes.AllColumns,
 	)
 
+	res := make([]model.Class, 0, len(inserts))
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

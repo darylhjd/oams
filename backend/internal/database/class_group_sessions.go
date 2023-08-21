@@ -145,17 +145,28 @@ type UpsertClassGroupSessionParams struct {
 	Venue        string    `json:"venue"`
 }
 
-func (d *DB) UpsertClassGroupSessions(ctx context.Context, args []UpsertClassGroupSessionParams) ([]model.ClassGroupSession, error) {
-	var res []model.ClassGroupSession
+// BatchUpsertClassGroupSessions inserts a batch of class group sessions into the database. If a class group session
+// already exists, then the end time and venue is updated. This operation is mainly used by the batch endpoint. Note
+// that this operation helps remove any potential duplicate UpsertClassGroupSessionParams provided to it.
+func (d *DB) BatchUpsertClassGroupSessions(ctx context.Context, args []UpsertClassGroupSessionParams) ([]model.ClassGroupSession, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
 
 	inserts := make([]model.ClassGroupSession, 0, len(args))
-	for _, param := range args {
-		inserts = append(inserts, model.ClassGroupSession{
-			ClassGroupID: param.ClassGroupID,
-			StartTime:    param.StartTime,
-			EndTime:      param.EndTime,
-			Venue:        param.Venue,
-		})
+	{
+		dupFinder := map[UpsertClassGroupSessionParams]struct{}{}
+		for _, param := range args {
+			if _, ok := dupFinder[param]; !ok {
+				dupFinder[param] = struct{}{}
+				inserts = append(inserts, model.ClassGroupSession{
+					ClassGroupID: param.ClassGroupID,
+					StartTime:    param.StartTime,
+					EndTime:      param.EndTime,
+					Venue:        param.Venue,
+				})
+			}
+		}
 	}
 
 	stmt := ClassGroupSessions.INSERT(
@@ -176,6 +187,7 @@ func (d *DB) UpsertClassGroupSessions(ctx context.Context, args []UpsertClassGro
 		ClassGroupSessions.AllColumns,
 	)
 
+	res := make([]model.ClassGroupSession, 0, len(inserts))
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

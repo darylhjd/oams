@@ -15,7 +15,7 @@ class NavBar extends StatelessWidget {
   static final List<BoxShadow>? _boxShadow = kElevationToShadow[8];
   static const double _borderRadius = 10;
 
-  const NavBar();
+  const NavBar({super.key});
 
   @override
   Widget build(BuildContext context) {
