@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
@@ -12,15 +12,11 @@ import (
 )
 
 const (
-	namespace = "middleware"
-)
-
-const (
 	AuthContextKey = "auth_context"
 )
 
 var (
-	ErrUnexpectedAuthContextType = fmt.Errorf("%s - unexpected auth context type", namespace)
+	ErrUnexpectedAuthContextType = errors.New("unexpected auth context type")
 )
 
 // AuthContext stores useful information regarding an authentication.

@@ -92,7 +92,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 					ID:    tests.MockAuthenticatorIDTokenName,
 					Name:  "",
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  model.UserRole_User,
+					Role:  model.UserRole_SystemAdmin,
 				},
 				[]database.UpcomingClassGroupSession{},
 			},
@@ -110,7 +110,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 					ID:    tests.MockAuthenticatorIDTokenName,
 					Name:  "",
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  model.UserRole_User,
+					Role:  model.UserRole_SystemAdmin,
 				},
 				[]database.UpcomingClassGroupSession{},
 			},
@@ -150,7 +150,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withStubAuthUser {
-				tests.StubAuthContextUser(t, ctx, v1.db)
+				tests.StubAuthContextUser(t, ctx, v1.db, model.UserRole_SystemAdmin)
 			}
 
 			if tt.withUpcomingClassGroupSession {

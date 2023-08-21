@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -28,7 +27,7 @@ func TestGetAuthContext(t *testing.T) {
 			"bad context value",
 			time.Time{},
 			false,
-			fmt.Errorf("%s - unexpected auth context type", namespace),
+			ErrUnexpectedAuthContextType,
 		},
 		{
 			"no context value",
