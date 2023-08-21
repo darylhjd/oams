@@ -188,8 +188,8 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										},
 									},
 									[]database.UpsertUserParams{
-										{"CHUL6789", "CHUA LI TING", ""},
-										{"YAPW9087", "YAP WEN LI", ""},
+										{"CHUL6789", "CHUA LI TING"},
+										{"YAPW9087", "YAP WEN LI"},
 									},
 								},
 								{
@@ -205,8 +205,8 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										},
 									},
 									[]database.UpsertUserParams{
-										{"BENST129", "BENJAMIN SANTOS", ""},
-										{"YAPW9088", "YAP WEI LING", ""},
+										{"BENST129", "BENJAMIN SANTOS"},
+										{"YAPW9088", "YAP WEI LING"},
 									},
 								},
 								{
@@ -222,8 +222,8 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 										},
 									},
 									[]database.UpsertUserParams{
-										{"PATELAR14", "ARJUN PATEL", ""},
-										{"YAPX9087", "YAP XIN TING", ""},
+										{"PATELAR14", "ARJUN PATEL"},
+										{"YAPX9087", "YAP XIN TING"},
 									},
 								},
 							},

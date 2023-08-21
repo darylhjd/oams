@@ -61,8 +61,8 @@ func TestParseBatchFile(t *testing.T) {
 							},
 						},
 						[]database.UpsertUserParams{
-							{"CHUX6789", "CHUA XIN YI", ""},
-							{"YAPW9087", "YAP WEN LI", ""},
+							{"CHUX6789", "CHUA XIN YI"},
+							{"YAPW9087", "YAP WEN LI"},
 						},
 					},
 					{
@@ -83,8 +83,8 @@ func TestParseBatchFile(t *testing.T) {
 							},
 						},
 						[]database.UpsertUserParams{
-							{"BENST129", "BENJAMIN SANTOS", ""},
-							{"YAPW9088", "YAP WEI LING", ""},
+							{"BENST129", "BENJAMIN SANTOS"},
+							{"YAPW9088", "YAP WEI LING"},
 						},
 					},
 					{
@@ -115,8 +115,8 @@ func TestParseBatchFile(t *testing.T) {
 							},
 						},
 						[]database.UpsertUserParams{
-							{"PATELAR14", "ARJUN PATEL", ""},
-							{"YAPX9087", "YAP XIN TING", ""},
+							{"PATELAR14", "ARJUN PATEL"},
+							{"YAPX9087", "YAP XIN TING"},
 						},
 					},
 				},
