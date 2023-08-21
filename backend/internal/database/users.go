@@ -204,7 +204,13 @@ func (d *DB) RegisterUser(ctx context.Context, arg RegisterUserParams) (model.Us
 		},
 	).ON_CONFLICT(
 		Users.ID,
-	).DO_NOTHING().RETURNING(Users.AllColumns)
+	).DO_UPDATE(
+		SET(
+			Users.Email.SET(Users.EXCLUDED.Email),
+		).WHERE(
+			Users.Email.NOT_EQ(Users.EXCLUDED.Email),
+		),
+	).RETURNING(Users.AllColumns)
 
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	if err != nil && errors.Is(err, qrm.ErrNoRows) {
