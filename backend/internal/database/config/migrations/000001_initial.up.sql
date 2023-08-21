@@ -55,8 +55,8 @@ CREATE TABLE class_managers
     managing_role MANAGING_ROLE NOT NULL,
     created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
     updated_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-    CONSTRAINT ux_user_id_class_id_managing_role
-        UNIQUE (user_id, class_id, managing_role),
+    CONSTRAINT ux_user_id_class_id
+        UNIQUE (user_id, class_id),
     CONSTRAINT fk_user_id
         FOREIGN KEY (user_id)
             REFERENCES users (id),
