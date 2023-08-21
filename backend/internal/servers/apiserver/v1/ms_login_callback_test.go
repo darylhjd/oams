@@ -91,9 +91,11 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			)
 			if tt.withExistingUser {
 				tests.StubAuthContextUser(t, ctx, v1.db)
-				// Set a name to the auth context user, so we can check for no change.
+				// Set a name to the auth context user, so we can check for no change. We also unset the email, and check
+				// that it is later set since it is different.
 				expectedUser, err = v1.db.UpdateUser(ctx, tests.MockAuthenticatorIDTokenName, database.UpdateUserParams{
-					Name: to.Ptr("TEST ACCOUNT NAME LIM"),
+					Name:  to.Ptr("TEST ACCOUNT NAME LIM"),
+					Email: to.Ptr(""),
 				})
 				a.Nil(err)
 			}
@@ -125,6 +127,10 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 				// Check that if the user is an existing user, then user's information is unchanged in database.
 				checkUser, err := v1.db.GetUser(ctx, tests.MockAuthenticatorIDTokenName)
 				a.Nil(err)
+				a.Equal(tests.MockAuthenticatorAccountPreferredUsername, checkUser.Email)
+
+				expectedUser.Email = checkUser.Email
+				expectedUser.UpdatedAt = checkUser.UpdatedAt
 				a.Equal(expectedUser, checkUser)
 			}
 
