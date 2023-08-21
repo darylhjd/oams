@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
@@ -134,16 +135,24 @@ type UpsertClassGroupParams struct {
 	ClassType model.ClassType `json:"class_type"`
 }
 
-func (d *DB) UpsertClassGroups(ctx context.Context, args []UpsertClassGroupParams) ([]model.ClassGroup, error) {
-	var res []model.ClassGroup
+func (d *DB) BatchUpsertClassGroups(ctx context.Context, args []UpsertClassGroupParams) ([]model.ClassGroup, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
 
 	inserts := make([]model.ClassGroup, 0, len(args))
-	for _, param := range args {
-		inserts = append(inserts, model.ClassGroup{
-			ClassID:   param.ClassID,
-			Name:      param.Name,
-			ClassType: param.ClassType,
-		})
+	{
+		dupFinder := map[UpsertClassGroupParams]struct{}{}
+		for _, param := range args {
+			if _, ok := dupFinder[param]; !ok {
+				dupFinder[param] = struct{}{}
+				inserts = append(inserts, model.ClassGroup{
+					ClassID:   param.ClassID,
+					Name:      param.Name,
+					ClassType: param.ClassType,
+				})
+			}
+		}
 	}
 
 	stmt := ClassGroups.INSERT(
@@ -152,10 +161,17 @@ func (d *DB) UpsertClassGroups(ctx context.Context, args []UpsertClassGroupParam
 		ClassGroups.ClassType,
 	).MODELS(
 		inserts,
-	).ON_CONFLICT().DO_NOTHING().RETURNING(
+	).ON_CONFLICT().ON_CONSTRAINT(
+		"ux_class_id_name_class_type",
+	).DO_UPDATE(
+		SET(
+			ClassGroups.UpdatedAt.SET(TimestampzT(time.Now())),
+		),
+	).RETURNING(
 		ClassGroups.AllColumns,
 	)
 
+	res := make([]model.ClassGroup, 0, len(inserts))
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

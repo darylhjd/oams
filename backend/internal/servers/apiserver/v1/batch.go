@@ -158,7 +158,6 @@ func (v *APIServerV1) batchPut(r *http.Request) apiResponse {
 
 // processBatchPutRequest and return a batchPutResponse and error if encountered.
 // This implementation aims to reduce database actions by sacrificing memory usage.
-// TODO: This endpoint returns an internal server error with rows not found message if the upsert does nothing.
 func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutRequest) (batchPutResponse, error) {
 	resp := batchPutResponse{
 		response: newSuccessResponse(),
@@ -207,7 +206,7 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		classesParams = append(classesParams, class.Class)
 	}
 
-	upsertClasses, err := txDb.UpsertClasses(r.Context(), classesParams)
+	upsertClasses, err := txDb.BatchUpsertClasses(r.Context(), classesParams)
 	if err != nil {
 		return resp, err
 	}
@@ -223,7 +222,7 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		}
 	}
 
-	upsertClassGroups, err := txDb.UpsertClassGroups(r.Context(), classGroupsParams)
+	upsertClassGroups, err := txDb.BatchUpsertClassGroups(r.Context(), classGroupsParams)
 	if err != nil {
 		return resp, err
 	}
@@ -243,7 +242,7 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		}
 	}
 
-	upsertClassGroupSessions, err := txDb.UpsertClassGroupSessions(r.Context(), classGroupSessionsParams)
+	upsertClassGroupSessions, err := txDb.BatchUpsertClassGroupSessions(r.Context(), classGroupSessionsParams)
 	if err != nil {
 		return resp, err
 	}
@@ -257,11 +256,11 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		}
 	}
 
-	if _, err = txDb.UpsertUsers(r.Context(), usersParams); err != nil {
+	if _, err = txDb.BatchUpsertUsers(r.Context(), usersParams); err != nil {
 		return resp, err
 	}
 
-	if _, err = txDb.UpsertSessionEnrollments(r.Context(), enrollmentsParams); err != nil {
+	if _, err = txDb.BatchUpsertSessionEnrollments(r.Context(), enrollmentsParams); err != nil {
 		return resp, err
 	}
 

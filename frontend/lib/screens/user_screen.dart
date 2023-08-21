@@ -18,11 +18,15 @@ class UserScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ScreenTemplate(ref.watch(_userProvider(_userId)).when(
-          data: (data) => _screen(context, data),
-          error: (error, stackTrace) => const InvalidSession(),
-          loading: () => const Center(child: CircularProgressIndicator()),
-        ));
+    return ScreenTemplate(
+      ref.watch(_userProvider(_userId)).when(
+            data: (data) => _screen(context, data),
+            error: (error, stackTrace) => const InvalidSession(),
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+    );
   }
 
   Widget _screen(BuildContext context, GetUserResponse data) {
