@@ -135,9 +135,8 @@ func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
 }
 
 type UpsertUserParams struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // BatchUpsertUsers inserts a batch of users into the database. If the user already exists, then update the name and
@@ -154,9 +153,8 @@ func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]m
 			if _, ok := dupFinder[param]; !ok {
 				dupFinder[param] = struct{}{}
 				inserts = append(inserts, model.User{
-					ID:    param.ID,
-					Name:  param.Name,
-					Email: param.Email,
+					ID:   param.ID,
+					Name: param.Name,
 				})
 			}
 		}
@@ -173,7 +171,6 @@ func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]m
 	).DO_UPDATE(
 		SET(
 			Users.Name.SET(Users.EXCLUDED.Name),
-			Users.Email.SET(Users.EXCLUDED.Email),
 		),
 	).RETURNING(
 		Users.AllColumns,
