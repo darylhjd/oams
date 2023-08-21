@@ -43,9 +43,8 @@ class User {
 }
 
 enum UserRole {
-  student("STUDENT"),
-  courseCoordinator("COURSE_COORDINATOR"),
-  admin("ADMIN");
+  user("USER"),
+  systemAdmin("SYSTEM_ADMIN");
 
   final String name;
 
