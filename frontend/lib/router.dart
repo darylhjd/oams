@@ -115,7 +115,7 @@ GoRoute _adminPanelRoute(ProviderRef<GoRouter> ref) {
       // Check user privileges.
       final userRole =
           ref.watch(sessionUserProvider).requireValue.sessionUser.role;
-      return userRole != UserRole.admin
+      return userRole != UserRole.systemAdmin
           ? state.namedLocation(Routes.index.name)
           : null;
     },
@@ -147,7 +147,7 @@ GoRoute _userRoute(ProviderRef<GoRouter> ref) {
       // Check user privileges.
       final userRole =
           ref.watch(sessionUserProvider).requireValue.sessionUser.role;
-      return userRole != UserRole.admin
+      return userRole != UserRole.systemAdmin
           ? state.namedLocation(Routes.index.name)
           : null;
     },

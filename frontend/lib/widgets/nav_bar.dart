@@ -149,7 +149,7 @@ class _Options extends ConsumerWidget {
     final userRole =
         ref.watch(sessionUserProvider).requireValue.sessionUser.role;
     return [
-      if (userRole == UserRole.admin)
+      if (userRole == UserRole.systemAdmin)
         const PopupMenuItem(
           padding: EdgeInsets.zero,
           child: _AdminPanelButton(),
@@ -163,7 +163,7 @@ class _Options extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (userRole == UserRole.admin) const _AdminPanelButton(),
+        if (userRole == UserRole.systemAdmin) const _AdminPanelButton(),
       ],
     );
   }
