@@ -10,11 +10,9 @@ package enum
 import "github.com/go-jet/jet/v2/postgres"
 
 var UserRole = &struct {
-	Student           postgres.StringExpression
-	CourseCoordinator postgres.StringExpression
-	Admin             postgres.StringExpression
+	User        postgres.StringExpression
+	SystemAdmin postgres.StringExpression
 }{
-	Student:           postgres.NewEnumValue("STUDENT"),
-	CourseCoordinator: postgres.NewEnumValue("COURSE_COORDINATOR"),
-	Admin:             postgres.NewEnumValue("ADMIN"),
+	User:        postgres.NewEnumValue("USER"),
+	SystemAdmin: postgres.NewEnumValue("SYSTEM_ADMIN"),
 }

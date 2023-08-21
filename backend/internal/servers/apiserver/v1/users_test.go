@@ -77,7 +77,7 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 				[]model.User{
 					{
 						ID:   "EXISTING_USER",
-						Role: model.UserRole_Student,
+						Role: model.UserRole_User,
 					},
 				},
 			},
@@ -234,7 +234,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			usersPostRequest{
 				database.CreateUserParams{
 					ID:   "NEW_USER",
-					Role: model.UserRole_Student,
+					Role: model.UserRole_User,
 				},
 			},
 			false,
@@ -242,7 +242,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 				newSuccessResponse(),
 				usersPostUserResponseFields{
 					ID:   "NEW_USER",
-					Role: model.UserRole_Student,
+					Role: model.UserRole_User,
 				},
 			},
 			http.StatusOK,
@@ -253,7 +253,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			usersPostRequest{
 				database.CreateUserParams{
 					ID:   "EXISTING_USER",
-					Role: model.UserRole_Student,
+					Role: model.UserRole_User,
 				},
 			},
 			true,
@@ -266,7 +266,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			usersPostRequest{
 				database.CreateUserParams{
 					ID:   sessionUserId,
-					Role: model.UserRole_Student,
+					Role: model.UserRole_User,
 				},
 			},
 			false,

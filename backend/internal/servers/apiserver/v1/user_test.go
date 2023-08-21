@@ -92,7 +92,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 					ID:    tests.MockAuthenticatorIDTokenName,
 					Name:  "",
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  model.UserRole_Student,
+					Role:  model.UserRole_User,
 				},
 				[]database.UpcomingClassGroupSession{},
 			},
@@ -110,7 +110,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 					ID:    tests.MockAuthenticatorIDTokenName,
 					Name:  "",
 					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  model.UserRole_Student,
+					Role:  model.UserRole_User,
 				},
 				[]database.UpcomingClassGroupSession{},
 			},
@@ -214,7 +214,7 @@ func TestAPIServerV1_userGet(t *testing.T) {
 				newSuccessResponse(),
 				model.User{
 					ID:   "EXISTING_USER",
-					Role: model.UserRole_Student,
+					Role: model.UserRole_User,
 				},
 			},
 			http.StatusOK,
@@ -283,7 +283,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 				database.UpdateUserParams{
 					Name:  to.Ptr("NEW NAME"),
 					Email: to.Ptr("NEW EMAIL"),
-					Role:  to.Ptr(model.UserRole_Student),
+					Role:  to.Ptr(model.UserRole_User),
 				},
 			},
 			true,
@@ -293,7 +293,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 					ID:    "EXISTING_ID",
 					Name:  "NEW NAME",
 					Email: "NEW EMAIL",
-					Role:  model.UserRole_Student,
+					Role:  model.UserRole_User,
 				},
 			},
 			false,
@@ -310,7 +310,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 				newSuccessResponse(),
 				userPatchUserResponseFields{
 					ID:   "EXISTING_ID",
-					Role: model.UserRole_Student,
+					Role: model.UserRole_User,
 				},
 			},
 			true,
@@ -438,7 +438,7 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, true)
 				userId = createdEnrollment.UserID
 			case tt.withExistingUser:
-				_ = tests.StubUser(t, ctx, v1.db, userId, model.UserRole_Student)
+				_ = tests.StubUser(t, ctx, v1.db, userId, model.UserRole_User)
 			default:
 				userId = uuid.NewString()
 			}
