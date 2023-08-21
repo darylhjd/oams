@@ -18,7 +18,7 @@ func StubAuthContextUser(t *testing.T, ctx context.Context, db *database.DB) mod
 	user, err := db.CreateUser(ctx, database.CreateUserParams{
 		ID:    MockAuthenticatorIDTokenName,
 		Email: MockAuthenticatorAccountPreferredUsername,
-		Role:  model.UserRole_Student,
+		Role:  model.UserRole_User,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -143,7 +143,7 @@ func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, a
 
 	user := StubUser(t, ctx, db,
 		uuid.NewString(),
-		model.UserRole_Student,
+		model.UserRole_User,
 	)
 
 	enrollment, err := db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{

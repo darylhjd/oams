@@ -340,7 +340,7 @@ func TestAPIServerV1_sessionEnrollmentsPost(t *testing.T) {
 				}
 
 				if tt.withExistingUser {
-					createdUser := tests.StubUser(t, ctx, v1.db, uuid.NewString(), model.UserRole_Student)
+					createdUser := tests.StubUser(t, ctx, v1.db, uuid.NewString(), model.UserRole_User)
 					tt.withRequest.SessionEnrollment.UserID = createdUser.ID
 				}
 			}
