@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -54,7 +53,7 @@ func TestAPIServerV1_logOut(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			tests.StubAuthContextUser(t, ctx, v1.db, model.UserRole_SystemAdmin)
+			tests.StubAuthContextUser(t, ctx, v1.db)
 
 			req := httptest.NewRequest(http.MethodGet, logoutUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))

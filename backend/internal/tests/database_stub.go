@@ -12,13 +12,13 @@ import (
 )
 
 // StubAuthContextUser inserts the mock auth context user into the database.
-func StubAuthContextUser(t *testing.T, ctx context.Context, db *database.DB, role model.UserRole) model.User {
+func StubAuthContextUser(t *testing.T, ctx context.Context, db *database.DB) model.User {
 	t.Helper()
 
 	user, err := db.CreateUser(ctx, database.CreateUserParams{
 		ID:    MockAuthenticatorIDTokenName,
 		Email: MockAuthenticatorAccountPreferredUsername,
-		Role:  role,
+		Role:  model.UserRole_User,
 	})
 	if err != nil {
 		t.Fatal(err)

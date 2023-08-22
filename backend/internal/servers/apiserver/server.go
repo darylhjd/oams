@@ -105,3 +105,7 @@ func (s *APIServer) base(w http.ResponseWriter, _ *http.Request) {
 func (s *APIServer) Stop() error {
 	return s.db.Close()
 }
+
+func (s *APIServer) GetLogger() *zap.Logger {
+	return s.l
+}
