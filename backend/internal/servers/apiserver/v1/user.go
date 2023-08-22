@@ -49,19 +49,20 @@ func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 		UpcomingClassGroupSessions: []database.UpcomingClassGroupSession{},
 	}
 
-	authContext, isSignedIn, err := middleware.GetAuthContext(r)
-	switch {
-	case err != nil:
+	authContext, err := middleware.GetAuthContext(r)
+	if err != nil {
+		if errors.Is(err, middleware.ErrNoAuthContext) {
+			return newErrorResponse(http.StatusUnauthorized, "client lacks authentication credentials")
+		}
+
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, err.Error())
-	case isSignedIn:
-		resp.SessionUser, err = v.db.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
-		if err != nil {
-			v.logInternalServerError(r, fmt.Errorf("expected session user in database: %w", err))
-			return newErrorResponse(http.StatusInternalServerError, "could get session user from database")
-		}
-	default:
-		return newErrorResponse(http.StatusUnauthorized, "client lacks authentication credentials")
+	}
+
+	resp.SessionUser, err = v.db.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
+	if err != nil {
+		v.logInternalServerError(r, fmt.Errorf("expected session user in database: %w", err))
+		return newErrorResponse(http.StatusInternalServerError, "could get session user from database")
 	}
 
 	upcomingClassGroupSessions, err := v.db.GetUserUpcomingClassGroupSessions(r.Context(), resp.SessionUser.ID)

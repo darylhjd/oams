@@ -32,12 +32,12 @@ func TestAPIServerV1_logOut(t *testing.T) {
 		{
 			"request with wrong account type in context",
 			time.Time{},
-			newErrorResponse(http.StatusInternalServerError, "unexpected auth context type"),
+			newErrorResponse(http.StatusInternalServerError, middleware.ErrUnexpectedAuthContextType.Error()),
 		},
 		{
 			"request with no account in context",
 			nil,
-			newErrorResponse(http.StatusInternalServerError, "logout called but there is no session user"),
+			newErrorResponse(http.StatusInternalServerError, middleware.ErrNoAuthContext.Error()),
 		},
 	}
 
