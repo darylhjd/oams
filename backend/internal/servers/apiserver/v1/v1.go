@@ -71,17 +71,27 @@ func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
 	v.mux.HandleFunc(logoutUrl, middleware.MustAuth(v.logout, v.azure))
 
-	v.mux.HandleFunc(batchUrl, middleware.AllowMethodsWithUserRoles(
-		middleware.MustAuth(v.batch, v.azure),
-		v.db,
-		map[string][]model.UserRole{
-			http.MethodPost: {model.UserRole_SystemAdmin},
-			http.MethodPut:  {model.UserRole_SystemAdmin},
-		},
+	v.mux.HandleFunc(batchUrl, middleware.MustAuth(
+		middleware.AllowMethodsWithUserRoles(
+			v.batch,
+			v.db,
+			map[string][]model.UserRole{
+				http.MethodPost: {model.UserRole_SystemAdmin},
+				http.MethodPut:  {model.UserRole_SystemAdmin},
+			},
+		),
+		v.azure,
 	))
 
 	v.mux.HandleFunc(usersUrl, middleware.MustAuth(
-		middleware.AllowMethods(v.users, http.MethodGet, http.MethodPost),
+		middleware.AllowMethodsWithUserRoles(
+			v.users,
+			v.db,
+			map[string][]model.UserRole{
+				http.MethodGet:  {model.UserRole_SystemAdmin},
+				http.MethodPost: {model.UserRole_SystemAdmin},
+			},
+		),
 		v.azure,
 	))
 
