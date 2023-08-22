@@ -6,7 +6,8 @@ import (
 	"net/http"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
-
+	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
@@ -16,6 +17,7 @@ const (
 )
 
 var (
+	ErrNoAuthContext             = errors.New("no auth context found")
 	ErrUnexpectedAuthContextType = errors.New("unexpected auth context type")
 )
 
@@ -26,43 +28,69 @@ type AuthContext struct {
 }
 
 // GetAuthContext is a helper function to get the authentication context from a request context.
-// If there is no AuthContext (i.e. there is no user session from request), then the boolean will be false and
-// AuthContext is empty. If there is an error while getting an AuthContext even with a user session, error will not be nil.
-// Callers should check for error first before checking for the boolean flag.
-func GetAuthContext(r *http.Request) (AuthContext, bool, error) {
+func GetAuthContext(r *http.Request) (AuthContext, error) {
 	val := r.Context().Value(AuthContextKey)
 	if val == nil {
-		return AuthContext{}, false, nil
+		return AuthContext{}, ErrNoAuthContext
 	}
 
 	authContext, ok := val.(AuthContext)
 	if !ok {
-		return AuthContext{}, false, ErrUnexpectedAuthContextType
+		return AuthContext{}, ErrUnexpectedAuthContextType
 	}
 
-	return authContext, true, nil
+	return authContext, nil
 }
 
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
 func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerFunc {
-	// Create set of allowed methods.
-	allowedMethods := map[string]struct{}{}
-	for _, method := range methods {
-		allowedMethods[method] = struct{}{}
-	}
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := allowedMethods[r.Method]; !ok {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
+		for _, method := range methods {
+			if method == r.Method {
+				handlerFunc(w, r)
+				return
+			}
 		}
 
-		handlerFunc(w, r)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 
-// WithAuthContext adds AuthContext for a handler and checks for authentication status.
-func WithAuthContext(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) http.HandlerFunc {
+// AllowMethodsWithUserRoles allows a handler to accept only certain specified HTTP methods with corresponding user roles.
+func AllowMethodsWithUserRoles(handlerFunc http.HandlerFunc, db *database.DB, methodRoles map[string][]model.UserRole) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authContext, err := GetAuthContext(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		for method, roles := range methodRoles {
+			if method == r.Method {
+				user, err := db.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
+				if err != nil {
+					http.Error(w, "error getting auth user", http.StatusInternalServerError)
+					return
+				}
+
+				for _, role := range roles {
+					if role == user.Role {
+						handlerFunc(w, r)
+						return
+					}
+				}
+
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+		}
+
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+// MustAuth adds AuthContext for a handler and checks for authentication status.
+func MustAuth(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		set, err := authenticator.GetKeyCache().Get(r.Context(), oauth2.KeySetSource)
 		if err != nil {

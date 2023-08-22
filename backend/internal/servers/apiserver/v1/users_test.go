@@ -11,7 +11,6 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
-	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -48,15 +47,12 @@ func TestAPIServerV1_users(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
-			ctx := context.Background()
 			id := uuid.NewString()
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
-			tests.StubAuthContextUser(t, ctx, v1.db, model.UserRole_SystemAdmin)
 
 			req := httptest.NewRequest(tt.withMethod, usersUrl, nil)
-			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tests.NewMockAuthContext()))
 			rr := httptest.NewRecorder()
 			v1.users(rr, req)
 
@@ -107,7 +103,6 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
-			authUser := tests.StubAuthContextUser(t, ctx, v1.db, model.UserRole_SystemAdmin)
 
 			if tt.withExistingUser {
 				for idx, user := range tt.wantResponse.Users {
@@ -117,10 +112,7 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 				}
 			}
 
-			tt.wantResponse.Users = append(tt.wantResponse.Users, authUser)
-
 			req := httptest.NewRequest(http.MethodGet, usersUrl, nil)
-			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tests.NewMockAuthContext()))
 			actualResp, ok := v1.usersGet(req).(usersGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
@@ -201,18 +193,15 @@ func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
 			t.Parallel()
 
 			a := assert.New(t)
-			ctx := context.Background()
 			id := uuid.NewString()
 
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
-			tests.StubAuthContextUser(t, ctx, v1.db, model.UserRole_SystemAdmin)
 
 			u := url.URL{Path: usersUrl}
 			u.RawQuery = tt.query.Encode()
 
 			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tests.NewMockAuthContext()))
 			resp := v1.usersGet(req)
 			a.Equal(tt.wantStatusCode, resp.Code())
 

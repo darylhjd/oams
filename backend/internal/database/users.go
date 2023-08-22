@@ -7,23 +7,17 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
-	"github.com/darylhjd/oams/backend/internal/middleware"
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
 func (d *DB) ListUsers(ctx context.Context, params listParams) ([]model.User, error) {
-	authContext, ok := ctx.Value(middleware.AuthContextKey).(middleware.AuthContext)
-	if !ok {
-		return nil, middleware.ErrUnexpectedAuthContextType
-	}
+	var res []model.User
 
 	stmt := SELECT(
 		Users.AllColumns,
 	).FROM(
 		Users.Table,
-	).WHERE(
-		whereIsSystemAdmin(authContext.AuthResult.IDToken.Name),
 	).ORDER_BY(
 		Users.ID.ASC(),
 	)
@@ -32,7 +26,6 @@ func (d *DB) ListUsers(ctx context.Context, params listParams) ([]model.User, er
 	stmt = setLimit(stmt, params)
 	stmt = setOffset(stmt, params)
 
-	var res []model.User
 	err := stmt.QueryContext(ctx, d.queryable, &res)
 	return res, err
 }

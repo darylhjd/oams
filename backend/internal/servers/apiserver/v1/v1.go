@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/gorilla/schema"
 	"go.uber.org/zap"
 
@@ -68,59 +69,73 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	v.mux.HandleFunc(logoutUrl, middleware.WithAuthContext(v.logout, v.azure))
+	v.mux.HandleFunc(logoutUrl, middleware.MustAuth(v.logout, v.azure))
 
-	v.mux.HandleFunc(batchUrl, middleware.WithAuthContext(
-		middleware.AllowMethods(v.batch, http.MethodPost, http.MethodPut),
+	v.mux.HandleFunc(batchUrl, middleware.MustAuth(
+		middleware.AllowMethodsWithUserRoles(
+			v.batch,
+			v.db,
+			map[string][]model.UserRole{
+				http.MethodPost: {model.UserRole_SystemAdmin},
+				http.MethodPut:  {model.UserRole_SystemAdmin},
+			},
+		),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(usersUrl, middleware.WithAuthContext(
-		middleware.AllowMethods(v.users, http.MethodGet, http.MethodPost),
+	v.mux.HandleFunc(usersUrl, middleware.MustAuth(
+		middleware.AllowMethodsWithUserRoles(
+			v.users,
+			v.db,
+			map[string][]model.UserRole{
+				http.MethodGet:  {model.UserRole_SystemAdmin},
+				http.MethodPost: {model.UserRole_SystemAdmin},
+			},
+		),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(userUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(userUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.user, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(classesUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(classesUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classes, http.MethodGet, http.MethodPost),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(classUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(classUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.class, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(classGroupsUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(classGroupsUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classGroups, http.MethodGet, http.MethodPost),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(classGroupUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(classGroupUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classGroup, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(classGroupSessionsUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(classGroupSessionsUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classGroupSessions, http.MethodGet, http.MethodPost),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(classGroupSessionUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(classGroupSessionUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classGroupSession, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(sessionEnrollmentsUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(sessionEnrollmentsUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.sessionEnrollments, http.MethodGet, http.MethodPost),
 		v.azure,
 	))
 
-	v.mux.HandleFunc(sessionEnrollmentUrl, middleware.WithAuthContext(
+	v.mux.HandleFunc(sessionEnrollmentUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.sessionEnrollment, http.MethodGet, http.MethodPatch, http.MethodDelete),
 		v.azure,
 	))

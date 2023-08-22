@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -33,12 +32,12 @@ func TestAPIServerV1_logOut(t *testing.T) {
 		{
 			"request with wrong account type in context",
 			time.Time{},
-			newErrorResponse(http.StatusInternalServerError, "unexpected auth context type"),
+			newErrorResponse(http.StatusInternalServerError, middleware.ErrUnexpectedAuthContextType.Error()),
 		},
 		{
 			"request with no account in context",
 			nil,
-			newErrorResponse(http.StatusInternalServerError, "logout called but there is no session user"),
+			newErrorResponse(http.StatusInternalServerError, middleware.ErrNoAuthContext.Error()),
 		},
 	}
 
@@ -54,7 +53,7 @@ func TestAPIServerV1_logOut(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			tests.StubAuthContextUser(t, ctx, v1.db, model.UserRole_SystemAdmin)
+			tests.StubAuthContextUser(t, ctx, v1.db)
 
 			req := httptest.NewRequest(http.MethodGet, logoutUrl, nil)
 			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
