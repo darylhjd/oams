@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/darylhjd/oams/backend/internal/permissions"
 	"github.com/gorilla/schema"
 	"go.uber.org/zap"
 
@@ -75,9 +75,9 @@ func (v *APIServerV1) registerHandlers() {
 		middleware.AllowMethodsWithUserRoles(
 			v.batch,
 			v.db,
-			map[string][]model.UserRole{
-				http.MethodPost: {model.UserRole_SystemAdmin},
-				http.MethodPut:  {model.UserRole_SystemAdmin},
+			map[string][]permissions.Permission{
+				http.MethodPost: {permissions.PermissionBatchPost},
+				http.MethodPut:  {permissions.PermissionBatchPut},
 			},
 		),
 		v.azure,
@@ -87,9 +87,9 @@ func (v *APIServerV1) registerHandlers() {
 		middleware.AllowMethodsWithUserRoles(
 			v.users,
 			v.db,
-			map[string][]model.UserRole{
-				http.MethodGet:  {model.UserRole_SystemAdmin},
-				http.MethodPost: {model.UserRole_SystemAdmin},
+			map[string][]permissions.Permission{
+				http.MethodGet:  {permissions.PermissionUserRead},
+				http.MethodPost: {permissions.PermissionUserCreate},
 			},
 		),
 		v.azure,
