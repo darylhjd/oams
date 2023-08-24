@@ -25,7 +25,7 @@ func (d *DB) ListClassGroups(ctx context.Context, params listParams) ([]model.Cl
 	stmt = setLimit(stmt, params)
 	stmt = setOffset(stmt, params)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -40,7 +40,7 @@ func (d *DB) GetClassGroup(ctx context.Context, id int64) (model.ClassGroup, err
 		ClassGroups.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -67,7 +67,7 @@ func (d *DB) CreateClassGroup(ctx context.Context, arg CreateClassGroupParams) (
 		ClassGroups.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -113,7 +113,7 @@ func (d *DB) UpdateClassGroup(ctx context.Context, id int64, arg UpdateClassGrou
 		ClassGroups.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -125,7 +125,7 @@ func (d *DB) DeleteClassGroup(ctx context.Context, id int64) (model.ClassGroup, 
 			ClassGroups.ID.EQ(Int64(id)),
 		).RETURNING(ClassGroups.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -172,6 +172,6 @@ func (d *DB) BatchUpsertClassGroups(ctx context.Context, args []UpsertClassGroup
 	)
 
 	res := make([]model.ClassGroup, 0, len(inserts))
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }

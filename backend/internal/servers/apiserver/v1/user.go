@@ -49,7 +49,7 @@ func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 		UpcomingClassGroupSessions: []database.UpcomingClassGroupSession{},
 	}
 
-	authContext, err := middleware.GetAuthContext(r)
+	authContext, err := middleware.GetAuthContext(r.Context())
 	if err != nil {
 		if errors.Is(err, middleware.ErrNoAuthContext) {
 			return newErrorResponse(http.StatusUnauthorized, "client lacks authentication credentials")

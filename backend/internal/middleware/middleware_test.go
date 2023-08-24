@@ -40,7 +40,7 @@ func TestGetAuthContext(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req = req.WithContext(context.WithValue(req.Context(), AuthContextKey, tt.contextValue))
 
-			_, err := GetAuthContext(req)
+			_, err := GetAuthContext(req.Context())
 			a.Equal(tt.wantErr, err)
 		})
 	}

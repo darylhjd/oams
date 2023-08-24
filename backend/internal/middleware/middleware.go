@@ -7,9 +7,9 @@ import (
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
+	"github.com/darylhjd/oams/backend/internal/permissions"
 )
 
 const (
@@ -28,8 +28,8 @@ type AuthContext struct {
 }
 
 // GetAuthContext is a helper function to get the authentication context from a request context.
-func GetAuthContext(r *http.Request) (AuthContext, error) {
-	val := r.Context().Value(AuthContextKey)
+func GetAuthContext(ctx context.Context) (AuthContext, error) {
+	val := ctx.Value(AuthContextKey)
 	if val == nil {
 		return AuthContext{}, ErrNoAuthContext
 	}
@@ -56,16 +56,16 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 	}
 }
 
-// AllowMethodsWithUserRoles allows a handler to accept only certain specified HTTP methods with corresponding user roles.
-func AllowMethodsWithUserRoles(handlerFunc http.HandlerFunc, db *database.DB, methodRoles map[string][]model.UserRole) http.HandlerFunc {
+// AllowMethodsWithPermissions allows a handler to accept only requests from users with certain permissions.
+func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, db *database.DB, methodPermissions map[string][]permissions.Permission) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authContext, err := GetAuthContext(r)
+		authContext, err := GetAuthContext(r.Context())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		for method, roles := range methodRoles {
+		for method, roles := range methodPermissions {
 			if method == r.Method {
 				user, err := db.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
 				if err != nil {
@@ -73,14 +73,13 @@ func AllowMethodsWithUserRoles(handlerFunc http.HandlerFunc, db *database.DB, me
 					return
 				}
 
-				for _, role := range roles {
-					if role == user.Role {
-						handlerFunc(w, r)
-						return
-					}
+				if !permissions.HasPermissions(user.Role, roles...) {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+
 				}
 
-				w.WriteHeader(http.StatusUnauthorized)
+				handlerFunc(w, r)
 				return
 			}
 		}

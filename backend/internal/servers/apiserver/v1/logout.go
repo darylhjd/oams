@@ -14,7 +14,7 @@ type logoutResponse struct {
 func (v *APIServerV1) logout(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	authContext, err := middleware.GetAuthContext(r)
+	authContext, err := middleware.GetAuthContext(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
 		resp = newErrorResponse(http.StatusInternalServerError, err.Error())

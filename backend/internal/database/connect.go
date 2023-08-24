@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/go-jet/jet/v2/qrm"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"github.com/darylhjd/oams/backend/internal/env"
@@ -20,25 +19,6 @@ const (
 	sslMode     = "sslmode"
 	sslRootCert = "sslrootcert"
 )
-
-type DB struct {
-	// Conn holds the base connection to the database. Usually, one will not directly use this for interactions with
-	// the database.
-	Conn *sql.DB
-
-	// queryable is used to support transactions.
-	queryable qrm.Queryable
-}
-
-// WithTx returns a new DB object with following transaction. The new DB should not be used once the transaction has
-// been committed.
-func (d *DB) WithTx(tx *sql.Tx) *DB {
-	return &DB{d.Conn, tx}
-}
-
-func (d *DB) Close() error {
-	return d.Conn.Close()
-}
 
 // Connect and return an interface to the OAMS database.
 func Connect(ctx context.Context) (*DB, error) {

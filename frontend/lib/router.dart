@@ -41,7 +41,6 @@ GoRouter _indexRoute(ProviderRef<GoRouter> ref) {
           _loginRoute(ref),
           _profileRoute(ref),
           _adminPanelRoute(ref),
-          _userRoute(ref),
         ],
       ),
     ],
@@ -119,6 +118,9 @@ GoRoute _adminPanelRoute(ProviderRef<GoRouter> ref) {
           ? state.namedLocation(Routes.index.name)
           : null;
     },
+    routes: [
+      _userRoute(ref),
+    ],
   );
 }
 
@@ -130,26 +132,5 @@ GoRoute _userRoute(ProviderRef<GoRouter> ref) {
       key: state.pageKey,
       child: UserScreen(state.pathParameters["userId"]!),
     ),
-    redirect: (context, state) {
-      if (!ref.watch(sessionProvider)) {
-        final resolvedPath = state.fullPath!
-            .replaceAll(":userId", state.pathParameters["userId"]!);
-        final redirectUrl =
-            "${webServerHost()}:${webServerPort()}$resolvedPath";
-        return state.namedLocation(
-          Routes.login.name,
-          queryParameters: {
-            APIClient.loginRedirectUrlParam: redirectUrl,
-          },
-        );
-      }
-
-      // Check user privileges.
-      final userRole =
-          ref.watch(sessionUserProvider).requireValue.sessionUser.role;
-      return userRole != UserRole.systemAdmin
-          ? state.namedLocation(Routes.index.name)
-          : null;
-    },
   );
 }
