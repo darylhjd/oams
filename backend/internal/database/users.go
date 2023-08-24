@@ -17,7 +17,7 @@ func (d *DB) ListUsers(ctx context.Context, params listParams) ([]model.User, er
 	stmt := SELECT(
 		Users.AllColumns,
 	).FROM(
-		Users.Table,
+		Users,
 	).ORDER_BY(
 		Users.ID.ASC(),
 	)

@@ -12,18 +12,12 @@ type logoutResponse struct {
 }
 
 func (v *APIServerV1) logout(w http.ResponseWriter, r *http.Request) {
-	var resp apiResponse
+	var resp apiResponse = logoutResponse{newSuccessResponse()}
 
-	authContext, err := middleware.GetAuthContext(r.Context())
-	if err != nil {
+	authContext := middleware.GetAuthContext(r.Context())
+	if err := v.azure.RemoveAccount(r.Context(), authContext.AuthResult.Account); err != nil {
 		v.logInternalServerError(r, err)
-		resp = newErrorResponse(http.StatusInternalServerError, err.Error())
-	} else {
-		resp = logoutResponse{newSuccessResponse()}
-		if err = v.azure.RemoveAccount(r.Context(), authContext.AuthResult.Account); err != nil {
-			v.logInternalServerError(r, err)
-			resp = newErrorResponse(http.StatusInternalServerError, "error clearing account cache")
-		}
+		resp = newErrorResponse(http.StatusInternalServerError, "error clearing account cache")
 	}
 
 	_ = oauth2.DeleteSessionCookie(w)

@@ -118,15 +118,6 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			"",
 		},
 		{
-			"request with invalid auth context",
-			time.Time{},
-			true,
-			false,
-			userMeResponse{},
-			http.StatusInternalServerError,
-			"unexpected auth context type",
-		},
-		{
 			"request with valid auth context but non-existent user in database",
 			tests.NewMockAuthContext(),
 			false,

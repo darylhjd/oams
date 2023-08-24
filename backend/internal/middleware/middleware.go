@@ -27,19 +27,20 @@ type AuthContext struct {
 	AuthResult confidential.AuthResult
 }
 
-// GetAuthContext is a helper function to get the authentication context from a request context.
-func GetAuthContext(ctx context.Context) (AuthContext, error) {
+// GetAuthContext is a helper function to get the authentication context from a request context. If the auth context is
+// not present or it is of a wrong type, then GetAuthContext panics.
+func GetAuthContext(ctx context.Context) AuthContext {
 	val := ctx.Value(AuthContextKey)
 	if val == nil {
-		return AuthContext{}, ErrNoAuthContext
+		panic(ErrNoAuthContext)
 	}
 
 	authContext, ok := val.(AuthContext)
 	if !ok {
-		return AuthContext{}, ErrUnexpectedAuthContextType
+		panic(ErrUnexpectedAuthContextType)
 	}
 
-	return authContext, nil
+	return authContext
 }
 
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
@@ -59,11 +60,7 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 // AllowMethodsWithPermissions allows a handler to accept only requests from users with certain permissions.
 func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, db *database.DB, methodPermissions map[string][]permissions.Permission) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authContext, err := GetAuthContext(r.Context())
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		authContext := GetAuthContext(r.Context())
 
 		for method, roles := range methodPermissions {
 			if method == r.Method {
