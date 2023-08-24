@@ -2,46 +2,15 @@ package middleware
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/env"
+	"github.com/darylhjd/oams/backend/internal/middleware/values"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 	"github.com/darylhjd/oams/backend/internal/permissions"
 )
-
-const (
-	AuthContextKey = "auth_context"
-)
-
-var (
-	ErrNoAuthContext             = errors.New("no auth context found")
-	ErrUnexpectedAuthContextType = errors.New("unexpected auth context type")
-)
-
-// AuthContext stores useful information regarding an authentication.
-type AuthContext struct {
-	Claims     *oauth2.AzureClaims
-	AuthResult confidential.AuthResult
-}
-
-// GetAuthContext is a helper function to get the authentication context from a request context. If the auth context is
-// not present or it is of a wrong type, then GetAuthContext panics.
-func GetAuthContext(ctx context.Context) AuthContext {
-	val := ctx.Value(AuthContextKey)
-	if val == nil {
-		panic(ErrNoAuthContext)
-	}
-
-	authContext, ok := val.(AuthContext)
-	if !ok {
-		panic(ErrUnexpectedAuthContextType)
-	}
-
-	return authContext
-}
 
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
 func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerFunc {
@@ -60,7 +29,7 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 // AllowMethodsWithPermissions allows a handler to accept only requests from users with certain permissions.
 func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, db *database.DB, methodPermissions map[string][]permissions.Permission) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authContext := GetAuthContext(r.Context())
+		authContext := values.GetAuthContext(r.Context())
 
 		for method, roles := range methodPermissions {
 			if method == r.Method {
@@ -129,7 +98,7 @@ func MustAuth(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) 
 		_ = oauth2.SetSessionCookie(w, res)
 
 		// Add auth context to the request.
-		r = r.WithContext(context.WithValue(r.Context(), AuthContextKey, AuthContext{
+		r = r.WithContext(context.WithValue(r.Context(), values.AuthContextKey, values.AuthContext{
 			Claims:     claims,
 			AuthResult: res,
 		}))

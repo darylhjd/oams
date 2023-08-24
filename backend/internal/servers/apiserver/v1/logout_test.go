@@ -7,11 +7,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/darylhjd/oams/backend/internal/middleware/values"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
@@ -28,7 +28,7 @@ func TestAPIServerV1_logOut(t *testing.T) {
 	tests.StubAuthContextUser(t, ctx, v1.db)
 
 	req := httptest.NewRequest(http.MethodGet, logoutUrl, nil)
-	req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tests.NewMockAuthContext()))
+	req = req.WithContext(context.WithValue(req.Context(), values.AuthContextKey, tests.NewMockAuthContext()))
 	rr := httptest.NewRecorder()
 	v1.logout(rr, req)
 
