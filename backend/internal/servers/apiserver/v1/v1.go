@@ -72,9 +72,7 @@ func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(logoutUrl, middleware.MustAuth(v.logout, v.azure))
 
 	v.mux.HandleFunc(batchUrl, middleware.MustAuth(
-		middleware.AllowMethodsWithUserRoles(
-			v.batch,
-			v.db,
+		middleware.AllowMethodsWithPermissions(v.batch, v.db,
 			map[string][]permissions.Permission{
 				http.MethodPost: {permissions.PermissionBatchPost},
 				http.MethodPut:  {permissions.PermissionBatchPut},
@@ -84,9 +82,7 @@ func (v *APIServerV1) registerHandlers() {
 	))
 
 	v.mux.HandleFunc(usersUrl, middleware.MustAuth(
-		middleware.AllowMethodsWithUserRoles(
-			v.users,
-			v.db,
+		middleware.AllowMethodsWithPermissions(v.users, v.db,
 			map[string][]permissions.Permission{
 				http.MethodGet:  {permissions.PermissionUserRead},
 				http.MethodPost: {permissions.PermissionUserCreate},

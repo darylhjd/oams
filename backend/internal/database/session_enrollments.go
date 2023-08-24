@@ -25,7 +25,7 @@ func (d *DB) ListSessionEnrollments(ctx context.Context, params listParams) ([]m
 	stmt = setLimit(stmt, params)
 	stmt = setOffset(stmt, params)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -40,7 +40,7 @@ func (d *DB) GetSessionEnrollment(ctx context.Context, id int64) (model.SessionE
 		SessionEnrollments.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -67,7 +67,7 @@ func (d *DB) CreateSessionEnrollment(ctx context.Context, arg CreateSessionEnrol
 		SessionEnrollments.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -101,7 +101,7 @@ func (d *DB) UpdateSessionEnrollment(ctx context.Context, id int64, arg UpdateSe
 		SessionEnrollments.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -113,7 +113,7 @@ func (d *DB) DeleteSessionEnrollment(ctx context.Context, id int64) (model.Sessi
 			SessionEnrollments.ID.EQ(Int64(id)),
 		).RETURNING(SessionEnrollments.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -162,6 +162,6 @@ func (d *DB) BatchUpsertSessionEnrollments(ctx context.Context, args []UpsertSes
 	)
 
 	res := make([]model.SessionEnrollment, 0, len(inserts))
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }

@@ -25,7 +25,7 @@ func (d *DB) ListClasses(ctx context.Context, params listParams) ([]model.Class,
 	stmt = setLimit(stmt, params)
 	stmt = setOffset(stmt, params)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -40,7 +40,7 @@ func (d *DB) GetClass(ctx context.Context, id int64) (model.Class, error) {
 		Classes.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -73,7 +73,7 @@ func (d *DB) CreateClass(ctx context.Context, arg CreateClassParams) (model.Clas
 		Classes.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -131,7 +131,7 @@ func (d *DB) UpdateClass(ctx context.Context, id int64, arg UpdateClassParams) (
 		Classes.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -143,7 +143,7 @@ func (d *DB) DeleteClass(ctx context.Context, id int64) (model.Class, error) {
 			Classes.ID.EQ(Int64(id)),
 		).RETURNING(Classes.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -200,6 +200,6 @@ func (d *DB) BatchUpsertClasses(ctx context.Context, args []UpsertClassParams) (
 	)
 
 	res := make([]model.Class, 0, len(inserts))
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }

@@ -163,15 +163,13 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		response: newSuccessResponse(),
 	}
 
-	tx, err := v.db.Conn.BeginTx(r.Context(), nil)
+	txDb, tx, err := v.db.AsTx(r.Context())
 	if err != nil {
 		return resp, err
 	}
 	defer func() {
 		_ = tx.Rollback()
 	}()
-
-	txDb := v.db.WithTx(tx)
 
 	// Collect all class params into one slice.
 	// Insert classes.

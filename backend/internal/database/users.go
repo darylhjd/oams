@@ -26,7 +26,7 @@ func (d *DB) ListUsers(ctx context.Context, params listParams) ([]model.User, er
 	stmt = setLimit(stmt, params)
 	stmt = setOffset(stmt, params)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -41,7 +41,7 @@ func (d *DB) GetUser(ctx context.Context, id string) (model.User, error) {
 		Users.ID.EQ(String(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -71,7 +71,7 @@ func (d *DB) CreateUser(ctx context.Context, arg CreateUserParams) (model.User, 
 		Users.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -117,7 +117,7 @@ func (d *DB) UpdateUser(ctx context.Context, id string, arg UpdateUserParams) (m
 		Users.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -130,7 +130,7 @@ func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
 		).
 		RETURNING(Users.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -177,7 +177,7 @@ func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]m
 	)
 
 	res := make([]model.User, 0, len(inserts))
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -209,7 +209,7 @@ func (d *DB) RegisterUser(ctx context.Context, arg RegisterUserParams) (model.Us
 		),
 	).RETURNING(Users.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	if err != nil && errors.Is(err, qrm.ErrNoRows) {
 		return res, nil
 	}
@@ -255,6 +255,6 @@ func (d *DB) GetUserUpcomingClassGroupSessions(ctx context.Context, id string) (
 		ClassGroupSessions.EndTime.ASC(),
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }

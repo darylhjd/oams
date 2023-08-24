@@ -25,7 +25,7 @@ func (d *DB) ListClassGroupSessions(ctx context.Context, params listParams) ([]m
 	stmt = setLimit(stmt, params)
 	stmt = setOffset(stmt, params)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -40,7 +40,7 @@ func (d *DB) GetClassGroupSession(ctx context.Context, id int64) (model.ClassGro
 		ClassGroupSessions.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -70,7 +70,7 @@ func (d *DB) CreateClassGroupSession(ctx context.Context, arg CreateClassGroupSe
 		ClassGroupSessions.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -122,7 +122,7 @@ func (d *DB) UpdateClassGroupSession(ctx context.Context, id int64, arg UpdateCl
 		ClassGroupSessions.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -134,7 +134,7 @@ func (d *DB) DeleteClassGroupSession(ctx context.Context, id int64) (model.Class
 			ClassGroupSessions.ID.EQ(Int64(id)),
 		).RETURNING(ClassGroupSessions.AllColumns)
 
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
@@ -188,6 +188,6 @@ func (d *DB) BatchUpsertClassGroupSessions(ctx context.Context, args []UpsertCla
 	)
 
 	res := make([]model.ClassGroupSession, 0, len(inserts))
-	err := stmt.QueryContext(ctx, d.queryable, &res)
+	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }

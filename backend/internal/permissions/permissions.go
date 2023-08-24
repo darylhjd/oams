@@ -36,18 +36,13 @@ const (
 
 // HasPermissions checks if a user with a role has all the given permissions.
 func HasPermissions(role model.UserRole, permissions ...Permission) bool {
-	var permModel map[Permission]struct{}
-	switch role {
-	case model.UserRole_User:
-		permModel = UserRolePermissions
-	case model.UserRole_SystemAdmin:
-		permModel = SystemAdminRolePermissions
-	default:
+	permModel, ok := rolePermissionMapping[role]
+	if !ok {
 		return false
 	}
 
 	for _, perm := range permissions {
-		if _, ok := permModel[perm]; !ok {
+		if _, ok = permModel[perm]; !ok {
 			return false
 		}
 	}
@@ -55,8 +50,14 @@ func HasPermissions(role model.UserRole, permissions ...Permission) bool {
 	return true
 }
 
-// UserRolePermissions holds the default permission model for a User.
-var UserRolePermissions = map[Permission]struct{}{
+type permissionMap map[Permission]struct{}
+
+var rolePermissionMapping = map[model.UserRole]permissionMap{
+	model.UserRole_User:        userRolePermissions,
+	model.UserRole_SystemAdmin: systemAdminRolePermissions,
+}
+
+var userRolePermissions = permissionMap{
 	PermissionUserRead:              {},
 	PermissionClassRead:             {},
 	PermissionClassGroupRead:        {},
@@ -64,7 +65,7 @@ var UserRolePermissions = map[Permission]struct{}{
 	PermissionSessionEnrollmentRead: {},
 }
 
-var SystemAdminRolePermissions = map[Permission]struct{}{
+var systemAdminRolePermissions = permissionMap{
 	PermissionBatchPost: {},
 	PermissionBatchPut:  {},
 
