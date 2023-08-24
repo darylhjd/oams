@@ -164,6 +164,7 @@ class _Options extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (userRole == UserRole.systemAdmin) const _AdminPanelButton(),
+        if (userRole == UserRole.systemAdmin) const _BatchUploadButton(),
       ],
     );
   }
@@ -194,6 +195,34 @@ class _AdminPanelButton extends StatelessWidget {
   Widget _desktop(BuildContext context) {
     return TextButton(
       onPressed: () => context.goNamed(Routes.adminPanel.name),
+      child: _text,
+    );
+  }
+}
+
+// Shows a button to go to the batch upload screen.
+class _BatchUploadButton extends StatelessWidget {
+  static const Widget _text = _NavBarText("Batch Upload");
+
+  const _BatchUploadButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? _mobile(context)
+        : _desktop(context);
+  }
+
+  Widget _mobile(BuildContext context) {
+    return PopupMenuItem<Widget>(
+      onTap: () => context.goNamed(Routes.batchUpload.name),
+      child: _text,
+    );
+  }
+
+  Widget _desktop(BuildContext context) {
+    return TextButton(
+      onPressed: () => context.goNamed(Routes.batchUpload.name),
       child: _text,
     );
   }

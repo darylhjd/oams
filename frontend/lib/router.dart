@@ -5,6 +5,7 @@ import 'package:frontend/env/env.dart';
 import 'package:frontend/providers/session.dart';
 import 'package:frontend/screens/about_screen.dart';
 import 'package:frontend/screens/admin_panel_screen.dart';
+import 'package:frontend/screens/batch_upload_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/profile_screen.dart';
@@ -18,6 +19,9 @@ class Routes {
   static const RouteInfo about = (name: "about", path: "about");
   static const RouteInfo login = (name: "login", path: "login");
   static const RouteInfo profile = (name: "profile", path: "profile");
+
+  static const RouteInfo batchUpload =
+      (name: "batchUpload", path: "batch-upload");
 
   static const RouteInfo adminPanel =
       (name: "admin-panel", path: "admin-panel");
@@ -40,6 +44,7 @@ GoRouter _indexRoute(ProviderRef<GoRouter> ref) {
           _aboutRoute(),
           _loginRoute(ref),
           _profileRoute(ref),
+          _batchUploadRoute(ref),
           _adminPanelRoute(ref),
         ],
       ),
@@ -91,6 +96,31 @@ GoRoute _profileRoute(ProviderRef<GoRouter> ref) {
         },
       );
       return ref.watch(sessionProvider) ? null : to;
+    },
+  );
+}
+
+GoRoute _batchUploadRoute(ProviderRef<GoRouter> ref) {
+  return GoRoute(
+    name: Routes.batchUpload.name,
+    path: Routes.batchUpload.path,
+    pageBuilder: (context, state) => NoTransitionPage(
+      key: state.pageKey,
+      child: const BatchUploadScreen(),
+    ),
+    redirect: (context, state) {
+      if (!ref.watch(sessionProvider)) {
+        return state.namedLocation(Routes.login.name, queryParameters: {
+          APIClient.loginRedirectUrlParam:
+              "${webServerHost()}:${webServerPort()}${state.fullPath!}",
+        });
+      }
+
+      final userRole =
+          ref.watch(sessionUserProvider).requireValue.sessionUser.role;
+      return userRole != UserRole.systemAdmin
+          ? state.namedLocation(Routes.index.name)
+          : null;
     },
   );
 }
