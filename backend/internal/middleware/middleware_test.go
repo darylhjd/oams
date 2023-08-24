@@ -40,8 +40,16 @@ func TestGetAuthContext(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req = req.WithContext(context.WithValue(req.Context(), AuthContextKey, tt.contextValue))
 
-			_, err := GetAuthContext(req.Context())
-			a.Equal(tt.wantErr, err)
+			switch {
+			case tt.wantErr != nil:
+				a.PanicsWithError(tt.wantErr.Error(), func() {
+					GetAuthContext(req.Context())
+				})
+			default:
+				a.NotPanics(func() {
+					GetAuthContext(req.Context())
+				})
+			}
 		})
 	}
 }
