@@ -15,28 +15,27 @@ const (
 
 	PermissionClassCreate
 	PermissionClassRead
+	PermissionClassUpdate
+	PermissionClassDelete
+
+	PermissionClassGroupCreate
+	PermissionClassGroupRead
+	PermissionClassGroupUpdate
+	PermissionClassGroupDelete
+
+	PermissionClassGroupSessionCreate
+	PermissionClassGroupSessionRead
+	PermissionClassGroupSessionUpdate
+	PermissionClassGroupSessionDelete
+
+	PermissionSessionEnrollmentCreate
+	PermissionSessionEnrollmentRead
+	PermissionSessionEnrollmentUpdate
+	PermissionSessionEnrollmentDelete
 )
 
-// UserRolePermissions holds the default permission model for a User.
-var UserRolePermissions = map[Permission]struct{}{
-	PermissionUserRead: {},
-}
-
-var SystemAdminRolePermissions = map[Permission]struct{}{
-	PermissionBatchPost: {},
-	PermissionBatchPut:  {},
-
-	PermissionUserCreate: {},
-	PermissionUserRead:   {},
-	PermissionUserUpdate: {},
-	PermissionUserDelete: {},
-
-	PermissionClassCreate: {},
-	PermissionClassRead:   {},
-}
-
-// HasPermission checks if a user with a role has all the given permissions.
-func HasPermission(role model.UserRole, permissions ...Permission) bool {
+// HasPermissions checks if a user with a role has all the given permissions.
+func HasPermissions(role model.UserRole, permissions ...Permission) bool {
 	var permModel map[Permission]struct{}
 	switch role {
 	case model.UserRole_User:
@@ -54,4 +53,43 @@ func HasPermission(role model.UserRole, permissions ...Permission) bool {
 	}
 
 	return true
+}
+
+// UserRolePermissions holds the default permission model for a User.
+var UserRolePermissions = map[Permission]struct{}{
+	PermissionUserRead:              {},
+	PermissionClassRead:             {},
+	PermissionClassGroupRead:        {},
+	PermissionClassGroupSessionRead: {},
+	PermissionSessionEnrollmentRead: {},
+}
+
+var SystemAdminRolePermissions = map[Permission]struct{}{
+	PermissionBatchPost: {},
+	PermissionBatchPut:  {},
+
+	PermissionUserCreate: {},
+	PermissionUserRead:   {},
+	PermissionUserUpdate: {},
+	PermissionUserDelete: {},
+
+	PermissionClassCreate: {},
+	PermissionClassRead:   {},
+	PermissionClassUpdate: {},
+	PermissionClassDelete: {},
+
+	PermissionClassGroupCreate: {},
+	PermissionClassGroupRead:   {},
+	PermissionClassGroupUpdate: {},
+	PermissionClassGroupDelete: {},
+
+	PermissionClassGroupSessionCreate: {},
+	PermissionClassGroupSessionRead:   {},
+	PermissionClassGroupSessionUpdate: {},
+	PermissionClassGroupSessionDelete: {},
+
+	PermissionSessionEnrollmentCreate: {},
+	PermissionSessionEnrollmentRead:   {},
+	PermissionSessionEnrollmentUpdate: {},
+	PermissionSessionEnrollmentDelete: {},
 }

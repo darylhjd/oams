@@ -73,7 +73,7 @@ func AllowMethodsWithUserRoles(handlerFunc http.HandlerFunc, db *database.DB, me
 					return
 				}
 
-				if !permissions.HasPermission(user.Role, roles...) {
+				if !permissions.HasPermissions(user.Role, roles...) {
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 
