@@ -27,22 +27,15 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 }
 
 // AllowMethodsWithPermissions allows a handler to accept only requests from users with certain permissions.
-func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, db *database.DB, methodPermissions map[string][]permissions.Permission) http.HandlerFunc {
+func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, methodPermissions map[string][]permissions.Permission) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authContext := values.GetAuthContext(r.Context())
-
 		for method, roles := range methodPermissions {
 			if method == r.Method {
-				user, err := db.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
-				if err != nil {
-					http.Error(w, "error getting auth user", http.StatusInternalServerError)
-					return
-				}
+				authContext := values.GetAuthContext(r.Context())
 
-				if !permissions.HasPermissions(user.Role, roles...) {
+				if !permissions.HasPermissions(authContext.User.Role, roles...) {
 					w.WriteHeader(http.StatusUnauthorized)
 					return
-
 				}
 
 				handlerFunc(w, r)
@@ -55,7 +48,7 @@ func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, db *database.DB, 
 }
 
 // MustAuth adds AuthContext for a handler and checks for authentication status.
-func MustAuth(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) http.HandlerFunc {
+func MustAuth(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator, db *database.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		set, err := authenticator.GetKeyCache().Get(r.Context(), oauth2.KeySetSource)
 		if err != nil {
@@ -94,6 +87,12 @@ func MustAuth(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) 
 			return
 		}
 
+		user, err := db.GetUser(r.Context(), res.IDToken.Name)
+		if err != nil {
+			http.Error(w, "could not get user information", http.StatusInternalServerError)
+			return
+		}
+
 		// Update the session cookie.
 		_ = oauth2.SetSessionCookie(w, res)
 
@@ -101,6 +100,7 @@ func MustAuth(handlerFunc http.HandlerFunc, authenticator oauth2.Authenticator) 
 		r = r.WithContext(context.WithValue(r.Context(), values.AuthContextKey, values.AuthContext{
 			Claims:     claims,
 			AuthResult: res,
+			User:       user,
 		}))
 		handlerFunc(w, r)
 	}

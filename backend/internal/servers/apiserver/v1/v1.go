@@ -69,71 +69,71 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(loginUrl, v.login)
 	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	v.mux.HandleFunc(logoutUrl, middleware.MustAuth(v.logout, v.azure))
+	v.mux.HandleFunc(logoutUrl, middleware.MustAuth(v.logout, v.azure, v.db))
 
 	v.mux.HandleFunc(batchUrl, middleware.MustAuth(
-		middleware.AllowMethodsWithPermissions(v.batch, v.db,
+		middleware.AllowMethodsWithPermissions(v.batch,
 			map[string][]permissions.Permission{
 				http.MethodPost: {permissions.PermissionBatchPost},
 				http.MethodPut:  {permissions.PermissionBatchPut},
 			},
 		),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(usersUrl, middleware.MustAuth(
-		middleware.AllowMethodsWithPermissions(v.users, v.db,
+		middleware.AllowMethodsWithPermissions(v.users,
 			map[string][]permissions.Permission{
 				http.MethodGet:  {permissions.PermissionUserRead},
 				http.MethodPost: {permissions.PermissionUserCreate},
 			},
 		),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(userUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.user, http.MethodGet, http.MethodPatch, http.MethodDelete),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(classesUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classes, http.MethodGet, http.MethodPost),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(classUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.class, http.MethodGet, http.MethodPatch, http.MethodDelete),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(classGroupsUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classGroups, http.MethodGet, http.MethodPost),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(classGroupUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classGroup, http.MethodGet, http.MethodPatch, http.MethodDelete),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(classGroupSessionsUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classGroupSessions, http.MethodGet, http.MethodPost),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(classGroupSessionUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.classGroupSession, http.MethodGet, http.MethodPatch, http.MethodDelete),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(sessionEnrollmentsUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.sessionEnrollments, http.MethodGet, http.MethodPost),
-		v.azure,
+		v.azure, v.db,
 	))
 
 	v.mux.HandleFunc(sessionEnrollmentUrl, middleware.MustAuth(
 		middleware.AllowMethods(v.sessionEnrollment, http.MethodGet, http.MethodPatch, http.MethodDelete),
-		v.azure,
+		v.azure, v.db,
 	))
 }
 
