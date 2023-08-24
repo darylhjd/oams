@@ -12,7 +12,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
-	"github.com/darylhjd/oams/backend/internal/middleware"
+	"github.com/darylhjd/oams/backend/internal/middleware/values"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/google/uuid"
@@ -161,7 +161,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, sessionUserId), nil)
-			req = req.WithContext(context.WithValue(req.Context(), middleware.AuthContextKey, tt.withAuthContext))
+			req = req.WithContext(context.WithValue(req.Context(), values.AuthContextKey, tt.withAuthContext))
 			resp := v1.userMe(req)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
