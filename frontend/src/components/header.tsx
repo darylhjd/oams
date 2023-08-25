@@ -1,10 +1,11 @@
 'use client'
 
 import { Button, Center, Container, Flex, Image, Menu, Space, Text, createStyles } from "@mantine/core";
-import { IconLogin, IconMenu2 } from "@tabler/icons-react";
+import { IconLogin, IconMenu2, IconUserCircle } from "@tabler/icons-react";
 import { Desktop, Mobile } from "./responsive";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routes/routes";
+import { sessionStore } from "@/states/session";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -71,9 +72,9 @@ function Logo() {
   const router = useRouter()
 
   return (
-    <Button 
-      className={classes.logo} 
-      variant='subtle' 
+    <Button
+      className={classes.logo}
+      variant='subtle'
       onClick={() => router.push("/")}>
       <Image src='logo.png' alt='OAMS Logo' fit='contain' />
     </Button>
@@ -82,6 +83,7 @@ function Logo() {
 
 function Options() {
   const router = useRouter()
+  const session = sessionStore()
 
   return (
     <>
@@ -97,9 +99,14 @@ function Options() {
             <Menu.Item onClick={() => router.push(Routes.about)}>
               <AboutButton />
             </Menu.Item>
-            <Menu.Item icon={<IconLogin stroke={1}/>} onClick={() => router.push(Routes.login)}>
-              <LoginButton />
-            </Menu.Item>
+            {session.user == null ?
+              <Menu.Item icon={<IconLogin stroke={1} />} onClick={() => router.push(Routes.login)}>
+                <LoginButton />
+              </Menu.Item> :
+              <Menu.Item icon={<IconUserCircle stroke={1} />} onClick={() => router.push(Routes.profile)}>
+                <ProfileButton />
+              </Menu.Item>
+            }
           </Menu.Dropdown>
         </Menu>
       </Mobile>
@@ -108,7 +115,7 @@ function Options() {
         <Flex align='center'>
           <AboutButton />
           <Space w='md' />
-          <LoginButton />
+          {session.user == null ? <LoginButton /> : <ProfileButton />}
         </Flex>
       </Desktop>
     </>
@@ -127,7 +134,7 @@ function AboutButton() {
       <Desktop>
         <Button variant='subtle' color='cyan' onClick={() => router.push(Routes.about)}>
           About
-        </Button>  
+        </Button>
       </Desktop>
     </>
   )
@@ -145,6 +152,24 @@ function LoginButton() {
       <Desktop>
         <Button onClick={() => router.push(Routes.login)}>
           Login
+        </Button>
+      </Desktop>
+    </>
+  )
+}
+
+function ProfileButton() {
+  const router = useRouter()
+
+  return (
+    <>
+      <Mobile>
+        <Text>Your Profile</Text>
+      </Mobile>
+
+      <Desktop>
+        <Button onClick={() => router.push(Routes.profile)} variant='outline'>
+          Your Profile
         </Button>
       </Desktop>
     </>
