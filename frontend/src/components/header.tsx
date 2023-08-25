@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Center, Container, Flex, Image, Menu, Space, Text, createStyles } from "@mantine/core";
-import { IconLogin, IconMenu2, IconQuestionMark } from "@tabler/icons-react";
+import { IconLogin, IconMenu2 } from "@tabler/icons-react";
 import { Desktop, Mobile } from "./responsive";
 
 const useStyles = createStyles((theme) => ({
@@ -15,6 +15,7 @@ const useStyles = createStyles((theme) => ({
   },
 
   centeredContainer: {
+    padding: '0em 1em',
     width: '100%',
     maxWidth: '80em',
   },
@@ -53,7 +54,7 @@ function NavBar() {
   const { classes } = useStyles()
 
   return (
-    <Container className={classes.centeredContainer}>
+    <nav className={classes.centeredContainer}>
       <Mobile>
         <Flex align='center' justify='space-between'>
           <Logo />
@@ -71,7 +72,7 @@ function NavBar() {
           </Flex>
         </Flex>
       </Desktop>
-    </Container>
+    </nav>
   )
 }
 
@@ -79,7 +80,10 @@ function Logo() {
   const { classes } = useStyles()
 
   return (
-    <Button className={classes.logo} variant='subtle'>
+    <Button 
+      className={classes.logo} 
+      variant='subtle' 
+      component='a' href={`${process.env.WEB_SERVER_HOST}:${process.env.WEB_SERVER_PORT}`}>
       <Image src='logo.png' alt='OAMS Logo' fit='contain' />
     </Button>
   )
@@ -93,7 +97,7 @@ function AboutButton() {
       </Mobile>
 
       <Desktop>
-        <Button variant='subtle' color='cyan'>
+        <Button variant='subtle' color='cyan' component='a' href='/about'>
           About
         </Button>  
       </Desktop>
@@ -109,7 +113,7 @@ function LoginButton() {
       </Mobile>
 
       <Desktop>
-        <Button>
+        <Button component='a' href='/login'>
           Login
         </Button>
       </Desktop>
@@ -130,7 +134,7 @@ function MobileDropDownMenu() {
         <Menu.Item>
           <AboutButton />
         </Menu.Item>
-        <Menu.Item icon={<IconLogin stroke={1}/>}>
+        <Menu.Item icon={<IconLogin stroke={1}/>} component='a' href='/login'>
           <LoginButton />
         </Menu.Item>
       </Menu.Dropdown>

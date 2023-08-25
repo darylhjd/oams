@@ -22,19 +22,19 @@ export default function Page() {
 
   if (!hasLoaded) {
     return (
-      <div>
-        Loading user....
-      </div>
+      <Center>
+        <p>Loading user....</p>
+      </Center>
     )
   }
 
   return (
-    <div>
-      <Center>
+    <Center>
+      <p>
         This is the home page.
         <br />
         Has user session: {`${!(sessionUser.user == null)}`}
-      </Center>
-    </div>
+      </p>
+    </Center>
   )
 }
