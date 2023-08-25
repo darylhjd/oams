@@ -58,23 +58,10 @@ function NavBar() {
 
   return (
     <nav className={classes.centeredContainer}>
-      <Mobile>
-        <Flex align='center' justify='space-between'>
-          <Logo />
-          <MobileDropDownMenu />
-        </Flex>
-      </Mobile>   
-
-      <Desktop>
-        <Flex align='center' justify='space-between'>
-          <Logo />
-          <Flex align='center'>
-            <AboutButton />
-            <Space w='md' />
-            <LoginButton />
-          </Flex>
-        </Flex>
-      </Desktop>
+      <Flex align='center' justify='space-between'>
+        <Logo />
+        <Options />
+      </Flex>
     </nav>
   )
 }
@@ -90,6 +77,41 @@ function Logo() {
       onClick={() => router.push("/")}>
       <Image src='logo.png' alt='OAMS Logo' fit='contain' />
     </Button>
+  )
+}
+
+function Options() {
+  const router = useRouter()
+
+  return (
+    <>
+      <Mobile>
+        <Menu position='bottom-end' width={150}>
+          <Menu.Target>
+            <Button leftIcon={<IconMenu2 />} variant='subtle'>
+              Menu
+            </Button>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Item onClick={() => router.push(Routes.about)}>
+              <AboutButton />
+            </Menu.Item>
+            <Menu.Item icon={<IconLogin stroke={1}/>} onClick={() => router.push(Routes.login)}>
+              <LoginButton />
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </Mobile>
+
+      <Desktop>
+        <Flex align='center'>
+          <AboutButton />
+          <Space w='md' />
+          <LoginButton />
+        </Flex>
+      </Desktop>
+    </>
   )
 }
 
@@ -126,28 +148,5 @@ function LoginButton() {
         </Button>
       </Desktop>
     </>
-  )
-}
-
-function MobileDropDownMenu() {
-  const router = useRouter()
-
-  return (
-    <Menu position='bottom-end' width={150}>
-      <Menu.Target>
-        <Button leftIcon={<IconMenu2 />} variant='subtle'>
-          Menu
-        </Button>
-      </Menu.Target>
-
-      <Menu.Dropdown>
-        <Menu.Item onClick={() => useRouter().push(Routes.about)}>
-          <AboutButton />
-        </Menu.Item>
-        <Menu.Item icon={<IconLogin stroke={1}/>} onClick={() => router.push(Routes.login)}>
-          <LoginButton />
-        </Menu.Item>
-      </Menu.Dropdown>
-    </Menu>
   )
 }

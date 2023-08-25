@@ -2,7 +2,7 @@
 
 import { APIClient } from "@/api/client";
 import { Routes } from "@/routes/routes";
-import { userSessionStore } from "@/states/session_user";
+import { sessionStore } from "@/states/session";
 import { Button, Center, Container, Image, Stack, createStyles } from "@mantine/core";
 import { redirect, useSearchParams } from "next/navigation";
 
@@ -19,7 +19,7 @@ const useStyles = createStyles((theme) => ({
 }))
 
 export default function LoginPage() {
-  checkRedirect()
+  redirectIfAlreadyLoggedIn()
 
   const { classes } = useStyles()
 
@@ -41,8 +41,8 @@ async function loginAction(redirectUrl: string) {
   location.replace(uri)
 }
 
-function checkRedirect() {
-  const session = userSessionStore()
+function redirectIfAlreadyLoggedIn() {
+  const session = sessionStore()
 
   if (session.user != null) {
     redirect(Routes.home)
