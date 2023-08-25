@@ -1,11 +1,12 @@
 'use client'
 
-import { Button, Center, Container, Flex, Image, Menu, Space, Text, createStyles } from "@mantine/core";
-import { IconLogin, IconMenu2, IconUserCircle } from "@tabler/icons-react";
+import { ActionIcon, Button, Center, Container, Flex, Image, Menu, Space, Text, createStyles } from "@mantine/core";
+import { IconLogin, IconLogout, IconMenu2, IconUserCircle } from "@tabler/icons-react";
 import { Desktop, Mobile } from "./responsive";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routes/routes";
 import { sessionStore } from "@/states/session";
+import { APIClient } from "@/api/client";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -103,9 +104,19 @@ function Options() {
               <Menu.Item icon={<IconLogin stroke={1} />} onClick={() => router.push(Routes.login)}>
                 <LoginButton />
               </Menu.Item> :
-              <Menu.Item icon={<IconUserCircle stroke={1} />} onClick={() => router.push(Routes.profile)}>
-                <ProfileButton />
-              </Menu.Item>
+              <>
+                <Menu.Label>Account</Menu.Label>
+                <Menu.Item icon={<IconUserCircle stroke={1} />} onClick={() => router.push(Routes.profile)}>
+                  <ProfileButton />
+                </Menu.Item>
+                <Menu.Item icon={<IconLogout stroke={1} />} onClick={async () => {
+                  session.invalidate()
+                  await APIClient.logout()
+                  location.href = '/'
+                }}>
+                  <LogoutButton />
+                </Menu.Item>
+              </>
             }
           </Menu.Dropdown>
         </Menu>
@@ -115,7 +126,10 @@ function Options() {
         <Flex align='center'>
           <AboutButton />
           <Space w='md' />
-          {session.user == null ? <LoginButton /> : <ProfileButton />}
+          {session.user == null ? 
+            <LoginButton /> :
+            <ProfileButton />
+          }
         </Flex>
       </Desktop>
     </>
@@ -160,6 +174,7 @@ function LoginButton() {
 
 function ProfileButton() {
   const router = useRouter()
+  const session = sessionStore()
 
   return (
     <>
@@ -168,10 +183,33 @@ function ProfileButton() {
       </Mobile>
 
       <Desktop>
-        <Button onClick={() => router.push(Routes.profile)} variant='outline'>
-          Your Profile
-        </Button>
+        <Menu position='bottom-end' width={150}>
+          <Menu.Target>
+            <ActionIcon size='lg'>
+              <IconUserCircle size='4em'/>
+            </ActionIcon>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Item icon={<IconUserCircle stroke={1}/>} onClick={() => router.push(Routes.profile)}>
+              <Text>Your Profile</Text>
+            </Menu.Item>
+            <Menu.Item icon={<IconLogout color='red'/>} onClick={async () => {
+                session.invalidate()
+                await APIClient.logout()
+                location.href = '/'
+            }}>
+              <LogoutButton />
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </Desktop>
     </>
+  )
+}
+
+function LogoutButton() {
+  return (
+    <Text c='red'>Logout</Text>
   )
 }

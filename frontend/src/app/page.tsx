@@ -1,18 +1,16 @@
 'use client'
 
 import { sessionStore } from "@/states/session"
-import { Center } from "@mantine/core"
+import LoggedHomePage from "./logged_page"
+import GuestHomePage from "./guest_page"
 
-export default function Page() {
+export default function HomePage() {
   const session = sessionStore()
 
-  return (
-    <Center>
-      <p>
-        This is the home page.
-        <br />
-        Has user session: {`${!(session.user == null)}`}
-      </p>
-    </Center>
-  )
+  switch (session.user) {
+    case null:
+      return <GuestHomePage />
+    default:
+      return <LoggedHomePage />
+  }
 }

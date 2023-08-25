@@ -8,6 +8,8 @@ export class APIClient {
   })
 
   static readonly _loginPath = "/login"
+  static readonly _logoutPath = "/logout"
+
   static readonly _userMePath = "/users/me"
 
   static async getLoginUrl(returnTo: string): Promise<string> {
@@ -21,10 +23,18 @@ export class APIClient {
           redirect_url: returnTo,
         }
       })
-      console.log(data)
       return data.redirect_url
     } catch (error) {
       throw error
+    }
+  }
+
+  static async logout(): Promise<boolean> {
+    try {
+      await this._client.get(this._logoutPath)
+      return true
+    } catch (error) {
+      return false
     }
   }
 
