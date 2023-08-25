@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import React, { Suspense } from "react";
 import Providers from "@/app/providers";
 import Header from '@/components/header';
+import CenteredScreen from '@/components/centered_page';
 
 export const metadata: Metadata = {
   title: 'OAMS',
@@ -21,7 +22,9 @@ export default async function RootLayout({
       <body>
         <Providers>
           <Header />
-          {children}
+            <CenteredScreen>
+              {children}
+            </CenteredScreen>
         </Providers>
       </body>
     </html>

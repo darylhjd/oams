@@ -1,11 +1,22 @@
 'use client'
 
-import { Center } from "@mantine/core";
+import { Center, createStyles } from "@mantine/core";
+
+const useStyles = createStyles((theme) => ({
+  expand: {
+    width: '100%',
+    height: '100%',
+  }
+}))
 
 export default function LoginPage() {
+  const { classes } = useStyles()
+
   return (
     <Center>
-      <p>This is the login page.</p>
+      <div className={classes.expand}>
+        Hi there.
+      </div>
     </Center>
   )
 }
