@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
-import React, { Suspense } from "react";
+import React from "react";
 import Providers from "@/app/providers";
 import Header from '@/components/header';
 import CenteredScreen from '@/components/centered_page';
+import SessionInitialiser from './session_initialiser';
 
 export const metadata: Metadata = {
   title: 'OAMS',
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
@@ -21,10 +22,12 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <Providers>
-          <Header />
+          <SessionInitialiser>
+            <Header />
             <CenteredScreen>
               {children}
             </CenteredScreen>
+          </SessionInitialiser>
         </Providers>
       </body>
     </html>

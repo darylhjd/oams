@@ -3,6 +3,9 @@
 import { Button, Center, Container, Flex, Image, Menu, Space, Text, createStyles } from "@mantine/core";
 import { IconLogin, IconMenu2 } from "@tabler/icons-react";
 import { Desktop, Mobile } from "./responsive";
+import { useRouter } from "next/navigation";
+import { loginRoute } from "@/app/login/page";
+import { aboutRoute } from "@/app/about/page";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -79,18 +82,21 @@ function NavBar() {
 
 function Logo() {
   const { classes } = useStyles()
+  const router = useRouter()
 
   return (
     <Button 
       className={classes.logo} 
       variant='subtle' 
-      component='a' href={`${process.env.WEB_SERVER_HOST}:${process.env.WEB_SERVER_PORT}`}>
+      onClick={() => router.push("/")}>
       <Image src='logo.png' alt='OAMS Logo' fit='contain' />
     </Button>
   )
 }
 
 function AboutButton() {
+  const router = useRouter()
+
   return (
     <>
       <Mobile>
@@ -98,7 +104,7 @@ function AboutButton() {
       </Mobile>
 
       <Desktop>
-        <Button variant='subtle' color='cyan' component='a' href='/about'>
+        <Button variant='subtle' color='cyan' onClick={() => router.push(aboutRoute)}>
           About
         </Button>  
       </Desktop>
@@ -107,6 +113,8 @@ function AboutButton() {
 }
 
 function LoginButton() {
+  const router = useRouter()
+
   return (
     <>
       <Mobile>
@@ -114,7 +122,7 @@ function LoginButton() {
       </Mobile>
 
       <Desktop>
-        <Button component='a' href='/login'>
+        <Button onClick={() => router.push(loginRoute)}>
           Login
         </Button>
       </Desktop>
@@ -123,6 +131,8 @@ function LoginButton() {
 }
 
 function MobileDropDownMenu() {
+  const router = useRouter()
+
   return (
     <Menu position='bottom-end' width={150}>
       <Menu.Target>
@@ -132,10 +142,10 @@ function MobileDropDownMenu() {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item component='a' href='/about'>
+        <Menu.Item onClick={() => useRouter().push(aboutRoute)}>
           <AboutButton />
         </Menu.Item>
-        <Menu.Item icon={<IconLogin stroke={1}/>} component='a' href='/login'>
+        <Menu.Item icon={<IconLogin stroke={1}/>} onClick={() => router.push(loginRoute)}>
           <LoginButton />
         </Menu.Item>
       </Menu.Dropdown>

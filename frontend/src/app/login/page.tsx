@@ -4,6 +4,8 @@ import { APIClient } from "@/api/client";
 import { Button, Center, Container, Image, Stack, createStyles } from "@mantine/core";
 import { useSearchParams } from "next/navigation";
 
+export const loginRoute = '/login'
+
 const useStyles = createStyles((theme) => ({
   container: {
     paddingTop: '10em',
