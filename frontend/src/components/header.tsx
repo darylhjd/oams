@@ -12,9 +12,11 @@ const useStyles = createStyles((theme) => ({
   container: {
     position: 'sticky',
     top: 0,
+    zIndex: 1,
     backgroundColor: 'white',
     padding: '0.29em 0em',
     borderBottom: '1px solid black',
+    boxShadow: '0em 0.1em 1em -0.1em rgba(0,0,0,0.4)',
 
     [theme.fn.smallerThan('md')]: {
       padding: '0.6em 0em',

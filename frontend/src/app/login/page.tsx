@@ -25,14 +25,16 @@ export default function LoginPage() {
 
   const redirectUrl = useSearchParams().get("redirect_url") ?? ""
   return (
-    <Container className={classes.container}>
-      <Button className={classes.image} variant='light' component='a' onClick={() => loginAction(redirectUrl)}>
-        <Stack>
-          <Image src='microsoft_logo.png' fit='contain' alt='Microsoft Logo'/>
-          <Center>Login with Microsoft</Center>
-        </Stack>
-      </Button>
-    </Container>
+    <Center>
+      <Container className={classes.container}>
+        <Button className={classes.image} variant='light' component='a' onClick={() => loginAction(redirectUrl)}>
+          <Stack>
+            <Image src='microsoft_logo.png' fit='contain' alt='Microsoft Logo'/>
+            <Center>Login with Microsoft</Center>
+          </Stack>
+        </Button>
+      </Container>
+    </Center>
   )
 }
 

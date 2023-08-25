@@ -6,6 +6,7 @@ const useStyles = createStyles((theme) => ({
   constrained: {
     width: '100%',
     maxWidth: '80em',
+    margin: "1em 0.4em",
   }
 }))
 
@@ -16,9 +17,7 @@ export default function CenteredScreen({ children }: { children: React.ReactNode
   return (
     <Center>
       <div className={classes.constrained}>
-        <Center>
-          {children}
-        </Center>
+        {children}
       </div>
     </Center>
   )
