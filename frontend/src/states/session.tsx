@@ -1,14 +1,14 @@
-import { User } from "@/api/models";
+import { UserMeResponse } from "@/api/models";
 import { create } from "zustand";
 
 type sessionStoreType = {
-  user: User | null;
+  user: UserMeResponse | null;
   loaded: boolean;
-  setUser: (user: User | null) => void;
+  setUser: (user: UserMeResponse | null) => void;
 }
 
 export const sessionStore = create<sessionStoreType>((set) => ({
   user: null,
   loaded: false,
-  setUser: (user: User | null) => set({user: user, loaded: true}),
+  setUser: (user: UserMeResponse | null) => set({user: user, loaded: true}),
 }))

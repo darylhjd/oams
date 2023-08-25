@@ -1,5 +1,5 @@
 import axios from "axios"
-import { LoginResponse, User } from "./models"
+import { LoginResponse, UserMeResponse } from "./models"
 
 export class APIClient {
   static _client = axios.create({
@@ -28,9 +28,9 @@ export class APIClient {
     }
   }
 
-  static async getUserMe(): Promise<User | null> {
+  static async getUserMe(): Promise<UserMeResponse | null> {
     try {
-      const { data } = await this._client.get<User>(this._userMePath)
+      const { data } = await this._client.get<UserMeResponse>(this._userMePath)
       return data
     } catch (error) {
       return null
