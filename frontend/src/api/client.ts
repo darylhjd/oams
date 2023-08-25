@@ -14,15 +14,7 @@ export class APIClient {
       const { data } = await this._client.get<User>(this._userMePath)
       return data
     } catch (error) {
-      await new Promise(f => setTimeout(f, 3000))
-      return {
-        id: "HAR0002",
-        name: "Daryl",
-        email: "email",
-        role: "role",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
+      return null
     }
   }
 }
