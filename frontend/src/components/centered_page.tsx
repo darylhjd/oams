@@ -6,7 +6,6 @@ const useStyles = createStyles((theme) => ({
   constrained: {
     width: '100%',
     maxWidth: '80em',
-    borderStyle: 'solid',
   }
 }))
 
