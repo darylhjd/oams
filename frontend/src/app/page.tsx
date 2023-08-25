@@ -3,24 +3,22 @@
 import { APIClient } from "@/api/client"
 import { sessionUserStore } from "@/states/session_user"
 import { Center } from "@mantine/core"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 
 export default function Page() {
-  const [hasLoaded, setLoaded] = useState(false)
   const sessionUser = sessionUserStore()
 
   useEffect(() => {
-    if (hasLoaded) {
+    if (sessionUser.loaded) {
       return
     }
 
     APIClient.getUserMe().then((data) => {
-      setLoaded(true)
       sessionUser.setUser(data)
     })
   })
 
-  if (!hasLoaded) {
+  if (!sessionUser.loaded) {
     return (
       <Center>
         <p>Loading user....</p>
