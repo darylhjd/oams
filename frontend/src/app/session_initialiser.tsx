@@ -1,13 +1,12 @@
 'use client'
 
 import { APIClient } from "@/api/client";
-import { User } from "@/api/models";
-import { sessionUserStore } from "@/states/session_user";
+import { userSessionStore } from "@/states/session_user";
 import { Center } from "@mantine/core";
 import { useEffect } from "react";
 
 export default function SessionInitialiser({children}: {children: React.ReactNode}) {
-  const sessionStore = sessionUserStore()
+  const sessionStore = userSessionStore()
 
   useEffect(() => {
     if (sessionStore.loaded) {

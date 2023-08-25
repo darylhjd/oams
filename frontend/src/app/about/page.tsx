@@ -2,8 +2,6 @@
 
 import { Center } from "@mantine/core";
 
-export const aboutRoute = '/about'
-
 export default function AboutPage() {
   return (
     <Center>

@@ -4,8 +4,7 @@ import { Button, Center, Container, Flex, Image, Menu, Space, Text, createStyles
 import { IconLogin, IconMenu2 } from "@tabler/icons-react";
 import { Desktop, Mobile } from "./responsive";
 import { useRouter } from "next/navigation";
-import { loginRoute } from "@/app/login/page";
-import { aboutRoute } from "@/app/about/page";
+import { Routes } from "@/routes/routes";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -104,7 +103,7 @@ function AboutButton() {
       </Mobile>
 
       <Desktop>
-        <Button variant='subtle' color='cyan' onClick={() => router.push(aboutRoute)}>
+        <Button variant='subtle' color='cyan' onClick={() => router.push(Routes.about)}>
           About
         </Button>  
       </Desktop>
@@ -122,7 +121,7 @@ function LoginButton() {
       </Mobile>
 
       <Desktop>
-        <Button onClick={() => router.push(loginRoute)}>
+        <Button onClick={() => router.push(Routes.login)}>
           Login
         </Button>
       </Desktop>
@@ -142,10 +141,10 @@ function MobileDropDownMenu() {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item onClick={() => useRouter().push(aboutRoute)}>
+        <Menu.Item onClick={() => useRouter().push(Routes.about)}>
           <AboutButton />
         </Menu.Item>
-        <Menu.Item icon={<IconLogin stroke={1}/>} onClick={() => router.push(loginRoute)}>
+        <Menu.Item icon={<IconLogin stroke={1}/>} onClick={() => router.push(Routes.login)}>
           <LoginButton />
         </Menu.Item>
       </Menu.Dropdown>

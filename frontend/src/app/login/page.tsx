@@ -1,10 +1,10 @@
 'use client'
 
 import { APIClient } from "@/api/client";
+import { Routes } from "@/routes/routes";
+import { userSessionStore } from "@/states/session_user";
 import { Button, Center, Container, Image, Stack, createStyles } from "@mantine/core";
-import { useSearchParams } from "next/navigation";
-
-export const loginRoute = '/login'
+import { redirect, useSearchParams } from "next/navigation";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -19,6 +19,8 @@ const useStyles = createStyles((theme) => ({
 }))
 
 export default function LoginPage() {
+  checkRedirect()
+
   const { classes } = useStyles()
 
   const redirectUrl = useSearchParams().get("redirect_url") ?? ""
@@ -37,4 +39,12 @@ export default function LoginPage() {
 async function loginAction(redirectUrl: string) {
   const uri = await APIClient.getLoginUrl(redirectUrl)
   location.replace(uri)
+}
+
+function checkRedirect() {
+  const session = userSessionStore()
+
+  if (session.user != null) {
+    redirect(Routes.home)
+  }
 }
