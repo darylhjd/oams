@@ -6,6 +6,9 @@ import { Desktop, Mobile } from "./responsive";
 
 const useStyles = createStyles((theme) => ({
   container: {
+    position: 'sticky',
+    top: 0,
+    backgroundColor: 'white',
     padding: '0.29em 0em',
     borderBottom: '1px solid black',
 
@@ -39,13 +42,11 @@ export default function Header() {
   const { classes } = useStyles()
 
   return (
-    <div>
-      <Container className={classes.container} fluid={true}>
-        <Center>
-          <NavBar />
-        </Center>
-      </Container>
-    </div>
+    <Container className={classes.container} fluid={true}>
+      <Center>
+        <NavBar />
+      </Center>
+    </Container>
   )
 }
 
@@ -131,7 +132,7 @@ function MobileDropDownMenu() {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item>
+        <Menu.Item component='a' href='/about'>
           <AboutButton />
         </Menu.Item>
         <Menu.Item icon={<IconLogin stroke={1}/>} component='a' href='/login'>
