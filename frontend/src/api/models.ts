@@ -3,7 +3,7 @@ export type LoginResponse = {
 }
 
 export type UserMeResponse = {
-  user: User;
+  session_user: User;
   upcoming_class_group_sessions: UpcomingClassGroupSession[];
 }
 

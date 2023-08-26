@@ -1,12 +1,13 @@
 'use client'
 
-import { ActionIcon, Button, Center, Container, Flex, Image, Menu, Space, Text, createStyles } from "@mantine/core";
+import { ActionIcon, Button, Center, Container, Flex, Image, Menu, Text, createStyles } from "@mantine/core";
 import { IconLogin, IconLogout, IconMenu2, IconUserCircle } from "@tabler/icons-react";
 import { Desktop, Mobile } from "./responsive";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routes/routes";
 import { sessionStore } from "@/states/session";
 import { APIClient } from "@/api/client";
+import { UserRole } from "@/api/models";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -40,6 +41,10 @@ const useStyles = createStyles((theme) => ({
       padding: '0.25em 0em',
       marginRight: '0',
     }
+  },
+
+  desktopOptions: {
+    width: '100%',
   }
 }))
 
@@ -87,6 +92,7 @@ function Logo() {
 function Options() {
   const router = useRouter()
   const session = sessionStore()
+  const { classes } = useStyles()
 
   return (
     <>
@@ -102,10 +108,23 @@ function Options() {
             <Menu.Item onClick={() => router.push(Routes.about)}>
               <AboutButton />
             </Menu.Item>
-            {session.user == null ?
+            {
+              session.userMe != null && session.userMe.session_user.role == UserRole.SystemAdmin ?
+              <>
+                <Menu.Label>Admin Controls</Menu.Label>
+                <Menu.Item onClick={() => router.push(Routes.adminPanel)}>
+                  <AdminPanelButton />
+                </Menu.Item> 
+              </>
+              :
+              null
+            }
+            {
+              session.userMe == null ?
               <Menu.Item icon={<IconLogin stroke={1} />} onClick={() => router.push(Routes.login)}>
                 <LoginButton />
-              </Menu.Item> :
+              </Menu.Item> 
+              :
               <>
                 <Menu.Label>Account</Menu.Label>
                 <Menu.Item icon={<IconUserCircle stroke={1} />} onClick={() => router.push(Routes.profile)}>
@@ -125,14 +144,43 @@ function Options() {
       </Mobile>
 
       <Desktop>
-        <Flex align='center'>
-          <AboutButton />
-          <Space w='md' />
-          {session.user == null ? 
-            <LoginButton /> :
-            <ProfileButton />
-          }
+        <Flex className={classes.desktopOptions} align='center' justify='space-between'>
+          <div>
+            {
+              session.userMe != null && session.userMe.session_user.role == UserRole.SystemAdmin ?
+              <AdminPanelButton />
+              :
+              null
+            }
+            <AboutButton />            
+          </div>
+          <div>
+            {
+              session.userMe == null ? 
+              <LoginButton /> 
+              :
+              <ProfileButton />
+            }            
+          </div>
         </Flex>
+      </Desktop>
+    </>
+  )
+}
+
+function AdminPanelButton() {
+  const router = useRouter()
+  
+  return (
+    <>
+      <Mobile>
+        <Text c='yellow'>Admin Panel</Text>
+      </Mobile>
+
+      <Desktop>
+        <Button variant='subtle' color='yellow' onClick={() => router.push(Routes.adminPanel)}>
+          Admin Panel
+        </Button>
       </Desktop>
     </>
   )

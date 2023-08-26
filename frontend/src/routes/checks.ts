@@ -7,7 +7,7 @@ import { Routes } from "./routes"
 export function RedirectIfAlreadyLoggedIn(url: string) {
   const session = sessionStore()
 
-  if (session.user != null) {
+  if (session.userMe != null) {
     redirect(url)
   }
 }
@@ -18,7 +18,7 @@ export function RedirectIfNotLoggedIn() {
   const session = sessionStore()
   const path = getURL()
 
-  if (session.user == null) {
+  if (session.userMe == null) {
     const redirectUrl = `${process.env.WEB_SERVER_HOST}:${process.env.WEB_SERVER_PORT}${path}`
     const queryParams = new URLSearchParams({
       redirect_url: redirectUrl,
