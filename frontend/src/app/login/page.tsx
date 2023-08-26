@@ -1,7 +1,7 @@
 'use client'
 
 import { APIClient } from "@/api/client";
-import { RedirectIfAlreadyLoggedIn } from "@/routes/checks";
+import { redirectIfAlreadyLoggedIn } from "@/routes/checks";
 import { Routes } from "@/routes/routes";
 import { Button, Center, Container, Image, Stack, createStyles } from "@mantine/core";
 import { useSearchParams } from "next/navigation";
@@ -19,7 +19,7 @@ const useStyles = createStyles((theme) => ({
 }))
 
 export default function LoginPage() {
-  RedirectIfAlreadyLoggedIn(Routes.home)
+  redirectIfAlreadyLoggedIn(Routes.home)
 
   const { classes } = useStyles()
 

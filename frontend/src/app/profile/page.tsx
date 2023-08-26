@@ -1,10 +1,10 @@
 'use client'
 
-import { RedirectIfNotLoggedIn } from "@/routes/checks";
+import { redirectIfNotLoggedIn } from "@/routes/checks";
 import { Center } from "@mantine/core";
 
 export default function LoginPage() {
-  RedirectIfNotLoggedIn()
+  redirectIfNotLoggedIn()
 
   return (
     <Center>
