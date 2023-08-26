@@ -1,6 +1,6 @@
 'use client'
 
-import { Center, Container, Divider, Flex, Space, Stack, Text, createStyles } from '@mantine/core'
+import { Center, Container, Divider, Flex, Space, Stack, createStyles } from '@mantine/core'
 import { Calendar, dayjsLocalizer } from 'react-big-calendar'
 import dayjs from 'dayjs'
 
