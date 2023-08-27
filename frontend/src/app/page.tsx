@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import { sessionStore } from "@/states/session"
-import LoggedHomePage from "./logged_page"
-import GuestHomePage from "./guest_page"
+import { sessionStore } from "@/states/session";
+import LoggedHomePage from "./logged_page";
+import GuestHomePage from "./guest_page";
 
 export default function HomePage() {
-  const session = sessionStore()
+  const session = sessionStore();
 
   switch (session.userMe) {
     case null:
-      return <GuestHomePage />
+      return <GuestHomePage />;
     default:
-      return <LoggedHomePage />
+      return <LoggedHomePage />;
   }
 }

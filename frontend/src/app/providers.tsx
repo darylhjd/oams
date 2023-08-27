@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { CacheProvider } from '@emotion/react';
-import { useEmotionCache, MantineProvider } from '@mantine/core';
-import { useServerInsertedHTML } from 'next/navigation';
+import { CacheProvider } from "@emotion/react";
+import { useEmotionCache, MantineProvider } from "@mantine/core";
+import { useServerInsertedHTML } from "next/navigation";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const cache = useEmotionCache();
@@ -10,9 +10,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   useServerInsertedHTML(() => (
     <style
-      data-emotion={`${cache.key} ${Object.keys(cache.inserted).join(' ')}`}
+      data-emotion={`${cache.key} ${Object.keys(cache.inserted).join(" ")}`}
       dangerouslySetInnerHTML={{
-        __html: Object.values(cache.inserted).join(' '),
+        __html: Object.values(cache.inserted).join(" "),
       }}
     />
   ));

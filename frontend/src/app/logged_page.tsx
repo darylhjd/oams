@@ -1,67 +1,80 @@
-'use client'
+"use client";
 
-import { Center, Container, Divider, Flex, Space, Stack, createStyles } from '@mantine/core'
-import { Calendar, dayjsLocalizer } from 'react-big-calendar'
-import dayjs from 'dayjs'
+import {
+  Center,
+  Container,
+  Divider,
+  Flex,
+  Space,
+  Stack,
+  createStyles,
+} from "@mantine/core";
+import { Calendar, dayjsLocalizer } from "react-big-calendar";
+import dayjs from "dayjs";
 
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
-import 'react-big-calendar/lib/css/react-big-calendar.css'
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 
-const localizer = dayjsLocalizer(dayjs)
+const localizer = dayjsLocalizer(dayjs);
 
 const useStyles = createStyles((theme) => ({
   calendar: {
     flexGrow: 1,
-    height: '35em',
-  },  
+    height: "35em",
+  },
 
   previewer: {
-    width: '22em',
+    width: "22em",
   },
 
   previewStack: {
-    height: '100%',
-    borderStyle: 'solid',
-    borderRadius: '0.5em',
+    height: "100%",
+    borderStyle: "solid",
+    borderRadius: "0.5em",
   },
 
   previewHeader: {
-    padding: '0.1em 0',
+    padding: "0.1em 0",
   },
 
   mainPreview: {
     flexGrow: 1,
-    padding: '0.5em 0',
+    padding: "0.5em 0",
   },
 
   previewFooter: {
-    padding: '0.1em 0',
-  }
-}))
+    padding: "0.1em 0",
+  },
+}));
 
 export default function LoggedHomePage() {
-  const { classes } = useStyles()
+  const { classes } = useStyles();
 
   return (
     <Container fluid={true}>
-      <Flex justify='space-between'>
-        <Calendar className={classes.calendar}
+      <Flex justify="space-between">
+        <Calendar
+          className={classes.calendar}
           localizer={localizer}
           defaultDate={new Date()}
         />
-        <Space w='md' />
+        <Space w="md" />
         <Previewer />
       </Flex>
     </Container>
-  )
+  );
 }
 
 function Previewer() {
-  const { classes } = useStyles()
+  const { classes } = useStyles();
 
   return (
     <div className={classes.previewer}>
-      <Stack className={classes.previewStack} justify='space-between' spacing={0}>
+      <Stack
+        className={classes.previewStack}
+        justify="space-between"
+        spacing={0}
+      >
         <Center className={classes.previewHeader}>Selected Day's Events</Center>
         <Divider />
         <Center className={classes.mainPreview}>Event Previews</Center>
@@ -69,5 +82,5 @@ function Previewer() {
         <Center className={classes.previewFooter}>Legend</Center>
       </Stack>
     </div>
-  )
+  );
 }

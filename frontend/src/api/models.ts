@@ -1,11 +1,11 @@
 export type LoginResponse = {
   redirect_url: string;
-}
+};
 
 export type UserMeResponse = {
   session_user: User;
   upcoming_class_group_sessions: UpcomingClassGroupSession[];
-}
+};
 
 export type User = {
   id: string;
@@ -14,7 +14,7 @@ export type User = {
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export enum UserRole {
   User = "USER",
@@ -29,7 +29,7 @@ export type UpcomingClassGroupSession = {
   classType: ClassType;
   start_time: Date;
   end_time: Date;
-}
+};
 
 export enum ClassType {
   Lecture = "LEC",

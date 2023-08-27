@@ -6,7 +6,7 @@ const nextConfig = {
     API_SERVER_PORT: process.env.API_SERVER_PORT,
     WEB_SERVER_HOST: process.env.WEB_SERVER_HOST,
     WEB_SERVER_PORT: process.env.WEB_SERVER_PORT,
-  }
-}
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
