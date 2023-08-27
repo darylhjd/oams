@@ -2,35 +2,40 @@
 
 import { redirectIfNotLoggedIn } from "@/routes/checks";
 import { sessionStore } from "@/states/session";
-import { Card, Center, Container, Stack, TextInput, Title, createStyles } from "@mantine/core";
+import {
+  Card,
+  Container,
+  Stack,
+  TextInput,
+  Title,
+  createStyles,
+} from "@mantine/core";
 
 const useStyles = createStyles((theme) => ({
   card: {
     width: "100%",
-  }
-}))
+  },
+}));
 
 export default function LoginPage() {
   redirectIfNotLoggedIn();
 
   return (
     <Stack align="center">
-        <Header />
-        <Information />        
+      <Header />
+      <Information />
     </Stack>
   );
 }
 
 function Header() {
-  return (
-    <Title>Your Profile</Title>
-  )
+  return <Title>Your Profile</Title>;
 }
 
 function Information() {
-  const session = sessionStore()
-  const { classes } = useStyles()
-  
+  const session = sessionStore();
+  const { classes } = useStyles();
+
   return (
     <Card className={classes.card} shadow="md" withBorder>
       <Container size="30em">
@@ -40,7 +45,7 @@ function Information() {
             label="ID"
             disabled
           />
-          <TextInput 
+          <TextInput
             placeholder={session.userMe!.session_user.name}
             label="Name"
             disabled
@@ -55,8 +60,8 @@ function Information() {
             label="Role"
             disabled
           />
-        </Stack>        
+        </Stack>
       </Container>
     </Card>
-  )
+  );
 }
