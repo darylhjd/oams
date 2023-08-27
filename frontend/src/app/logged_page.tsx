@@ -75,7 +75,7 @@ function Previewer() {
         justify="space-between"
         spacing={0}
       >
-        <Center className={classes.previewHeader}>Selected Day's Events</Center>
+        <Center className={classes.previewHeader}>Selected Day&apos; Events</Center>
         <Divider />
         <Center className={classes.mainPreview}>Event Previews</Center>
         <Divider />

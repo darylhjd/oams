@@ -20,7 +20,7 @@ export default function SessionInitialiser({
     APIClient.getUserMe().then((data) => {
       session.setUser(data);
     });
-  }, []);
+  }, [session]);
 
   if (!session.loaded) {
     return <Center>Loading...</Center>;
