@@ -18,7 +18,7 @@ import (
 const Namespace = "webserver"
 
 const (
-	buildPath = "build/web"
+	buildPath = "build/out"
 	index     = "index.html"
 )
 
@@ -26,7 +26,7 @@ const (
 	appUrl = "/"
 )
 
-//go:embed build/web/*
+//go:embed build/out/*
 var website embed.FS
 
 // WebServer defines the server structure for the OAMS Web Server.
