@@ -36,30 +36,20 @@ function Information() {
   const session = sessionStore();
   const { classes } = useStyles();
 
+  const fields = [
+    [session.data!.session_user.id, "ID"],
+    [session.data!.session_user.name, "Name"],
+    [session.data!.session_user.email, "Email"],
+    [session.data!.session_user.role, "Role"],
+  ];
+
   return (
     <Card className={classes.card} shadow="md" withBorder>
       <Container size="30em">
         <Stack>
-          <TextInput
-            placeholder={session.data!.session_user.id}
-            label="ID"
-            disabled
-          />
-          <TextInput
-            placeholder={session.data!.session_user.name}
-            label="Name"
-            disabled
-          />
-          <TextInput
-            placeholder={session.data!.session_user.email}
-            label="Email"
-            disabled
-          />
-          <TextInput
-            placeholder={session.data!.session_user.role}
-            label="Role"
-            disabled
-          />
+          {fields.map((field) => (
+            <TextInput placeholder={field[0]} label={field[1]} disabled />
+          ))}
         </Stack>
       </Container>
     </Card>

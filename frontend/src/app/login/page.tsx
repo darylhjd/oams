@@ -27,30 +27,33 @@ const useStyles = createStyles((theme) => ({
 
 export default function LoginPage() {
   redirectIfAlreadyLoggedIn(Routes.home);
-
   const { classes } = useStyles();
 
-  const redirectUrl = useSearchParams().get("redirect_url") ?? "";
   return (
     <Center>
       <Container className={classes.container}>
-        <Button
-          className={classes.image}
-          variant="light"
-          component="a"
-          onClick={() => loginAction(redirectUrl)}
-        >
-          <Stack>
-            <Image
-              src="microsoft_logo.png"
-              fit="contain"
-              alt="Microsoft Logo"
-            />
-            <Center>Login with Microsoft</Center>
-          </Stack>
-        </Button>
+        <LoginButton />
       </Container>
     </Center>
+  );
+}
+
+function LoginButton() {
+  const { classes } = useStyles();
+  const redirectUrl = useSearchParams().get("redirect_url") ?? "";
+
+  return (
+    <Button
+      className={classes.image}
+      variant="light"
+      component="a"
+      onClick={() => loginAction(redirectUrl)}
+    >
+      <Stack>
+        <Image src="microsoft_logo.png" fit="contain" alt="Microsoft Logo" />
+        <Center>Login with Microsoft</Center>
+      </Stack>
+    </Button>
   );
 }
 

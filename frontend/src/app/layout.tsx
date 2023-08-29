@@ -22,10 +22,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
-          <SessionInitialiser>
-            <Header />
-            <CenteredScreen>{children}</CenteredScreen>
-          </SessionInitialiser>
+          <Header />
+          <CenteredScreen>{children}</CenteredScreen>
         </Providers>
       </body>
     </html>
