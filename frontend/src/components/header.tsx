@@ -131,6 +131,9 @@ function Options() {
                 <Menu.Item onClick={() => router.push(Routes.adminPanel)}>
                   <AdminPanelButton />
                 </Menu.Item>
+                <Menu.Item onClick={() => router.push(Routes.batchProcessing)}>
+                  <BatchProcessingButton />
+                </Menu.Item>
               </>
             ) : null}
             {session.userMe == null ? (
@@ -174,7 +177,10 @@ function Options() {
           <div>
             {session.userMe != null &&
             session.userMe.session_user.role == UserRole.SystemAdmin ? (
-              <AdminPanelButton />
+              <>
+                <AdminPanelButton />
+                <BatchProcessingButton />
+              </>
             ) : null}
             <AboutButton />
           </div>
@@ -203,6 +209,28 @@ function AdminPanelButton() {
           onClick={() => router.push(Routes.adminPanel)}
         >
           Admin Panel
+        </Button>
+      </Desktop>
+    </>
+  );
+}
+
+function BatchProcessingButton() {
+  const router = useRouter();
+
+  return (
+    <>
+      <Mobile>
+        <Text c="yellow">Batch Processing</Text>
+      </Mobile>
+
+      <Desktop>
+        <Button
+          variant="subtle"
+          color="yellow"
+          onClick={() => router.push(Routes.batchProcessing)}
+        >
+          Batch Processing
         </Button>
       </Desktop>
     </>
