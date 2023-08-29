@@ -3,7 +3,6 @@ import React from "react";
 import Providers from "@/app/providers";
 import Header from "@/components/header";
 import CenteredScreen from "@/components/centered_page";
-import SessionInitialiser from "./session_initialiser";
 
 export const metadata: Metadata = {
   title: "OAMS",

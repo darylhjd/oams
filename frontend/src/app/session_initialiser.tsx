@@ -2,8 +2,14 @@
 
 import { APIClient } from "@/api/client";
 import { sessionStore } from "@/states/session";
-import { Center } from "@mantine/core";
+import { Center, Container, Flex, Transition, createStyles } from "@mantine/core";
 import { useEffect } from "react";
+
+const useStyles = createStyles((theme) => ({
+  container: {
+    margin: "45vh 0",
+  }
+}))
 
 export default function SessionInitialiser({
   children,
@@ -11,6 +17,7 @@ export default function SessionInitialiser({
   children: React.ReactNode;
 }) {
   const session = sessionStore();
+  const { classes } = useStyles();
 
   useEffect(() => {
     if (session.loaded) {
@@ -23,8 +30,20 @@ export default function SessionInitialiser({
   }, [session]);
 
   if (!session.loaded) {
-    return <Center>Loading...</Center>;
+    return (
+      <Center>
+        <Container className={classes.container}>
+          <Flex align="center">
+            <p>Beaming you to the site...</p>
+          </Flex>
+        </Container>        
+      </Center>
+    );
   }
 
-  return <>{children}</>;
+  return (
+    <Transition mounted transition="fade" duration={400} timingFunction="ease">
+      {(styles) => <div style={styles}>{children}</div>}
+    </Transition>
+  );
 }
