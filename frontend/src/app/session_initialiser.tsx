@@ -2,7 +2,7 @@
 
 import { APIClient } from "@/api/client";
 import { sessionStore } from "@/states/session";
-import { Center, Container, Flex, Transition, createStyles } from "@mantine/core";
+import { Center, Container, Flex, createStyles } from "@mantine/core";
 import { useEffect } from "react";
 
 const useStyles = createStyles((theme) => ({
@@ -42,8 +42,6 @@ export default function SessionInitialiser({
   }
 
   return (
-    <Transition mounted transition="fade" duration={400} timingFunction="ease">
-      {(styles) => <div style={styles}>{children}</div>}
-    </Transition>
+    <>{children}</>
   );
 }

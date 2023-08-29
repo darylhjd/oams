@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import React from "react";
+import React, { Suspense } from "react";
 import Providers from "@/app/providers";
 import Header from "@/components/header";
 import CenteredScreen from "@/components/centered_page";
@@ -20,10 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>
-          <Header />
-          <CenteredScreen>{children}</CenteredScreen>
-        </Providers>
+        <Suspense>
+          <Providers>
+            <Header />
+            <CenteredScreen>{children}</CenteredScreen>
+          </Providers>          
+        </Suspense>
       </body>
     </html>
   );
