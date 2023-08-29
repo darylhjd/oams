@@ -7,7 +7,7 @@ import GuestHomePage from "./guest_page";
 export default function HomePage() {
   const session = sessionStore();
 
-  switch (session.userMe) {
+  switch (session.data) {
     case null:
       return <GuestHomePage />;
     default:

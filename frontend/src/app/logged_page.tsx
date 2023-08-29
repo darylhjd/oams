@@ -76,7 +76,7 @@ function Previewer() {
         spacing={0}
       >
         <Center className={classes.previewHeader}>
-          Selected Day&apos; Events
+          Selected Day&apos;s Events
         </Center>
         <Divider />
         <Center className={classes.mainPreview}>Event Previews</Center>

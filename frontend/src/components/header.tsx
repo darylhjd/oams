@@ -124,8 +124,8 @@ function Options() {
             <Menu.Item onClick={() => router.push(Routes.about)}>
               <AboutButton />
             </Menu.Item>
-            {session.userMe != null &&
-            session.userMe.session_user.role == UserRole.SystemAdmin ? (
+            {session.data != null &&
+            session.data.session_user.role == UserRole.SystemAdmin ? (
               <>
                 <Menu.Label>Admin Controls</Menu.Label>
                 <Menu.Item onClick={() => router.push(Routes.adminPanel)}>
@@ -136,7 +136,7 @@ function Options() {
                 </Menu.Item>
               </>
             ) : null}
-            {session.userMe == null ? (
+            {session.data == null ? (
               <Menu.Item
                 icon={<IconLogin stroke={1} />}
                 onClick={() => router.push(Routes.login)}
@@ -175,8 +175,8 @@ function Options() {
           justify="space-between"
         >
           <div>
-            {session.userMe != null &&
-            session.userMe.session_user.role == UserRole.SystemAdmin ? (
+            {session.data != null &&
+            session.data.session_user.role == UserRole.SystemAdmin ? (
               <>
                 <AdminPanelButton />
                 <BatchProcessingButton />
@@ -185,7 +185,7 @@ function Options() {
             <AboutButton />
           </div>
           <div>
-            {session.userMe == null ? <LoginButton /> : <ProfileButton />}
+            {session.data == null ? <LoginButton /> : <ProfileButton />}
           </div>
         </Flex>
       </Desktop>

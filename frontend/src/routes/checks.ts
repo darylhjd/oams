@@ -8,7 +8,7 @@ import { UserRole } from "@/api/models";
 export function redirectIfAlreadyLoggedIn(url: string) {
   const session = sessionStore();
 
-  if (session.userMe != null) {
+  if (session.data != null) {
     redirect(url);
   }
 }
@@ -19,7 +19,7 @@ export function redirectIfNotLoggedIn() {
   const session = sessionStore();
   const path = getURL();
 
-  if (session.userMe == null) {
+  if (session.data == null) {
     const redirectUrl = `${process.env.WEB_SERVER_HOST}:${process.env.WEB_SERVER_PORT}${path}`;
     const queryParams = new URLSearchParams({
       redirect_url: redirectUrl,
@@ -35,7 +35,7 @@ export function redirectIfNotUserRole(role: UserRole) {
 
   redirectIfNotLoggedIn();
 
-  if (session.userMe!.session_user.role != role) {
+  if (session.data!.session_user.role != role) {
     redirect(Routes.home);
   }
 }

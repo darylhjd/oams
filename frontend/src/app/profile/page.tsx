@@ -41,22 +41,22 @@ function Information() {
       <Container size="30em">
         <Stack>
           <TextInput
-            placeholder={session.userMe!.session_user.id}
+            placeholder={session.data!.session_user.id}
             label="ID"
             disabled
           />
           <TextInput
-            placeholder={session.userMe!.session_user.name}
+            placeholder={session.data!.session_user.name}
             label="Name"
             disabled
           />
           <TextInput
-            placeholder={session.userMe!.session_user.email}
+            placeholder={session.data!.session_user.email}
             label="Email"
             disabled
           />
           <TextInput
-            placeholder={session.userMe!.session_user.role}
+            placeholder={session.data!.session_user.role}
             label="Role"
             disabled
           />
