@@ -1,3 +1,5 @@
+"use client"
+
 import { sessionStore } from "@/states/session";
 import { getURL } from "next/dist/shared/lib/utils";
 import { Routes } from "./routes";
