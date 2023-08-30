@@ -8,7 +8,7 @@ WORKDIR /app
 COPY ./frontend ./
 
 RUN --mount=type=secret,id=env cat /run/secrets/env > /app/.env.production  \
-    && npx next telemetry disable  \
+    && npm next telemetry disable  \
     && npm install  \
     && npm run build
 
