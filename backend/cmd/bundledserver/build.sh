@@ -6,5 +6,5 @@ docker buildx build \
   -t bundledserver \
   -f backend/cmd/bundledserver/Dockerfile \
   --secret id=ssh_key,src="$SSH_KEY_SOURCE" \
-  --secret id=env_json,src="$ENV_JSON_SOURCE" \
+  --secret id=env,src="$ENV_SOURCE" \
   .

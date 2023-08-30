@@ -48,7 +48,7 @@ function Information() {
       <Container size="30em">
         <Stack>
           {fields.map((field) => (
-            <TextInput placeholder={field[0]} label={field[1]} disabled />
+            <TextInput placeholder={field[0]} label={field[1]} key={field[1]} disabled />
           ))}
         </Stack>
       </Container>

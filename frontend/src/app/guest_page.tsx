@@ -1,7 +1,8 @@
 "use client";
 
-import { isMobile } from "@/components/responsive";
+import { MOBILE_MIN_WIDTH } from "@/components/responsive";
 import { Title, createStyles } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 
 const useStyles = createStyles((theme) => ({
   hero: {
@@ -18,7 +19,7 @@ function TopBanner() {
 
   return (
     <div className={classes.hero}>
-      <Title order={isMobile() ? 2 : 1} ta="center">
+      <Title order={useMediaQuery(MOBILE_MIN_WIDTH) ? 2 : 1} ta="center">
         Welcome to the Online Attendance Management System
       </Title>
     </div>

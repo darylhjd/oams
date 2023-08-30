@@ -17,12 +17,13 @@ import {
   IconMenu2,
   IconUserCircle,
 } from "@tabler/icons-react";
-import { isMobile } from "./responsive";
+import { MOBILE_MIN_WIDTH } from "./responsive";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routes/routes";
 import { sessionStore } from "@/states/session";
 import { APIClient } from "@/api/client";
 import { UserRole } from "@/api/models";
+import { useMediaQuery } from "@mantine/hooks";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -113,7 +114,7 @@ function Options() {
   const session = sessionStore();
   const { classes } = useStyles();
 
-  if (isMobile()) {
+  if (useMediaQuery(MOBILE_MIN_WIDTH)) {
     return (
       <Menu position="bottom-end" width={150}>
         <Menu.Target>

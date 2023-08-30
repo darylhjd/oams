@@ -5,5 +5,5 @@ cd ../../../
 docker buildx build \
   -t webserver \
   -f backend/cmd/webserver/Dockerfile \
-  --secret id=env_json,src="$ENV_JSON_SOURCE" \
+  --secret id=env,src="$ENV_SOURCE" \
   .
