@@ -37,7 +37,7 @@ export function redirectIfNotUserRole(role: UserRole) {
     redirectIfNotLoggedIn();
     return;
   }
-  
+
   if (session.data!.session_user.role != role) {
     redirect(Routes.home);
   }
