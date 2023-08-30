@@ -2,7 +2,9 @@
 
 import { APIClient } from "@/api/client";
 import { UserRole } from "@/api/models";
-import { redirectIfNotUserRole } from "@/routes/checks";
+import { buildRedirectUrlQueryParamsString } from "@/routes/checks";
+import { Routes } from "@/routes/routes";
+import { sessionStore } from "@/states/session";
 import {
   Button,
   Center,
@@ -14,7 +16,9 @@ import {
   Title,
   createStyles,
 } from "@mantine/core";
-import { Dispatch, SetStateAction, useState } from "react";
+import { getURL } from "next/dist/shared/lib/utils";
+import { useRouter } from "next/navigation";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 const useStyles = createStyles((theme) => ({
   fileContainer: {
@@ -32,7 +36,23 @@ export default function BatchProcessingPage() {
   const [files, setFiles] = useState<File[]>([]);
   const clearFiles = () => setFiles([]);
 
-  if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
+  const router = useRouter();
+  const session = sessionStore();
+
+  useEffect(() => {
+    if (session.data == null) {
+      router.replace(
+        `${Routes.login}?${buildRedirectUrlQueryParamsString(getURL())}`,
+      );
+    } else if (session.data!.session_user.role != UserRole.SystemAdmin) {
+      router.replace(Routes.home);
+    }
+  }, [router, session]);
+
+  if (
+    session.data == null ||
+    session.data!.session_user.role != UserRole.SystemAdmin
+  ) {
     return null;
   }
 

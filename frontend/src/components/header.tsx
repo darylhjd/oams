@@ -309,7 +309,7 @@ const LogoutButton = () => {
       onClick={async () => {
         session.invalidate();
         await APIClient.logout();
-        location.href = "/";
+        location.href = Routes.home;
       }}
     >
       <Text c="red">Logout</Text>

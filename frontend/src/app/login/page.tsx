@@ -1,8 +1,8 @@
 "use client";
 
 import { APIClient } from "@/api/client";
-import { redirectIfAlreadyLoggedIn } from "@/routes/checks";
 import { Routes } from "@/routes/routes";
+import { sessionStore } from "@/states/session";
 import {
   Button,
   Center,
@@ -11,7 +11,8 @@ import {
   Stack,
   createStyles,
 } from "@mantine/core";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -26,9 +27,20 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function LoginPage() {
-  redirectIfAlreadyLoggedIn(Routes.home);
-  const { classes } = useStyles();
+  const router = useRouter();
+  const session = sessionStore();
 
+  useEffect(() => {
+    if (session.data != null) {
+      router.replace(Routes.home);
+    }
+  }, [router, session]);
+
+  if (session.data != null) {
+    return null;
+  }
+
+  const { classes } = useStyles();
   return (
     <Center>
       <Container className={classes.container}>

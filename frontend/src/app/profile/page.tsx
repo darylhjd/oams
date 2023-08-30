@@ -1,6 +1,7 @@
 "use client";
 
-import { redirectIfNotLoggedIn } from "@/routes/checks";
+import { buildRedirectUrlQueryParamsString } from "@/routes/checks";
+import { Routes } from "@/routes/routes";
 import { sessionStore } from "@/states/session";
 import {
   Card,
@@ -10,6 +11,9 @@ import {
   Title,
   createStyles,
 } from "@mantine/core";
+import { getURL } from "next/dist/shared/lib/utils";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -18,7 +22,18 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function LoginPage() {
-  if (redirectIfNotLoggedIn()) {
+  const router = useRouter();
+  const session = sessionStore();
+
+  useEffect(() => {
+    if (session.data == null) {
+      router.replace(
+        `${Routes.login}?${buildRedirectUrlQueryParamsString(getURL())}`,
+      );
+    }
+  });
+
+  if (session.data == null) {
     return null;
   }
 
