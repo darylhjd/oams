@@ -20,7 +20,7 @@ export function Desktop({ children }: { children: React.ReactNode }) {
 }
 
 // A simple boolean flag to check if the current screen size is suitable for a
-// desktop version or not.
-export function isDesktop() {
-  return useMediaQuery("(min-width: 62em)");
+// mobile version or not.
+export function isMobile() {
+  return !useMediaQuery("(min-width: 62em)");
 }

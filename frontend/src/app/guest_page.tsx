@@ -1,6 +1,6 @@
 "use client";
 
-import { isDesktop } from "@/components/responsive";
+import { isMobile } from "@/components/responsive";
 import { Title, createStyles } from "@mantine/core";
 
 const useStyles = createStyles((theme) => ({
@@ -18,7 +18,7 @@ function TopBanner() {
 
   return (
     <div className={classes.hero}>
-      <Title order={isDesktop() ? 1 : 2} ta="center">
+      <Title order={isMobile() ? 2 : 1} ta="center">
         Welcome to the Online Attendance Management System
       </Title>
     </div>
