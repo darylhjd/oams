@@ -33,10 +33,7 @@ export function redirectIfNotLoggedIn() {
 export function redirectIfNotUserRole(role: UserRole) {
   const session = sessionStore();
 
-  if (session.data == null) {
-    redirectIfNotLoggedIn();
-    return;
-  }
+  redirectIfNotLoggedIn();
 
   if (session.data!.session_user.role != role) {
     redirect(Routes.home);
