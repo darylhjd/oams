@@ -27,6 +27,8 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function LoginPage() {
+  const { classes } = useStyles();
+
   const router = useRouter();
   const session = sessionStore();
 
@@ -40,7 +42,6 @@ export default function LoginPage() {
     return null;
   }
 
-  const { classes } = useStyles();
   return (
     <Center>
       <Container className={classes.container}>
