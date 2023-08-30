@@ -24,7 +24,7 @@ export default function RootLayout({
           <Providers>
             <Header />
             <CenteredScreen>{children}</CenteredScreen>
-          </Providers>          
+          </Providers>
         </Suspense>
       </body>
     </html>

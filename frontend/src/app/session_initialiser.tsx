@@ -8,8 +8,8 @@ import { useEffect } from "react";
 const useStyles = createStyles((theme) => ({
   container: {
     margin: "45vh 0",
-  }
-}))
+  },
+}));
 
 export default function SessionInitialiser({
   children,
@@ -36,12 +36,10 @@ export default function SessionInitialiser({
           <Flex align="center">
             <p>Beaming you to the site...</p>
           </Flex>
-        </Container>        
+        </Container>
       </Center>
     );
   }
 
-  return (
-    <>{children}</>
-  );
+  return <>{children}</>;
 }

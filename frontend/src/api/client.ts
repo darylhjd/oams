@@ -10,6 +10,8 @@ export class APIClient {
   static readonly _loginPath = "/login";
   static readonly _logoutPath = "/logout";
 
+  static readonly _batchPath = "/batch";
+
   static readonly _userMePath = "/users/me";
 
   static async getLoginUrl(returnTo: string): Promise<string> {
@@ -44,6 +46,20 @@ export class APIClient {
       return data;
     } catch (error) {
       return null;
+    }
+  }
+
+  static async batchPost(files: File[]): Promise<boolean> {
+    const form = new FormData();
+    for (var file of files) {
+      form.append("attachments", file);
+    }
+
+    try {
+      await this._client.post(this._batchPath, form);
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 }
