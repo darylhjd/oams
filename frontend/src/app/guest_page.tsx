@@ -1,7 +1,7 @@
 "use client";
 
+import { isDesktop } from "@/components/responsive";
 import { Title, createStyles } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
 
 const useStyles = createStyles((theme) => ({
   hero: {
@@ -16,11 +16,9 @@ export default function GuestHomePage() {
 function TopBanner() {
   const { classes } = useStyles();
 
-  const largeScreen = useMediaQuery("(min-width: 62em)");
-
   return (
     <div className={classes.hero}>
-      <Title order={largeScreen ? 1 : 2} ta="center">
+      <Title order={isDesktop() ? 1 : 2} ta="center">
         Welcome to the Online Attendance Management System
       </Title>
     </div>
