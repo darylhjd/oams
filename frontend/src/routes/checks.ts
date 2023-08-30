@@ -27,7 +27,7 @@ export function redirectIfNotLoggedIn(): boolean {
       redirect_url: redirectUrl,
     });
 
-    location.href = `${Routes.login}?${queryParams.toString()}`;
+    location.replace(`${Routes.login}?${queryParams.toString()}`);
     return true;
   }
 
@@ -44,7 +44,7 @@ export function redirectIfNotUserRole(role: UserRole): boolean {
   }
 
   if (session.data!.session_user.role != role) {
-    location.href = Routes.home;
+    location.replace(Routes.home);
     return true;
   }
 
