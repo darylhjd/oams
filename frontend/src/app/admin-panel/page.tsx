@@ -5,7 +5,9 @@ import { redirectIfNotUserRole } from "@/routes/checks";
 import { Center } from "@mantine/core";
 
 export default function AdminPanelPage() {
-  redirectIfNotUserRole(UserRole.SystemAdmin);
+  if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
+    return null;
+  }
 
   return (
     <Center>

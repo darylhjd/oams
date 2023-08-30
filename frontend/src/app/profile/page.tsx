@@ -18,7 +18,9 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function LoginPage() {
-  redirectIfNotLoggedIn();
+  if (redirectIfNotLoggedIn()) {
+    return null;
+  }
 
   return (
     <Stack align="center">

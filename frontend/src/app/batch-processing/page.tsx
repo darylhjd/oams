@@ -29,10 +29,12 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function BatchProcessingPage() {
-  redirectIfNotUserRole(UserRole.SystemAdmin);
-
   const [files, setFiles] = useState<File[]>([]);
   const clearFiles = () => setFiles([]);
+
+  if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
+    return null;
+  }
 
   return (
     <>

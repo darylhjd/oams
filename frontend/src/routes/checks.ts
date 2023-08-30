@@ -1,21 +1,23 @@
 import { sessionStore } from "@/states/session";
 import { getURL } from "next/dist/shared/lib/utils";
-import { redirect } from "next/navigation";
 import { Routes } from "./routes";
 import { UserRole } from "@/api/models";
 
 // Checks if there is already a user session. If yes, then redirect to the given URL.
-export function redirectIfAlreadyLoggedIn(url: string) {
+export function redirectIfAlreadyLoggedIn(url: string): boolean {
   const session = sessionStore();
 
   if (session.data != null) {
-    redirect(url);
+    location.href = url;
+    return true;
   }
+
+  return false;
 }
 
 // Checks if there is a user session. If there is not, then redirect the user to login. This function
 // automatically redirects the user back to the original URL.
-export function redirectIfNotLoggedIn() {
+export function redirectIfNotLoggedIn(): boolean {
   const session = sessionStore();
   const path = getURL();
 
@@ -24,18 +26,27 @@ export function redirectIfNotLoggedIn() {
     const queryParams = new URLSearchParams({
       redirect_url: redirectUrl,
     });
-    redirect(`${Routes.login}?${queryParams.toString()}`);
+
+    location.href = `${Routes.login}?${queryParams.toString()}`;
+    return true;
   }
+
+  return false;
 }
 
 // Checks if a user has required user role. If not, it redirects to home screen. Also checks if there is a user session.
 // If not, it will redirect the user to log in first.
-export function redirectIfNotUserRole(role: UserRole) {
+export function redirectIfNotUserRole(role: UserRole): boolean {
   const session = sessionStore();
 
-  redirectIfNotLoggedIn();
+  if (redirectIfNotLoggedIn()) {
+    return true;
+  }
 
   if (session.data!.session_user.role != role) {
-    redirect(Routes.home);
+    location.href = Routes.home;
+    return true;
   }
+
+  return false;
 }
