@@ -18,15 +18,17 @@ import (
 const Namespace = "webserver"
 
 const (
-	buildPath = "build/web"
-	index     = "index.html"
+	buildPath = "build/out"
+
+	index    = "index"
+	notFound = "404.html"
 )
 
 const (
 	appUrl = "/"
 )
 
-//go:embed build/web/*
+//go:embed build/out/*
 var website embed.FS
 
 // WebServer defines the server structure for the OAMS Web Server.
@@ -83,11 +85,14 @@ func (s *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get index HTML from the filesystem.
-	file, err := s.app.Open(index)
+	// Get appropriate HTML file to serve.
+	if path == "" {
+		path = index
+	}
+
+	file, err := s.app.Open(fmt.Sprintf("%s.html", path))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		file, _ = s.app.Open(notFound)
 	}
 
 	if _, err = io.Copy(w, file); err != nil {

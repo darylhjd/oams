@@ -1,13 +1,16 @@
 # syntax=docker/dockerfile:1
 # Context: Project root.
 
-# Stage 1: Build flutter web.
-FROM ghcr.io/cirruslabs/flutter:3.13.0 as flutter-builder
+# Stage 1: Build web.
+FROM node:lts-alpine3.18 as web-builder
 
 WORKDIR /app
 COPY ./frontend ./
 
-RUN --mount=type=secret,id=env_json flutter pub get && flutter build web --dart-define-from-file=/run/secrets/env_json
+RUN --mount=type=secret,id=env cat /run/secrets/env > /app/.env.production  \
+    && npx next telemetry disable  \
+    && npm install  \
+    && npm run build
 
 # Stage 2: Build webserver.
 FROM golang:1.20-alpine as builder
@@ -17,7 +20,7 @@ COPY ./backend ./
 RUN go mod download
 
 # Copy flutter build.
-COPY --from=flutter-builder /app/build/web/ ./internal/servers/webserver/build/web/
+COPY --from=web-builder /app/out/ ./internal/servers/webserver/build/out/
 
 WORKDIR /app/cmd/webserver
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out
