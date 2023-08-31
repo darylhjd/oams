@@ -3,6 +3,7 @@ package common
 import (
 	"log"
 	"time"
+	_ "time/tzdata"
 )
 
 const (
