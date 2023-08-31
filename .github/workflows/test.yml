@@ -88,4 +88,5 @@ jobs:
           cd backend
           mkdir -p internal/servers/webserver/build/out/
           touch internal/servers/webserver/build/out/index.html
+          touch internal/servers/webserver/build/out/404.html
           go test ./...
