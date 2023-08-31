@@ -1,7 +1,6 @@
 package common
 
 import (
-	"log"
 	"time"
 	_ "time/tzdata"
 )
@@ -54,10 +53,5 @@ const (
 var location *time.Location
 
 func init() {
-	log.Println("init called in common package")
-	var err error
-	location, err = time.LoadLocation(timezoneLocation)
-	if err != nil {
-		log.Printf("Error: %s", err)
-	}
+	location, _ = time.LoadLocation(timezoneLocation)
 }
