@@ -6,7 +6,8 @@ FROM golang:1.20-alpine as builder
 
 RUN apk add --no-cache git \
     openssh-client \
-    ca-certificates
+    ca-certificates \
+    tzdata
 
 WORKDIR /app
 
