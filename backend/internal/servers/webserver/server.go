@@ -19,7 +19,9 @@ const Namespace = "webserver"
 
 const (
 	buildPath = "build/out"
-	notFound  = "404.html"
+
+	index    = "index"
+	notFound = "404.html"
 )
 
 const (
@@ -83,7 +85,11 @@ func (s *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get index HTML from the filesystem.
+	// Get appropriate HTML file to serve.
+	if path == "" {
+		path = index
+	}
+
 	file, err := s.app.Open(fmt.Sprintf("%s.html", path))
 	if err != nil {
 		file, _ = s.app.Open(notFound)
