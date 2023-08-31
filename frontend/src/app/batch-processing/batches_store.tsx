@@ -1,13 +1,13 @@
 import { BatchPostResponse } from "@/api/models";
 import { create } from "zustand";
 
-type batchStoreType = {
+type batchesStoreType = {
   data: BatchPostResponse | null;
   setData: (batchResponse: BatchPostResponse | null) => void;
   invalidate: () => void;
 };
 
-export const batchStore = create<batchStoreType>((set) => ({
+export const batchesStore = create<batchesStoreType>((set) => ({
   data: null,
   setData: (batchResponse: BatchPostResponse | null) =>
     set({ data: batchResponse }),
