@@ -1,6 +1,9 @@
 package common
 
-import "time"
+import (
+	"time"
+	_ "time/tzdata"
+)
 
 const (
 	timezoneLocation    = "Asia/Singapore"
