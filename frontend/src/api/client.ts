@@ -1,5 +1,5 @@
 import axios from "axios";
-import { LoginResponse, UserMeResponse } from "./models";
+import { BatchPostResponse, LoginResponse, UserMeResponse } from "./models";
 
 export class APIClient {
   static _client = axios.create({
@@ -49,17 +49,20 @@ export class APIClient {
     }
   }
 
-  static async batchPost(files: File[]): Promise<boolean> {
+  static async batchPost(files: File[]): Promise<BatchPostResponse | null> {
     const form = new FormData();
     for (var file of files) {
       form.append("attachments", file);
     }
 
     try {
-      await this._client.post(this._batchPath, form);
-      return true;
+      const { data } = await this._client.post<BatchPostResponse>(
+        this._batchPath,
+        form,
+      );
+      return data;
     } catch (error) {
-      return false;
+      return null;
     }
   }
 }

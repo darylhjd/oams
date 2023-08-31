@@ -19,6 +19,7 @@ import {
 import { getURL } from "next/dist/shared/lib/utils";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { batchStore } from "./batch_store";
 
 const useStyles = createStyles((theme) => ({
   fileContainer: {
@@ -38,6 +39,7 @@ export default function BatchProcessingPage() {
 
   const router = useRouter();
   const session = sessionStore();
+  const batches = batchStore();
 
   useEffect(() => {
     if (session.data == null) {
@@ -65,12 +67,18 @@ export default function BatchProcessingPage() {
               <p>Upload your batch files here.</p>
             </Center>
             <ChooseFilesButton onChange={setFiles} />
-            <ResetFilesButton files={files} onClick={clearFiles} />
-            <Space h="md" />
+            <ResetFilesButton
+              files={files}
+              onClick={() => {
+                clearFiles();
+                batches.invalidate();
+              }}
+            />
           </Stack>
         </Center>
       </Container>
       <SelectedFilesList files={files} />
+      <BatchData />
     </>
   );
 }
@@ -126,13 +134,39 @@ function SelectedFilesList({ files }: { files: File[] }) {
 }
 
 function ProcessFilesButton({ files }: { files: File[] }) {
+  const batches = batchStore();
+
   return (
     <Button
       disabled={files.length == 0}
       color="green"
-      onClick={() => APIClient.batchPost(files)}
+      onClick={async () => {
+        const data = await APIClient.batchPost(files);
+        batches.setData(data);
+      }}
     >
       Process Files
     </Button>
+  );
+}
+
+function BatchData() {
+  const batches = batchStore();
+
+  if (batches.data == null) {
+    return null;
+  }
+
+  return (
+    <Center>
+      {batches.data.batches.map((batch) => (
+        <>
+          <p>{batch.filename}</p>
+          {batch.class_groups.map((classGroup) => (
+            <p>{classGroup.name}</p>
+          ))}
+        </>
+      ))}
+    </Center>
   );
 }
