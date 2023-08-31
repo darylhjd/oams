@@ -11,7 +11,6 @@ import {
   Container,
   FileButton,
   List,
-  Space,
   Stack,
   Title,
   createStyles,
