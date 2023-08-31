@@ -6,20 +6,22 @@ import { Routes } from "@/routes/routes";
 import { sessionStore } from "@/states/session";
 import { Center } from "@mantine/core";
 import { getURL } from "next/dist/shared/lib/utils";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function AdminPanelPage() {
+  const router = useRouter();
   const session = sessionStore();
 
   useEffect(() => {
     if (session.data == null) {
-      location.replace(
+      router.replace(
         `${Routes.login}?${buildRedirectUrlQueryParamsString(getURL())}`,
       );
     } else if (session.data!.session_user.role != UserRole.SystemAdmin) {
-      location.replace(Routes.home);
+      router.replace(Routes.home);
     }
-  }, [session]);
+  }, [router, session]);
 
   if (
     session.data == null ||
