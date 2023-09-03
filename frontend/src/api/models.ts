@@ -26,7 +26,7 @@ export type UpcomingClassGroupSession = {
   year: number;
   semester: string;
   name: string;
-  classType: ClassType;
+  class_type: ClassType;
   start_time: Date;
   end_time: Date;
 };
