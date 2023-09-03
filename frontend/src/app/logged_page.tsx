@@ -14,6 +14,8 @@ import dayjs from "dayjs";
 
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { sessionStore } from "@/states/session";
+import { ClassType } from "@/api/models";
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -21,6 +23,18 @@ const useStyles = createStyles((theme) => ({
   calendar: {
     flexGrow: 1,
     height: "35em",
+  },
+
+  tutorialEvent: {
+    backgroundColor: "green",
+  },
+
+  lectureEvent: {
+    backgroundColor: "blue",
+  },
+
+  labEvent: {
+    backgroundColor: "chocolate",
   },
 
   previewer: {
@@ -48,21 +62,60 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function LoggedHomePage() {
-  const { classes } = useStyles();
-
   return (
     <Container fluid={true}>
       <Flex justify="space-between">
-        <Calendar
-          className={classes.calendar}
-          localizer={localizer}
-          defaultDate={new Date()}
-        />
+        <CalendarPreview />
         <Space w="md" />
         <Previewer />
       </Flex>
     </Container>
   );
+}
+
+function CalendarPreview() {
+  const {classes} = useStyles()
+  const session = sessionStore();
+
+  const events = session.data!.upcoming_class_group_sessions.map((session) => ({
+    title: `${session.code} ${session.class_type}`,
+    start: new Date(session.start_time), // Since typescript parses date from API as a string.
+    end: new Date(session.end_time),
+    allDay: false,
+    resource: session,
+  }));
+
+  return (
+    <Calendar
+      className={classes.calendar}
+      localizer={localizer}
+      defaultDate={new Date()}
+      events={events}
+      eventPropGetter={(event, start, end, isSelected) => {
+        var className = null;
+        switch (event.resource.class_type) {
+          case ClassType.Lab:
+            className = classes.labEvent;
+            break;
+          case ClassType.Lecture:
+            className = classes.lectureEvent;
+            break;
+          case ClassType.Tutorial:
+            className = classes.tutorialEvent;
+            break;
+        }
+        return {
+          className: className,
+        };
+      }}
+      formats={{
+        agendaHeaderFormat: ({ start, end }, _, localizer) => 
+          localizer!.format(start, "YYYY/MM/DD") +
+          " - " +
+          localizer!.format(end, "YYYY/MM/DD"),
+      }}
+    />
+  )
 }
 
 function Previewer() {
