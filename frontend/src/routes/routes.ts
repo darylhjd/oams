@@ -5,4 +5,5 @@ export const Routes = {
   profile: "/profile",
   adminPanel: "/admin-panel",
   batchProcessing: "/batch-processing",
+  notFound: "/404",
 };
