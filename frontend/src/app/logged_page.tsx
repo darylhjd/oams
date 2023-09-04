@@ -74,7 +74,7 @@ export default function LoggedHomePage() {
 }
 
 function CalendarPreview() {
-  const {classes} = useStyles()
+  const { classes } = useStyles();
   const session = sessionStore();
 
   const events = session.data!.upcoming_class_group_sessions.map((session) => ({
@@ -109,13 +109,13 @@ function CalendarPreview() {
         };
       }}
       formats={{
-        agendaHeaderFormat: ({ start, end }, _, localizer) => 
+        agendaHeaderFormat: ({ start, end }, _, localizer) =>
           localizer!.format(start, "YYYY/MM/DD") +
           " - " +
           localizer!.format(end, "YYYY/MM/DD"),
       }}
     />
-  )
+  );
 }
 
 function Previewer() {
