@@ -19,6 +19,12 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { batchesStore } from "./batches_store";
 import { redirectIfNotUserRole } from "@/routes/checks";
 import { UserRole } from "@/api/models";
+import {
+  ClassGroupSessionsTable,
+  ClassGroupsTable,
+  ClassesTable,
+  UsersTable,
+} from "./batch_tables";
 
 const useStyles = createStyles((theme) => ({
   fileContainer: {
@@ -200,7 +206,6 @@ function BatchTabViewer({ filename }: { filename: string }) {
 
   var batch = null;
   for (var b of batches.data!.batches) {
-    console.log(b.filename);
     if (b.filename == filename) {
       batch = b;
       break;
@@ -219,17 +224,19 @@ function BatchTabViewer({ filename }: { filename: string }) {
           <Tabs.Tab value="classGroups">Class Groups</Tabs.Tab>
           <Tabs.Tab value="classGroupSessions">Class Group Sessions</Tabs.Tab>
           <Tabs.Tab value="users">Users</Tabs.Tab>
-          <Tabs.Tab value="sessionEnrollments">Session Enrollments</Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="classes">{batch.filename}</Tabs.Panel>
-        <Tabs.Panel value="classGroups">Class Groups Content</Tabs.Panel>
-        <Tabs.Panel value="classGroupSessions">
-          Class Group Sessions Content
+        <Tabs.Panel value="classes">
+          <ClassesTable cls={batch.class} />
         </Tabs.Panel>
-        <Tabs.Panel value="users">Users Content</Tabs.Panel>
-        <Tabs.Panel value="sessionEnrollments">
-          Session Enrollments Content
+        <Tabs.Panel value="classGroups">
+          <ClassGroupsTable classGroups={batch.class_groups} />
+        </Tabs.Panel>
+        <Tabs.Panel value="classGroupSessions">
+          <ClassGroupSessionsTable classGroups={batch.class_groups} />
+        </Tabs.Panel>
+        <Tabs.Panel value="users">
+          <UsersTable classGroups={batch.class_groups} />
         </Tabs.Panel>
       </Tabs>
     </Container>
