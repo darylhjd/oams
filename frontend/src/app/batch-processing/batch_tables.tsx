@@ -1,9 +1,6 @@
 import { Table } from "@mantine/core";
-import {
-  ClassGroupData,
-  UpsertClassGroupSessionParams,
-  UpsertClassParams,
-} from "@/api/models";
+import { ClassGroupData, UpsertClassParams } from "@/api/models";
+import { DataTable } from "mantine-datatable";
 
 export function ClassesTable({ cls }: { cls: UpsertClassParams }) {
   const row = (
@@ -18,19 +15,31 @@ export function ClassesTable({ cls }: { cls: UpsertClassParams }) {
   );
 
   return (
-    <Table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Code</th>
-          <th>Year</th>
-          <th>Semester</th>
-          <th>Programme</th>
-          <th>AU</th>
-        </tr>
-      </thead>
-      <tbody>{row}</tbody>
-    </Table>
+    <DataTable
+      withBorder
+      borderRadius="sm"
+      withColumnBorders
+      striped
+      highlightOnHover
+      columns={[
+        { accessor: "id" , title: "ID"},
+        { accessor: "code" },
+        { accessor: "year" },
+        { accessor: "semester" },
+        { accessor: "programme" },
+        { accessor: "au" },
+      ]}
+      records={[
+        {
+          id: 0,
+          code: cls.code,
+          year: cls.year,
+          semester: cls.semester,
+          programme: cls.programme,
+          au: cls.au,
+        },
+      ]}
+    />
   );
 }
 
