@@ -17,12 +17,10 @@ export function ClassesTable({ cls }: { cls: UpsertClassParams }) {
   return (
     <DataTable
       withBorder
-      borderRadius="sm"
       withColumnBorders
-      striped
       highlightOnHover
       columns={[
-        { accessor: "id" , title: "ID"},
+        { accessor: "id", title: "ID" },
         { accessor: "code" },
         { accessor: "year" },
         { accessor: "semester" },
@@ -48,27 +46,26 @@ export function ClassGroupsTable({
 }: {
   classGroups: ClassGroupData[];
 }) {
-  const rows = classGroups.map((classGroup, index) => (
-    <tr key={classGroup.name}>
-      <td>{index}</td>
-      <td>{classGroup.class_id}</td>
-      <td>{classGroup.name}</td>
-      <td>{classGroup.class_type}</td>
-    </tr>
-  ));
+  const rows = classGroups.map((classGroup, index) => ({
+    id: index,
+    classId: classGroup.class_id,
+    name: classGroup.name,
+    classType: classGroup.class_type,
+  }));
 
   return (
-    <Table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Class ID</th>
-          <th>Name</th>
-          <th>Class Type</th>
-        </tr>
-      </thead>
-      <tbody>{rows}</tbody>
-    </Table>
+    <DataTable
+      withBorder
+      withColumnBorders
+      highlightOnHover
+      columns={[
+        { accessor: "id", title: "ID" },
+        { accessor: "classId", title: "Class ID" },
+        { accessor: "name" },
+        { accessor: "classType" },
+      ]}
+      records={rows}
+    />
   );
 }
 
