@@ -28,7 +28,7 @@ import {
 } from "./batch_tables";
 import { useMediaQuery } from "@mantine/hooks";
 import { MOBILE_MIN_WIDTH } from "@/components/responsive";
-import { IconCheck, IconCross, IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 
 const useStyles = createStyles((theme) => ({
   fileContainer: {
@@ -295,7 +295,7 @@ function ConfirmBatchPutButton() {
                 title: "Oh no!",
                 message:
                   "There was an error processing your batch data. Please try again later",
-                icon: <IconCross />,
+                icon: <IconX />,
                 color: "red",
               });
               return;
