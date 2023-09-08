@@ -64,9 +64,9 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const mobileProp = {
-  mobile: false,
-};
+interface MobileProp {
+  mobile?: boolean;
+}
 
 // Header stores the navigation bar and shows a horizontal divider bottom border.
 export default function Header() {
@@ -168,7 +168,7 @@ function Options() {
   );
 }
 
-const AdminPanelButton = ({ mobile }: { mobile: boolean }) => {
+const AdminPanelButton: React.FC<MobileProp> = ({ mobile = false }) => {
   const router = useRouter();
 
   if (mobile) {
@@ -190,9 +190,7 @@ const AdminPanelButton = ({ mobile }: { mobile: boolean }) => {
   );
 };
 
-AdminPanelButton.defaultProps = mobileProp;
-
-const BatchProcessingButton = ({ mobile }: { mobile: boolean }) => {
+const BatchProcessingButton: React.FC<MobileProp> = ({ mobile = false }) => {
   const router = useRouter();
 
   if (mobile) {
@@ -214,9 +212,7 @@ const BatchProcessingButton = ({ mobile }: { mobile: boolean }) => {
   );
 };
 
-BatchProcessingButton.defaultProps = mobileProp;
-
-const AboutButton = ({ mobile }: { mobile: boolean }) => {
+const AboutButton: React.FC<MobileProp> = ({ mobile = false }) => {
   const router = useRouter();
 
   if (mobile) {
@@ -238,9 +234,7 @@ const AboutButton = ({ mobile }: { mobile: boolean }) => {
   );
 };
 
-AboutButton.defaultProps = mobileProp;
-
-const LoginButton = ({ mobile }: { mobile: boolean }) => {
+const LoginButton: React.FC<MobileProp> = ({ mobile = false }) => {
   const router = useRouter();
 
   if (mobile) {
@@ -261,9 +255,7 @@ const LoginButton = ({ mobile }: { mobile: boolean }) => {
   );
 };
 
-LoginButton.defaultProps = mobileProp;
-
-const ProfileButton = ({ mobile }: { mobile: boolean }) => {
+const ProfileButton: React.FC<MobileProp> = ({ mobile = false }) => {
   const router = useRouter();
 
   if (mobile) {
@@ -297,8 +289,6 @@ const ProfileButton = ({ mobile }: { mobile: boolean }) => {
     </Menu>
   );
 };
-
-ProfileButton.defaultProps = mobileProp;
 
 const LogoutButton = () => {
   const session = sessionStore();
