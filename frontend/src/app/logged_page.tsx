@@ -16,6 +16,8 @@ import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { sessionStore } from "@/states/session";
 import { ClassType } from "@/api/models";
+import { useMediaQuery } from "@mantine/hooks";
+import { MOBILE_MIN_WIDTH } from "@/components/responsive";
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -39,6 +41,10 @@ const useStyles = createStyles((theme) => ({
 
   previewer: {
     width: "22em",
+
+    [theme.fn.smallerThan("md")]: {
+      width: "100%",
+    },
   },
 
   previewStack: {
@@ -62,15 +68,20 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function LoggedHomePage() {
-  return (
-    <Container fluid={true}>
-      <Flex justify="space-between">
-        <CalendarPreview />
-        <Space w="md" />
-        <Previewer />
-      </Flex>
-    </Container>
+  const layout = useMediaQuery(MOBILE_MIN_WIDTH) ? (
+    <Stack>
+      <CalendarPreview />
+      <Previewer />
+    </Stack>
+  ) : (
+    <Flex justify="space-between">
+      <CalendarPreview />
+      <Space w="md" />
+      <Previewer />
+    </Flex>
   );
+
+  return <Container fluid>{layout}</Container>;
 }
 
 function CalendarPreview() {

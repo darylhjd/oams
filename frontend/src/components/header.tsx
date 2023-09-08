@@ -29,7 +29,7 @@ const useStyles = createStyles((theme) => ({
   container: {
     position: "sticky",
     top: 0,
-    zIndex: 1,
+    zIndex: 5,
     backgroundColor: "white",
     padding: "0.29em 0em",
     borderBottom: "1px solid black",
