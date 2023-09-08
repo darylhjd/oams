@@ -285,6 +285,7 @@ function ConfirmBatchPutButton() {
             notifications.show({
               id: "loading",
               title: "Processing...",
+              autoClose: 1000,
               message: "Your data is being processed. Please wait.",
               loading: true,
             });
