@@ -291,15 +291,16 @@ const ProfileButton: React.FC<MobileProp> = ({ mobile = false }) => {
 };
 
 const LogoutButton = () => {
+  const router = useRouter();
   const session = sessionStore();
 
   return (
     <Menu.Item
       icon={<IconLogout color="red" />}
       onClick={async () => {
-        session.invalidate();
         await APIClient.logout();
-        location.href = Routes.home;
+        session.invalidate();
+        router.push(Routes.index);
       }}
     >
       <Text c="red">Logout</Text>
