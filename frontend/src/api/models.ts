@@ -41,6 +41,12 @@ export type BatchPostResponse = {
   batches: BatchData[];
 };
 
+export type BatchPutRequest = BatchPostResponse;
+
+export type BatchPutResponse = {
+  class_ids: number[];
+};
+
 export type BatchData = {
   filename: string;
   file_creation_date: Date;

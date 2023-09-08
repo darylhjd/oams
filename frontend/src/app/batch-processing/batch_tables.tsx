@@ -90,14 +90,20 @@ export function UsersTable({ classGroups }: { classGroups: ClassGroupData[] }) {
   );
 }
 
-function StyledDataTable({ columns, records }: { columns: DataTableColumn<any>[]; records: any }) {
+function StyledDataTable({
+  columns,
+  records,
+}: {
+  columns: DataTableColumn<any>[];
+  records: any;
+}) {
   return (
     <DataTable
       height={500}
       withBorder
       withColumnBorders
       highlightOnHover
-      scrollAreaProps={{type: "auto"}}
+      scrollAreaProps={{ type: "auto" }}
       columns={columns}
       records={records}
     />
