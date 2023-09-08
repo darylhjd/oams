@@ -2,6 +2,7 @@
 
 import { CacheProvider } from "@emotion/react";
 import { useEmotionCache, MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import { useServerInsertedHTML } from "next/navigation";
 import SessionInitialiser from "./session_initialiser";
 
@@ -21,6 +22,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <CacheProvider value={cache}>
       <MantineProvider withGlobalStyles withNormalizeCSS>
+        <Notifications />
         <SessionInitialiser>{children}</SessionInitialiser>
       </MantineProvider>
     </CacheProvider>

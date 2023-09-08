@@ -1,5 +1,11 @@
 import axios from "axios";
-import { BatchPostResponse, LoginResponse, UserMeResponse } from "./models";
+import {
+  BatchPostResponse,
+  BatchPutRequest,
+  BatchPutResponse,
+  LoginResponse,
+  UserMeResponse,
+} from "./models";
 
 export class APIClient {
   static _client = axios.create({
@@ -59,6 +65,20 @@ export class APIClient {
       const { data } = await this._client.post<BatchPostResponse>(
         this._batchPath,
         form,
+      );
+      return data;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  static async batchPut(
+    req: BatchPutRequest,
+  ): Promise<BatchPutResponse | null> {
+    try {
+      const { data } = await this._client.put<BatchPutResponse>(
+        this._batchPath,
+        req,
       );
       return data;
     } catch (error) {

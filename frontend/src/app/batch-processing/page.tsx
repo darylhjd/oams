@@ -15,6 +15,7 @@ import {
   Title,
   createStyles,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { Dispatch, SetStateAction, useState } from "react";
 import { batchesStore } from "./batches_store";
 import { redirectIfNotUserRole } from "@/routes/checks";
@@ -27,6 +28,7 @@ import {
 } from "./batch_tables";
 import { useMediaQuery } from "@mantine/hooks";
 import { MOBILE_MIN_WIDTH } from "@/components/responsive";
+import { IconCheck, IconCross, IconX } from "@tabler/icons-react";
 
 const useStyles = createStyles((theme) => ({
   fileContainer: {
@@ -47,11 +49,14 @@ const useStyles = createStyles((theme) => ({
     overflowY: "hidden",
     overflowX: "auto",
     flexWrap: "nowrap",
-    
   },
 
   tabTab: {
     padding: "1em 1em",
+  },
+
+  batchPutButton: {
+    padding: "1.5em 0",
   },
 }));
 
@@ -133,13 +138,13 @@ function SelectedFilesList({ files }: { files: File[] }) {
             ))}
           </List>
         )}
-        <ProcessFilesButton files={files} />
+        <PreviewBatchDataButton files={files} />
       </Stack>
     </Container>
   );
 }
 
-function ProcessFilesButton({ files }: { files: File[] }) {
+function PreviewBatchDataButton({ files }: { files: File[] }) {
   const batches = batchesStore();
 
   return (
@@ -151,7 +156,7 @@ function ProcessFilesButton({ files }: { files: File[] }) {
         batches.setData(data);
       }}
     >
-      Process Files
+      Preview Batch Data
     </Button>
   );
 }
@@ -178,6 +183,7 @@ function BatchData() {
       </Title>
       <BatchChooserMenu onChange={setFilename} />
       <BatchTabViewer filename={filename} />
+      <ConfirmBatchPutButton />
     </>
   );
 }
@@ -259,6 +265,53 @@ function BatchTabViewer({ filename }: { filename: string }) {
           <UsersTable classGroups={batch.class_groups} />
         </Tabs.Panel>
       </Tabs>
+    </Container>
+  );
+}
+
+function ConfirmBatchPutButton() {
+  const { classes } = useStyles();
+  const batches = batchesStore();
+
+  if (batches.data == null) {
+    return null;
+  }
+
+  return (
+    <Container className={classes.batchPutButton}>
+      <Center>
+        <Button
+          onClick={async () => {
+            notifications.show({
+              id: "loading",
+              title: "Processing...",
+              message: "Your data is being processed. Please wait.",
+              loading: true,
+            });
+
+            const result = await APIClient.batchPut(batches.data!);
+            if (result == null) {
+              notifications.show({
+                title: "Oh no!",
+                message:
+                  "There was an error processing your batch data. Please try again later",
+                icon: <IconCross />,
+                color: "red",
+              });
+              return;
+            }
+
+            notifications.show({
+              title: "Success!",
+              message: "All batch data has been processed!",
+              icon: <IconCheck />,
+              color: "teal",
+            });
+          }}
+        >
+          Confirm Data Processing
+        </Button>
+      </Center>
     </Container>
   );
 }
