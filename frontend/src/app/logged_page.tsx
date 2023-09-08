@@ -81,7 +81,7 @@ export default function LoggedHomePage() {
     </Flex>
   );
 
-  return <Container fluid={true}>{layout}</Container>;
+  return <Container fluid>{layout}</Container>;
 }
 
 function CalendarPreview() {
