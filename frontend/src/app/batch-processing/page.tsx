@@ -25,6 +25,8 @@ import {
   ClassesTable,
   UsersTable,
 } from "./batch_tables";
+import { useMediaQuery } from "@mantine/hooks";
+import { MOBILE_MIN_WIDTH } from "@/components/responsive";
 
 const useStyles = createStyles((theme) => ({
   fileContainer: {
@@ -39,6 +41,17 @@ const useStyles = createStyles((theme) => ({
 
   batchChooserButton: {
     padding: "1.5em 0",
+  },
+
+  tabList: {
+    overflowY: "hidden",
+    overflowX: "auto",
+    flexWrap: "nowrap",
+    
+  },
+
+  tabTab: {
+    padding: "1em 1em",
   },
 }));
 
@@ -202,7 +215,9 @@ function BatchChooserMenu({
 }
 
 function BatchTabViewer({ filename }: { filename: string }) {
+  const { classes } = useStyles();
   const batches = batchesStore();
+  const isMobile = useMediaQuery(MOBILE_MIN_WIDTH);
 
   var batch = null;
   for (var b of batches.data!.batches) {
@@ -218,9 +233,14 @@ function BatchTabViewer({ filename }: { filename: string }) {
 
   return (
     <Container>
-      <Tabs defaultValue="classes">
-        <Tabs.List>
-          <Tabs.Tab value="classes">Classes</Tabs.Tab>
+      <Tabs defaultValue="classes" variant="outline">
+        <Tabs.List
+          className={classes.tabList}
+          position={isMobile ? "left" : "center"}
+        >
+          <Tabs.Tab className={classes.tabTab} value="classes">
+            Classes
+          </Tabs.Tab>
           <Tabs.Tab value="classGroups">Class Groups</Tabs.Tab>
           <Tabs.Tab value="classGroupSessions">Class Group Sessions</Tabs.Tab>
           <Tabs.Tab value="users">Users</Tabs.Tab>

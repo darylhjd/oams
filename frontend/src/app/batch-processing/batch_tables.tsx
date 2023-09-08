@@ -1,13 +1,9 @@
-import { Table } from "@mantine/core";
 import { ClassGroupData, UpsertClassParams } from "@/api/models";
-import { DataTable } from "mantine-datatable";
+import { DataTable, DataTableColumn } from "mantine-datatable";
 
 export function ClassesTable({ cls }: { cls: UpsertClassParams }) {
   return (
-    <DataTable
-      withBorder
-      withColumnBorders
-      highlightOnHover
+    <StyledDataTable
       columns={[
         { accessor: "id", title: "ID" },
         { accessor: "code" },
@@ -43,10 +39,7 @@ export function ClassGroupsTable({
   }));
 
   return (
-    <DataTable
-      withBorder
-      withColumnBorders
-      highlightOnHover
+    <StyledDataTable
       columns={[
         { accessor: "id", title: "ID" },
         { accessor: "classId", title: "Class ID" },
@@ -74,10 +67,7 @@ export function ClassGroupSessionsTable({
     .flat();
 
   return (
-    <DataTable
-      withBorder
-      withColumnBorders
-      highlightOnHover
+    <StyledDataTable
       columns={[
         { accessor: "class_group_id", title: "Class Group ID" },
         { accessor: "start_time", title: "Start Time" },
@@ -93,12 +83,23 @@ export function UsersTable({ classGroups }: { classGroups: ClassGroupData[] }) {
   const rows = classGroups.map((group) => group.students).flat();
 
   return (
+    <StyledDataTable
+      columns={[{ accessor: "id", title: "ID" }, { accessor: "name" }]}
+      records={rows}
+    />
+  );
+}
+
+function StyledDataTable({ columns, records }: { columns: DataTableColumn<any>[]; records: any }) {
+  return (
     <DataTable
+      height={500}
       withBorder
       withColumnBorders
       highlightOnHover
-      columns={[{ accessor: "id", title: "ID" }, { accessor: "name" }]}
-      records={rows}
+      scrollAreaProps={{type: "auto"}}
+      columns={columns}
+      records={records}
     />
   );
 }
