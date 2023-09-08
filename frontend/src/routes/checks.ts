@@ -10,7 +10,7 @@ export function redirectIfLoggedIn(): boolean {
   const session = sessionStore();
 
   if (session.data != null) {
-    location.replace(Routes.home);
+    location.replace(Routes.index);
     return true;
   }
 
@@ -43,7 +43,7 @@ export function redirectIfNotUserRole(userRole: UserRole): boolean {
   }
 
   if (session.data!.session_user.role != userRole) {
-    location.replace(Routes.home);
+    location.replace(Routes.index);
     return true;
   }
 
