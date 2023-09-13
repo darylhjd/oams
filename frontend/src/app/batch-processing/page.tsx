@@ -151,7 +151,6 @@ function PreviewBatchDataButton({ files }: { files: File[] }) {
   return (
     <Button
       disabled={files.length == 0}
-      color="green"
       onClick={async () => {
         const data = await APIClient.batchPost(files);
         batches.setData(data);
@@ -239,42 +238,41 @@ function ConfirmBatchPutButton() {
   return (
     <Container className={classes.batchPutButton}>
       <Center>
-        <Button color="green" onClick={confirmDataProcessingAction}>
+        <Button
+          color="green"
+          onClick={async () => {
+            const loadingId = uuidv4();
+            notifications.show({
+              id: loadingId,
+              title: "Processing...",
+              message: "Your data is being processed. Please wait.",
+              loading: true,
+            });
+
+            const result = await APIClient.batchPut({ batches: batches.data! });
+            if (result == null) {
+              notifications.show({
+                title: "Oh no!",
+                message:
+                  "There was an error processing your batch data. Please try again later",
+                icon: <IconX />,
+                color: "red",
+              });
+              return;
+            }
+
+            notifications.hide(loadingId);
+            notifications.show({
+              title: "Success!",
+              message: "All batch data has been processed!",
+              icon: <IconCheck />,
+              color: "teal",
+            });
+          }}
+        >
           Confirm Data Processing
         </Button>
       </Center>
     </Container>
   );
-}
-
-async function confirmDataProcessingAction() {
-  const batches = batchesStore();
-
-  const loadingId = uuidv4();
-  notifications.show({
-    id: loadingId,
-    title: "Processing...",
-    message: "Your data is being processed. Please wait.",
-    loading: true,
-  });
-
-  const result = await APIClient.batchPut({ batches: batches.data! });
-  if (result == null) {
-    notifications.show({
-      title: "Oh no!",
-      message:
-        "There was an error processing your batch data. Please try again later",
-      icon: <IconX />,
-      color: "red",
-    });
-    return;
-  }
-
-  notifications.hide(loadingId);
-  notifications.show({
-    title: "Success!",
-    message: "All batch data has been processed!",
-    icon: <IconCheck />,
-    color: "teal",
-  });
 }
