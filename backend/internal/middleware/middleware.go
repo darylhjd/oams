@@ -27,7 +27,7 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 }
 
 // AllowMethodsWithPermissions allows a handler to accept only requests from users with certain permissions.
-func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, methodPermissions map[string][]permissions.Permission) http.HandlerFunc {
+func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, methodPermissions map[string][]permissions.P) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		for method, roles := range methodPermissions {
 			if method == r.Method {
