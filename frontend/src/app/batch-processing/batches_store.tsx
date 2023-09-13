@@ -14,12 +14,14 @@ export const batchesStore = create<batchesStoreType>((set) => ({
       return;
     }
 
+    var classGroupRunningIndex = 0;
     batchResponse.batches.forEach((batch, classIndex) => {
-      batch.class_groups.forEach((classGroup, classGroupIndex) => {
+      batch.class_groups.forEach((classGroup) => {
         classGroup.class_id = classIndex;
         classGroup.sessions.forEach((session) => {
-          session.class_group_id = classGroupIndex;
+          session.class_group_id = classGroupRunningIndex;
         });
+        classGroupRunningIndex++;
       });
     });
 
