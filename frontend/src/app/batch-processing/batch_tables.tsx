@@ -1,7 +1,16 @@
-import { ClassGroupData, UpsertClassParams } from "@/api/models";
+import { BatchData } from "@/api/models";
 import { DataTable, DataTableColumn } from "mantine-datatable";
 
-export function ClassesTable({ cls }: { cls: UpsertClassParams }) {
+export function ClassesTable({ batches }: { batches: BatchData[] }) {
+  const rows = batches.map((batch, index) => ({
+    id: index,
+    code: batch.class.code,
+    year: batch.class.year,
+    semester: batch.class.semester,
+    programme: batch.class.programme,
+    au: batch.class.au,
+  }));
+
   return (
     <StyledDataTable
       columns={[
@@ -12,31 +21,21 @@ export function ClassesTable({ cls }: { cls: UpsertClassParams }) {
         { accessor: "programme" },
         { accessor: "au" },
       ]}
-      records={[
-        {
-          id: 0,
-          code: cls.code,
-          year: cls.year,
-          semester: cls.semester,
-          programme: cls.programme,
-          au: cls.au,
-        },
-      ]}
+      records={rows}
     />
   );
 }
 
-export function ClassGroupsTable({
-  classGroups,
-}: {
-  classGroups: ClassGroupData[];
-}) {
-  const rows = classGroups.map((classGroup, index) => ({
-    id: index,
-    classId: classGroup.class_id,
-    name: classGroup.name,
-    classType: classGroup.class_type,
-  }));
+export function ClassGroupsTable({ batches }: { batches: BatchData[] }) {
+  const rows = batches
+    .map((batch) => batch.class_groups)
+    .flat()
+    .map((classGroup, index) => ({
+      id: index,
+      classId: classGroup.class_id,
+      name: classGroup.name,
+      classType: classGroup.class_type,
+    }));
 
   return (
     <StyledDataTable
@@ -51,19 +50,11 @@ export function ClassGroupsTable({
   );
 }
 
-export function ClassGroupSessionsTable({
-  classGroups,
-}: {
-  classGroups: ClassGroupData[];
-}) {
-  const rows = classGroups
-    .map((group, index) => {
-      for (let i = 0; i < group.sessions.length; i++) {
-        group.sessions[i].class_group_id = index;
-      }
-
-      return group.sessions;
-    })
+export function ClassGroupSessionsTable({ batches }: { batches: BatchData[] }) {
+  const rows = batches
+    .map((batch) => batch.class_groups)
+    .flat()
+    .map((classGroup) => classGroup.sessions)
     .flat();
 
   return (
@@ -79,8 +70,12 @@ export function ClassGroupSessionsTable({
   );
 }
 
-export function UsersTable({ classGroups }: { classGroups: ClassGroupData[] }) {
-  const rows = classGroups.map((group) => group.students).flat();
+export function UsersTable({ batches }: { batches: BatchData[] }) {
+  const rows = batches
+    .map((batch) => batch.class_groups)
+    .flat()
+    .map((classGroup) => classGroup.students)
+    .flat();
 
   return (
     <StyledDataTable

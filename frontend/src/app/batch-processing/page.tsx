@@ -29,6 +29,7 @@ import {
 import { useMediaQuery } from "@mantine/hooks";
 import { MOBILE_MIN_WIDTH } from "@/components/responsive";
 import { IconCheck, IconX } from "@tabler/icons-react";
+import { v4 as uuidv4 } from "uuid";
 
 const useStyles = createStyles((theme) => ({
   fileContainer: {
@@ -163,7 +164,6 @@ function PreviewBatchDataButton({ files }: { files: File[] }) {
 
 function BatchData() {
   const batches = batchesStore();
-  const [filename, setFilename] = useState("");
 
   if (batches.data == null) {
     return (
@@ -181,59 +181,18 @@ function BatchData() {
       <Title align="center" order={6}>
         Batch Data
       </Title>
-      <BatchChooserMenu onChange={setFilename} />
-      <BatchTabViewer filename={filename} />
+      <BatchTabViewer />
       <ConfirmBatchPutButton />
     </>
   );
 }
 
-function BatchChooserMenu({
-  onChange,
-}: {
-  onChange: Dispatch<SetStateAction<string>>;
-}) {
-  const { classes } = useStyles();
-  const batches = batchesStore();
-
-  if (batches.data == null) {
-    return null;
-  }
-
-  var data = batches.data.batches.map((batch) => ({
-    value: batch.filename,
-    label: batch.filename,
-  }));
-  data.unshift({ value: "", label: "Select a file" });
-
-  return (
-    <Center>
-      <Container className={classes.batchChooserButton}>
-        <NativeSelect
-          onChange={(event) => onChange(event.currentTarget.value)}
-          data={data}
-          label="Select uploaded file"
-          variant="filled"
-        />
-      </Container>
-    </Center>
-  );
-}
-
-function BatchTabViewer({ filename }: { filename: string }) {
+function BatchTabViewer() {
   const { classes } = useStyles();
   const batches = batchesStore();
   const isMobile = useMediaQuery(MOBILE_MIN_WIDTH);
 
-  var batch = null;
-  for (var b of batches.data!.batches) {
-    if (b.filename == filename) {
-      batch = b;
-      break;
-    }
-  }
-
-  if (batch == null) {
+  if (batches.data == null) {
     return null;
   }
 
@@ -253,16 +212,16 @@ function BatchTabViewer({ filename }: { filename: string }) {
         </Tabs.List>
 
         <Tabs.Panel value="classes">
-          <ClassesTable cls={batch.class} />
+          <ClassesTable batches={batches.data} />
         </Tabs.Panel>
         <Tabs.Panel value="classGroups">
-          <ClassGroupsTable classGroups={batch.class_groups} />
+          <ClassGroupsTable batches={batches.data} />
         </Tabs.Panel>
         <Tabs.Panel value="classGroupSessions">
-          <ClassGroupSessionsTable classGroups={batch.class_groups} />
+          <ClassGroupSessionsTable batches={batches.data} />
         </Tabs.Panel>
         <Tabs.Panel value="users">
-          <UsersTable classGroups={batch.class_groups} />
+          <UsersTable batches={batches.data} />
         </Tabs.Panel>
       </Tabs>
     </Container>
@@ -280,39 +239,42 @@ function ConfirmBatchPutButton() {
   return (
     <Container className={classes.batchPutButton}>
       <Center>
-        <Button
-          onClick={async () => {
-            notifications.show({
-              id: "loading",
-              title: "Processing...",
-              autoClose: 1000,
-              message: "Your data is being processed. Please wait.",
-              loading: true,
-            });
-
-            const result = await APIClient.batchPut(batches.data!);
-            if (result == null) {
-              notifications.show({
-                title: "Oh no!",
-                message:
-                  "There was an error processing your batch data. Please try again later",
-                icon: <IconX />,
-                color: "red",
-              });
-              return;
-            }
-
-            notifications.show({
-              title: "Success!",
-              message: "All batch data has been processed!",
-              icon: <IconCheck />,
-              color: "teal",
-            });
-          }}
-        >
+        <Button color="green" onClick={confirmDataProcessingAction}>
           Confirm Data Processing
         </Button>
       </Center>
     </Container>
   );
+}
+
+async function confirmDataProcessingAction() {
+  const batches = batchesStore();
+
+  const loadingId = uuidv4();
+  notifications.show({
+    id: loadingId,
+    title: "Processing...",
+    message: "Your data is being processed. Please wait.",
+    loading: true,
+  });
+
+  const result = await APIClient.batchPut({ batches: batches.data! });
+  if (result == null) {
+    notifications.show({
+      title: "Oh no!",
+      message:
+        "There was an error processing your batch data. Please try again later",
+      icon: <IconX />,
+      color: "red",
+    });
+    return;
+  }
+
+  notifications.hide(loadingId);
+  notifications.show({
+    title: "Success!",
+    message: "All batch data has been processed!",
+    icon: <IconCheck />,
+    color: "teal",
+  });
 }
