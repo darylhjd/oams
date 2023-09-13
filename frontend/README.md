@@ -1,4 +1,5 @@
 # Frontend Module
+
 The frontend is built on the NextJS framework.
 
 The `frontend` module requires its own set of environment variables.
