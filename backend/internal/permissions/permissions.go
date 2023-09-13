@@ -2,40 +2,40 @@ package permissions
 
 import "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 
-type Permission int
+type P int
 
 const (
-	PermissionBatchPost Permission = iota
-	PermissionBatchPut
+	BatchPost P = iota
+	BatchPut
 
-	PermissionUserCreate
-	PermissionUserRead
-	PermissionUserUpdate
-	PermissionUserDelete
+	UserCreate
+	UserRead
+	UserUpdate
+	UserDelete
 
-	PermissionClassCreate
-	PermissionClassRead
-	PermissionClassUpdate
-	PermissionClassDelete
+	ClassCreate
+	ClassRead
+	ClassUpdate
+	ClassDelete
 
-	PermissionClassGroupCreate
-	PermissionClassGroupRead
-	PermissionClassGroupUpdate
-	PermissionClassGroupDelete
+	ClassGroupCreate
+	ClassGroupRead
+	ClassGroupUpdate
+	ClassGroupDelete
 
-	PermissionClassGroupSessionCreate
-	PermissionClassGroupSessionRead
-	PermissionClassGroupSessionUpdate
-	PermissionClassGroupSessionDelete
+	ClassGroupSessionCreate
+	ClassGroupSessionRead
+	ClassGroupSessionUpdate
+	ClassGroupSessionDelete
 
-	PermissionSessionEnrollmentCreate
-	PermissionSessionEnrollmentRead
-	PermissionSessionEnrollmentUpdate
-	PermissionSessionEnrollmentDelete
+	SessionEnrollmentCreate
+	SessionEnrollmentRead
+	SessionEnrollmentUpdate
+	SessionEnrollmentDelete
 )
 
 // HasPermissions checks if a user with a role has all the given permissions.
-func HasPermissions(role model.UserRole, permissions ...Permission) bool {
+func HasPermissions(role model.UserRole, permissions ...P) bool {
 	permModel, ok := rolePermissionMapping[role]
 	if !ok {
 		return false
@@ -50,7 +50,7 @@ func HasPermissions(role model.UserRole, permissions ...Permission) bool {
 	return true
 }
 
-type permissionMap map[Permission]struct{}
+type permissionMap map[P]struct{}
 
 var rolePermissionMapping = map[model.UserRole]permissionMap{
 	model.UserRole_User:        userRolePermissions,
@@ -58,39 +58,39 @@ var rolePermissionMapping = map[model.UserRole]permissionMap{
 }
 
 var userRolePermissions = permissionMap{
-	PermissionUserRead:              {},
-	PermissionClassRead:             {},
-	PermissionClassGroupRead:        {},
-	PermissionClassGroupSessionRead: {},
-	PermissionSessionEnrollmentRead: {},
+	UserRead:              {},
+	ClassRead:             {},
+	ClassGroupRead:        {},
+	ClassGroupSessionRead: {},
+	SessionEnrollmentRead: {},
 }
 
 var systemAdminRolePermissions = permissionMap{
-	PermissionBatchPost: {},
-	PermissionBatchPut:  {},
+	BatchPost: {},
+	BatchPut:  {},
 
-	PermissionUserCreate: {},
-	PermissionUserRead:   {},
-	PermissionUserUpdate: {},
-	PermissionUserDelete: {},
+	UserCreate: {},
+	UserRead:   {},
+	UserUpdate: {},
+	UserDelete: {},
 
-	PermissionClassCreate: {},
-	PermissionClassRead:   {},
-	PermissionClassUpdate: {},
-	PermissionClassDelete: {},
+	ClassCreate: {},
+	ClassRead:   {},
+	ClassUpdate: {},
+	ClassDelete: {},
 
-	PermissionClassGroupCreate: {},
-	PermissionClassGroupRead:   {},
-	PermissionClassGroupUpdate: {},
-	PermissionClassGroupDelete: {},
+	ClassGroupCreate: {},
+	ClassGroupRead:   {},
+	ClassGroupUpdate: {},
+	ClassGroupDelete: {},
 
-	PermissionClassGroupSessionCreate: {},
-	PermissionClassGroupSessionRead:   {},
-	PermissionClassGroupSessionUpdate: {},
-	PermissionClassGroupSessionDelete: {},
+	ClassGroupSessionCreate: {},
+	ClassGroupSessionRead:   {},
+	ClassGroupSessionUpdate: {},
+	ClassGroupSessionDelete: {},
 
-	PermissionSessionEnrollmentCreate: {},
-	PermissionSessionEnrollmentRead:   {},
-	PermissionSessionEnrollmentUpdate: {},
-	PermissionSessionEnrollmentDelete: {},
+	SessionEnrollmentCreate: {},
+	SessionEnrollmentRead:   {},
+	SessionEnrollmentUpdate: {},
+	SessionEnrollmentDelete: {},
 }
