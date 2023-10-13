@@ -28,6 +28,16 @@ export type UserMeResponse = {
   upcoming_class_group_sessions: UpcomingClassGroupSession[];
 };
 
+export type UpcomingClassGroupSession = {
+  code: string;
+  year: number;
+  semester: string;
+  name: string;
+  class_type: ClassType;
+  start_time: Date;
+  end_time: Date;
+};
+
 export type User = {
   id: string;
   name: string;
@@ -76,14 +86,18 @@ export enum ClassType {
   Lab = "LAB",
 }
 
-export type UpcomingClassGroupSession = {
-  code: string;
-  year: number;
-  semester: string;
-  name: string;
-  class_type: ClassType;
+export type ClassGroupSessionsGetResponse = {
+  class_group_sessions: ClassGroupSession[];
+};
+
+export type ClassGroupSession = {
+  id: number;
+  class_group_id: number;
   start_time: Date;
   end_time: Date;
+  venue: string;
+  created_at: Date;
+  updated_at: Date;
 };
 
 export type ClassGroupData = UpsertClassGroupParams & {
