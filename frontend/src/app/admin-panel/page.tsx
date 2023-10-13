@@ -19,13 +19,13 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function AdminPanelPage() {
-  if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
-    return null;
-  }
-
   const { classes } = useStyles();
   const isMobile = useMediaQuery(MOBILE_MIN_WIDTH);
 
+  if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
+    return null;
+  }
+  
   return (
     <Container>
       <Tabs defaultValue="users" variant="outline">
