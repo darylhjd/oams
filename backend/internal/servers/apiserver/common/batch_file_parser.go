@@ -24,8 +24,10 @@ func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 		_ = file.Close()
 	}()
 
-	var creationData BatchData
-	creationData.Filename = filename
+	creationData := BatchData{
+		Filename:    filename,
+		ClassGroups: []ClassGroupData{},
+	}
 
 	sheets := file.GetSheetList()
 	if len(sheets) != expectedSheetCount {
@@ -100,8 +102,13 @@ func parseClassMetaData(batchData *BatchData, rows [][]string) error {
 func parseClassGroups(batchData *BatchData, rows [][]string) error {
 	index := expectedClassMetaDataRows + 1            // Skip blank row after metadata.
 	for index+expectedClassGroupIDRows <= len(rows) { // For each class group.
-		var group ClassGroupData
-		group.ClassType = batchData.classType
+		group := ClassGroupData{
+			database.UpsertClassGroupParams{
+				ClassType: batchData.classType,
+			},
+			[]database.UpsertClassGroupSessionParams{},
+			[]database.UpsertUserParams{},
+		}
 
 		// Parse class group name.
 		if len(rows[index]) != expectedClassGroupMetaDataRowLength {

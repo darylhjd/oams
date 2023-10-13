@@ -124,6 +124,72 @@ func TestParseBatchFile(t *testing.T) {
 			},
 		},
 		{
+			"empty class group session has no null array",
+			"batch_file_empty_class_group_enrollments.xlsx",
+			"",
+			&BatchData{
+				"batch_file_empty_class_group_enrollments.xlsx",
+				time.Date(2023, time.June, 15, 13, 1, 0, 0, location),
+				database.UpsertClassParams{
+					Code:      "SC1015",
+					Year:      2023,
+					Semester:  "2",
+					Programme: "CSC  Full-Time",
+					Au:        3,
+				},
+				[]ClassGroupData{
+					{
+						database.UpsertClassGroupParams{
+							Name:      "A21",
+							ClassType: model.ClassType_Tut,
+						},
+						[]database.UpsertClassGroupSessionParams{
+							{
+								StartTime: time.Date(2024, time.January, 15, 8, 30, 0, 0, location),
+								EndTime:   time.Date(2024, time.January, 15, 9, 20, 0, 0, location),
+								Venue:     "TR+15 NORTH,NS4-05-93",
+							},
+							{
+								StartTime: time.Date(2024, time.April, 8, 8, 30, 0, 0, location),
+								EndTime:   time.Date(2024, time.April, 8, 9, 20, 0, 0, location),
+								Venue:     "TR+15 NORTH,NS4-05-93",
+							},
+							{
+								StartTime: time.Date(2024, time.January, 16, 9, 30, 0, 0, location),
+								EndTime:   time.Date(2024, time.January, 16, 10, 20, 0, 0, location),
+								Venue:     "TR+15 NORTH,NS4-05-93",
+							},
+							{
+								StartTime: time.Date(2024, time.April, 9, 9, 30, 0, 0, location),
+								EndTime:   time.Date(2024, time.April, 9, 10, 20, 0, 0, location),
+								Venue:     "TR+15 NORTH,NS4-05-93",
+							},
+						},
+						[]database.UpsertUserParams{},
+					},
+				},
+				model.ClassType_Tut,
+			},
+		},
+		{
+			"empty class groups has no null array",
+			"batch_file_no_class_groups.xlsx",
+			"",
+			&BatchData{
+				"batch_file_no_class_groups.xlsx",
+				time.Date(2023, time.June, 15, 13, 1, 0, 0, location),
+				database.UpsertClassParams{
+					Code:      "SC1015",
+					Year:      2023,
+					Semester:  "2",
+					Programme: "CSC  Full-Time",
+					Au:        3,
+				},
+				[]ClassGroupData{},
+				model.ClassType_Tut,
+			},
+		},
+		{
 			"empty class creation file",
 			"batch_file_empty_test.xlsx",
 			"not enough rows for class metadata",
@@ -186,13 +252,16 @@ func TestParseBatchFile(t *testing.T) {
 			}
 
 			// Check class groups.
+			a.NotNil(data.ClassGroups)
 			a.Equal(len(tt.expectedData.ClassGroups), len(data.ClassGroups))
 			for i := 0; i < len(tt.expectedData.ClassGroups); i++ {
 				a.Equal(tt.expectedData.ClassGroups[i].Name, data.ClassGroups[i].Name)
 				a.Equal(tt.expectedData.ClassGroups[i].ClassType, data.ClassGroups[i].ClassType)
+				a.NotNil(data.ClassGroups[i].Sessions)
 				for _, session := range tt.expectedData.ClassGroups[i].Sessions {
 					a.Contains(data.ClassGroups[i].Sessions, session)
 				}
+				a.NotNil(data.ClassGroups[i].Students)
 				for _, student := range tt.expectedData.ClassGroups[i].Students {
 					a.Contains(data.ClassGroups[i].Students, student)
 				}
