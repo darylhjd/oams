@@ -13,6 +13,18 @@ export class UsersDataSource extends AsyncDataSource {
   }
 }
 
+export class ClassesDataSource extends AsyncDataSource {
+  async getRows(offset: number, limit: number): Promise<any[]> {
+    const response = await APIClient.classesGet(offset, limit);
+    if (response == null) {
+      return [];
+    }
+
+    super.updateRecordsEstimationState(offset, limit, response.classes.length);
+    return response.classes;
+  }
+}
+
 export class PlaceholderDataSource extends AsyncDataSource {
   async getRows(offset: number, limit: number): Promise<any[]> {
     return [];
