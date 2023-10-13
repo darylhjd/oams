@@ -7,6 +7,7 @@ import {
   ClassGroupsGetResponse,
   ClassesGetResponse,
   LoginResponse,
+  SessionEnrollmentsGetResponse,
   UserMeResponse,
   UsersGetResponse,
 } from "./models";
@@ -25,6 +26,7 @@ export class APIClient {
   static readonly _classesPath = "/classes";
   static readonly _classGroupsPath = "/class-groups";
   static readonly _classGroupSessionsPath = "/class-group-sessions";
+  static readonly _sessionEnrollmentsPath = "/session-enrollments";
 
   static async getLoginUrl(returnTo: string): Promise<string> {
     if (returnTo.length == 0) {
@@ -159,6 +161,26 @@ export class APIClient {
     try {
       const { data } = await this._client.get<ClassGroupSessionsGetResponse>(
         this._classGroupSessionsPath,
+        {
+          params: {
+            offset: offset,
+            limit: limit,
+          },
+        },
+      );
+      return data;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  static async sessionEnrollmentsGet(
+    offset: number,
+    limit: number,
+  ): Promise<SessionEnrollmentsGetResponse | null> {
+    try {
+      const { data } = await this._client.get<SessionEnrollmentsGetResponse>(
+        this._sessionEnrollmentsPath,
         {
           params: {
             offset: offset,
