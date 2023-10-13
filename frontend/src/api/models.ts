@@ -7,13 +7,17 @@ export type UserMeResponse = {
   upcoming_class_group_sessions: UpcomingClassGroupSession[];
 };
 
+export type UsersGetResponse = {
+  users: User[];
+};
+
 export type User = {
   id: string;
   name: string;
   email: string;
   role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 };
 
 export enum UserRole {

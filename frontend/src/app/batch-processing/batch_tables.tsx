@@ -1,5 +1,11 @@
 import { BatchData } from "@/api/models";
-import { DataTable, DataTableColumn } from "mantine-datatable";
+import {
+  BatchDataTable,
+  ClassBatchDataTableColumns,
+  ClassGroupBatchDataTableColumns,
+  ClassGroupSessionBatchDataTableColumns,
+  UserBatchDataTableColumns,
+} from "@/components/entity_tables";
 
 export function ClassesTable({ batches }: { batches: BatchData[] }) {
   const rows = batches.map((batch, index) => ({
@@ -11,19 +17,7 @@ export function ClassesTable({ batches }: { batches: BatchData[] }) {
     au: batch.class.au,
   }));
 
-  return (
-    <StyledDataTable
-      columns={[
-        { accessor: "id", title: "ID" },
-        { accessor: "code" },
-        { accessor: "year" },
-        { accessor: "semester" },
-        { accessor: "programme" },
-        { accessor: "au" },
-      ]}
-      records={rows}
-    />
-  );
+  return <BatchDataTable columns={ClassBatchDataTableColumns} records={rows} />;
 }
 
 export function ClassGroupsTable({ batches }: { batches: BatchData[] }) {
@@ -32,21 +26,13 @@ export function ClassGroupsTable({ batches }: { batches: BatchData[] }) {
     .flat()
     .map((classGroup, index) => ({
       id: index,
-      classId: classGroup.class_id,
+      class_id: classGroup.class_id,
       name: classGroup.name,
-      classType: classGroup.class_type,
+      class_type: classGroup.class_type,
     }));
 
   return (
-    <StyledDataTable
-      columns={[
-        { accessor: "id", title: "ID" },
-        { accessor: "classId", title: "Class ID" },
-        { accessor: "name" },
-        { accessor: "classType" },
-      ]}
-      records={rows}
-    />
+    <BatchDataTable columns={ClassGroupBatchDataTableColumns} records={rows} />
   );
 }
 
@@ -58,13 +44,8 @@ export function ClassGroupSessionsTable({ batches }: { batches: BatchData[] }) {
     .flat();
 
   return (
-    <StyledDataTable
-      columns={[
-        { accessor: "class_group_id", title: "Class Group ID" },
-        { accessor: "start_time", title: "Start Time" },
-        { accessor: "end_time", title: "End Time" },
-        { accessor: "venue" },
-      ]}
+    <BatchDataTable
+      columns={ClassGroupSessionBatchDataTableColumns}
       records={rows}
     />
   );
@@ -77,30 +58,5 @@ export function UsersTable({ batches }: { batches: BatchData[] }) {
     .map((classGroup) => classGroup.students)
     .flat();
 
-  return (
-    <StyledDataTable
-      columns={[{ accessor: "id", title: "ID" }, { accessor: "name" }]}
-      records={rows}
-    />
-  );
-}
-
-function StyledDataTable({
-  columns,
-  records,
-}: {
-  columns: DataTableColumn<any>[];
-  records: any;
-}) {
-  return (
-    <DataTable
-      height={500}
-      withBorder
-      withColumnBorders
-      highlightOnHover
-      scrollAreaProps={{ type: "auto" }}
-      columns={columns}
-      records={records}
-    />
-  );
+  return <BatchDataTable columns={UserBatchDataTableColumns} records={rows} />;
 }

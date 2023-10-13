@@ -5,6 +5,13 @@ import { MOBILE_MIN_WIDTH } from "@/components/responsive";
 import { redirectIfNotUserRole } from "@/routes/checks";
 import { Center, Container, Tabs, createStyles } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
+import {
+  ClassGroupSessionsTable,
+  ClassGroupsTable,
+  ClassesTable,
+  SessionEnrollmentsTable,
+  UsersTable,
+} from "./entity_tables";
 
 const useStyles = createStyles((theme) => ({
   tabList: {
@@ -25,9 +32,9 @@ export default function AdminPanelPage() {
   if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
     return null;
   }
-  
+
   return (
-    <Container>
+    <Container fluid>
       <Tabs defaultValue="users" variant="outline">
         <Tabs.List
           className={classes.tabList}
@@ -43,19 +50,19 @@ export default function AdminPanelPage() {
         </Tabs.List>
 
         <Tabs.Panel value="users">
-          <Center>Users WIP</Center>
+          <UsersTable />
         </Tabs.Panel>
         <Tabs.Panel value="classes">
-          <Center>Classes WIP</Center>
+          <ClassesTable />
         </Tabs.Panel>
         <Tabs.Panel value="classGroups">
-          <Center>Class Groups WIP</Center>
+          <ClassGroupsTable />
         </Tabs.Panel>
         <Tabs.Panel value="classGroupSessions">
-          <Center>Class Group Sessions WIP</Center>
+          <ClassGroupSessionsTable />
         </Tabs.Panel>
         <Tabs.Panel value="sessionEnrollments">
-          <Center>Session Enrollments WIP</Center>
+          <SessionEnrollmentsTable />
         </Tabs.Panel>
       </Tabs>
     </Container>
