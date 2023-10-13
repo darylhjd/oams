@@ -10,7 +10,7 @@ import {
   ClassGroupSessionsDataSource,
   ClassGroupsDataSource,
   ClassesDataSource,
-  PlaceholderDataSource,
+  SessionEnrollmentsDataSource,
   UsersDataSource,
 } from "./data_source";
 
@@ -54,7 +54,7 @@ export function SessionEnrollmentsTable() {
   return (
     <AsyncDataTable
       columns={SessionEnrollmentsDataTableColumns}
-      dataSource={new PlaceholderDataSource()}
+      dataSource={new SessionEnrollmentsDataSource()}
     />
   );
 }
