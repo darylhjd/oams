@@ -3,6 +3,7 @@ import {
   BatchPostResponse,
   BatchPutRequest,
   BatchPutResponse,
+  ClassGroupsGetResponse,
   ClassesGetResponse,
   LoginResponse,
   UserMeResponse,
@@ -21,6 +22,7 @@ export class APIClient {
   static readonly _usersPath = "/users";
   static readonly _userMePath = "/users/me";
   static readonly _classesPath = "/classes";
+  static readonly _classGroupsPath = "/class-groups";
 
   static async getLoginUrl(returnTo: string): Promise<string> {
     if (returnTo.length == 0) {
@@ -115,6 +117,26 @@ export class APIClient {
     try {
       const { data } = await this._client.get<ClassesGetResponse>(
         this._classesPath,
+        {
+          params: {
+            offset: offset,
+            limit: limit,
+          },
+        },
+      );
+      return data;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  static async classGroupsGet(
+    offset: number,
+    limit: number,
+  ): Promise<ClassGroupsGetResponse | null> {
+    try {
+      const { data } = await this._client.get<ClassGroupsGetResponse>(
+        this._classGroupsPath,
         {
           params: {
             offset: offset,

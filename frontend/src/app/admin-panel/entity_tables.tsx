@@ -7,6 +7,7 @@ import {
   UserDataTableColumns,
 } from "@/components/entity_tables";
 import {
+  ClassGroupsDataSource,
   ClassesDataSource,
   PlaceholderDataSource,
   UsersDataSource,
@@ -34,7 +35,7 @@ export function ClassGroupsTable() {
   return (
     <AsyncDataTable
       columns={ClassGroupDataTableColumns}
-      dataSource={new PlaceholderDataSource()}
+      dataSource={new ClassGroupsDataSource()}
     />
   );
 }

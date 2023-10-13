@@ -25,6 +25,22 @@ export class ClassesDataSource extends AsyncDataSource {
   }
 }
 
+export class ClassGroupsDataSource extends AsyncDataSource {
+  async getRows(offset: number, limit: number): Promise<any[]> {
+    const response = await APIClient.classGroupsGet(offset, limit);
+    if (response == null) {
+      return [];
+    }
+
+    super.updateRecordsEstimationState(
+      offset,
+      limit,
+      response.class_groups.length,
+    );
+    return response.class_groups;
+  }
+}
+
 export class PlaceholderDataSource extends AsyncDataSource {
   async getRows(offset: number, limit: number): Promise<any[]> {
     return [];

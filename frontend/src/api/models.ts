@@ -57,6 +57,25 @@ export type Class = {
   updated_at: Date;
 };
 
+export type ClassGroupsGetResponse = {
+  class_groups: ClassGroup[];
+};
+
+export type ClassGroup = {
+  id: number;
+  class_id: number;
+  name: string;
+  class_type: ClassType;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export enum ClassType {
+  Lecture = "LEC",
+  Tutorial = "TUT",
+  Lab = "LAB",
+}
+
 export type UpcomingClassGroupSession = {
   code: string;
   year: number;
@@ -66,12 +85,6 @@ export type UpcomingClassGroupSession = {
   start_time: Date;
   end_time: Date;
 };
-
-export enum ClassType {
-  Lecture = "LEC",
-  Tutorial = "TUT",
-  Lab = "LAB",
-}
 
 export type ClassGroupData = UpsertClassGroupParams & {
   sessions: UpsertClassGroupSessionParams[];
