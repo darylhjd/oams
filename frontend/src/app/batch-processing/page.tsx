@@ -8,7 +8,6 @@ import {
   Divider,
   FileButton,
   List,
-  NativeSelect,
   Stack,
   Tabs,
   Text,
