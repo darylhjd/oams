@@ -7,6 +7,10 @@ export type UserMeResponse = {
   upcoming_class_group_sessions: UpcomingClassGroupSession[];
 };
 
+export type UsersGetResponse = {
+  users: User[];
+};
+
 export type User = {
   id: string;
   name: string;

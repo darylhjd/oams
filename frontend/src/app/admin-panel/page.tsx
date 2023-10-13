@@ -25,7 +25,7 @@ export default function AdminPanelPage() {
   if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
     return null;
   }
-  
+
   return (
     <Container>
       <Tabs defaultValue="users" variant="outline">

@@ -5,6 +5,7 @@ import {
   BatchPutResponse,
   LoginResponse,
   UserMeResponse,
+  UsersGetResponse,
 } from "./models";
 
 export class APIClient {
@@ -19,6 +20,7 @@ export class APIClient {
   static readonly _batchPath = "/batch";
 
   static readonly _userMePath = "/users/me";
+  static readonly _usersPath = "/users";
 
   static async getLoginUrl(returnTo: string): Promise<string> {
     if (returnTo.length == 0) {
@@ -79,6 +81,26 @@ export class APIClient {
       const { data } = await this._client.put<BatchPutResponse>(
         this._batchPath,
         req,
+      );
+      return data;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  static async usersGet(
+    offset: number,
+    limit: number,
+  ): Promise<UsersGetResponse | null> {
+    try {
+      const { data } = await this._client.get<UsersGetResponse>(
+        this._usersPath,
+        {
+          params: {
+            offset: offset,
+            limit: limit,
+          },
+        },
       );
       return data;
     } catch (error) {
