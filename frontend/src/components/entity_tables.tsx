@@ -77,7 +77,7 @@ export function BatchDataTable({
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE;
     setPageRecords(records.slice(from, to));
-  }, [page]);
+  }, [page, records]);
 
   return (
     <DataTable
@@ -96,23 +96,56 @@ export function BatchDataTable({
   );
 }
 
+export abstract class AsyncDataSource {
+  constructor(
+    public totalRecords: number = 0,
+    public isApproximateRowCount: boolean = true,
+  ) {}
+
+  updateRecordsEstimationState(
+    offset: number,
+    limit: number,
+    lastFetchLength: number,
+  ) {
+    const knownLength = offset + lastFetchLength;
+
+    if (knownLength < offset + limit) {
+      this.totalRecords = knownLength;
+    } else {
+      this.totalRecords = offset + 2 * limit; // Allows possible fetch of next page.
+    }
+  }
+
+  abstract getRows(offset: number, limit: number): Promise<any[]>;
+}
+
 export function AsyncDataTable({
   columns,
+  dataSource,
 }: {
   columns: DataTableColumn<any>[];
+  dataSource: AsyncDataSource;
 }) {
   const PAGE_SIZE = 100;
 
   const [page, setPage] = useState(1);
-  const [pageRecords, setPageRecords] = useState([]);
-  const [fetching, setFetching] = useState(true);
+  const [pageRecords, setPageRecords] = useState<any[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [fetching, setFetching] = useState(false);
 
-  useEffect(() => {}, [page]);
+  useEffect(() => {
+    setFetching(true);
+    const from = (page - 1) * PAGE_SIZE;
+    dataSource.getRows(from, PAGE_SIZE).then((rows) => {
+      setPageRecords(rows);
+      setTotalRecords(dataSource.totalRecords);
+      setFetching(false);
+    });
+  }, [page]);
 
   return (
     <DataTable
-      height={1000}
+      height={700}
       withBorder
       withColumnBorders
       highlightOnHover
@@ -123,6 +156,7 @@ export function AsyncDataTable({
       recordsPerPage={PAGE_SIZE}
       page={page}
       onPageChange={(p) => setPage(p)}
+      fetching={fetching}
     />
   );
 }
