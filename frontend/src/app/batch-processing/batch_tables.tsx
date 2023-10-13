@@ -1,10 +1,10 @@
 import { BatchData } from "@/api/models";
 import {
   BatchDataTable,
-  ClassDataTableColumns,
-  ClassGroupDataTableColumns,
-  ClassGroupSessionDataTableColumns,
-  UserDataTableColumns,
+  ClassBatchDataTableColumns,
+  ClassGroupBatchDataTableColumns,
+  ClassGroupSessionBatchDataTableColumns,
+  UserBatchDataTableColumns,
 } from "@/components/entity_tables";
 
 export function ClassesTable({ batches }: { batches: BatchData[] }) {
@@ -17,7 +17,7 @@ export function ClassesTable({ batches }: { batches: BatchData[] }) {
     au: batch.class.au,
   }));
 
-  return <BatchDataTable columns={ClassDataTableColumns} records={rows} />;
+  return <BatchDataTable columns={ClassBatchDataTableColumns} records={rows} />;
 }
 
 export function ClassGroupsTable({ batches }: { batches: BatchData[] }) {
@@ -31,7 +31,9 @@ export function ClassGroupsTable({ batches }: { batches: BatchData[] }) {
       class_type: classGroup.class_type,
     }));
 
-  return <BatchDataTable columns={ClassGroupDataTableColumns} records={rows} />;
+  return (
+    <BatchDataTable columns={ClassGroupBatchDataTableColumns} records={rows} />
+  );
 }
 
 export function ClassGroupSessionsTable({ batches }: { batches: BatchData[] }) {
@@ -43,7 +45,7 @@ export function ClassGroupSessionsTable({ batches }: { batches: BatchData[] }) {
 
   return (
     <BatchDataTable
-      columns={ClassGroupSessionDataTableColumns}
+      columns={ClassGroupSessionBatchDataTableColumns}
       records={rows}
     />
   );
@@ -56,5 +58,5 @@ export function UsersTable({ batches }: { batches: BatchData[] }) {
     .map((classGroup) => classGroup.students)
     .flat();
 
-  return <BatchDataTable columns={UserDataTableColumns} records={rows} />;
+  return <BatchDataTable columns={UserBatchDataTableColumns} records={rows} />;
 }

@@ -16,8 +16,8 @@ export type User = {
   name: string;
   email: string;
   role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 };
 
 export enum UserRole {
