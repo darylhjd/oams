@@ -1,4 +1,3 @@
-import { APIClient } from "@/api/client";
 import { DataTable, DataTableColumn } from "mantine-datatable";
 import { useEffect, useState } from "react";
 
