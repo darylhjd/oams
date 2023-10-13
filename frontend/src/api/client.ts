@@ -3,6 +3,7 @@ import {
   BatchPostResponse,
   BatchPutRequest,
   BatchPutResponse,
+  ClassesGetResponse,
   LoginResponse,
   UserMeResponse,
   UsersGetResponse,
@@ -16,11 +17,10 @@ export class APIClient {
 
   static readonly _loginPath = "/login";
   static readonly _logoutPath = "/logout";
-
   static readonly _batchPath = "/batch";
-
-  static readonly _userMePath = "/users/me";
   static readonly _usersPath = "/users";
+  static readonly _userMePath = "/users/me";
+  static readonly _classesPath = "/classes";
 
   static async getLoginUrl(returnTo: string): Promise<string> {
     if (returnTo.length == 0) {
@@ -45,15 +45,6 @@ export class APIClient {
       return true;
     } catch (error) {
       return false;
-    }
-  }
-
-  static async getUserMe(): Promise<UserMeResponse | null> {
-    try {
-      const { data } = await this._client.get<UserMeResponse>(this._userMePath);
-      return data;
-    } catch (error) {
-      return null;
     }
   }
 
@@ -95,6 +86,35 @@ export class APIClient {
     try {
       const { data } = await this._client.get<UsersGetResponse>(
         this._usersPath,
+        {
+          params: {
+            offset: offset,
+            limit: limit,
+          },
+        },
+      );
+      return data;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  static async getUserMe(): Promise<UserMeResponse | null> {
+    try {
+      const { data } = await this._client.get<UserMeResponse>(this._userMePath);
+      return data;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  static async classesGet(
+    offset: number,
+    limit: number,
+  ): Promise<ClassesGetResponse | null> {
+    try {
+      const { data } = await this._client.get<ClassesGetResponse>(
+        this._classesPath,
         {
           params: {
             offset: offset,

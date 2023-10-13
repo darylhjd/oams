@@ -6,7 +6,11 @@ import {
   SessionEnrollmentsDataTableColumns,
   UserDataTableColumns,
 } from "@/components/entity_tables";
-import { PlaceholderDataSource, UsersDataSource } from "./data_source";
+import {
+  ClassesDataSource,
+  PlaceholderDataSource,
+  UsersDataSource,
+} from "./data_source";
 
 export function UsersTable() {
   return (
@@ -21,7 +25,7 @@ export function ClassesTable() {
   return (
     <AsyncDataTable
       columns={ClassDataTableColumns}
-      dataSource={new PlaceholderDataSource()}
+      dataSource={new ClassesDataSource()}
     />
   );
 }
