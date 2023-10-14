@@ -16,9 +16,6 @@ func (d *DB) ListClassGroupSessions(ctx context.Context, params listParams) ([]m
 		ClassGroupSessions.AllColumns,
 	).FROM(
 		ClassGroupSessions,
-	).ORDER_BY(
-		ClassGroupSessions.ClassGroupID,
-		ClassGroupSessions.StartTime,
 	)
 
 	stmt = setSorts(stmt, params)

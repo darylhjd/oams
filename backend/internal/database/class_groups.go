@@ -16,9 +16,6 @@ func (d *DB) ListClassGroups(ctx context.Context, params listParams) ([]model.Cl
 		ClassGroups.AllColumns,
 	).FROM(
 		ClassGroups,
-	).ORDER_BY(
-		ClassGroups.ClassID,
-		ClassGroups.Name,
 	)
 
 	stmt = setSorts(stmt, params)
