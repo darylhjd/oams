@@ -112,7 +112,7 @@ export abstract class AsyncDataSource {
     if (knownLength < offset + limit) {
       this.totalRecords = knownLength;
     } else {
-      this.totalRecords = offset + 2 * limit; // Allows possible fetch of next page.
+      this.totalRecords = Math.max(this.totalRecords, offset + 2 * limit); // Allows possible fetch of next page.
     }
   }
 
