@@ -16,9 +16,6 @@ func (d *DB) ListSessionEnrollments(ctx context.Context, params listParams) ([]m
 		SessionEnrollments.AllColumns,
 	).FROM(
 		SessionEnrollments,
-	).ORDER_BY(
-		SessionEnrollments.SessionID,
-		SessionEnrollments.UserID,
 	)
 
 	stmt = setSorts(stmt, params)

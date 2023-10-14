@@ -15,10 +15,6 @@ func (d *DB) ListClasses(ctx context.Context, params listParams) ([]model.Class,
 		Classes.AllColumns,
 	).FROM(
 		Classes,
-	).ORDER_BY(
-		Classes.Code,
-		Classes.Year,
-		Classes.Semester,
 	)
 
 	stmt = setSorts(stmt, params)
