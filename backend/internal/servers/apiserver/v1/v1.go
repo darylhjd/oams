@@ -33,6 +33,7 @@ const (
 	userUrl               = "/users/"
 	classesUrl            = "/classes"
 	classUrl              = "/classes/"
+	classManagersUrl      = "/class-managers"
 	classGroupsUrl        = "/class-groups"
 	classGroupUrl         = "/class-groups/"
 	classGroupSessionsUrl = "/class-group-sessions"
@@ -116,6 +117,15 @@ func (v *APIServerV1) registerHandlers() {
 				http.MethodGet:    {permissions.ClassRead},
 				http.MethodPatch:  {permissions.ClassUpdate},
 				http.MethodDelete: {permissions.ClassDelete},
+			}),
+		v.azure, v.db,
+	))
+
+	v.mux.HandleFunc(classManagersUrl, middleware.MustAuth(
+		middleware.AllowMethodsWithPermissions(v.classManagers,
+			map[string][]permissions.P{
+				http.MethodGet:  {permissions.ClassManagerRead},
+				http.MethodPost: {permissions.ClassManagerCreate},
 			}),
 		v.azure, v.db,
 	))
