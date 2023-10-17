@@ -61,6 +61,26 @@ func StubClass(t *testing.T, ctx context.Context, db *database.DB, code string, 
 	return class
 }
 
+// StubClassManager inserts a mock user and class into the database, and then makes the user
+// a manager of the mocked class.
+func StubClassManager(t *testing.T, ctx context.Context, db *database.DB, role model.ManagingRole) model.ClassManager {
+	t.Helper()
+
+	user := StubUser(t, ctx, db, uuid.NewString(), model.UserRole_User)
+	class := StubClass(t, ctx, db, uuid.NewString(), rand.Int31(), uuid.NewString())
+
+	manager, err := db.CreateClassManager(ctx, database.CreateClassManagerParams{
+		UserID:       user.ID,
+		ClassID:      class.ID,
+		ManagingRole: role,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return manager
+}
+
 // StubClassGroup inserts a mock class and a corresponding class group into the database.
 func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name string, classType model.ClassType) model.ClassGroup {
 	t.Helper()
