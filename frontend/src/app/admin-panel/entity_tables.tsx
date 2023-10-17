@@ -3,12 +3,14 @@ import {
   ClassDataTableColumns,
   ClassGroupDataTableColumns,
   ClassGroupSessionDataTableColumns,
+  ClassManagerDataTableColumns,
   SessionEnrollmentsDataTableColumns,
   UserDataTableColumns,
 } from "@/components/entity_tables";
 import {
   ClassGroupSessionsDataSource,
   ClassGroupsDataSource,
+  ClassManagersDataSource,
   ClassesDataSource,
   SessionEnrollmentsDataSource,
   UsersDataSource,
@@ -28,6 +30,15 @@ export function ClassesTable() {
     <AsyncDataTable
       columns={ClassDataTableColumns}
       dataSource={new ClassesDataSource()}
+    />
+  );
+}
+
+export function ClassManagersTable() {
+  return (
+    <AsyncDataTable
+      columns={ClassManagerDataTableColumns}
+      dataSource={new ClassManagersDataSource()}
     />
   );
 }

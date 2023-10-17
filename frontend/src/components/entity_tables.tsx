@@ -30,6 +30,14 @@ export const ClassDataTableColumns = [
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
+export const ClassManagerDataTableColumns = [
+  { accessor: "id", title: "ID" },
+  { accessor: "user_id", title: "User ID" },
+  { accessor: "class_id", title: "Class ID" },
+  { accessor: "managing_role", title: "Managing Role" },
+  ...CreatedAtUpdatedAtDataTableColumns,
+];
+
 export const ClassGroupBatchDataTableColumns = [
   { accessor: "id", title: "ID" },
   { accessor: "class_id", title: "Class ID" },

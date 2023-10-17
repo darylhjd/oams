@@ -5,6 +5,7 @@ import {
   BatchPutResponse,
   ClassGroupSessionsGetResponse,
   ClassGroupsGetResponse,
+  ClassManagersGetResponse,
   ClassesGetResponse,
   LoginResponse,
   SessionEnrollmentsGetResponse,
@@ -24,6 +25,7 @@ export class APIClient {
   static readonly _usersPath = "/users";
   static readonly _userMePath = "/users/me";
   static readonly _classesPath = "/classes";
+  static readonly _classManagersPath = "/class-managers";
   static readonly _classGroupsPath = "/class-groups";
   static readonly _classGroupSessionsPath = "/class-group-sessions";
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
@@ -121,6 +123,26 @@ export class APIClient {
     try {
       const { data } = await this._client.get<ClassesGetResponse>(
         this._classesPath,
+        {
+          params: {
+            offset: offset,
+            limit: limit,
+          },
+        },
+      );
+      return data;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  static async classManagersGet(
+    offset: number,
+    limit: number,
+  ): Promise<ClassManagersGetResponse | null> {
+    try {
+      const { data } = await this._client.get<ClassManagersGetResponse>(
+        this._classManagersPath,
         {
           params: {
             offset: offset,
