@@ -1,6 +1,6 @@
 import { SessionEnrollment } from "@/api/models";
 import { DataTable, DataTableColumn } from "mantine-datatable";
-import { useEffect, useState } from "react";
+import { useEffect, useState, MouseEvent } from "react";
 
 const CreatedAtUpdatedAtDataTableColumns = [
   { accessor: "created_at", title: "Created At" },
@@ -73,12 +73,12 @@ export const SessionEnrollmentsDataTableColumns = [
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
-export function BatchDataTable({
+export function BatchDataTable<T>({
   columns,
   records,
 }: {
-  columns: DataTableColumn<any>[];
-  records: any[];
+  columns: DataTableColumn<T>[];
+  records: T[];
 }) {
   const PAGE_SIZE = 50;
 
@@ -108,7 +108,7 @@ export function BatchDataTable({
   );
 }
 
-export abstract class AsyncDataSource {
+export abstract class AsyncDataSource<T> {
   constructor(
     public totalRecords: number = 0,
     public isApproximateRowCount: boolean = true,
@@ -128,20 +128,22 @@ export abstract class AsyncDataSource {
     }
   }
 
-  abstract getRows(offset: number, limit: number): Promise<any[]>;
+  abstract getRows(offset: number, limit: number): Promise<T[]>;
 }
 
-export function AsyncDataTable({
+export function AsyncDataTable<T>({
   columns,
   dataSource,
+  onRowClick,
 }: {
-  columns: DataTableColumn<any>[];
-  dataSource: AsyncDataSource;
+  columns: DataTableColumn<T>[];
+  dataSource: AsyncDataSource<T>;
+  onRowClick?: (record: T, recordIndex: number, event: MouseEvent) => void;
 }) {
   const PAGE_SIZE = 100;
 
   const [page, setPage] = useState(1);
-  const [pageRecords, setPageRecords] = useState<any[]>([]);
+  const [pageRecords, setPageRecords] = useState<T[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [fetching, setFetching] = useState(false);
 
@@ -169,6 +171,7 @@ export function AsyncDataTable({
       page={page}
       onPageChange={(p) => setPage(p)}
       fetching={fetching}
+      onRowClick={onRowClick}
     />
   );
 }
