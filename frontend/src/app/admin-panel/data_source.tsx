@@ -1,8 +1,16 @@
 import { APIClient } from "@/api/client";
+import {
+  Class,
+  ClassGroup,
+  ClassGroupSession,
+  ClassManager,
+  SessionEnrollment,
+  User,
+} from "@/api/models";
 import { AsyncDataSource } from "@/components/entity_tables";
 
-export class UsersDataSource extends AsyncDataSource {
-  async getRows(offset: number, limit: number): Promise<any[]> {
+export class UsersDataSource extends AsyncDataSource<User> {
+  async getRows(offset: number, limit: number): Promise<User[]> {
     const response = await APIClient.usersGet(offset, limit);
     if (response == null) {
       return [];
@@ -13,8 +21,8 @@ export class UsersDataSource extends AsyncDataSource {
   }
 }
 
-export class ClassesDataSource extends AsyncDataSource {
-  async getRows(offset: number, limit: number): Promise<any[]> {
+export class ClassesDataSource extends AsyncDataSource<Class> {
+  async getRows(offset: number, limit: number): Promise<Class[]> {
     const response = await APIClient.classesGet(offset, limit);
     if (response == null) {
       return [];
@@ -25,8 +33,8 @@ export class ClassesDataSource extends AsyncDataSource {
   }
 }
 
-export class ClassManagersDataSource extends AsyncDataSource {
-  async getRows(offset: number, limit: number): Promise<any[]> {
+export class ClassManagersDataSource extends AsyncDataSource<ClassManager> {
+  async getRows(offset: number, limit: number): Promise<ClassManager[]> {
     const response = await APIClient.classManagersGet(offset, limit);
     if (response == null) {
       return [];
@@ -41,8 +49,8 @@ export class ClassManagersDataSource extends AsyncDataSource {
   }
 }
 
-export class ClassGroupsDataSource extends AsyncDataSource {
-  async getRows(offset: number, limit: number): Promise<any[]> {
+export class ClassGroupsDataSource extends AsyncDataSource<ClassGroup> {
+  async getRows(offset: number, limit: number): Promise<ClassGroup[]> {
     const response = await APIClient.classGroupsGet(offset, limit);
     if (response == null) {
       return [];
@@ -57,8 +65,8 @@ export class ClassGroupsDataSource extends AsyncDataSource {
   }
 }
 
-export class ClassGroupSessionsDataSource extends AsyncDataSource {
-  async getRows(offset: number, limit: number): Promise<any[]> {
+export class ClassGroupSessionsDataSource extends AsyncDataSource<ClassGroupSession> {
+  async getRows(offset: number, limit: number): Promise<ClassGroupSession[]> {
     const response = await APIClient.classGroupSessionsGet(offset, limit);
     if (response == null) {
       return [];
@@ -73,8 +81,8 @@ export class ClassGroupSessionsDataSource extends AsyncDataSource {
   }
 }
 
-export class SessionEnrollmentsDataSource extends AsyncDataSource {
-  async getRows(offset: number, limit: number): Promise<any[]> {
+export class SessionEnrollmentsDataSource extends AsyncDataSource<SessionEnrollment> {
+  async getRows(offset: number, limit: number): Promise<SessionEnrollment[]> {
     const response = await APIClient.sessionEnrollmentsGet(offset, limit);
     if (response == null) {
       return [];
