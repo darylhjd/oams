@@ -295,6 +295,20 @@ func TestAPIServerV1_classManagersPost(t *testing.T) {
 			http.StatusBadRequest,
 			"user_id and/or class_id does not exist",
 		},
+		{
+			"request with non-existent user and class dependency",
+			classManagersPostRequest{
+				database.CreateClassManagerParams{
+					ManagingRole: model.ManagingRole_CourseCoordinator,
+				},
+			},
+			false,
+			false,
+			false,
+			classManagersPostResponse{},
+			http.StatusBadRequest,
+			"user_id and/or class_id does not exist",
+		},
 	}
 
 	for _, tt := range tts {
