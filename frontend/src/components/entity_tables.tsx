@@ -1,3 +1,4 @@
+import { SessionEnrollment } from "@/api/models";
 import { DataTable, DataTableColumn } from "mantine-datatable";
 import { useEffect, useState } from "react";
 
@@ -65,7 +66,10 @@ export const SessionEnrollmentsDataTableColumns = [
   { accessor: "id", title: "ID" },
   { accessor: "session_id", title: "Session ID" },
   { accessor: "user_id", title: "User ID" },
-  { accessor: "attended" },
+  {
+    accessor: "attended",
+    render: (record: SessionEnrollment) => record.attended.toString(),
+  },
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
