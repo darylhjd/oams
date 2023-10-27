@@ -1,0 +1,17 @@
+.header {
+  position: "sticky";
+  top: 0;
+  z-index: 9999999;
+  border-bottom: rem(1px) solid grey;
+  padding: rem(10px) rem(10px);
+}
+
+.items {
+  height: 4rem;
+  width: 80rem;
+}
+
+.logo {
+  width: 10rem;
+  height: 100%;
+}

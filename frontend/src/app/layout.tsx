@@ -4,6 +4,7 @@ import "@mantine/core/styles.css";
 
 import { ColorSchemeScript } from "@mantine/core";
 import Providers from "./providers";
+import Header from "@/components/header";
 
 export const metadata = {
   title: "OAMS",
@@ -21,7 +22,10 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   );

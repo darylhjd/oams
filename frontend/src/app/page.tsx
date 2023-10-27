@@ -1,14 +1,11 @@
 "use client";
 
 import { useSessionUserStore } from "@/stores/session";
-import { Center } from "@mantine/core";
+import LoggedPage from "./page_logged";
+import GuestPage from "./page_guest";
 
 export default function Home() {
   const session = useSessionUserStore();
 
-  return (
-    <Center>
-      <p>Hello there, {session.data?.session_user.name}</p>
-    </Center>
-  );
+  return session.data ? LoggedPage() : GuestPage();
 }
