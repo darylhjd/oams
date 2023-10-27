@@ -16,10 +16,10 @@ import {
 export class APIClient {
   static _client = axios.create({
     withCredentials: true,
-    baseURL: `${process.env.API_SERVER_HOST}/api/v1`,
+    baseURL: `${process.env.API_SERVER_HOST}`,
   });
 
-  static readonly _loginPath = "/login";
+  static readonly _loginPath = "/api/v1" + "/login";
   static readonly _logoutPath = "/logout";
   static readonly _batchPath = "/batch";
   static readonly _usersPath = "/users";

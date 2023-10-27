@@ -76,7 +76,6 @@ func SetSessionCookie(w http.ResponseWriter, res confidential.AuthResult) http.C
 	cookie := &http.Cookie{
 		Name:     SessionCookieIdent,
 		Value:    res.Account.HomeAccountID,
-		Domain:   env.GetWebServerHost(),
 		Path:     "/",
 		Expires:  res.ExpiresOn,
 		Secure:   true,
