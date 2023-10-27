@@ -1,37 +1,32 @@
 # syntax=docker/dockerfile:1
-# Context: Project root.
+# Context: Frontend.
 
 # Stage 1: Build web.
-FROM node:lts-alpine3.18 as web-builder
+FROM node:lts-alpine3.18 as builder
 
 WORKDIR /app
-COPY ./frontend ./
+COPY . ./
 
 RUN --mount=type=secret,id=env cat /run/secrets/env > /app/.env.production  \
     && npx next telemetry disable  \
     && npm install  \
     && npm run build
 
-# Stage 2: Build webserver.
-FROM golang:1.20-alpine as builder
+# Stage 2: New container to run.
+FROM node:lts-alpine3.18 as runner
 
-WORKDIR /app
-COPY ./backend ./
-RUN go mod download
+WORKDIR ./app
 
-# Copy flutter build.
-COPY --from=web-builder /app/out/ ./internal/servers/webserver/build/out/
-
-WORKDIR /app/cmd/webserver
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out
-
-# Stage 3: Move webserver binary to bare container.
-FROM scratch
-COPY --from=builder /out /out
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Required for making HTTP requests in the container.
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-EXPOSE 8080
+EXPOSE 3000
 
-ENTRYPOINT ["/out"]
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["node", "server.js"]

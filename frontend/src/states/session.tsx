@@ -3,7 +3,6 @@ import { create } from "zustand";
 
 type sessionStoreType = {
   data: UserMeResponse | null;
-  loaded: boolean;
   setUser: (user: UserMeResponse | null) => void;
   invalidate: () => void;
 };
@@ -11,6 +10,6 @@ type sessionStoreType = {
 export const sessionStore = create<sessionStoreType>((set) => ({
   data: null,
   loaded: false,
-  setUser: (user: UserMeResponse | null) => set({ data: user, loaded: true }),
-  invalidate: () => set({ data: null, loaded: false }),
+  setUser: (user: UserMeResponse | null) => set({ data: user }),
+  invalidate: () => set({ data: null }),
 }));
