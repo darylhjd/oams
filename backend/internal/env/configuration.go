@@ -13,7 +13,6 @@ type Configuration string
 
 const (
 	ConfigurationApiServer = "apiserver"
-	ConfigurationWebServer = "webserver"
 	ConfigurationDatabase  = "database"
 )
 
@@ -30,8 +29,7 @@ func verifyApiServerConfiguration() error {
 		apiServerAzureClientSecret,
 		apiServerAzureLoginScope,
 		apiServerAzureLoginCallbackUrl,
-		webServerHost,
-		webServerPort,
+		webServer,
 	}
 
 	if err := checkRequiredEnvs(envs...); err != nil {
@@ -39,18 +37,6 @@ func verifyApiServerConfiguration() error {
 	}
 
 	if err := verifyDatabaseConfiguration(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func verifyWebServerConfiguration() error {
-	envs := []string{
-		webServerPort,
-	}
-
-	if err := checkRequiredEnvs(envs...); err != nil {
 		return err
 	}
 

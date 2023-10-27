@@ -54,7 +54,7 @@ export function redirectIfNotUserRole(userRole: UserRole): boolean {
 // page before the redirect.
 function loginWithRedirectUrl(): string {
   const path = getURL();
-  const redirectUrl = `${process.env.WEB_SERVER_HOST}:${process.env.WEB_SERVER_PORT}${path}`;
+  const redirectUrl = `${process.env.WEB_SERVER}${path}`;
   const queryParams = new URLSearchParams({
     redirect_url: redirectUrl,
   });

@@ -49,15 +49,12 @@ func verifyConfiguration() error {
 	switch getConfiguration() {
 	case ConfigurationApiServer:
 		return verifyApiServerConfiguration()
-	case ConfigurationWebServer:
-		return verifyWebServerConfiguration()
 	case ConfigurationDatabase:
 		return verifyDatabaseConfiguration()
 	default:
 		// If no configuration is specified, all configurations are checked.
 		return errors.Join(
 			verifyApiServerConfiguration(),
-			verifyWebServerConfiguration(),
 			verifyDatabaseConfiguration(),
 		)
 	}

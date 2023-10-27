@@ -15,7 +15,7 @@ import {
 
 export class APIClient {
   static _client = axios.create({
-    baseURL: `${process.env.API_SERVER_HOST}:${process.env.API_SERVER_PORT}/api/v1`,
+    baseURL: `${process.env.API_SERVER}/api/v1`,
     withCredentials: true,
   });
 
@@ -32,7 +32,7 @@ export class APIClient {
 
   static async getLoginUrl(returnTo: string): Promise<string> {
     if (returnTo.length == 0) {
-      returnTo = `${process.env.WEB_SERVER_HOST}:${process.env.WEB_SERVER_PORT}`;
+      returnTo = `${process.env.WEB_SERVER}`;
     }
 
     try {
