@@ -2,7 +2,8 @@
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 
-import { MantineProvider, ColorSchemeScript } from "@mantine/core";
+import { ColorSchemeScript } from "@mantine/core";
+import Providers from "./providers";
 
 export const metadata = {
   title: "OAMS",
@@ -20,9 +21,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="dark">
-          {children}
-        </MantineProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
