@@ -15,7 +15,7 @@ import {
 
 export class APIClient {
   static _client = axios.create({
-    baseURL: `${process.env.API_SERVER_HOST}/api/v1`,
+    baseURL: `${process.env.API_SERVER_HOST}:${process.env.API_SERVER_PORT}/api/v1`,
     withCredentials: true,
   });
 
