@@ -3,7 +3,7 @@
 import { APIClient } from "@/api/client";
 import { sessionStore } from "@/states/session";
 import { Center, Container, Flex, createStyles } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -19,17 +19,20 @@ export default function SessionInitialiser({
   const session = sessionStore();
   const { classes } = useStyles();
 
+  const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
-    if (session.loaded) {
+    if (loaded) {
       return;
     }
 
     APIClient.getUserMe().then((data) => {
       session.setUser(data);
+      setLoaded(true);
     });
   }, [session]);
 
-  if (!session.loaded) {
+  if (!loaded) {
     return (
       <Center>
         <Container className={classes.container}>
