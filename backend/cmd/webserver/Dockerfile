@@ -26,4 +26,7 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 EXPOSE 8080
 
+ENV PORT 8080
+ENV HOSTNAME "0.0.0.0"
+
 CMD ["node", "server.js"]
