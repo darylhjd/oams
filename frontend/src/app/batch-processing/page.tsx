@@ -56,49 +56,47 @@ export default function BatchProcessingPage() {
   }
 
   return (
-    <>
-      <Container className={styles.processor} fluid>
-        <Stack>
-          <Stepper
-            active={step}
-            onStepClick={setStep}
-            allowNextStepsSelect={false}
-            orientation={isMobile ? "vertical" : "horizontal"}
+    <Container className={styles.processor} fluid>
+      <Stack>
+        <Stepper
+          active={step}
+          onStepClick={setStep}
+          allowNextStepsSelect={false}
+          orientation={isMobile ? "vertical" : "horizontal"}
+        >
+          <StepperStep label="First step" description="Choose batch files">
+            <FilePicker />
+          </StepperStep>
+          <StepperStep label="Second step" description="Preview batch data">
+            <Previewer />
+          </StepperStep>
+          <StepperCompleted>
+            <Completed />
+          </StepperCompleted>
+        </Stepper>
+
+        <Group justify="center" mt="xl">
+          <Button variant="default" onClick={prevStep} disabled={step == 0}>
+            Back
+          </Button>
+          <Button
+            disabled={fileStorage.files.length == 0}
+            onClick={async () => {
+              if (await stepDescriptions[step].action()) {
+                nextStep();
+              }
+
+              if (step == stepDescriptions.length - 1) {
+                setStep(0);
+                fileStorage.clearFiles();
+              }
+            }}
           >
-            <StepperStep label="First step" description="Choose batch files">
-              <FilePicker />
-            </StepperStep>
-            <StepperStep label="Second step" description="Preview batch data">
-              <Previewer />
-            </StepperStep>
-            <StepperCompleted>
-              <Completed />
-            </StepperCompleted>
-          </Stepper>
-
-          <Group justify="center" mt="xl">
-            <Button variant="default" onClick={prevStep} disabled={step == 0}>
-              Back
-            </Button>
-            <Button
-              disabled={fileStorage.files.length == 0}
-              onClick={async () => {
-                if (await stepDescriptions[step].action()) {
-                  nextStep();
-                }
-
-                if (step == stepDescriptions.length - 1) {
-                  setStep(0);
-                  fileStorage.clearFiles();
-                }
-              }}
-            >
-              {stepDescriptions[step].desc}
-            </Button>
-          </Group>
-        </Stack>
-      </Container>
-    </>
+            {stepDescriptions[step].desc}
+          </Button>
+        </Group>
+      </Stack>
+    </Container>
   );
 }
 
