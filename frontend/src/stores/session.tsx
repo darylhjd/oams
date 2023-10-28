@@ -27,12 +27,14 @@ export function SessionInitialiser({
 }) {
   const session = useSessionUserStore();
   const [loaded, setLoaded] = useState(false);
+  const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
-    if (loaded) {
+    if (fetching) {
       return;
     }
 
+    setFetching(true);
     APIClient.userMe()
       .then((data) => {
         session.setSession(data);
