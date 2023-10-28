@@ -1,4 +1,4 @@
-import { ClassType } from "./class";
+import { ClassType } from "./class_group";
 
 export type BatchPostResponse = {
   batches: BatchData[];
