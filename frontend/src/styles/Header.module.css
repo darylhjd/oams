@@ -1,8 +1,8 @@
 .header {
-  position: "sticky";
+  position: sticky;
   top: 0;
-  z-index: 9999999;
-  border-bottom: rem(1px) solid grey;
+  background-color: var(--mantine-color-default);
+  border-bottom: rem(1px) solid var(--mantine-color-default-border);
   padding: rem(10px) rem(10px);
 }
 

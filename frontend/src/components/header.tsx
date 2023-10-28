@@ -24,6 +24,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown } from "@tabler/icons-react";
 import { Routes } from "@/routing/routes";
 import { APIClient } from "@/api/client";
+import { UserRole } from "@/api/user";
 
 export default function Header() {
   return (
@@ -99,16 +100,22 @@ function GuestItems({ close }: { close: () => void }) {
 }
 
 function LoggedItems({ close }: { close: () => void }) {
+  const session = useSessionUserStore();
+
   return (
     <>
       <Group visibleFrom="md">
-        <SystemAdminMenu close={close} />
+        {session.data?.session_user.role == UserRole.SystemAdmin ? (
+          <SystemAdminMenu close={close} />
+        ) : null}
         <AboutButton close={close} />
         <LogoutButton />
       </Group>
 
       <Stack hiddenFrom="md">
-        <SystemAdminMenu close={close} />
+        {session.data?.session_user.role == UserRole.SystemAdmin ? (
+          <SystemAdminMenu close={close} />
+        ) : null}
         <Divider />
         <AboutButton close={close} />
         <LogoutButton />
@@ -174,6 +181,8 @@ function LogoutButton() {
 }
 
 function SystemAdminMenu({ close }: { close: () => void }) {
+  const router = useRouter();
+
   return (
     <>
       <Box visibleFrom="md">
@@ -188,7 +197,9 @@ function SystemAdminMenu({ close }: { close: () => void }) {
             </Button>
           </MenuTarget>
           <MenuDropdown>
-            <MenuItem>Admin Panel</MenuItem>
+            <MenuItem onClick={() => router.push(Routes.adminPanel)}>
+              Admin Panel
+            </MenuItem>
             <MenuItem>Batch Processing</MenuItem>
           </MenuDropdown>
         </Menu>
@@ -201,7 +212,13 @@ function SystemAdminMenu({ close }: { close: () => void }) {
         active
         variant="subtle"
       >
-        <NavLink label="Admin Panel" onClick={close} />
+        <NavLink
+          label="Admin Panel"
+          onClick={() => {
+            close();
+            router.push(Routes.adminPanel);
+          }}
+        />
         <NavLink label="Batch Processing" onClick={close} />
       </NavLink>
     </>
