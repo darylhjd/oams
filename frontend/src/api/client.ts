@@ -9,6 +9,7 @@ export class APIClient {
   });
 
   static readonly _loginPath = "/login";
+  static readonly _logoutPath = "/logout";
   static readonly _userMePath = "/users/me";
 
   static async login(redirectUrl: string = ""): Promise<string> {
@@ -18,6 +19,11 @@ export class APIClient {
       },
     });
     return data.redirect_url;
+  }
+
+  static async logout(): Promise<boolean> {
+    await this._client.get(this._logoutPath);
+    return true;
   }
 
   static async userMe(): Promise<UserMeResponse> {

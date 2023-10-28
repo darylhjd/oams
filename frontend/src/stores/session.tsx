@@ -37,6 +37,7 @@ export function SessionInitialiser({
       .then((data) => {
         session.setSession(data);
       })
+      .catch((_error) => null)
       .finally(() => setLoaded(true));
   });
 

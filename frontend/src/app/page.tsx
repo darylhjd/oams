@@ -7,5 +7,5 @@ import GuestPage from "./page_guest";
 export default function Home() {
   const session = useSessionUserStore();
 
-  return session.data ? LoggedPage() : GuestPage();
+  return session.data ? <LoggedPage /> : <GuestPage />;
 }

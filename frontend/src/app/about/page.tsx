@@ -1,9 +1,9 @@
 import { Center } from "@mantine/core";
 
-export default function GuestPage() {
+export default function AboutPage() {
   return (
     <Center>
-      <p>Welcome, Guest!</p>
+      <p>This is the about page.</p>
     </Center>
   );
 }

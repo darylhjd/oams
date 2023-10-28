@@ -9,9 +9,19 @@
 .items {
   height: 4rem;
   width: 80rem;
+  margin-right: rem(15px);
+
+  @media (max-width: $mantine-breakpoint-md) {
+    height: 3.5rem;
+  }
 }
 
 .logo {
   width: 10rem;
   height: 100%;
+
+  @media (max-width: $mantine-breakpoint-md) {
+    width: 8rem;
+    height: 90%;
+  }
 }

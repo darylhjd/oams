@@ -1,23 +1,45 @@
 "use client";
 
-import { Button, Center, Container, Image, Group } from "@mantine/core";
+import {
+  Button,
+  Center,
+  Container,
+  Image,
+  Group,
+  Burger,
+  Drawer,
+  Box,
+  Stack,
+  Menu,
+  MenuTarget,
+  MenuDropdown,
+  MenuItem,
+  NavLink,
+  Divider,
+} from "@mantine/core";
 import styles from "@/styles/Header.module.css";
 import { useRouter } from "next/navigation";
+import { useSessionUserStore } from "@/stores/session";
+import { useDisclosure } from "@mantine/hooks";
+import { IconChevronDown } from "@tabler/icons-react";
+import { Routes } from "@/routing/routes";
+import { APIClient } from "@/api/client";
+import { create } from "zustand";
 
 export default function Header() {
   return (
     <Container className={styles.header} fluid>
-      <Items />
+      <NavBarItems />
     </Container>
   );
 }
 
-function Items() {
+function NavBarItems() {
   return (
     <Center>
-      <Group className={styles.items} justify="space-between" align="center">
+      <Group className={styles.items} justify="space-between">
         <Logo />
-        <GroupItems />
+        <Items />
       </Group>
     </Center>
   );
@@ -30,7 +52,7 @@ function Logo() {
     <Button
       className={styles.logo}
       variant="subtle"
-      onClick={() => router.push("/")}
+      onClick={() => router.push(Routes.index)}
     >
       <div>
         <Image src="logo.png" fit="contain" />
@@ -39,10 +61,150 @@ function Logo() {
   );
 }
 
-function GroupItems() {
+function Items() {
+  const session = useSessionUserStore();
+  const [opened, { close, toggle }] = useDisclosure();
+
+  const items = session.data ? (
+    <LoggedItems close={close} />
+  ) : (
+    <GuestItems close={close} />
+  );
+
   return (
-    <Group gap={5}>
-      <Button>Login</Button>
-    </Group>
+    <>
+      <Box visibleFrom="md">{items}</Box>
+
+      <Burger hiddenFrom="md" opened={opened} onClick={toggle} />
+      <Drawer opened={opened} onClose={close}>
+        {items}
+      </Drawer>
+    </>
+  );
+}
+
+function GuestItems({ close }: { close: () => void }) {
+  return (
+    <>
+      <Group visibleFrom="md">
+        <AboutButton close={close} />
+        <LoginButton />
+      </Group>
+
+      <Stack hiddenFrom="md">
+        <AboutButton close={close} />
+        <LoginButton />
+      </Stack>
+    </>
+  );
+}
+
+function LoggedItems({ close }: { close: () => void }) {
+  return (
+    <>
+      <Group visibleFrom="md">
+        <SystemAdminMenu close={close} />
+        <AboutButton close={close} />
+        <LogoutButton />
+      </Group>
+
+      <Stack hiddenFrom="md">
+        <SystemAdminMenu close={close} />
+        <Divider />
+        <AboutButton close={close} />
+        <LogoutButton />
+      </Stack>
+    </>
+  );
+}
+
+function AboutButton({ close }: { close: () => void }) {
+  const router = useRouter();
+
+  return (
+    <>
+      <Button
+        visibleFrom="md"
+        variant="subtle"
+        onClick={() => router.push(Routes.about)}
+      >
+        About
+      </Button>
+
+      <NavLink
+        hiddenFrom="md"
+        label="About"
+        active
+        variant="subtle"
+        onClick={() => {
+          close();
+          router.push(Routes.about);
+        }}
+      />
+    </>
+  );
+}
+
+function LoginButton() {
+  const router = useRouter();
+
+  return (
+    <Button
+      onClick={async () => {
+        const loginLink = await APIClient.login();
+        router.push(loginLink);
+      }}
+    >
+      Login
+    </Button>
+  );
+}
+
+function LogoutButton() {
+  return (
+    <Button
+      color="red"
+      onClick={async () => {
+        await APIClient.logout();
+        location.href = Routes.index;
+      }}
+    >
+      Logout
+    </Button>
+  );
+}
+
+function SystemAdminMenu({ close }: { close: () => void }) {
+  return (
+    <>
+      <Box visibleFrom="md">
+        <Menu>
+          <MenuTarget>
+            <Button
+              color="orange"
+              variant="subtle"
+              rightSection={<IconChevronDown />}
+            >
+              System Admin Menu
+            </Button>
+          </MenuTarget>
+          <MenuDropdown>
+            <MenuItem>Admin Panel</MenuItem>
+            <MenuItem>Batch Processing</MenuItem>
+          </MenuDropdown>
+        </Menu>
+      </Box>
+
+      <NavLink
+        color="orange"
+        hiddenFrom="md"
+        label="System Admin Menu"
+        active
+        variant="subtle"
+      >
+        <NavLink label="Admin Panel" onClick={close} />
+        <NavLink label="Batch Processing" onClick={close} />
+      </NavLink>
+    </>
   );
 }
