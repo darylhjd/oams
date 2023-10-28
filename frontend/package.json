@@ -13,6 +13,7 @@
     "@mantine/core": "^7.1.7",
     "@mantine/dropzone": "^7.1.7",
     "@mantine/hooks": "^7.1.7",
+    "@mantine/notifications": "^7.1.7",
     "@tabler/icons-react": "^2.40.0",
     "axios": "^1.6.0",
     "framer-motion": "^10.16.4",

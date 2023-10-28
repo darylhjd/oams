@@ -18,6 +18,10 @@ import { FilePicker } from "./file_picker";
 import { useBatchFiles } from "@/stores/batch_file_picker";
 import { APIClient } from "@/api/client";
 import { useMediaQuery } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { IconX } from "@tabler/icons-react";
+import { getError } from "@/api/error";
+import { FileWithPath } from "@mantine/dropzone";
 
 export default function BatchProcessingPage() {
   const isMobile = useMediaQuery(`(max-width: 62em)`);
@@ -28,7 +32,7 @@ export default function BatchProcessingPage() {
   const stepDescriptions = [
     {
       desc: "Preview Batch Data",
-      action: async () => APIClient.batchPost(fileStorage.files),
+      action: async () => previewAction(fileStorage.files),
     },
     { desc: "Confirm Batch Processing", action: async () => {} },
     { desc: "Done!", action: async () => {} },
@@ -86,4 +90,17 @@ export default function BatchProcessingPage() {
       </Container>
     </>
   );
+}
+
+async function previewAction(files: FileWithPath[]) {
+  try {
+    const resp = await APIClient.batchPost(files);
+  } catch (error) {
+    notifications.show({
+      title: "Batch Preview Error",
+      message: getError(error),
+      icon: <IconX />,
+      color: "red",
+    });
+  }
 }
