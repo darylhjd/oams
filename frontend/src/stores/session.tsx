@@ -10,14 +10,16 @@ import styles from "@/styles/SessionInitialiser.module.css";
 
 type sessionUserStoreType = {
   data: UserMeResponse | null;
+  loaded: boolean;
   setSession: (data: UserMeResponse) => void;
-  invalidate: () => void;
+  setLoaded: () => void;
 };
 
 export const useSessionUserStore = create<sessionUserStoreType>((set) => ({
   data: null,
-  setSession: (data: UserMeResponse) => set({ data: data }),
-  invalidate: () => set({ data: null }),
+  loaded: false,
+  setSession: (data: UserMeResponse) => set({ data: data, loaded: true }),
+  setLoaded: () => set({ loaded: true }),
 }));
 
 export function SessionInitialiser({
@@ -26,7 +28,6 @@ export function SessionInitialiser({
   children: React.ReactNode;
 }) {
   const session = useSessionUserStore();
-  const [loaded, setLoaded] = useState(false);
   const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
@@ -40,10 +41,10 @@ export function SessionInitialiser({
         session.setSession(data);
       })
       .catch((_error) => null)
-      .finally(() => setLoaded(true));
+      .finally(() => session.setLoaded());
   }, [fetching, session]);
 
-  return loaded ? (
+  return session.loaded ? (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
