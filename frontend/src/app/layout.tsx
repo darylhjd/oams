@@ -5,10 +5,14 @@ import "@mantine/core/styles.css";
 import { ColorSchemeScript } from "@mantine/core";
 import Providers from "./providers";
 import Header from "@/components/header";
+import CenteredPage from "@/components/centered_page";
 
 export const metadata = {
   title: "OAMS",
   description: "Online Attendance Management System",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -24,7 +28,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <Header />
-          {children}
+          <CenteredPage>{children}</CenteredPage>
         </Providers>
       </body>
     </html>

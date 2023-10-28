@@ -24,7 +24,6 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown } from "@tabler/icons-react";
 import { Routes } from "@/routing/routes";
 import { APIClient } from "@/api/client";
-import { create } from "zustand";
 
 export default function Header() {
   return (
