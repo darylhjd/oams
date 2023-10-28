@@ -152,8 +152,6 @@ function AboutButton({ close }: { close: () => void }) {
 }
 
 function LoginButton() {
-  const router = useRouter();
-
   return (
     <Button
       onClick={async () => {
