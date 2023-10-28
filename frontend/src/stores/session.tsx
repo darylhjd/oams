@@ -41,7 +41,7 @@ export function SessionInitialiser({
       })
       .catch((_error) => null)
       .finally(() => setLoaded(true));
-  });
+  }, [fetching, session]);
 
   return loaded ? (
     <motion.div

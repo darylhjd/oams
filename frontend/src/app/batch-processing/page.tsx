@@ -12,8 +12,6 @@ import {
   StepperStep,
   StepperCompleted,
   Text,
-  Space,
-  Divider,
 } from "@mantine/core";
 import { Dispatch, SetStateAction, useState } from "react";
 import styles from "@/styles/BatchProcessingPage.module.css";
@@ -27,6 +25,7 @@ import { getError } from "@/api/error";
 import { FileWithPath } from "@mantine/dropzone";
 import { BatchData } from "@/api/batch";
 import { Previewer } from "./previewer";
+import { StepLayout } from "./step_layout";
 
 export default function BatchProcessingPage() {
   const isMobile = useMediaQuery(`(max-width: 62em)`);
@@ -100,16 +99,6 @@ export default function BatchProcessingPage() {
   );
 }
 
-export function StepLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <Divider my="sm" />
-      <Space visibleFrom="md" h="md" />
-      {children}
-    </>
-  );
-}
-
 function Completed() {
   return (
     <StepLayout>
@@ -118,8 +107,8 @@ function Completed() {
           Processing complete!
           <br />
           <br />
-          Press the 'Done' button to restart the process, or the 'Back' button
-          to revist the previous steps.
+          Press the &apos;Done&apos; button to restart the process, or the
+          &apos;Back&apos; button to revist the previous steps.
         </Text>
       </Container>
     </StepLayout>

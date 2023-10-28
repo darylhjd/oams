@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { useBatchFiles } from "@/stores/batch_file_picker";
 import styles from "@/styles/BatchProcessingPage.module.css";
-import { StepLayout } from "./page";
+import { StepLayout } from "./step_layout";
 
 const MAX_FILE_SIZE = 5 * 1024 ** 2; // 5MB
 

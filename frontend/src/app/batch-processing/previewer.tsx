@@ -1,6 +1,6 @@
 import { Tabs, TabsList, TabsPanel } from "@mantine/core";
 import styles from "@/styles/BatchProcessingPage.module.css";
-import { StepLayout } from "./page";
+import { StepLayout } from "./step_layout";
 
 export function Previewer() {
   return (
