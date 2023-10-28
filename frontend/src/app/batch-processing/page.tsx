@@ -3,14 +3,25 @@
 import { UserRole } from "@/api/user";
 import { useSessionUserStore } from "@/stores/session";
 import NotFoundPage from "../not-found";
-import { Group, Stepper, Button, Container, Stack } from "@mantine/core";
+import {
+  Group,
+  Stepper,
+  Button,
+  Container,
+  Stack,
+  StepperStep,
+  StepperCompleted,
+} from "@mantine/core";
 import { useState } from "react";
 import styles from "@/styles/BatchProcessingPage.module.css";
 import { FilePicker } from "./file_picker";
 import { useBatchFiles } from "@/stores/batch_file_picker";
 import { APIClient } from "@/api/client";
+import { useMediaQuery } from "@mantine/hooks";
 
 export default function BatchProcessingPage() {
+  const isMobile = useMediaQuery(`(max-width: 62em)`);
+
   const session = useSessionUserStore();
   const fileStorage = useBatchFiles();
 
@@ -34,22 +45,23 @@ export default function BatchProcessingPage() {
 
   return (
     <>
-      <Container className={styles.processor} visibleFrom="md" fluid>
+      <Container className={styles.processor} fluid>
         <Stack>
           <Stepper
             active={step}
             onStepClick={setStep}
             allowNextStepsSelect={false}
+            orientation={isMobile ? "vertical" : "horizontal"}
           >
-            <Stepper.Step label="First step" description="Choose batch files">
+            <StepperStep label="First step" description="Choose batch files">
               <FilePicker />
-            </Stepper.Step>
-            <Stepper.Step label="Second step" description="Preview batch data">
+            </StepperStep>
+            <StepperStep label="Second step" description="Preview batch data">
               Here is your data preview.
-            </Stepper.Step>
-            <Stepper.Completed>
+            </StepperStep>
+            <StepperCompleted>
               Completed, click back button to get to previous step
-            </Stepper.Completed>
+            </StepperCompleted>
           </Stepper>
 
           <Group justify="center" mt="xl">
