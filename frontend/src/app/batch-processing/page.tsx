@@ -11,6 +11,9 @@ import {
   Stack,
   StepperStep,
   StepperCompleted,
+  Text,
+  Space,
+  Divider,
 } from "@mantine/core";
 import { Dispatch, SetStateAction, useState } from "react";
 import styles from "@/styles/BatchProcessingPage.module.css";
@@ -23,6 +26,7 @@ import { IconCheck, IconX } from "@tabler/icons-react";
 import { getError } from "@/api/error";
 import { FileWithPath } from "@mantine/dropzone";
 import { BatchData } from "@/api/batch";
+import { Previewer } from "./previewer";
 
 export default function BatchProcessingPage() {
   const isMobile = useMediaQuery(`(max-width: 62em)`);
@@ -65,10 +69,10 @@ export default function BatchProcessingPage() {
               <FilePicker />
             </StepperStep>
             <StepperStep label="Second step" description="Preview batch data">
-              Here is your data preview.
+              <Previewer />
             </StepperStep>
             <StepperCompleted>
-              Completed, click back button to get to previous step
+              <Completed />
             </StepperCompleted>
           </Stepper>
 
@@ -77,6 +81,7 @@ export default function BatchProcessingPage() {
               Back
             </Button>
             <Button
+              disabled={fileStorage.files.length == 0}
               onClick={async () => {
                 if (await stepDescriptions[step].action()) {
                   nextStep();
@@ -94,6 +99,32 @@ export default function BatchProcessingPage() {
         </Stack>
       </Container>
     </>
+  );
+}
+
+export function StepLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Divider my="sm" />
+      <Space visibleFrom="md" h="md" />
+      {children}
+    </>
+  );
+}
+
+function Completed() {
+  return (
+    <StepLayout>
+      <Container size="md">
+        <Text ta="center">
+          Processing complete!
+          <br />
+          <br />
+          Press the 'Done' button to restart the process, or the 'Back' button
+          to revist the previous steps.
+        </Text>
+      </Container>
+    </StepLayout>
   );
 }
 
