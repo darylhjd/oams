@@ -200,7 +200,9 @@ function SystemAdminMenu({ close }: { close: () => void }) {
             <MenuItem onClick={() => router.push(Routes.adminPanel)}>
               Admin Panel
             </MenuItem>
-            <MenuItem>Batch Processing</MenuItem>
+            <MenuItem onClick={() => router.push(Routes.batchProcessing)}>
+              Batch Processing
+            </MenuItem>
           </MenuDropdown>
         </Menu>
       </Box>
@@ -219,7 +221,13 @@ function SystemAdminMenu({ close }: { close: () => void }) {
             router.push(Routes.adminPanel);
           }}
         />
-        <NavLink label="Batch Processing" onClick={close} />
+        <NavLink
+          label="Batch Processing"
+          onClick={() => {
+            close();
+            router.push(Routes.batchProcessing);
+          }}
+        />
       </NavLink>
     </>
   );
