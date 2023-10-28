@@ -156,7 +156,7 @@ function LoginButton() {
     <Button
       onClick={async () => {
         const loginLink = await APIClient.login();
-        location.href = loginLink;
+        location.replace(loginLink);
       }}
     >
       Login
