@@ -93,7 +93,7 @@ function FileLister() {
   return (
     <List className={styles.fileList}>
       {fileStorage.files.map((file) => (
-        <ListItem>
+        <ListItem key={file.name}>
           <>
             <Text visibleFrom="md" size="md">
               {file.name}

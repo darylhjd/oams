@@ -1,7 +1,7 @@
 import axios from "axios";
 import { LoginResponse } from "./login";
 import { UserMeResponse } from "./user";
-import { BatchPostResponse } from "./batch";
+import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
 
 export class APIClient {
@@ -37,6 +37,13 @@ export class APIClient {
       this._batchPath,
       form,
     );
+    return data;
+  }
+
+  static async batchPut(batchData: BatchData[]): Promise<BatchPutResponse> {
+    const { data } = await this._client.put<BatchPutResponse>(this._batchPath, {
+      batches: batchData,
+    });
     return data;
   }
 
