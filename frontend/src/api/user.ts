@@ -1,3 +1,5 @@
+import { ClassType } from "./class";
+
 export type UsersGetResponse = {
   users: User[];
 };
@@ -29,10 +31,4 @@ export type User = {
 export enum UserRole {
   User = "USER",
   SystemAdmin = "SYSTEM_ADMIN",
-}
-
-export enum ClassType {
-  Lecture = "LEC",
-  Tutorial = "TUT",
-  Lab = "LAB",
 }

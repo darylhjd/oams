@@ -1,6 +1,8 @@
 import axios from "axios";
 import { LoginResponse } from "./login";
 import { UserMeResponse } from "./user";
+import { BatchPostResponse } from "./batch";
+import { FileWithPath } from "@mantine/dropzone";
 
 export class APIClient {
   static _client = axios.create({
@@ -10,6 +12,7 @@ export class APIClient {
 
   static readonly _loginPath = "/login";
   static readonly _logoutPath = "/logout";
+  static readonly _batchPath = "/batch";
   static readonly _userMePath = "/users/me";
 
   static async login(redirectUrl: string = ""): Promise<string> {
@@ -24,6 +27,17 @@ export class APIClient {
   static async logout(): Promise<boolean> {
     await this._client.get(this._logoutPath);
     return true;
+  }
+
+  static async batchPost(files: FileWithPath[]): Promise<BatchPostResponse> {
+    const form = new FormData();
+    files.forEach((file) => form.append("attachments", file));
+
+    const { data } = await this._client.post<BatchPostResponse>(
+      this._batchPath,
+      form,
+    );
+    return data;
   }
 
   static async userMe(): Promise<UserMeResponse> {
