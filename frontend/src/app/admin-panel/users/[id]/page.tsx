@@ -4,17 +4,22 @@ import { User } from "@/api/user";
 import { Text } from "@mantine/core";
 import { useState } from "react";
 import { Params } from "./layout";
+import { APIClient } from "@/api/client";
+import { EntityLoader } from "@/app/admin-panel/entity_loader";
 
 export default function AdminPanelUsersPage({ params }: { params: Params }) {
   const [user, setUser] = useState<User | null>(null);
+  const promiseFunc = () => {
+    return APIClient.userGet(params.id).then((data) => setUser(data.user));
+  };
 
-  if (user == null) {
-    return <Text ta="center">This is the admin panel user page.</Text>;
-  }
-
-  return <Page user={user} />;
+  return (
+    <EntityLoader promiseFunc={promiseFunc}>
+      <UserDisplay user={user!} />
+    </EntityLoader>
+  );
 }
 
-function Page({ user }: { user: User }) {
+function UserDisplay({ user }: { user: User }) {
   return <Text ta="center">{user.id}</Text>;
 }

@@ -1,5 +1,3 @@
-import { UserRole } from "@/api/user";
-import { CheckHasUserRole } from "@/components/session_checker";
 import { Metadata } from "next";
 
 export type Params = {
@@ -25,7 +23,5 @@ export default function AdminPanelUsersLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <CheckHasUserRole role={UserRole.SystemAdmin}>{children}</CheckHasUserRole>
-  );
+  return <>{children}</>;
 }
