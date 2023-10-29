@@ -2,8 +2,6 @@
 
 import styles from "@/styles/BatchProcessingPage.module.css";
 
-import { UserRole } from "@/api/user";
-import { useSessionUserStore } from "@/stores/session";
 import {
   Group,
   Stepper,
@@ -27,12 +25,10 @@ import { BatchData } from "@/api/batch";
 import { Previewer } from "./previewer";
 import { StepLayout } from "./step_layout";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
-import NotFoundPage from "../not-found";
 
 export default function BatchProcessingPage() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
-  const session = useSessionUserStore();
   const fileStorage = useBatchFiles();
   const [batchData, setBatchData] = useState<BatchData[]>([]);
   const [step, setStep] = useState(0);
@@ -51,10 +47,6 @@ export default function BatchProcessingPage() {
     },
     { desc: "Done!", action: async () => true },
   ];
-
-  if (session.data?.session_user.role != UserRole.SystemAdmin) {
-    return <NotFoundPage />;
-  }
 
   return (
     <Container className={styles.processor} fluid>

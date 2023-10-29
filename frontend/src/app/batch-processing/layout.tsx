@@ -1,3 +1,6 @@
+import { UserRole } from "@/api/user";
+import { CheckHasUserRole } from "@/components/session_checker";
+
 export const metadata = {
   title: "Batch Processing",
   description: "OAMS Batch Processing Service",
@@ -11,5 +14,7 @@ export default function BatchProcessingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <CheckHasUserRole role={UserRole.SystemAdmin}>{children}</CheckHasUserRole>
+  );
 }

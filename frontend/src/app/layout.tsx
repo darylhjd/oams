@@ -5,9 +5,9 @@ import "@mantine/dropzone/styles.css";
 import "@mantine/notifications/styles.css";
 
 import { ColorSchemeScript } from "@mantine/core";
-import Providers from "./providers";
 import Header from "@/components/header";
 import CenteredPage from "@/components/centered_page";
+import Providers from "@/components/providers";
 
 export const metadata = {
   title: "OAMS",
