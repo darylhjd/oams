@@ -19,7 +19,7 @@ import {
   NavLink,
   Divider,
 } from "@mantine/core";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown } from "@tabler/icons-react";
@@ -110,6 +110,7 @@ function LoggedItems({ close }: { close: () => void }) {
           <SystemAdminMenu close={close} />
         ) : null}
         <AboutButton close={close} />
+        <ProfileButton close={close} />
         <LogoutButton />
       </Group>
 
@@ -119,6 +120,7 @@ function LoggedItems({ close }: { close: () => void }) {
         ) : null}
         <Divider />
         <AboutButton close={close} />
+        <ProfileButton close={close} />
         <LogoutButton />
       </Stack>
     </>
@@ -153,14 +155,35 @@ function AboutButton({ close }: { close: () => void }) {
 }
 
 function LoginButton() {
+  const router = useRouter();
+  const pathname = usePathname();
+
   return (
     <Button
       onClick={async () => {
-        const loginLink = await APIClient.login();
-        location.replace(loginLink);
+        const redirectLink = `${process.env.WEB_SERVER}${pathname}`;
+        const loginLink = await APIClient.login(redirectLink);
+        router.push(loginLink);
       }}
     >
       Login
+    </Button>
+  );
+}
+
+function ProfileButton({ close }: { close: () => void }) {
+  const router = useRouter();
+
+  return (
+    <Button
+      color="blue"
+      variant="filled"
+      onClick={() => {
+        close();
+        router.push(Routes.profile);
+      }}
+    >
+      Profile
     </Button>
   );
 }

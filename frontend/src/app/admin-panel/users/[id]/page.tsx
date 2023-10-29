@@ -9,7 +9,7 @@ export default function AdminPanelUsersPage({ params }: { params: Params }) {
   const [user, setUser] = useState<User | null>(null);
 
   if (user == null) {
-    return <Text>Loading or does not exist.</Text>;
+    return <Text ta="center">This is the admin panel user page.</Text>;
   }
 
   return <Page user={user} />;
