@@ -1,5 +1,6 @@
-import { Space, Text } from "@mantine/core";
 import styles from "@/styles/AboutPage.module.css";
+
+import { Space, Text } from "@mantine/core";
 
 export default function AboutPage() {
   return (

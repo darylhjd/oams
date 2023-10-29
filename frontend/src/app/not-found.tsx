@@ -1,7 +1,8 @@
 "use client";
 
-import { Container, Title, Text, Group, Button } from "@mantine/core";
 import styles from "@/styles/NotFound.module.css";
+
+import { Container, Title, Text, Group, Button } from "@mantine/core";
 import { Routes } from "@/routing/routes";
 import { useRouter } from "next/navigation";
 

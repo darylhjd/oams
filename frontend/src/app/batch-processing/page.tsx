@@ -1,8 +1,9 @@
 "use client";
 
+import styles from "@/styles/BatchProcessingPage.module.css";
+
 import { UserRole } from "@/api/user";
 import { useSessionUserStore } from "@/stores/session";
-import NotFoundPage from "../not-found";
 import {
   Group,
   Stepper,
@@ -14,7 +15,6 @@ import {
   Text,
 } from "@mantine/core";
 import { Dispatch, SetStateAction, useState } from "react";
-import styles from "@/styles/BatchProcessingPage.module.css";
 import { FilePicker } from "./file_picker";
 import { useBatchFiles } from "@/stores/batch_file_picker";
 import { APIClient } from "@/api/client";
@@ -27,6 +27,7 @@ import { BatchData } from "@/api/batch";
 import { Previewer } from "./previewer";
 import { StepLayout } from "./step_layout";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
+import NotFoundPage from "../not-found";
 
 export default function BatchProcessingPage() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);

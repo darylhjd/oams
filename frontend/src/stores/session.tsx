@@ -1,12 +1,13 @@
 "use client";
 
+import styles from "@/styles/SessionInitialiser.module.css";
+
 import { APIClient } from "@/api/client";
 import { UserMeResponse } from "@/api/user";
 import { Center, Skeleton } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { motion } from "framer-motion";
-import styles from "@/styles/SessionInitialiser.module.css";
 
 type sessionUserStoreType = {
   data: UserMeResponse | null;

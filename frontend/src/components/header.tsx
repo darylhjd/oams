@@ -1,5 +1,7 @@
 "use client";
 
+import styles from "@/styles/Header.module.css";
+
 import {
   Button,
   Center,
@@ -17,7 +19,6 @@ import {
   NavLink,
   Divider,
 } from "@mantine/core";
-import styles from "@/styles/Header.module.css";
 import { useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
 import { useDisclosure } from "@mantine/hooks";

@@ -1,5 +1,7 @@
 "use client";
 
+import styles from "@/styles/BatchProcessingPage.module.css";
+
 import { Dropzone, MS_EXCEL_MIME_TYPE } from "@mantine/dropzone";
 import { IconFile, IconUpload, IconX } from "@tabler/icons-react";
 import {
@@ -14,7 +16,6 @@ import {
   rem,
 } from "@mantine/core";
 import { useBatchFiles } from "@/stores/batch_file_picker";
-import styles from "@/styles/BatchProcessingPage.module.css";
 import { StepLayout } from "./step_layout";
 
 const MAX_FILE_SIZE = 5 * 1024 ** 2; // 5MB

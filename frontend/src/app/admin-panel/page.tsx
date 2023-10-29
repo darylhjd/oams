@@ -1,12 +1,13 @@
 "use client";
 
+import styles from "@/styles/AdminPage.module.css";
+
 import { UserRole } from "@/api/user";
 import { useSessionUserStore } from "@/stores/session";
 import { Container, TabsList, Tabs, TabsPanel, TabsTab } from "@mantine/core";
-import NotFoundPage from "../not-found";
-import styles from "@/styles/AdminPage.module.css";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
+import NotFoundPage from "../not-found";
 
 export default function AdminPanelPage() {
   const session = useSessionUserStore();

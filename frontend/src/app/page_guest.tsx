@@ -1,5 +1,6 @@
-import { Title } from "@mantine/core";
 import styles from "@/styles/PageGuest.module.css";
+
+import { Title } from "@mantine/core";
 
 export default function GuestPage() {
   return (
