@@ -18,6 +18,8 @@ import {
   MenuItem,
   NavLink,
   Divider,
+  Flex,
+  Space,
 } from "@mantine/core";
 import { usePathname, useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
@@ -42,10 +44,10 @@ export default function Header() {
 function NavBarItems() {
   return (
     <Center>
-      <Group className={styles.items} justify="space-between">
+      <Flex className={styles.items} justify="space-between" align="center">
         <Logo />
         <Items />
-      </Group>
+      </Flex>
     </Center>
   );
 }
@@ -81,7 +83,7 @@ function Items() {
       <Box visibleFrom="md">{items}</Box>
 
       <Burger hiddenFrom="md" opened={opened} onClick={toggle} />
-      <Drawer opened={opened} onClose={close}>
+      <Drawer size="sm" padding="lg" opened={opened} onClose={close}>
         {items}
       </Drawer>
     </>
@@ -96,9 +98,14 @@ function GuestItems({ close }: { close: () => void }) {
         <LoginButton />
       </Group>
 
-      <Stack hiddenFrom="md">
+      <Stack hiddenFrom="md" gap={0}>
         <AboutButton close={close} />
-        <LoginButton />
+        <Divider my="sm" />
+
+        <Space h="md" />
+        <Group>
+          <LoginButton />
+        </Group>
       </Stack>
     </>
   );
@@ -118,14 +125,18 @@ function LoggedItems({ close }: { close: () => void }) {
         <LogoutButton />
       </Group>
 
-      <Stack hiddenFrom="md">
+      <Stack hiddenFrom="md" gap={0}>
         {session.data?.session_user.role == UserRole.SystemAdmin ? (
           <SystemAdminMenu close={close} />
         ) : null}
-        <Divider />
         <AboutButton close={close} />
-        <ProfileButton close={close} />
-        <LogoutButton />
+        <Divider my="sm" />
+
+        <Space h="md" />
+        <Group>
+          <ProfileButton close={close} />
+          <LogoutButton />
+        </Group>
       </Stack>
     </>
   );
