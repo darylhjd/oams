@@ -1,9 +1,13 @@
-import request from "axios";
+import { isAxiosError } from "axios";
+
+export type ErrorResponse = {
+  error: string;
+};
 
 export function getError(error: any): string {
-  if (!request.isAxiosError(error)) {
+  if (!isAxiosError(error) || !error.response) {
     return "";
   }
 
-  return error.response?.data["error"];
+  return (error.response.data as ErrorResponse).error;
 }
