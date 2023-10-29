@@ -25,7 +25,7 @@ export function EntityLoader({
     promiseFunc()
       .catch((error) => setError(error))
       .finally(() => setLoaded(true));
-  });
+  }, [fetching, promiseFunc]);
 
   if (!loaded) {
     return (
