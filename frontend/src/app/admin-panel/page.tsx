@@ -12,7 +12,7 @@ export default function AdminPanelPage() {
   return (
     <Container className={styles.container} fluid>
       <Tabs
-        defaultValue="classes"
+        defaultValue="users"
         classNames={{
           list: styles.entityTabList,
           tab: styles.entityTabTab,
