@@ -4,6 +4,10 @@ export type UsersGetResponse = {
   users: User[];
 };
 
+export type UserGetResponse = {
+  user: User;
+};
+
 export type UserMeResponse = {
   session_user: User;
   upcoming_class_group_sessions: UpcomingClassGroupSession[];

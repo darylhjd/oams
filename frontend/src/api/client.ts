@@ -1,6 +1,6 @@
 import axios from "axios";
 import { LoginResponse } from "./login";
-import { UserMeResponse, UsersGetResponse } from "./user";
+import { UserGetResponse, UserMeResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
 import { ClassesGetResponse } from "./class";
@@ -19,6 +19,7 @@ export class APIClient {
   static readonly _logoutPath = "/logout";
   static readonly _batchPath = "/batch";
   static readonly _usersPath = "/users";
+  static readonly _userPath = "/users/";
   static readonly _userMePath = "/users/me";
   static readonly _classesPath = "/classes";
   static readonly _classManagersPath = "/class-managers";
@@ -68,6 +69,13 @@ export class APIClient {
         limit: limit,
       },
     });
+    return data;
+  }
+
+  static async userGet(id: string): Promise<UserGetResponse> {
+    const { data } = await this._client.get<UserGetResponse>(
+      this._userPath + id,
+    );
     return data;
   }
 

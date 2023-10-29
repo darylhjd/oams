@@ -1,7 +1,10 @@
 import { UserRole } from "@/api/user";
 import { CheckHasUserRole } from "@/components/session_checker";
 import { Metadata } from "next";
-import { Params } from "./page";
+
+export type Params = {
+  id: string;
+};
 
 export async function generateMetadata({
   params,
@@ -9,7 +12,7 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   return {
-    title: params.id,
+    title: `User: ${params.id}`,
     description: "OAMS User",
     icons: {
       icon: "/favicon.svg",
