@@ -2,20 +2,12 @@
 
 import styles from "@/styles/AdminPage.module.css";
 
-import { UserRole } from "@/api/user";
-import { useSessionUserStore } from "@/stores/session";
 import { Container, TabsList, Tabs, TabsPanel, TabsTab } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
-import NotFoundPage from "../not-found";
 
 export default function AdminPanelPage() {
-  const session = useSessionUserStore();
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
-
-  if (session.data?.session_user.role != UserRole.SystemAdmin) {
-    return <NotFoundPage />;
-  }
 
   return (
     <Container className={styles.container} fluid>
