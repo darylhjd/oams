@@ -56,7 +56,7 @@ function Logo() {
       onClick={() => router.push(Routes.index)}
     >
       <div>
-        <Image src="logo.png" alt="OAMS" fit="contain" />
+        <Image src="/logo.png" alt="OAMS" fit="contain" />
       </div>
     </Button>
   );
