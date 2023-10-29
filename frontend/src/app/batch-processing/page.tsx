@@ -26,9 +26,10 @@ import { FileWithPath } from "@mantine/dropzone";
 import { BatchData } from "@/api/batch";
 import { Previewer } from "./previewer";
 import { StepLayout } from "./step_layout";
+import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 
 export default function BatchProcessingPage() {
-  const isMobile = useMediaQuery(`(max-width: 62em)`);
+  const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
   const session = useSessionUserStore();
   const fileStorage = useBatchFiles();

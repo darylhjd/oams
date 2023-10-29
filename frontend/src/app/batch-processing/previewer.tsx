@@ -1,8 +1,12 @@
-import { Tabs, TabsList, TabsPanel } from "@mantine/core";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "@mantine/core";
 import styles from "@/styles/BatchProcessingPage.module.css";
 import { StepLayout } from "./step_layout";
+import { useMediaQuery } from "@mantine/hooks";
+import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 
 export function Previewer() {
+  const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
+
   return (
     <StepLayout>
       <Tabs
@@ -13,11 +17,11 @@ export function Previewer() {
           tab: styles.previewTabTab,
         }}
       >
-        <TabsList grow justify="center">
-          <Tabs.Tab value="classes">Classes</Tabs.Tab>
-          <Tabs.Tab value="classGroups">Class Groups</Tabs.Tab>
-          <Tabs.Tab value="classGroupSessions">Class Group Sessions</Tabs.Tab>
-          <Tabs.Tab value="users">Users</Tabs.Tab>
+        <TabsList grow justify={isMobile ? "left" : "center"}>
+          <TabsTab value="classes">Classes</TabsTab>
+          <TabsTab value="classGroups">Class Groups</TabsTab>
+          <TabsTab value="classGroupSessions">Class Group Sessions</TabsTab>
+          <TabsTab value="users">Users</TabsTab>
         </TabsList>
 
         <TabsPanel value="classes">Classes Table goes here.</TabsPanel>
