@@ -1,4 +1,9 @@
-import { BatchData } from "@/api/batch";
+import {
+  BatchData,
+  UpsertClassGroupParams,
+  UpsertClassGroupSessionParams,
+  UpsertClassParams,
+} from "@/api/batch";
 import {
   ClassBatchDataTableColumns,
   ClassGroupBatchDataTableColumns,
@@ -18,7 +23,7 @@ export function UsersPreviewTable({ batches }: { batches: BatchData[] }) {
 }
 
 export function ClassesPreviewTable({ batches }: { batches: BatchData[] }) {
-  const rows = batches.map((batch, index) => ({
+  const rows = batches.map<UpsertClassParams>((batch, index) => ({
     id: index,
     code: batch.class.code,
     year: batch.class.year,
@@ -34,7 +39,7 @@ export function ClassGroupsPreviewTable({ batches }: { batches: BatchData[] }) {
   const rows = batches
     .map((batch) => batch.class_groups)
     .flat()
-    .map((classGroup, index) => ({
+    .map<UpsertClassGroupParams>((classGroup, index) => ({
       id: index,
       class_id: classGroup.class_id,
       name: classGroup.name,
@@ -54,7 +59,14 @@ export function ClassGroupSessionsPreviewTable({
   const rows = batches
     .map((batch) => batch.class_groups)
     .flat()
-    .map((classGroup) => classGroup.sessions)
+    .map((classGroup, index) =>
+      classGroup.sessions.map<UpsertClassGroupSessionParams>((session) => ({
+        class_group_id: index,
+        start_time: session.start_time,
+        end_time: session.end_time,
+        venue: session.venue,
+      })),
+    )
     .flat();
 
   return (
