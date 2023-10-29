@@ -4,8 +4,10 @@ import { Tabs, TabsList, TabsPanel, TabsTab } from "@mantine/core";
 import { StepLayout } from "./step_layout";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
+import { UsersDataTable } from "./tables";
+import { BatchData } from "@/api/batch";
 
-export function Previewer() {
+export function Previewer({ batchData }: { batchData: BatchData[] }) {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
   return (
@@ -30,7 +32,9 @@ export function Previewer() {
         <TabsPanel value="classGroupSessions">
           Class Group Sessions Table goes here.
         </TabsPanel>
-        <TabsPanel value="users">Users Table goes here.</TabsPanel>
+        <TabsPanel value="users">
+          <UsersDataTable batches={batchData} />
+        </TabsPanel>
       </Tabs>
     </StepLayout>
   );

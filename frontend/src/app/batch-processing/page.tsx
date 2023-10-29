@@ -25,7 +25,6 @@ import { BatchData } from "@/api/batch";
 import { Previewer } from "./previewer";
 import { StepLayout } from "./step_layout";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
-import { AxiosError } from "axios";
 
 export default function BatchProcessingPage() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
@@ -62,7 +61,7 @@ export default function BatchProcessingPage() {
             <FilePicker />
           </StepperStep>
           <StepperStep label="Second step" description="Preview batch data">
-            <Previewer />
+            <Previewer batchData={batchData} />
           </StepperStep>
           <StepperCompleted>
             <Completed />

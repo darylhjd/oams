@@ -1,18 +1,22 @@
+import { UpsertUserParams } from "@/api/batch";
 import { SessionEnrollment } from "@/api/session_enrollment";
+import { User } from "@/api/user";
+import { MRT_ColumnDef } from "mantine-react-table";
 
 const CreatedAtUpdatedAtDataTableColumns = [
-  { accessor: "created_at", title: "Created At" },
-  { accessor: "updated_at", title: "Updated At" },
+  { accessorKey: "created_at", header: "Created At" },
+  { accessorKey: "updated_at", header: "Updated At" },
 ];
 
-export const UserBatchDataTableColumns = [
-  { accessor: "id", title: "ID" },
-  { accessor: "name" },
+export const UserBatchDataTableColumns = <MRT_ColumnDef<UpsertUserParams>[]>[
+  { accessorKey: "id", header: "ID" },
+  { accessorKey: "name", header: "Name" },
 ];
-export const UserDataTableColumns = [
+
+export const UserDataTableColumns = <MRT_ColumnDef<User>[]>[
   ...UserBatchDataTableColumns,
-  { accessor: "email" },
-  { accessor: "role" },
+  { accessorKey: "email", header: "Email" },
+  { accessorKey: "role", header: "Role" },
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
