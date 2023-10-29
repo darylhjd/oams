@@ -7,7 +7,7 @@ export type batchFileStoreType = {
   clearFiles: () => void;
 };
 
-export const useBatchFiles = create<batchFileStoreType>((set) => ({
+export const useBatchFilesStore = create<batchFileStoreType>((set) => ({
   files: [],
   setFiles: (files) => set({ files: files }),
   clearFiles: () => set({ files: [] }),

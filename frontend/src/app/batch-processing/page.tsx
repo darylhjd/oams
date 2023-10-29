@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { Dispatch, SetStateAction, useState } from "react";
 import { FilePicker } from "./file_picker";
-import { useBatchFiles } from "@/stores/batch_file_picker";
+import { useBatchFilesStore } from "@/stores/batch_file_picker";
 import { APIClient } from "@/api/client";
 import { useMediaQuery } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -29,7 +29,7 @@ import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 export default function BatchProcessingPage() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
-  const fileStorage = useBatchFiles();
+  const fileStorage = useBatchFilesStore();
   const [batchData, setBatchData] = useState<BatchData[]>([]);
   const [step, setStep] = useState(0);
   const nextStep = () =>

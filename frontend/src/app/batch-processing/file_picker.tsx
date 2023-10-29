@@ -15,13 +15,13 @@ import {
   Text,
   rem,
 } from "@mantine/core";
-import { useBatchFiles } from "@/stores/batch_file_picker";
+import { useBatchFilesStore } from "@/stores/batch_file_picker";
 import { StepLayout } from "./step_layout";
 
 const MAX_FILE_SIZE = 5 * 1024 ** 2; // 5MB
 
 export function FilePicker() {
-  const fileStorage = useBatchFiles();
+  const fileStorage = useBatchFilesStore();
 
   return (
     <StepLayout>
@@ -89,7 +89,7 @@ export function FilePicker() {
 }
 
 function FileLister() {
-  const fileStorage = useBatchFiles();
+  const fileStorage = useBatchFilesStore();
 
   if (fileStorage.files.length == 0) {
     return null;
@@ -114,7 +114,7 @@ function FileLister() {
 }
 
 function ResetFilesButton() {
-  const fileStorage = useBatchFiles();
+  const fileStorage = useBatchFilesStore();
 
   return (
     <Center>
