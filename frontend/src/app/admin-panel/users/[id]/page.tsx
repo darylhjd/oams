@@ -9,8 +9,9 @@ import { EntityLoader } from "@/app/admin-panel/entity_loader";
 
 export default function AdminPanelUsersPage({ params }: { params: Params }) {
   const [user, setUser] = useState<User | null>(null);
-  const promiseFunc = () => {
-    return APIClient.userGet(params.id).then((data) => setUser(data.user));
+  const promiseFunc = async () => {
+    const data = await APIClient.userGet(params.id);
+    return setUser(data.user);
   };
 
   return (
