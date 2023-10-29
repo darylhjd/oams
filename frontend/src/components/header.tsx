@@ -22,7 +22,11 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
 import { useDisclosure } from "@mantine/hooks";
-import { IconChevronDown } from "@tabler/icons-react";
+import {
+  IconChevronDown,
+  IconFileDescription,
+  IconLayoutDashboard,
+} from "@tabler/icons-react";
 import { Routes } from "@/routing/routes";
 import { APIClient } from "@/api/client";
 import { UserRole } from "@/api/user";
@@ -208,7 +212,7 @@ function SystemAdminMenu({ close }: { close: () => void }) {
   return (
     <>
       <Box visibleFrom="md">
-        <Menu>
+        <Menu width={200}>
           <MenuTarget>
             <Button
               color="orange"
@@ -219,10 +223,16 @@ function SystemAdminMenu({ close }: { close: () => void }) {
             </Button>
           </MenuTarget>
           <MenuDropdown>
-            <MenuItem onClick={() => router.push(Routes.adminPanel)}>
+            <MenuItem
+              leftSection={<IconLayoutDashboard size={16} />}
+              onClick={() => router.push(Routes.adminPanel)}
+            >
               Admin Panel
             </MenuItem>
-            <MenuItem onClick={() => router.push(Routes.batchProcessing)}>
+            <MenuItem
+              leftSection={<IconFileDescription size={16} />}
+              onClick={() => router.push(Routes.batchProcessing)}
+            >
               Batch Processing
             </MenuItem>
           </MenuDropdown>
@@ -238,6 +248,7 @@ function SystemAdminMenu({ close }: { close: () => void }) {
       >
         <NavLink
           label="Admin Panel"
+          leftSection={<IconLayoutDashboard size={16} />}
           onClick={() => {
             close();
             router.push(Routes.adminPanel);
@@ -245,6 +256,7 @@ function SystemAdminMenu({ close }: { close: () => void }) {
         />
         <NavLink
           label="Batch Processing"
+          leftSection={<IconFileDescription size={16} />}
           onClick={() => {
             close();
             router.push(Routes.batchProcessing);
