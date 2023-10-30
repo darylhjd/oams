@@ -62,6 +62,7 @@ func (s *APIServer) Start() error {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{fmt.Sprintf("%s", env.GetWebServer())},
 		AllowCredentials: true,
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete},
 	})
 
 	port := env.GetAPIServerPort()

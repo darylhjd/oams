@@ -1,21 +1,37 @@
+import { Class } from "@/api/class";
+import { ClassGroup } from "@/api/class_group";
+import { ClassGroupSession } from "@/api/class_group_session";
+import { ClassManager } from "@/api/class_manager";
 import { APIClient } from "@/api/client";
-import {
-  Class,
-  ClassGroup,
-  ClassGroupSession,
-  ClassManager,
-  SessionEnrollment,
-  User,
-} from "@/api/models";
-import { AsyncDataSource } from "@/components/entity_tables";
+import { SessionEnrollment } from "@/api/session_enrollment";
+import { User } from "@/api/user";
+
+export abstract class AsyncDataSource<T> {
+  constructor(
+    public totalRecords: number = 0,
+    public isApproximateRowCount: boolean = true,
+  ) {}
+
+  updateRecordsEstimationState(
+    offset: number,
+    limit: number,
+    lastFetchLength: number,
+  ) {
+    const knownLength = offset + lastFetchLength;
+
+    if (knownLength < offset + limit) {
+      this.totalRecords = knownLength;
+    } else {
+      this.totalRecords = Math.max(this.totalRecords, offset + 2 * limit); // Allows possible fetch of next page.
+    }
+  }
+
+  abstract getRows(offset: number, limit: number): Promise<T[]>;
+}
 
 export class UsersDataSource extends AsyncDataSource<User> {
   async getRows(offset: number, limit: number): Promise<User[]> {
     const response = await APIClient.usersGet(offset, limit);
-    if (response == null) {
-      return [];
-    }
-
     super.updateRecordsEstimationState(offset, limit, response.users.length);
     return response.users;
   }
@@ -24,10 +40,6 @@ export class UsersDataSource extends AsyncDataSource<User> {
 export class ClassesDataSource extends AsyncDataSource<Class> {
   async getRows(offset: number, limit: number): Promise<Class[]> {
     const response = await APIClient.classesGet(offset, limit);
-    if (response == null) {
-      return [];
-    }
-
     super.updateRecordsEstimationState(offset, limit, response.classes.length);
     return response.classes;
   }
@@ -36,10 +48,6 @@ export class ClassesDataSource extends AsyncDataSource<Class> {
 export class ClassManagersDataSource extends AsyncDataSource<ClassManager> {
   async getRows(offset: number, limit: number): Promise<ClassManager[]> {
     const response = await APIClient.classManagersGet(offset, limit);
-    if (response == null) {
-      return [];
-    }
-
     super.updateRecordsEstimationState(
       offset,
       limit,
@@ -52,10 +60,6 @@ export class ClassManagersDataSource extends AsyncDataSource<ClassManager> {
 export class ClassGroupsDataSource extends AsyncDataSource<ClassGroup> {
   async getRows(offset: number, limit: number): Promise<ClassGroup[]> {
     const response = await APIClient.classGroupsGet(offset, limit);
-    if (response == null) {
-      return [];
-    }
-
     super.updateRecordsEstimationState(
       offset,
       limit,
@@ -68,10 +72,6 @@ export class ClassGroupsDataSource extends AsyncDataSource<ClassGroup> {
 export class ClassGroupSessionsDataSource extends AsyncDataSource<ClassGroupSession> {
   async getRows(offset: number, limit: number): Promise<ClassGroupSession[]> {
     const response = await APIClient.classGroupSessionsGet(offset, limit);
-    if (response == null) {
-      return [];
-    }
-
     super.updateRecordsEstimationState(
       offset,
       limit,
@@ -84,10 +84,6 @@ export class ClassGroupSessionsDataSource extends AsyncDataSource<ClassGroupSess
 export class SessionEnrollmentsDataSource extends AsyncDataSource<SessionEnrollment> {
   async getRows(offset: number, limit: number): Promise<SessionEnrollment[]> {
     const response = await APIClient.sessionEnrollmentsGet(offset, limit);
-    if (response == null) {
-      return [];
-    }
-
     super.updateRecordsEstimationState(
       offset,
       limit,

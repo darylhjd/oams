@@ -1,0 +1,5 @@
+.centered {
+  width: calc(100% - rem(15px));
+  max-width: 80rem;
+  margin: rem(10px) auto;
+}

@@ -1,17 +1,18 @@
-"use client";
+import styles from "@/styles/AboutPage.module.css";
 
-import { Container, Text } from "@mantine/core";
+import { Space, Text } from "@mantine/core";
 
 export default function AboutPage() {
   return (
-    <Container>
-      <Text align="center">
-        This application is created as part of the Final Year Paper requirement
-        for the Bachelor of Engineering in Computer Science in Nanyang
-        Technological University.
+    <>
+      <Text ta="center" className={styles.aboutText}>
+        The Online Attendance Management System provides a centralised
+        attendance service for Nanyang Technological University.
       </Text>
-      <br />
-      <Text align="center">Copyright &#169; Har Jing Daryl, 2023</Text>
-    </Container>
+      <Space h="xl" />
+      <Text ta="center" size="sm">
+        Copyright &#169; Har Jing Daryl, 2023
+      </Text>
+    </>
   );
 }

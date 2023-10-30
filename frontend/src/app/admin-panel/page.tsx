@@ -1,10 +1,10 @@
 "use client";
 
-import { UserRole } from "@/api/models";
-import { MOBILE_MIN_WIDTH } from "@/components/responsive";
-import { redirectIfNotUserRole } from "@/routes/checks";
-import { Container, Tabs, createStyles } from "@mantine/core";
+import styles from "@/styles/AdminPage.module.css";
+
+import { Container, TabsList, Tabs, TabsPanel, TabsTab } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
+import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import {
   ClassGroupSessionsTable,
   ClassGroupsTable,
@@ -12,63 +12,47 @@ import {
   ClassesTable,
   SessionEnrollmentsTable,
   UsersTable,
-} from "./entity_tables";
-
-const useStyles = createStyles((theme) => ({
-  tabList: {
-    overflowY: "hidden",
-    overflowX: "auto",
-    flexWrap: "nowrap",
-  },
-
-  tabTab: {
-    padding: "1em 1em",
-  },
-}));
+} from "./tables";
 
 export default function AdminPanelPage() {
-  const { classes } = useStyles();
-  const isMobile = useMediaQuery(MOBILE_MIN_WIDTH);
-
-  if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
-    return null;
-  }
+  const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
   return (
-    <Container fluid>
-      <Tabs defaultValue="users" variant="outline">
-        <Tabs.List
-          className={classes.tabList}
-          position={isMobile ? "left" : "center"}
-        >
-          <Tabs.Tab className={classes.tabTab} value="users">
-            Users
-          </Tabs.Tab>
-          <Tabs.Tab value="classes">Classes</Tabs.Tab>
-          <Tabs.Tab value="classManagers">Class Managers</Tabs.Tab>
-          <Tabs.Tab value="classGroups">Class Groups</Tabs.Tab>
-          <Tabs.Tab value="classGroupSessions">Class Group Sessions</Tabs.Tab>
-          <Tabs.Tab value="sessionEnrollments">Session Enrollments</Tabs.Tab>
-        </Tabs.List>
+    <Container className={styles.container} fluid>
+      <Tabs
+        defaultValue="users"
+        classNames={{
+          list: styles.entityTabList,
+          tab: styles.entityTabTab,
+        }}
+      >
+        <TabsList grow justify={isMobile ? "left" : "center"}>
+          <TabsTab value="users">Users</TabsTab>
+          <TabsTab value="classes">Classes</TabsTab>
+          <TabsTab value="classManagers">Class Managers</TabsTab>
+          <TabsTab value="classGroups">Class Groups</TabsTab>
+          <TabsTab value="classGroupSessions">Class Group Sessions</TabsTab>
+          <TabsTab value="sessionEnrollments">Session Enrollments</TabsTab>
+        </TabsList>
 
-        <Tabs.Panel value="users">
+        <TabsPanel value="users">
           <UsersTable />
-        </Tabs.Panel>
-        <Tabs.Panel value="classes">
+        </TabsPanel>
+        <TabsPanel value="classes">
           <ClassesTable />
-        </Tabs.Panel>
-        <Tabs.Panel value="classManagers">
+        </TabsPanel>
+        <TabsPanel value="classManagers">
           <ClassManagersTable />
-        </Tabs.Panel>
-        <Tabs.Panel value="classGroups">
+        </TabsPanel>
+        <TabsPanel value="classGroups">
           <ClassGroupsTable />
-        </Tabs.Panel>
-        <Tabs.Panel value="classGroupSessions">
+        </TabsPanel>
+        <TabsPanel value="classGroupSessions">
           <ClassGroupSessionsTable />
-        </Tabs.Panel>
-        <Tabs.Panel value="sessionEnrollments">
+        </TabsPanel>
+        <TabsPanel value="sessionEnrollments">
           <SessionEnrollmentsTable />
-        </Tabs.Panel>
+        </TabsPanel>
       </Tabs>
     </Container>
   );

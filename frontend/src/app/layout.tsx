@@ -1,10 +1,16 @@
-import type { Metadata } from "next";
-import React, { Suspense } from "react";
-import Providers from "@/app/providers";
-import Header from "@/components/header";
-import CenteredScreen from "@/components/centered_page";
+// Import styles of packages that you've installed.
+// All packages except `@mantine/hooks` require styles imports
+import "@mantine/core/styles.css";
+import "@mantine/dropzone/styles.css";
+import "@mantine/notifications/styles.css";
+import "mantine-react-table/styles.css";
 
-export const metadata: Metadata = {
+import { ColorSchemeScript } from "@mantine/core";
+import Header from "@/components/header";
+import CenteredPage from "@/components/centered_page";
+import Providers from "@/components/providers";
+
+export const metadata = {
   title: "OAMS",
   description: "Online Attendance Management System",
   icons: {
@@ -19,13 +25,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <ColorSchemeScript defaultColorScheme="dark" />
+      </head>
       <body>
-        <Suspense>
-          <Providers>
-            <Header />
-            <CenteredScreen>{children}</CenteredScreen>
-          </Providers>
-        </Suspense>
+        <Providers>
+          <Header />
+          <CenteredPage>{children}</CenteredPage>
+        </Providers>
       </body>
     </html>
   );

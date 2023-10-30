@@ -1,277 +1,145 @@
 "use client";
 
-import { APIClient } from "@/api/client";
+import styles from "@/styles/BatchProcessingPage.module.css";
+
 import {
+  Group,
+  Stepper,
   Button,
-  Center,
   Container,
-  Divider,
-  FileButton,
-  List,
   Stack,
-  Tabs,
+  StepperStep,
+  StepperCompleted,
   Text,
-  Title,
-  createStyles,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { Dispatch, SetStateAction, useState } from "react";
-import { batchesStore } from "./batches_store";
-import { redirectIfNotUserRole } from "@/routes/checks";
-import { UserRole } from "@/api/models";
+import { useState } from "react";
+import { FilePicker } from "./file_picker";
 import {
-  ClassGroupSessionsTable,
-  ClassGroupsTable,
-  ClassesTable,
-  UsersTable,
-} from "./batch_tables";
+  useBatchDataStore,
+  useBatchFilesStore,
+} from "@/stores/batch_processing";
+import { APIClient } from "@/api/client";
 import { useMediaQuery } from "@mantine/hooks";
-import { MOBILE_MIN_WIDTH } from "@/components/responsive";
+import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
-import { v4 as uuidv4 } from "uuid";
-
-const useStyles = createStyles((theme) => ({
-  fileContainer: {
-    padding: "2em 0",
-  },
-
-  listItem: {
-    listStyleType: "none",
-    margin: 0,
-    padding: 0,
-  },
-
-  batchChooserButton: {
-    padding: "1.5em 0",
-  },
-
-  tabList: {
-    overflowY: "hidden",
-    overflowX: "auto",
-    flexWrap: "nowrap",
-  },
-
-  tabTab: {
-    padding: "1em 1em",
-  },
-
-  batchPutButton: {
-    padding: "1.5em 0",
-  },
-}));
+import { getError } from "@/api/error";
+import { Previewer } from "./previewer";
+import { StepLayout } from "./step_layout";
+import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 
 export default function BatchProcessingPage() {
-  const [files, setFiles] = useState<File[]>([]);
-  const clearFiles = () => setFiles([]);
+  const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
-  const batches = batchesStore();
+  const fileStorage = useBatchFilesStore();
+  const batchDataStorage = useBatchDataStore();
 
-  if (redirectIfNotUserRole(UserRole.SystemAdmin)) {
-    return null;
-  }
+  const [step, setStep] = useState(0);
+  const nextStep = () =>
+    setStep((current) => Math.min(current + 1, stepDescriptions.length));
+  const prevStep = () => setStep((current) => Math.max(current - 1, 0));
 
-  return (
-    <>
-      <Container>
-        <Center>
-          <Stack>
-            <Text align="center">Upload your batch files here.</Text>
-            <ChooseFilesButton onChange={setFiles} />
-            <ResetFilesButton
-              files={files}
-              onClick={() => {
-                clearFiles();
-                batches.invalidate();
-              }}
-            />
-          </Stack>
-        </Center>
-      </Container>
-      <SelectedFilesList files={files} />
-      <Divider my="md" />
-      <BatchData />
-    </>
-  );
-}
-
-function ChooseFilesButton({
-  onChange,
-}: {
-  onChange: Dispatch<SetStateAction<File[]>>;
-}) {
-  return (
-    <FileButton onChange={onChange} accept="xlsx" multiple>
-      {(props) => <Button {...props}>Choose files</Button>}
-    </FileButton>
-  );
-}
-
-function ResetFilesButton({
-  files,
-  onClick,
-}: {
-  files: File[];
-  onClick: () => void;
-}) {
-  return (
-    <Button disabled={files.length == 0} color="red" onClick={onClick}>
-      Reset
-    </Button>
-  );
-}
-
-function SelectedFilesList({ files }: { files: File[] }) {
-  const { classes } = useStyles();
+  const stepDescriptions = [
+    {
+      desc: "Preview Batch Data",
+      action: async () => {
+        try {
+          const resp = await APIClient.batchPost(fileStorage.files);
+          batchDataStorage.setData(resp.batches);
+          return true;
+        } catch (error) {
+          notifications.show({
+            title: "Batch Preview Error",
+            message: getError(error),
+            icon: <IconX />,
+            color: "red",
+          });
+          return false;
+        }
+      },
+    },
+    {
+      desc: "Confirm Batch Processing",
+      action: async () => {
+        try {
+          await APIClient.batchPut(batchDataStorage.data);
+          notifications.show({
+            title: "Success!",
+            message: "All batch data has been processed!",
+            icon: <IconCheck />,
+            color: "teal",
+          });
+          return true;
+        } catch (error) {
+          notifications.show({
+            title: "Batch Processing Error",
+            message: getError(error),
+            icon: <IconX />,
+            color: "red",
+          });
+          return false;
+        }
+      },
+    },
+    { desc: "Done!", action: async () => true },
+  ];
 
   return (
-    <Container className={classes.fileContainer}>
-      <Stack align="center">
-        <Title order={6}>Selected Files</Title>
-        {files.length == 0 ? (
-          <>No files selected.</>
-        ) : (
-          <List>
-            {files.map((file, index) => (
-              <List.Item className={classes.listItem} key={index}>
-                {file.name}
-              </List.Item>
-            ))}
-          </List>
-        )}
-        <PreviewBatchDataButton files={files} />
+    <Container className={styles.processor} fluid>
+      <Stack>
+        <Stepper
+          active={step}
+          onStepClick={setStep}
+          allowNextStepsSelect={false}
+          orientation={isMobile ? "vertical" : "horizontal"}
+        >
+          <StepperStep label="First step" description="Choose batch files">
+            <FilePicker />
+          </StepperStep>
+          <StepperStep label="Second step" description="Preview batch data">
+            <Previewer />
+          </StepperStep>
+          <StepperCompleted>
+            <Completed />
+          </StepperCompleted>
+        </Stepper>
+
+        <Group justify="center" mt="xl">
+          <Button variant="default" onClick={prevStep} disabled={step == 0}>
+            Back
+          </Button>
+          <Button
+            disabled={fileStorage.files.length == 0}
+            onClick={async () => {
+              if (await stepDescriptions[step].action()) {
+                nextStep();
+              }
+
+              if (step == stepDescriptions.length - 1) {
+                setStep(0);
+                fileStorage.clearFiles();
+              }
+            }}
+          >
+            {stepDescriptions[step].desc}
+          </Button>
+        </Group>
       </Stack>
     </Container>
   );
 }
 
-function PreviewBatchDataButton({ files }: { files: File[] }) {
-  const batches = batchesStore();
-
+function Completed() {
   return (
-    <Button
-      disabled={files.length == 0}
-      onClick={async () => {
-        const data = await APIClient.batchPost(files);
-        batches.setData(data);
-      }}
-    >
-      Preview Batch Data
-    </Button>
-  );
-}
-
-function BatchData() {
-  const batches = batchesStore();
-
-  if (batches.data == null) {
-    return (
-      <>
-        <Title align="center" order={6}>
-          Batch Data
-        </Title>
-        <Text align="center">Choose some files to process!</Text>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <Title align="center" order={6}>
-        Batch Data
-      </Title>
-      <BatchTabViewer />
-      <ConfirmBatchPutButton />
-    </>
-  );
-}
-
-function BatchTabViewer() {
-  const { classes } = useStyles();
-  const batches = batchesStore();
-  const isMobile = useMediaQuery(MOBILE_MIN_WIDTH);
-
-  if (batches.data == null) {
-    return null;
-  }
-
-  return (
-    <Container>
-      <Tabs defaultValue="classes" variant="outline">
-        <Tabs.List
-          className={classes.tabList}
-          position={isMobile ? "left" : "center"}
-        >
-          <Tabs.Tab className={classes.tabTab} value="classes">
-            Classes
-          </Tabs.Tab>
-          <Tabs.Tab value="classGroups">Class Groups</Tabs.Tab>
-          <Tabs.Tab value="classGroupSessions">Class Group Sessions</Tabs.Tab>
-          <Tabs.Tab value="users">Users</Tabs.Tab>
-        </Tabs.List>
-
-        <Tabs.Panel value="classes">
-          <ClassesTable batches={batches.data} />
-        </Tabs.Panel>
-        <Tabs.Panel value="classGroups">
-          <ClassGroupsTable batches={batches.data} />
-        </Tabs.Panel>
-        <Tabs.Panel value="classGroupSessions">
-          <ClassGroupSessionsTable batches={batches.data} />
-        </Tabs.Panel>
-        <Tabs.Panel value="users">
-          <UsersTable batches={batches.data} />
-        </Tabs.Panel>
-      </Tabs>
-    </Container>
-  );
-}
-
-function ConfirmBatchPutButton() {
-  const { classes } = useStyles();
-  const batches = batchesStore();
-
-  if (batches.data == null) {
-    return null;
-  }
-
-  return (
-    <Container className={classes.batchPutButton}>
-      <Center>
-        <Button
-          color="green"
-          onClick={async () => {
-            const loadingId = uuidv4();
-            notifications.show({
-              id: loadingId,
-              title: "Processing...",
-              message: "Your data is being processed. Please wait.",
-              loading: true,
-            });
-
-            const result = await APIClient.batchPut({ batches: batches.data! });
-            if (result == null) {
-              notifications.show({
-                title: "Oh no!",
-                message:
-                  "There was an error processing your batch data. Please try again later",
-                icon: <IconX />,
-                color: "red",
-              });
-              return;
-            }
-
-            notifications.hide(loadingId);
-            notifications.show({
-              title: "Success!",
-              message: "All batch data has been processed!",
-              icon: <IconCheck />,
-              color: "teal",
-            });
-          }}
-        >
-          Confirm Data Processing
-        </Button>
-      </Center>
-    </Container>
+    <StepLayout>
+      <Container size="md">
+        <Text ta="center">
+          Processing complete!
+          <br />
+          <br />
+          Press the &apos;Done&apos; button to restart the process, or the
+          &apos;Back&apos; button to revist the previous steps.
+        </Text>
+      </Container>
+    </StepLayout>
   );
 }

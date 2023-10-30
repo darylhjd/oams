@@ -1,309 +1,270 @@
 "use client";
 
+import styles from "@/styles/Header.module.css";
+
 import {
-  ActionIcon,
   Button,
   Center,
   Container,
-  Flex,
   Image,
+  Group,
+  Burger,
+  Drawer,
+  Box,
+  Stack,
   Menu,
-  Text,
-  createStyles,
+  MenuTarget,
+  MenuDropdown,
+  MenuItem,
+  NavLink,
+  Divider,
+  Flex,
+  Space,
 } from "@mantine/core";
+import { usePathname, useRouter } from "next/navigation";
+import { useSessionUserStore } from "@/stores/session";
+import { useDisclosure } from "@mantine/hooks";
 import {
-  IconLogin,
-  IconLogout,
-  IconMenu2,
-  IconUserCircle,
+  IconChevronDown,
+  IconFileDescription,
+  IconLayoutDashboard,
 } from "@tabler/icons-react";
-import { MOBILE_MIN_WIDTH } from "./responsive";
-import { useRouter } from "next/navigation";
-import { Routes } from "@/routes/routes";
-import { sessionStore } from "@/states/session";
+import { Routes } from "@/routing/routes";
 import { APIClient } from "@/api/client";
-import { UserRole } from "@/api/models";
-import { useMediaQuery } from "@mantine/hooks";
+import { UserRole } from "@/api/user";
 
-const useStyles = createStyles((theme) => ({
-  container: {
-    position: "sticky",
-    top: 0,
-    zIndex: 5,
-    backgroundColor: "white",
-    padding: "0.29em 0em",
-    borderBottom: "1px solid black",
-    boxShadow: "0em 0.1em 1em -0.1em rgba(0,0,0,0.4)",
-
-    [theme.fn.smallerThan("md")]: {
-      padding: "0.6em 0em",
-    },
-  },
-
-  centeredContainer: {
-    padding: "0em 1em",
-    width: "100%",
-    maxWidth: "80em",
-  },
-
-  logo: {
-    width: "9em",
-    height: "auto",
-    padding: "0.5em 0em",
-    marginRight: "0.7em",
-
-    [theme.fn.smallerThan("md")]: {
-      width: "7em",
-      padding: "0.25em 0em",
-      marginRight: "0",
-    },
-  },
-
-  desktopOptions: {
-    width: "100%",
-  },
-}));
-
-interface MobileProp {
-  mobile?: boolean;
-}
-
-// Header stores the navigation bar and shows a horizontal divider bottom border.
 export default function Header() {
-  const { classes } = useStyles();
-
   return (
-    <Container className={classes.container} fluid={true}>
-      <Center>
-        <NavBar />
-      </Center>
+    <Container className={styles.header} fluid>
+      <NavBarItems />
     </Container>
   );
 }
 
-// This shows the navigation bar.
-function NavBar() {
-  const { classes } = useStyles();
-
+function NavBarItems() {
   return (
-    <nav className={classes.centeredContainer}>
-      <Flex align="center" justify="space-between">
+    <Center>
+      <Flex className={styles.items} justify="space-between" align="center">
         <Logo />
-        <Options />
+        <Items />
       </Flex>
-    </nav>
+    </Center>
   );
 }
 
 function Logo() {
-  const { classes } = useStyles();
   const router = useRouter();
 
   return (
     <Button
-      className={classes.logo}
+      className={styles.logo}
       variant="subtle"
-      onClick={() => router.push("/")}
-    >
-      <Image src="logo.png" alt="OAMS Logo" fit="contain" />
-    </Button>
-  );
-}
-
-function Options() {
-  const session = sessionStore();
-  const { classes } = useStyles();
-
-  if (useMediaQuery(MOBILE_MIN_WIDTH)) {
-    return (
-      <Menu position="bottom-end" width={150}>
-        <Menu.Target>
-          <Button leftIcon={<IconMenu2 />} variant="subtle">
-            Menu
-          </Button>
-        </Menu.Target>
-
-        <Menu.Dropdown>
-          <AboutButton mobile />
-          {session.data != null &&
-          session.data.session_user.role == UserRole.SystemAdmin ? (
-            <>
-              <Menu.Label>Admin Controls</Menu.Label>
-              <AdminPanelButton mobile />
-              <BatchProcessingButton mobile />
-            </>
-          ) : null}
-          {session.data == null ? (
-            <LoginButton mobile />
-          ) : (
-            <>
-              <Menu.Label>Account</Menu.Label>
-              <ProfileButton mobile />
-              <LogoutButton />
-            </>
-          )}
-        </Menu.Dropdown>
-      </Menu>
-    );
-  }
-
-  return (
-    <Flex
-      className={classes.desktopOptions}
-      align="center"
-      justify="space-between"
+      onClick={() => router.push(Routes.index)}
     >
       <div>
-        {session.data != null &&
-        session.data.session_user.role == UserRole.SystemAdmin ? (
-          <>
-            <AdminPanelButton />
-            <BatchProcessingButton />
-          </>
-        ) : null}
-        <AboutButton />
+        <Image src="/logo.png" alt="OAMS" fit="contain" />
       </div>
-      <div>{session.data == null ? <LoginButton /> : <ProfileButton />}</div>
-    </Flex>
+    </Button>
   );
 }
 
-const AdminPanelButton: React.FC<MobileProp> = ({ mobile = false }) => {
-  const router = useRouter();
+function Items() {
+  const session = useSessionUserStore();
+  const [opened, { close, toggle }] = useDisclosure();
 
-  if (mobile) {
-    return (
-      <Menu.Item onClick={() => router.push(Routes.adminPanel)}>
-        <Text c="yellow">Admin Panel</Text>
-      </Menu.Item>
-    );
-  }
+  const items = session.data ? <LoggedItems /> : <GuestItems />;
 
   return (
-    <Button
-      variant="subtle"
-      color="yellow"
-      onClick={() => router.push(Routes.adminPanel)}
-    >
-      Admin Panel
-    </Button>
-  );
-};
+    <>
+      <Box visibleFrom="md">{items}</Box>
 
-const BatchProcessingButton: React.FC<MobileProp> = ({ mobile = false }) => {
-  const router = useRouter();
-
-  if (mobile) {
-    return (
-      <Menu.Item onClick={() => router.push(Routes.batchProcessing)}>
-        <Text c="yellow">Batch Processing</Text>
-      </Menu.Item>
-    );
-  }
-
-  return (
-    <Button
-      variant="subtle"
-      color="yellow"
-      onClick={() => router.push(Routes.batchProcessing)}
-    >
-      Batch Processing
-    </Button>
-  );
-};
-
-const AboutButton: React.FC<MobileProp> = ({ mobile = false }) => {
-  const router = useRouter();
-
-  if (mobile) {
-    return (
-      <Menu.Item onClick={() => router.push(Routes.about)}>
-        <Text c="cyan">About</Text>
-      </Menu.Item>
-    );
-  }
-
-  return (
-    <Button
-      variant="subtle"
-      color="cyan"
-      onClick={() => router.push(Routes.about)}
-    >
-      About
-    </Button>
-  );
-};
-
-const LoginButton: React.FC<MobileProp> = ({ mobile = false }) => {
-  const router = useRouter();
-
-  if (mobile) {
-    return (
-      <Menu.Item
-        icon={<IconLogin color="darkblue" />}
-        onClick={() => router.push(Routes.login)}
+      <Burger hiddenFrom="md" opened={opened} onClick={toggle} />
+      <Drawer
+        size="sm"
+        padding="lg"
+        opened={opened}
+        onClose={close}
+        onClick={close}
       >
-        <Text c="blue">Login</Text>
-      </Menu.Item>
-    );
-  }
+        {items}
+      </Drawer>
+    </>
+  );
+}
+
+function GuestItems() {
+  return (
+    <>
+      <Group visibleFrom="md">
+        <AboutButton />
+        <LoginButton />
+      </Group>
+
+      <Stack hiddenFrom="md" gap={0}>
+        <AboutButton />
+        <Divider my="sm" />
+
+        <Space h="md" />
+        <Group>
+          <LoginButton />
+        </Group>
+      </Stack>
+    </>
+  );
+}
+
+function LoggedItems() {
+  const session = useSessionUserStore();
 
   return (
-    <Button color="blue" onClick={() => router.push(Routes.login)}>
+    <>
+      <Group visibleFrom="md">
+        {session.data?.session_user.role == UserRole.SystemAdmin ? (
+          <SystemAdminMenu />
+        ) : null}
+        <AboutButton />
+        <ProfileButton />
+        <LogoutButton />
+      </Group>
+
+      <Stack hiddenFrom="md" gap={0}>
+        {session.data?.session_user.role == UserRole.SystemAdmin ? (
+          <SystemAdminMenu />
+        ) : null}
+        <AboutButton />
+        <Divider my="sm" />
+
+        <Space h="md" />
+        <Group>
+          <ProfileButton />
+          <LogoutButton />
+        </Group>
+      </Stack>
+    </>
+  );
+}
+
+function AboutButton() {
+  const router = useRouter();
+
+  return (
+    <>
+      <Button
+        visibleFrom="md"
+        variant="subtle"
+        onClick={() => router.push(Routes.about)}
+      >
+        About
+      </Button>
+
+      <NavLink
+        hiddenFrom="md"
+        label="About"
+        active
+        variant="subtle"
+        onClick={() => router.push(Routes.about)}
+      />
+    </>
+  );
+}
+
+function LoginButton() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  return (
+    <Button
+      onClick={async () => {
+        const redirectLink = `${process.env.WEB_SERVER}${pathname}`;
+        const loginLink = await APIClient.login(redirectLink);
+        router.push(loginLink);
+      }}
+    >
       Login
     </Button>
   );
-};
+}
 
-const ProfileButton: React.FC<MobileProp> = ({ mobile = false }) => {
+function ProfileButton() {
   const router = useRouter();
 
-  if (mobile) {
-    return (
-      <Menu.Item
-        icon={<IconUserCircle stroke={1} />}
-        onClick={() => router.push(Routes.profile)}
-      >
-        <Text>Your Profile</Text>
-      </Menu.Item>
-    );
-  }
-
   return (
-    <Menu position="bottom-end" width={150}>
-      <Menu.Target>
-        <ActionIcon size="lg">
-          <IconUserCircle size="4em" />
-        </ActionIcon>
-      </Menu.Target>
-
-      <Menu.Dropdown>
-        <Menu.Item
-          icon={<IconUserCircle stroke={1} />}
-          onClick={() => router.push(Routes.profile)}
-        >
-          <Text>Your Profile</Text>
-        </Menu.Item>
-        <LogoutButton />
-      </Menu.Dropdown>
-    </Menu>
+    <Button
+      color="blue"
+      variant="filled"
+      onClick={() => router.push(Routes.profile)}
+    >
+      Profile
+    </Button>
   );
-};
+}
 
-const LogoutButton = () => {
-  const router = useRouter();
-  const session = sessionStore();
-
+function LogoutButton() {
   return (
-    <Menu.Item
-      icon={<IconLogout color="red" />}
+    <Button
+      color="red"
       onClick={async () => {
         await APIClient.logout();
-        session.invalidate();
-        router.push(Routes.index);
+        location.href = Routes.index;
       }}
     >
-      <Text c="red">Logout</Text>
-    </Menu.Item>
+      Logout
+    </Button>
   );
-};
+}
+
+function SystemAdminMenu() {
+  const router = useRouter();
+
+  return (
+    <>
+      <Box visibleFrom="md">
+        <Menu width={200}>
+          <MenuTarget>
+            <Button
+              color="orange"
+              variant="subtle"
+              rightSection={<IconChevronDown />}
+            >
+              System Admin Menu
+            </Button>
+          </MenuTarget>
+          <MenuDropdown>
+            <MenuItem
+              leftSection={<IconLayoutDashboard size={16} />}
+              onClick={() => router.push(Routes.adminPanel)}
+            >
+              Admin Panel
+            </MenuItem>
+            <MenuItem
+              leftSection={<IconFileDescription size={16} />}
+              onClick={() => router.push(Routes.batchProcessing)}
+            >
+              Batch Processing
+            </MenuItem>
+          </MenuDropdown>
+        </Menu>
+      </Box>
+
+      <NavLink
+        color="orange"
+        hiddenFrom="md"
+        label="System Admin Menu"
+        active
+        variant="subtle"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <NavLink
+          label="Admin Panel"
+          leftSection={<IconLayoutDashboard size={16} />}
+          onClick={() => router.push(Routes.adminPanel)}
+        />
+        <NavLink
+          label="Batch Processing"
+          leftSection={<IconFileDescription size={16} />}
+          onClick={() => router.push(Routes.batchProcessing)}
+        />
+      </NavLink>
+    </>
+  );
+}
