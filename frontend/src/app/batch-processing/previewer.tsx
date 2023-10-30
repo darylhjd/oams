@@ -10,9 +10,8 @@ import {
   ClassesPreviewTable,
   UsersPreviewTable,
 } from "./tables";
-import { BatchData } from "@/api/batch";
 
-export function Previewer({ batchData }: { batchData: BatchData[] }) {
+export function Previewer() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
   return (
@@ -33,16 +32,16 @@ export function Previewer({ batchData }: { batchData: BatchData[] }) {
         </TabsList>
 
         <TabsPanel value="users">
-          <UsersPreviewTable batches={batchData} />
+          <UsersPreviewTable />
         </TabsPanel>
         <TabsPanel value="classes">
-          <ClassesPreviewTable batches={batchData} />
+          <ClassesPreviewTable />
         </TabsPanel>
         <TabsPanel value="classGroups">
-          <ClassGroupsPreviewTable batches={batchData} />
+          <ClassGroupsPreviewTable />
         </TabsPanel>
         <TabsPanel value="classGroupSessions">
-          <ClassGroupSessionsPreviewTable batches={batchData} />
+          <ClassGroupSessionsPreviewTable />
         </TabsPanel>
       </Tabs>
     </StepLayout>

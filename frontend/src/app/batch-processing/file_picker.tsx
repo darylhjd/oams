@@ -15,7 +15,7 @@ import {
   Text,
   rem,
 } from "@mantine/core";
-import { useBatchFilesStore } from "@/stores/batch_file_picker";
+import { useBatchFilesStore } from "@/stores/batch_processing";
 import { StepLayout } from "./step_layout";
 
 const MAX_FILE_SIZE = 5 * 1024 ** 2; // 5MB

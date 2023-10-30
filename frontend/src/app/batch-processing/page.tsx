@@ -12,16 +12,17 @@ import {
   StepperCompleted,
   Text,
 } from "@mantine/core";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { FilePicker } from "./file_picker";
-import { useBatchFilesStore } from "@/stores/batch_file_picker";
+import {
+  useBatchDataStore,
+  useBatchFilesStore,
+} from "@/stores/batch_processing";
 import { APIClient } from "@/api/client";
 import { useMediaQuery } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { getError } from "@/api/error";
-import { FileWithPath } from "@mantine/dropzone";
-import { BatchData } from "@/api/batch";
 import { Previewer } from "./previewer";
 import { StepLayout } from "./step_layout";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
@@ -30,7 +31,8 @@ export default function BatchProcessingPage() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
   const fileStorage = useBatchFilesStore();
-  const [batchData, setBatchData] = useState<BatchData[]>([]);
+  const batchDataStorage = useBatchDataStore();
+
   const [step, setStep] = useState(0);
   const nextStep = () =>
     setStep((current) => Math.min(current + 1, stepDescriptions.length));
@@ -39,11 +41,44 @@ export default function BatchProcessingPage() {
   const stepDescriptions = [
     {
       desc: "Preview Batch Data",
-      action: async () => previewAction(fileStorage.files, setBatchData),
+      action: async () => {
+        try {
+          const resp = await APIClient.batchPost(fileStorage.files);
+          batchDataStorage.setData(resp.batches);
+          return true;
+        } catch (error) {
+          notifications.show({
+            title: "Batch Preview Error",
+            message: getError(error),
+            icon: <IconX />,
+            color: "red",
+          });
+          return false;
+        }
+      },
     },
     {
       desc: "Confirm Batch Processing",
-      action: async () => batchPutAction(batchData),
+      action: async () => {
+        try {
+          await APIClient.batchPut(batchDataStorage.data);
+          notifications.show({
+            title: "Success!",
+            message: "All batch data has been processed!",
+            icon: <IconCheck />,
+            color: "teal",
+          });
+          return true;
+        } catch (error) {
+          notifications.show({
+            title: "Batch Processing Error",
+            message: getError(error),
+            icon: <IconX />,
+            color: "red",
+          });
+          return false;
+        }
+      },
     },
     { desc: "Done!", action: async () => true },
   ];
@@ -61,7 +96,7 @@ export default function BatchProcessingPage() {
             <FilePicker />
           </StepperStep>
           <StepperStep label="Second step" description="Preview batch data">
-            <Previewer batchData={batchData} />
+            <Previewer />
           </StepperStep>
           <StepperCompleted>
             <Completed />
@@ -107,44 +142,4 @@ function Completed() {
       </Container>
     </StepLayout>
   );
-}
-
-async function previewAction(
-  files: FileWithPath[],
-  setBatchData: Dispatch<SetStateAction<BatchData[]>>,
-): Promise<boolean> {
-  try {
-    const resp = await APIClient.batchPost(files);
-    setBatchData(resp.batches);
-    return true;
-  } catch (error) {
-    notifications.show({
-      title: "Batch Preview Error",
-      message: getError(error),
-      icon: <IconX />,
-      color: "red",
-    });
-    return false;
-  }
-}
-
-async function batchPutAction(batchData: BatchData[]): Promise<boolean> {
-  try {
-    await APIClient.batchPut(batchData);
-    notifications.show({
-      title: "Success!",
-      message: "All batch data has been processed!",
-      icon: <IconCheck />,
-      color: "teal",
-    });
-    return true;
-  } catch (error) {
-    notifications.show({
-      title: "Batch Processing Error",
-      message: getError(error),
-      icon: <IconX />,
-      color: "red",
-    });
-    return false;
-  }
 }

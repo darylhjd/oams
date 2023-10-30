@@ -1,5 +1,6 @@
+"use client";
+
 import {
-  BatchData,
   UpsertClassGroupParams,
   UpsertClassGroupSessionParams,
   UpsertClassParams,
@@ -10,10 +11,13 @@ import {
   ClassGroupSessionBatchDataTableColumns,
   UserBatchDataTableColumns,
 } from "@/components/entity_columns";
+import { useBatchDataStore } from "@/stores/batch_processing";
 import { MantineReactTable } from "mantine-react-table";
 
-export function UsersPreviewTable({ batches }: { batches: BatchData[] }) {
-  const rows = batches
+export function UsersPreviewTable() {
+  const batchDataStorage = useBatchDataStore();
+
+  const rows = batchDataStorage.data
     .map((batch) => batch.class_groups)
     .flat()
     .map((classGroup) => classGroup.students)
@@ -22,8 +26,10 @@ export function UsersPreviewTable({ batches }: { batches: BatchData[] }) {
   return <MantineReactTable columns={UserBatchDataTableColumns} data={rows} />;
 }
 
-export function ClassesPreviewTable({ batches }: { batches: BatchData[] }) {
-  const rows = batches.map<UpsertClassParams>((batch, index) => ({
+export function ClassesPreviewTable() {
+  const batchDataStorage = useBatchDataStore();
+
+  const rows = batchDataStorage.data.map<UpsertClassParams>((batch, index) => ({
     id: index,
     code: batch.class.code,
     year: batch.class.year,
@@ -35,8 +41,10 @@ export function ClassesPreviewTable({ batches }: { batches: BatchData[] }) {
   return <MantineReactTable columns={ClassBatchDataTableColumns} data={rows} />;
 }
 
-export function ClassGroupsPreviewTable({ batches }: { batches: BatchData[] }) {
-  const rows = batches
+export function ClassGroupsPreviewTable() {
+  const batchDataStorage = useBatchDataStore();
+
+  const rows = batchDataStorage.data
     .map((batch) => batch.class_groups)
     .flat()
     .map<UpsertClassGroupParams>((classGroup, index) => ({
@@ -51,12 +59,10 @@ export function ClassGroupsPreviewTable({ batches }: { batches: BatchData[] }) {
   );
 }
 
-export function ClassGroupSessionsPreviewTable({
-  batches,
-}: {
-  batches: BatchData[];
-}) {
-  const rows = batches
+export function ClassGroupSessionsPreviewTable() {
+  const batchDataStorage = useBatchDataStore();
+
+  const rows = batchDataStorage.data
     .map((batch) => batch.class_groups)
     .flat()
     .map((classGroup, index) =>
