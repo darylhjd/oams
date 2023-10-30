@@ -72,34 +72,36 @@ function Items() {
   const session = useSessionUserStore();
   const [opened, { close, toggle }] = useDisclosure();
 
-  const items = session.data ? (
-    <LoggedItems close={close} />
-  ) : (
-    <GuestItems close={close} />
-  );
+  const items = session.data ? <LoggedItems /> : <GuestItems />;
 
   return (
     <>
       <Box visibleFrom="md">{items}</Box>
 
       <Burger hiddenFrom="md" opened={opened} onClick={toggle} />
-      <Drawer size="sm" padding="lg" opened={opened} onClose={close}>
+      <Drawer
+        size="sm"
+        padding="lg"
+        opened={opened}
+        onClose={close}
+        onClick={close}
+      >
         {items}
       </Drawer>
     </>
   );
 }
 
-function GuestItems({ close }: { close: () => void }) {
+function GuestItems() {
   return (
     <>
       <Group visibleFrom="md">
-        <AboutButton close={close} />
+        <AboutButton />
         <LoginButton />
       </Group>
 
       <Stack hiddenFrom="md" gap={0}>
-        <AboutButton close={close} />
+        <AboutButton />
         <Divider my="sm" />
 
         <Space h="md" />
@@ -111,30 +113,30 @@ function GuestItems({ close }: { close: () => void }) {
   );
 }
 
-function LoggedItems({ close }: { close: () => void }) {
+function LoggedItems() {
   const session = useSessionUserStore();
 
   return (
     <>
       <Group visibleFrom="md">
         {session.data?.session_user.role == UserRole.SystemAdmin ? (
-          <SystemAdminMenu close={close} />
+          <SystemAdminMenu />
         ) : null}
-        <AboutButton close={close} />
-        <ProfileButton close={close} />
+        <AboutButton />
+        <ProfileButton />
         <LogoutButton />
       </Group>
 
       <Stack hiddenFrom="md" gap={0}>
         {session.data?.session_user.role == UserRole.SystemAdmin ? (
-          <SystemAdminMenu close={close} />
+          <SystemAdminMenu />
         ) : null}
-        <AboutButton close={close} />
+        <AboutButton />
         <Divider my="sm" />
 
         <Space h="md" />
         <Group>
-          <ProfileButton close={close} />
+          <ProfileButton />
           <LogoutButton />
         </Group>
       </Stack>
@@ -142,7 +144,7 @@ function LoggedItems({ close }: { close: () => void }) {
   );
 }
 
-function AboutButton({ close }: { close: () => void }) {
+function AboutButton() {
   const router = useRouter();
 
   return (
@@ -160,10 +162,7 @@ function AboutButton({ close }: { close: () => void }) {
         label="About"
         active
         variant="subtle"
-        onClick={() => {
-          close();
-          router.push(Routes.about);
-        }}
+        onClick={() => router.push(Routes.about)}
       />
     </>
   );
@@ -186,17 +185,14 @@ function LoginButton() {
   );
 }
 
-function ProfileButton({ close }: { close: () => void }) {
+function ProfileButton() {
   const router = useRouter();
 
   return (
     <Button
       color="blue"
       variant="filled"
-      onClick={() => {
-        close();
-        router.push(Routes.profile);
-      }}
+      onClick={() => router.push(Routes.profile)}
     >
       Profile
     </Button>
@@ -217,7 +213,7 @@ function LogoutButton() {
   );
 }
 
-function SystemAdminMenu({ close }: { close: () => void }) {
+function SystemAdminMenu() {
   const router = useRouter();
 
   return (
@@ -256,22 +252,17 @@ function SystemAdminMenu({ close }: { close: () => void }) {
         label="System Admin Menu"
         active
         variant="subtle"
+        onClick={(event) => event.stopPropagation()}
       >
         <NavLink
           label="Admin Panel"
           leftSection={<IconLayoutDashboard size={16} />}
-          onClick={() => {
-            close();
-            router.push(Routes.adminPanel);
-          }}
+          onClick={() => router.push(Routes.adminPanel)}
         />
         <NavLink
           label="Batch Processing"
           leftSection={<IconFileDescription size={16} />}
-          onClick={() => {
-            close();
-            router.push(Routes.batchProcessing);
-          }}
+          onClick={() => router.push(Routes.batchProcessing)}
         />
       </NavLink>
     </>
