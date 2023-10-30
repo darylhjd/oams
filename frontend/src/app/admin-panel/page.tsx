@@ -5,6 +5,14 @@ import styles from "@/styles/AdminPage.module.css";
 import { Container, TabsList, Tabs, TabsPanel, TabsTab } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
+import {
+  ClassGroupSessionsTable,
+  ClassGroupsTable,
+  ClassManagersTable,
+  ClassesTable,
+  SessionEnrollmentsTable,
+  UsersTable,
+} from "./tables";
 
 export default function AdminPanelPage() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
@@ -27,17 +35,23 @@ export default function AdminPanelPage() {
           <TabsTab value="sessionEnrollments">Session Enrollments</TabsTab>
         </TabsList>
 
-        <TabsPanel value="users">Users Table goes here.</TabsPanel>
-        <TabsPanel value="classes">Classes Table goes here.</TabsPanel>
-        <TabsPanel value="classManagers">
-          Class Managers Table goes here.
+        <TabsPanel value="users">
+          <UsersTable />
         </TabsPanel>
-        <TabsPanel value="classGroups">Class Groups Table goes here.</TabsPanel>
+        <TabsPanel value="classes">
+          <ClassesTable />
+        </TabsPanel>
+        <TabsPanel value="classManagers">
+          <ClassManagersTable />
+        </TabsPanel>
+        <TabsPanel value="classGroups">
+          <ClassGroupsTable />
+        </TabsPanel>
         <TabsPanel value="classGroupSessions">
-          Class Group Sessions Table goes here.
+          <ClassGroupSessionsTable />
         </TabsPanel>
         <TabsPanel value="sessionEnrollments">
-          Session Enrollments Table goes here.
+          <SessionEnrollmentsTable />
         </TabsPanel>
       </Tabs>
     </Container>

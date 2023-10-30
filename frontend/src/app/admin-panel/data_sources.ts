@@ -6,7 +6,7 @@ import { APIClient } from "@/api/client";
 import { SessionEnrollment } from "@/api/session_enrollment";
 import { User } from "@/api/user";
 
-abstract class AsyncDataSource<T> {
+export abstract class AsyncDataSource<T> {
   constructor(
     public totalRecords: number = 0,
     public isApproximateRowCount: boolean = true,
