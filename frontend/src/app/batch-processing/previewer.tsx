@@ -9,7 +9,7 @@ import {
   ClassGroupsPreviewTable,
   ClassesPreviewTable,
   UsersPreviewTable,
-} from "./tables";
+} from "./previewer_tables";
 
 export function Previewer() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
