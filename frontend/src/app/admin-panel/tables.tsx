@@ -96,7 +96,7 @@ function AsyncDataTable<T extends Record<string, any>>({
 
   useEffect(() => {
     setLoading(true);
-    
+
     const from = paginationState.pageIndex * paginationState.pageSize;
     dataSource.getRows(from, paginationState.pageSize).then((data) => {
       setData(data);
