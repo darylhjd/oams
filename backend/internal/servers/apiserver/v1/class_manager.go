@@ -28,7 +28,7 @@ func (v *APIServerV1) classManager(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPatch:
 		resp = v.classManagerPatch(r, managerId)
 	case http.MethodDelete:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classManagerDelete(r, managerId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -101,4 +101,22 @@ func (v *APIServerV1) classManagerPatch(r *http.Request, id int64) apiResponse {
 			manager.UpdatedAt,
 		},
 	}
+}
+
+type classManagerDeleteResponse struct {
+	response
+}
+
+func (v *APIServerV1) classManagerDelete(r *http.Request, id int64) apiResponse {
+	_, err := v.db.DeleteClassManager(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "class manager to delete does not exist")
+		}
+
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not process class manager delete database action")
+	}
+
+	return classManagerDeleteResponse{newSuccessResponse()}
 }

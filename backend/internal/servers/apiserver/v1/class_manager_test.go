@@ -38,7 +38,7 @@ func TestAPIServerV1_classManager(t *testing.T) {
 		{
 			"with DELETE method",
 			http.MethodDelete,
-			http.StatusNotImplemented,
+			http.StatusNotFound,
 		},
 		{
 			"with PUT method",
@@ -251,6 +251,68 @@ func TestAPIServerV1_classManagerPatch(t *testing.T) {
 				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classManagerUrl, managerId), bytes.NewReader(reqBodyBytes))
 				successiveResp := v1.classManagerPatch(req, managerId).(classManagerPatchResponse)
 				a.Equal(actualResp, successiveResp)
+			}
+		})
+	}
+}
+
+func TestAPIServerV1_classManagerDelete(t *testing.T) {
+	t.Parallel()
+
+	tts := []struct {
+		name                     string
+		withExistingClassManager bool
+		wantResponse             classManagerDeleteResponse
+		wantStatusCode           int
+		wantErr                  string
+	}{
+		{
+			"request with existing class manager",
+			true,
+			classManagerDeleteResponse{newSuccessResponse()},
+			http.StatusOK,
+			"",
+		},
+		{
+			"request with non-existent class manager",
+			false,
+			classManagerDeleteResponse{},
+			http.StatusNotFound,
+			"class manager to delete does not exist",
+		},
+	}
+
+	for _, tt := range tts {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			a := assert.New(t)
+			ctx := context.Background()
+			id := uuid.NewString()
+
+			v1 := newTestAPIServerV1(t, id)
+			defer tests.TearDown(t, v1.db, id)
+
+			var managerId int64 = 6666 // Choose a random ID that does not exist.
+			if tt.withExistingClassManager {
+				createdManager := tests.StubClassManager(t, ctx, v1.db, model.ManagingRole_CourseCoordinator)
+				managerId = createdManager.ID
+			}
+
+			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classManagerUrl, managerId), nil)
+			resp := v1.classManagerDelete(req, managerId)
+			a.Equal(tt.wantStatusCode, resp.Code())
+
+			switch {
+			case tt.wantErr != "":
+				actualResp, ok := resp.(errorResponse)
+				a.True(ok)
+				a.Contains(actualResp.Error, tt.wantErr)
+			default:
+				actualResp, ok := resp.(classManagerDeleteResponse)
+				a.True(ok)
+				a.Equal(tt.wantResponse, actualResp)
 			}
 		})
 	}
