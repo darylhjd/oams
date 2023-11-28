@@ -9,7 +9,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListClassGroupSessions(ctx context.Context, params listParams) ([]model.ClassGroupSession, error) {
+func (d *DB) ListClassGroupSessions(ctx context.Context, params ListQueryParams) ([]model.ClassGroupSession, error) {
 	var res []model.ClassGroupSession
 
 	stmt := SELECT(

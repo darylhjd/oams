@@ -14,7 +14,7 @@ appropriate database values for connection in your `.env` file for tests.
 
 When running tests, for example with the `go test ./...` command in the `backend` module, you must remember to set the
 appropriate environment variables together with the programme. The recommendation is to use a proper IDE that can set up
-the appropriate configurations for the testing (e.g. helping you to load a local `.env.test` file before running the 
+the appropriate configurations for the testing (e.g. helping you to load a local `.env.test` file before running the
 `go test ./...` command).
 
 If you have followed the above steps, you will be able to successfully run the test suite with no issues.
