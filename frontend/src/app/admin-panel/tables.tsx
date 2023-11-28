@@ -1,5 +1,5 @@
 import {
-  MRT_ColumnDef,
+  MRT_TableOptions,
   MRT_PaginationState,
   MantineReactTable,
 } from "mantine-react-table";
@@ -21,14 +21,25 @@ import {
   SessionEnrollmentsDataTableColumns,
   UserDataTableColumns,
 } from "@/components/entity_columns";
+import { useRouter } from "next/navigation";
+import { Routes } from "@/routing/routes";
 
 const DEFAULT_PAGE_SIZE = 10;
+const ROW_PROPS = {
+  style: { cursor: "pointer" },
+};
 
 export function UsersTable() {
+  const router = useRouter();
+
   return (
     <AsyncDataTable
       columns={UserDataTableColumns}
       dataSource={new UsersDataSource()}
+      mantineTableBodyRowProps={({ row }) => ({
+        onClick: (_) => router.push(Routes.adminPanelUsers + row.original.id),
+        ...ROW_PROPS,
+      })}
     />
   );
 }
@@ -79,12 +90,11 @@ export function SessionEnrollmentsTable() {
 }
 
 function AsyncDataTable<T extends Record<string, any>>({
-  columns,
   dataSource,
+  ...props
 }: {
-  columns: MRT_ColumnDef<T>[];
   dataSource: AsyncDataSource<T>;
-}) {
+} & Omit<MRT_TableOptions<T>, "data">) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -107,7 +117,7 @@ function AsyncDataTable<T extends Record<string, any>>({
 
   return (
     <MantineReactTable
-      columns={columns}
+      {...props}
       data={data}
       manualPagination={true}
       rowCount={rowCount}
