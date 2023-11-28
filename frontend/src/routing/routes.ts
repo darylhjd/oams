@@ -5,5 +5,6 @@ export const Routes = {
   adminPanel: "/admin-panel",
   adminPanelUsers: "/admin-panel/users/",
   adminPanelClasses: "/admin-panel/classes/",
+  adminPanelClassGroups: "/admin-panel/class-groups/",
   batchProcessing: "/batch-processing",
 };

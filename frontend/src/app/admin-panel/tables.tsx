@@ -69,10 +69,17 @@ export function ClassManagersTable() {
 }
 
 export function ClassGroupsTable() {
+  const router = useRouter();
+
   return (
     <AsyncDataTable
       columns={ClassGroupDataTableColumns}
       dataSource={new ClassGroupsDataSource()}
+      mantineTableBodyRowProps={({ row }) => ({
+        onClick: (_) =>
+          router.push(Routes.adminPanelClassGroups + row.original.id),
+        ...ROW_PROPS,
+      })}
     />
   );
 }

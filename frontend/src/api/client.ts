@@ -5,7 +5,7 @@ import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
 import { ClassGetResponse, ClassesGetResponse } from "./class";
 import { ClassManagersGetResponse } from "./class_manager";
-import { ClassGroupsGetResponse } from "./class_group";
+import { ClassGroupGetResponse, ClassGroupsGetResponse } from "./class_group";
 import { ClassGroupSessionsGetResponse } from "./class_group_session";
 import { SessionEnrollmentsGetResponse } from "./session_enrollment";
 
@@ -25,6 +25,7 @@ export class APIClient {
   static readonly _classPath = "/classes/";
   static readonly _classManagersPath = "/class-managers";
   static readonly _classGroupsPath = "/class-groups";
+  static readonly _classGroupPath = "/class-groups/";
   static readonly _classGroupSessionsPath = "/class-group-sessions";
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
 
@@ -136,6 +137,13 @@ export class APIClient {
           limit: limit,
         },
       },
+    );
+    return data;
+  }
+
+  static async classGroupGet(id: number): Promise<ClassGroupGetResponse> {
+    const { data } = await this._client.get<ClassGroupGetResponse>(
+      this._classGroupPath + id,
     );
     return data;
   }
