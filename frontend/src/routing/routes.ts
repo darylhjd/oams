@@ -3,6 +3,10 @@ export const Routes = {
   about: "/about",
   profile: "/profile",
   adminPanel: "/admin-panel",
-  adminPanelUsers: "/admin-panel/users/",
+  adminPanelUser: "/admin-panel/users/",
+  adminPanelClass: "/admin-panel/classes/",
+  adminPanelClassGroup: "/admin-panel/class-groups/",
+  adminPanelClassGroupSession: "/admin-panel/class-group-sessions/",
+  adminPanelSessionEnrollment: "/admin-panel/session-enrollments/",
   batchProcessing: "/batch-processing",
 };

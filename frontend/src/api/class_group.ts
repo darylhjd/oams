@@ -2,6 +2,10 @@ export type ClassGroupsGetResponse = {
   class_groups: ClassGroup[];
 };
 
+export type ClassGroupGetResponse = {
+  class_group: ClassGroup;
+};
+
 export type ClassGroup = {
   id: number;
   class_id: number;

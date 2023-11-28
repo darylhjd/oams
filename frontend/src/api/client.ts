@@ -3,11 +3,17 @@ import { LoginResponse } from "./login";
 import { UserGetResponse, UserMeResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
-import { ClassesGetResponse } from "./class";
+import { ClassGetResponse, ClassesGetResponse } from "./class";
 import { ClassManagersGetResponse } from "./class_manager";
-import { ClassGroupsGetResponse } from "./class_group";
-import { ClassGroupSessionsGetResponse } from "./class_group_session";
-import { SessionEnrollmentsGetResponse } from "./session_enrollment";
+import { ClassGroupGetResponse, ClassGroupsGetResponse } from "./class_group";
+import {
+  ClassGroupSessionGetResponse,
+  ClassGroupSessionsGetResponse,
+} from "./class_group_session";
+import {
+  SessionEnrollmentGetResponse,
+  SessionEnrollmentsGetResponse,
+} from "./session_enrollment";
 
 export class APIClient {
   static _client = axios.create({
@@ -22,10 +28,14 @@ export class APIClient {
   static readonly _userPath = "/users/";
   static readonly _userMePath = "/users/me";
   static readonly _classesPath = "/classes";
+  static readonly _classPath = "/classes/";
   static readonly _classManagersPath = "/class-managers";
   static readonly _classGroupsPath = "/class-groups";
+  static readonly _classGroupPath = "/class-groups/";
   static readonly _classGroupSessionsPath = "/class-group-sessions";
+  static readonly _classGroupSessionPath = "/class-group-sessions/";
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
+  static readonly _sessionEnrollmentPath = "/session-enrollments/";
 
   static async login(redirectUrl: string = ""): Promise<string> {
     const { data } = await this._client.get<LoginResponse>(this._loginPath, {
@@ -100,6 +110,13 @@ export class APIClient {
     return data;
   }
 
+  static async classGet(id: number): Promise<ClassGetResponse> {
+    const { data } = await this._client.get<ClassGetResponse>(
+      this._classPath + id,
+    );
+    return data;
+  }
+
   static async classManagersGet(
     offset: number,
     limit: number,
@@ -132,6 +149,13 @@ export class APIClient {
     return data;
   }
 
+  static async classGroupGet(id: number): Promise<ClassGroupGetResponse> {
+    const { data } = await this._client.get<ClassGroupGetResponse>(
+      this._classGroupPath + id,
+    );
+    return data;
+  }
+
   static async classGroupSessionsGet(
     offset: number,
     limit: number,
@@ -148,6 +172,15 @@ export class APIClient {
     return data;
   }
 
+  static async classGroupSessionGet(
+    id: number,
+  ): Promise<ClassGroupSessionGetResponse> {
+    const { data } = await this._client.get<ClassGroupSessionGetResponse>(
+      this._classGroupSessionPath + id,
+    );
+    return data;
+  }
+
   static async sessionEnrollmentsGet(
     offset: number,
     limit: number,
@@ -160,6 +193,15 @@ export class APIClient {
           limit: limit,
         },
       },
+    );
+    return data;
+  }
+
+  static async sessionEnrollmentGet(
+    id: number,
+  ): Promise<SessionEnrollmentGetResponse> {
+    const { data } = await this._client.get<SessionEnrollmentGetResponse>(
+      this._sessionEnrollmentPath + id,
     );
     return data;
   }

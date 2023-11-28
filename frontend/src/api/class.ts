@@ -2,6 +2,10 @@ export type ClassesGetResponse = {
   classes: Class[];
 };
 
+export type ClassGetResponse = {
+  class: Class;
+};
+
 export type Class = {
   id: number;
   code: string;

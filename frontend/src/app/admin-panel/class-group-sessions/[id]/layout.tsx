@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export type Params = {
-  id: string;
+  id: number;
 };
 
 export async function generateMetadata({
@@ -10,15 +10,15 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   return {
-    title: `User: ${params.id}`,
-    description: "OAMS User",
+    title: `Class Group Session: ${params.id}`,
+    description: "OAMS Class Group Session",
     icons: {
       icon: "/favicon.svg",
     },
   };
 }
 
-export default function AdminPanelUserLayout({
+export default function AdminPanelClassGroupSessionLayout({
   children,
 }: {
   children: React.ReactNode;
