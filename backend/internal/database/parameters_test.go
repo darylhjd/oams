@@ -9,26 +9,77 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type testSorter struct {
-	s []SortParam
-}
+func Test_parseSortParam(t *testing.T) {
+	tts := []struct {
+		name           string
+		withS          string
+		withColumnList ColumnList
+		wantSortParam  SortParam
+		wantErr        bool
+	}{
+		{
+			"correct column descending",
+			"id:desc",
+			Users.AllColumns,
+			SortParam{
+				Users.ID,
+				true,
+			},
+			false,
+		},
+		{
+			"correct column ascending",
+			"id",
+			Users.AllColumns,
+			SortParam{
+				Users.ID,
+				false,
+			},
+			false,
+		},
+		{
+			"wrong column",
+			"wrong",
+			Users.AllColumns,
+			SortParam{},
+			true,
+		},
+		{
+			"wrong descending identifier",
+			"id:asc",
+			Users.AllColumns,
+			SortParam{},
+			true,
+		},
+	}
 
-func (t testSorter) Sorts() []SortParam {
-	return t.s
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
+			sortParam, err := parseSortParam(tt.withS, tt.withColumnList)
+			if tt.wantErr {
+				a.Error(err)
+			} else {
+				a.Equal(tt.wantSortParam, sortParam)
+			}
+		})
+	}
 }
 
 func Test_setSorts(t *testing.T) {
 	tts := []struct {
 		name          string
-		withSorter    sorter
+		withSorter    ListQueryParams
 		wantStatement SelectStatement
 	}{
 		{
 			"with parameters",
-			testSorter{[]SortParam{
-				{Users.ID, ""},
-				{Users.Name, SortDirectionDesc},
-			}},
+			ListQueryParams{
+				SParsed: []SortParam{
+					{Users.ID, false},
+					{Users.Name, true},
+				}},
 			SELECT(NULL).
 				ORDER_BY(
 					Users.ID.ASC(),
@@ -37,7 +88,7 @@ func Test_setSorts(t *testing.T) {
 		},
 		{
 			"with no parameters",
-			testSorter{[]SortParam{}},
+			ListQueryParams{},
 			SELECT(NULL),
 		},
 	}
@@ -52,29 +103,21 @@ func Test_setSorts(t *testing.T) {
 	}
 }
 
-type testLimiter struct {
-	l *int64
-}
-
-func (t testLimiter) Limit() *int64 {
-	return t.l
-}
-
 func Test_setLimit(t *testing.T) {
 	tts := []struct {
 		name          string
-		withLimiter   limiter
+		withLimiter   ListQueryParams
 		wantStatement SelectStatement
 	}{
 		{
 			"with parameters",
-			testLimiter{to.Ptr(int64(2))},
+			ListQueryParams{L: to.Ptr(int64(2))},
 			SELECT(NULL).
 				LIMIT(2),
 		},
 		{
 			"with no parameters",
-			testLimiter{},
+			ListQueryParams{},
 			SELECT(NULL).
 				LIMIT(ListDefaultLimit),
 		},
@@ -90,29 +133,21 @@ func Test_setLimit(t *testing.T) {
 	}
 }
 
-type testOffsetter struct {
-	o *int64
-}
-
-func (t testOffsetter) Offset() *int64 {
-	return t.o
-}
-
 func Test_setOffset(t *testing.T) {
 	tts := []struct {
 		name          string
-		withOffsetter offsetter
+		withOffset    ListQueryParams
 		wantStatement SelectStatement
 	}{
 		{
 			"with parameters",
-			testOffsetter{to.Ptr(int64(2))},
+			ListQueryParams{O: to.Ptr(int64(2))},
 			SELECT(NULL).
 				OFFSET(2),
 		},
 		{
 			"with no parameters",
-			testOffsetter{},
+			ListQueryParams{},
 			SELECT(NULL),
 		},
 	}
@@ -121,7 +156,7 @@ func Test_setOffset(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
 
-			stmt := setOffset(SELECT(NULL), tt.withOffsetter)
+			stmt := setOffset(SELECT(NULL), tt.withOffset)
 			a.Equal(tt.wantStatement.DebugSql(), stmt.DebugSql())
 		})
 	}

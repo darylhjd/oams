@@ -31,7 +31,7 @@ type classesGetResponse struct {
 }
 
 func (v *APIServerV1) classesGet(r *http.Request) apiResponse {
-	params, err := v.decodeListQueryParameters(r.URL.Query(), table.Classes.AllColumns)
+	params, err := database.DecodeListQueryParams(r.URL.Query(), table.Classes.AllColumns)
 	if err != nil {
 		return newErrorResponse(http.StatusBadRequest, err.Error())
 	}

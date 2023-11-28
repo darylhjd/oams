@@ -9,7 +9,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListSessionEnrollments(ctx context.Context, params listParams) ([]model.SessionEnrollment, error) {
+func (d *DB) ListSessionEnrollments(ctx context.Context, params ListQueryParams) ([]model.SessionEnrollment, error) {
 	var res []model.SessionEnrollment
 
 	stmt := SELECT(

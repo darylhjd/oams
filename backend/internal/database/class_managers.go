@@ -8,7 +8,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func (d *DB) ListClassManagers(ctx context.Context, params listParams) ([]model.ClassManager, error) {
+func (d *DB) ListClassManagers(ctx context.Context, params ListQueryParams) ([]model.ClassManager, error) {
 	var res []model.ClassManager
 
 	stmt := SELECT(

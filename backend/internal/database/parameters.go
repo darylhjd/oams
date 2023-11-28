@@ -1,38 +1,79 @@
 package database
 
 import (
+	"fmt"
+	"strings"
+
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/gorilla/schema"
 )
 
-type listParams interface {
-	sorter
-	limiter
-	offsetter
-}
+var decoder = schema.NewDecoder()
 
-const (
-	SortDirectionDesc = "desc"
-)
-
-type sorter interface {
-	Sorts() []SortParam
+type ListQueryParams struct {
+	S       []string `schema:"sort"`
+	SParsed []SortParam
+	L       *int64   `schema:"limit"`
+	O       *int64   `schema:"offset"`
+	F       []string `schema:"filter"`
 }
 
 type SortParam struct {
-	Col       Column
-	Direction string
+	Col          Column
+	IsDescending bool
+}
+
+func DecodeListQueryParams(source map[string][]string, cList ColumnList) (ListQueryParams, error) {
+	var l ListQueryParams
+	err := decoder.Decode(&l, source)
+	if err != nil {
+		return l, err
+	}
+
+	for _, s := range l.S {
+		p, err := parseSortParam(s, cList)
+		if err != nil {
+			return l, err
+		}
+
+		l.SParsed = append(l.SParsed, p)
+	}
+
+	return l, err
+}
+
+const (
+	descendingIdent = ":desc"
+)
+
+func parseSortParam(s string, cList ColumnList) (SortParam, error) {
+	var p SortParam
+
+	if strings.HasSuffix(s, descendingIdent) {
+		p.IsDescending = true
+	}
+
+	columnString := strings.TrimSuffix(s, descendingIdent)
+	for _, c := range cList {
+		if c.Name() == columnString {
+			p.Col = c
+			return p, nil
+		}
+	}
+
+	return p, fmt.Errorf("unknown sort column `%s`", columnString)
 }
 
 // setSorts sets the ORDER BY parameters for a select statement.
-func setSorts(stmt SelectStatement, s sorter) SelectStatement {
-	if len(s.Sorts()) == 0 {
+func setSorts(stmt SelectStatement, params ListQueryParams) SelectStatement {
+	if len(params.SParsed) == 0 {
 		return stmt
 	}
 
 	var orders []OrderByClause
-	for _, param := range s.Sorts() {
+	for _, param := range params.SParsed {
 		direction := param.Col.ASC()
-		if param.Direction == SortDirectionDesc {
+		if param.IsDescending {
 			direction = param.Col.DESC()
 		}
 
@@ -46,14 +87,10 @@ const (
 	ListDefaultLimit = 50
 )
 
-type limiter interface {
-	Limit() *int64
-}
-
 // setLimit sets a limit to the number of returned rows in a select statement.
-func setLimit(stmt SelectStatement, limit limiter) SelectStatement {
-	if limit.Limit() != nil && *limit.Limit() > 0 {
-		stmt = stmt.LIMIT(*limit.Limit())
+func setLimit(stmt SelectStatement, params ListQueryParams) SelectStatement {
+	if params.L != nil && *params.L > 0 {
+		stmt = stmt.LIMIT(*params.L)
 	} else {
 		stmt = stmt.LIMIT(ListDefaultLimit)
 	}
@@ -61,14 +98,10 @@ func setLimit(stmt SelectStatement, limit limiter) SelectStatement {
 	return stmt
 }
 
-type offsetter interface {
-	Offset() *int64
-}
-
 // setOffset sets an offset to the returned rows in a select statement.
-func setOffset(stmt SelectStatement, offset offsetter) SelectStatement {
-	if offset.Offset() != nil && *offset.Offset() > 0 {
-		stmt = stmt.OFFSET(*offset.Offset())
+func setOffset(stmt SelectStatement, params ListQueryParams) SelectStatement {
+	if params.O != nil && *params.O > 0 {
+		stmt = stmt.OFFSET(*params.O)
 	}
 
 	return stmt

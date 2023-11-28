@@ -11,7 +11,7 @@ import (
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-func (d *DB) ListUsers(ctx context.Context, params listParams) ([]model.User, error) {
+func (d *DB) ListUsers(ctx context.Context, params ListQueryParams) ([]model.User, error) {
 	var res []model.User
 
 	stmt := SELECT(
