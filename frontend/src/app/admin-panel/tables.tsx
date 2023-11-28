@@ -45,10 +45,16 @@ export function UsersTable() {
 }
 
 export function ClassesTable() {
+  const router = useRouter();
+
   return (
     <AsyncDataTable
       columns={ClassDataTableColumns}
       dataSource={new ClassesDataSource()}
+      mantineTableBodyRowProps={({ row }) => ({
+        onClick: (_) => router.push(Routes.adminPanelClasses + row.original.id),
+        ...ROW_PROPS,
+      })}
     />
   );
 }

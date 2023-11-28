@@ -3,7 +3,7 @@ import { LoginResponse } from "./login";
 import { UserGetResponse, UserMeResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
-import { ClassesGetResponse } from "./class";
+import { ClassGetResponse, ClassesGetResponse } from "./class";
 import { ClassManagersGetResponse } from "./class_manager";
 import { ClassGroupsGetResponse } from "./class_group";
 import { ClassGroupSessionsGetResponse } from "./class_group_session";
@@ -22,6 +22,7 @@ export class APIClient {
   static readonly _userPath = "/users/";
   static readonly _userMePath = "/users/me";
   static readonly _classesPath = "/classes";
+  static readonly _classPath = "/classes/";
   static readonly _classManagersPath = "/class-managers";
   static readonly _classGroupsPath = "/class-groups";
   static readonly _classGroupSessionsPath = "/class-group-sessions";
@@ -96,6 +97,13 @@ export class APIClient {
           limit: limit,
         },
       },
+    );
+    return data;
+  }
+
+  static async classGet(id: number): Promise<ClassGetResponse> {
+    const { data } = await this._client.get<ClassGetResponse>(
+      this._classPath + id,
     );
     return data;
   }
