@@ -18,7 +18,7 @@ export async function generateMetadata({
   };
 }
 
-export default function AdminPanelClassGroupsLayout({
+export default function AdminPanelClassGroupLayout({
   children,
 }: {
   children: React.ReactNode;

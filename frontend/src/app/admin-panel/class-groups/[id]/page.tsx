@@ -7,7 +7,7 @@ import { APIClient } from "@/api/client";
 import { EntityLoader } from "@/app/admin-panel/entity_loader";
 import { ClassGroup } from "@/api/class_group";
 
-export default function AdminPanelClassGroupsPage({
+export default function AdminPanelClassGroupPage({
   params,
 }: {
   params: Params;

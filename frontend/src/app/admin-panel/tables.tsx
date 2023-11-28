@@ -37,7 +37,7 @@ export function UsersTable() {
       columns={UserDataTableColumns}
       dataSource={new UsersDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
-        onClick: (_) => router.push(Routes.adminPanelUsers + row.original.id),
+        onClick: (_) => router.push(Routes.adminPanelUser + row.original.id),
         ...ROW_PROPS,
       })}
     />
@@ -52,7 +52,7 @@ export function ClassesTable() {
       columns={ClassDataTableColumns}
       dataSource={new ClassesDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
-        onClick: (_) => router.push(Routes.adminPanelClasses + row.original.id),
+        onClick: (_) => router.push(Routes.adminPanelClass + row.original.id),
         ...ROW_PROPS,
       })}
     />
@@ -77,7 +77,7 @@ export function ClassGroupsTable() {
       dataSource={new ClassGroupsDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
         onClick: (_) =>
-          router.push(Routes.adminPanelClassGroups + row.original.id),
+          router.push(Routes.adminPanelClassGroup + row.original.id),
         ...ROW_PROPS,
       })}
     />
