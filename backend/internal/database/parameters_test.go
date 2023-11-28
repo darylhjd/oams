@@ -9,6 +9,64 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_parseSortParam(t *testing.T) {
+	tts := []struct {
+		name           string
+		withS          string
+		withColumnList ColumnList
+		wantSortParam  SortParam
+		wantErr        bool
+	}{
+		{
+			"correct column descending",
+			"id:desc",
+			Users.AllColumns,
+			SortParam{
+				Users.ID,
+				true,
+			},
+			false,
+		},
+		{
+			"correct column ascending",
+			"id",
+			Users.AllColumns,
+			SortParam{
+				Users.ID,
+				false,
+			},
+			false,
+		},
+		{
+			"wrong column",
+			"wrong",
+			Users.AllColumns,
+			SortParam{},
+			true,
+		},
+		{
+			"wrong descending identifier",
+			"id:asc",
+			Users.AllColumns,
+			SortParam{},
+			true,
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
+			sortParam, err := parseSortParam(tt.withS, tt.withColumnList)
+			if tt.wantErr {
+				a.Error(err)
+			} else {
+				a.Equal(tt.wantSortParam, sortParam)
+			}
+		})
+	}
+}
+
 func Test_setSorts(t *testing.T) {
 	tts := []struct {
 		name          string
