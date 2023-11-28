@@ -6,8 +6,14 @@ import { FileWithPath } from "@mantine/dropzone";
 import { ClassGetResponse, ClassesGetResponse } from "./class";
 import { ClassManagersGetResponse } from "./class_manager";
 import { ClassGroupGetResponse, ClassGroupsGetResponse } from "./class_group";
-import { ClassGroupSessionsGetResponse } from "./class_group_session";
-import { SessionEnrollmentsGetResponse } from "./session_enrollment";
+import {
+  ClassGroupSessionGetResponse,
+  ClassGroupSessionsGetResponse,
+} from "./class_group_session";
+import {
+  SessionEnrollmentGetResponse,
+  SessionEnrollmentsGetResponse,
+} from "./session_enrollment";
 
 export class APIClient {
   static _client = axios.create({
@@ -27,7 +33,9 @@ export class APIClient {
   static readonly _classGroupsPath = "/class-groups";
   static readonly _classGroupPath = "/class-groups/";
   static readonly _classGroupSessionsPath = "/class-group-sessions";
+  static readonly _classGroupSessionPath = "/class-group-sessions/";
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
+  static readonly _sessionEnrollmentPath = "/session-enrollments/";
 
   static async login(redirectUrl: string = ""): Promise<string> {
     const { data } = await this._client.get<LoginResponse>(this._loginPath, {
@@ -164,6 +172,15 @@ export class APIClient {
     return data;
   }
 
+  static async classGroupSessionGet(
+    id: number,
+  ): Promise<ClassGroupSessionGetResponse> {
+    const { data } = await this._client.get<ClassGroupSessionGetResponse>(
+      this._classGroupSessionPath + id,
+    );
+    return data;
+  }
+
   static async sessionEnrollmentsGet(
     offset: number,
     limit: number,
@@ -176,6 +193,15 @@ export class APIClient {
           limit: limit,
         },
       },
+    );
+    return data;
+  }
+
+  static async sessionEnrollmentGet(
+    id: number,
+  ): Promise<SessionEnrollmentGetResponse> {
+    const { data } = await this._client.get<SessionEnrollmentGetResponse>(
+      this._sessionEnrollmentPath + id,
     );
     return data;
   }

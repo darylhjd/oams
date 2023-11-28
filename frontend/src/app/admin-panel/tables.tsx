@@ -2,6 +2,7 @@ import {
   MRT_TableOptions,
   MRT_PaginationState,
   MantineReactTable,
+  MRT_DensityState,
 } from "mantine-react-table";
 import {
   AsyncDataSource,
@@ -24,7 +25,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 50;
 const ROW_PROPS = {
   style: { cursor: "pointer" },
 };
@@ -85,19 +86,33 @@ export function ClassGroupsTable() {
 }
 
 export function ClassGroupSessionsTable() {
+  const router = useRouter();
+
   return (
     <AsyncDataTable
       columns={ClassGroupSessionDataTableColumns}
       dataSource={new ClassGroupSessionsDataSource()}
+      mantineTableBodyRowProps={({ row }) => ({
+        onClick: (_) =>
+          router.push(Routes.adminPanelClassGroupSession + row.original.id),
+        ...ROW_PROPS,
+      })}
     />
   );
 }
 
 export function SessionEnrollmentsTable() {
+  const router = useRouter();
+
   return (
     <AsyncDataTable
       columns={SessionEnrollmentsDataTableColumns}
       dataSource={new SessionEnrollmentsDataSource()}
+      mantineTableBodyRowProps={({ row }) => ({
+        onClick: (_) =>
+          router.push(Routes.adminPanelSessionEnrollment + row.original.id),
+        ...ROW_PROPS,
+      })}
     />
   );
 }
@@ -134,6 +149,9 @@ function AsyncDataTable<T extends Record<string, any>>({
       data={data}
       manualPagination={true}
       rowCount={rowCount}
+      initialState={{
+        density: "sm" as MRT_DensityState,
+      }}
       state={{
         pagination: paginationState,
         isLoading: loading,
