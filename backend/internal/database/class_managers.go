@@ -25,6 +25,21 @@ func (d *DB) ListClassManagers(ctx context.Context, params listParams) ([]model.
 	return res, err
 }
 
+func (d *DB) GetClassManager(ctx context.Context, id int64) (model.ClassManager, error) {
+	var res model.ClassManager
+
+	stmt := SELECT(
+		ClassManagers.AllColumns,
+	).FROM(
+		ClassManagers,
+	).WHERE(
+		ClassManagers.ID.EQ(Int64(id)),
+	).LIMIT(1)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
 type CreateClassManagerParams struct {
 	UserID       string             `json:"user_id"`
 	ClassID      int64              `json:"class_id"`
