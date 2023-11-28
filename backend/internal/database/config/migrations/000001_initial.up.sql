@@ -6,7 +6,8 @@ CREATE TYPE USER_ROLE AS ENUM ('USER', 'SYSTEM_ADMIN');
 
 CREATE TYPE MANAGING_ROLE AS ENUM ('COURSE_COORDINATOR');
 
-CREATE FUNCTION update_updated_at() RETURNS TRIGGER AS $$
+CREATE FUNCTION update_updated_at() RETURNS TRIGGER AS
+$$
 BEGIN
     IF NEW <> OLD THEN
         NEW.updated_at := NOW();
@@ -26,8 +27,10 @@ CREATE TABLE users
 );
 
 CREATE TRIGGER update_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+    BEFORE UPDATE
+    ON users
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
 
 CREATE TABLE classes
 (
@@ -44,8 +47,10 @@ CREATE TABLE classes
 );
 
 CREATE TRIGGER update_updated_at
-    BEFORE UPDATE ON classes
-    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+    BEFORE UPDATE
+    ON classes
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
 
 CREATE TABLE class_managers
 (
@@ -66,8 +71,10 @@ CREATE TABLE class_managers
 );
 
 CREATE TRIGGER update_updated_at
-    BEFORE UPDATE ON class_managers
-    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+    BEFORE UPDATE
+    ON class_managers
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
 
 CREATE TABLE class_groups
 (
@@ -85,8 +92,10 @@ CREATE TABLE class_groups
 );
 
 CREATE TRIGGER update_updated_at
-    BEFORE UPDATE ON class_groups
-    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+    BEFORE UPDATE
+    ON class_groups
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
 
 CREATE TABLE class_group_sessions
 (
@@ -107,8 +116,10 @@ CREATE TABLE class_group_sessions
 );
 
 CREATE TRIGGER update_updated_at
-    BEFORE UPDATE ON class_group_sessions
-    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+    BEFORE UPDATE
+    ON class_group_sessions
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
 
 CREATE TABLE session_enrollments
 (
@@ -129,7 +140,9 @@ CREATE TABLE session_enrollments
 );
 
 CREATE TRIGGER update_updated_at
-    BEFORE UPDATE ON session_enrollments
-    FOR EACH ROW EXECUTE PROCEDURE update_updated_at();
+    BEFORE UPDATE
+    ON session_enrollments
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
 
 COMMIT;

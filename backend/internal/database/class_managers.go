@@ -66,3 +66,37 @@ func (d *DB) CreateClassManager(ctx context.Context, arg CreateClassManagerParam
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
+
+type UpdateClassManagerParams struct {
+	ManagingRole *model.ManagingRole `json:"managing_role"`
+}
+
+func (d *DB) UpdateClassManager(ctx context.Context, id int64, arg UpdateClassManagerParams) (model.ClassManager, error) {
+	var (
+		res    model.ClassManager
+		cols   ColumnList
+		update model.ClassManager
+	)
+
+	if arg.ManagingRole != nil {
+		cols = append(cols, ClassManagers.ManagingRole)
+		update.ManagingRole = *arg.ManagingRole
+	}
+
+	if len(cols) == 0 {
+		return d.GetClassManager(ctx, id)
+	}
+
+	stmt := ClassManagers.UPDATE(
+		cols,
+	).MODEL(
+		update,
+	).WHERE(
+		ClassManagers.ID.EQ(Int64(id)),
+	).RETURNING(
+		ClassManagers.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
