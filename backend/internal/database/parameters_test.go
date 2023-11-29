@@ -22,15 +22,23 @@ func Test_parseFilterParam(t *testing.T) {
 	}{
 		{
 			"correct column",
-			"id.NTU0001",
+			"id=NTU0001",
 			Users,
 			Users.AllColumns,
 			fmt.Sprintf("%s.id = 'NTU0001'", pq.QuoteIdentifier(Users.Alias())),
 			false,
 		},
 		{
+			"correct column integer",
+			"id=2",
+			Classes,
+			Classes.AllColumns,
+			fmt.Sprintf("%s.id = '2'", pq.QuoteIdentifier(Classes.Alias())),
+			false,
+		},
+		{
 			"wrong column",
-			"wrong.NTU0001",
+			"wrong=NTU0001",
 			Users,
 			Users.AllColumns,
 			"",
@@ -46,6 +54,7 @@ func Test_parseFilterParam(t *testing.T) {
 			if tt.wantErr {
 				a.Error(err)
 			} else {
+				a.Nil(err)
 				a.Contains(
 					SELECT(NULL).WHERE(filterParam).DebugSql(),
 					tt.wantFilterParam,
@@ -107,6 +116,7 @@ func Test_parseSortParam(t *testing.T) {
 			if tt.wantErr {
 				a.Error(err)
 			} else {
+				a.Nil(err)
 				a.Equal(tt.wantSortParam, sortParam)
 			}
 		})

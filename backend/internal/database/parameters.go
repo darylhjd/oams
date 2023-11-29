@@ -107,14 +107,13 @@ func DecodeListQueryParams(source map[string][]string, table Table, cList Column
 
 const (
 	filterSplitLength = 2
-	filterSeparator   = "."
+	filterSeparator   = "="
 )
 
 func parseFilterParam(s string, table Table, cList ColumnList) (BoolExpression, error) {
-	fmt.Println(s)
 	parts := strings.Split(s, filterSeparator)
 	if len(parts) != filterSplitLength {
-		return nil, fmt.Errorf("filter param `%s` does not follow format `col_name.value`", s)
+		return nil, fmt.Errorf("filter param `%s` does not follow format `col_name%svalue`", s, filterSeparator)
 	}
 
 	for _, c := range cList {
