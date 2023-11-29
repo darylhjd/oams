@@ -17,9 +17,10 @@ func (d *DB) ListClassManagers(ctx context.Context, params ListQueryParams) ([]m
 		ClassManagers,
 	)
 
-	stmt = setSorts(stmt, params)
-	stmt = setLimit(stmt, params)
-	stmt = setOffset(stmt, params)
+	stmt = params.setFilters(stmt)
+	stmt = params.setSorts(stmt)
+	stmt = params.setLimit(stmt)
+	stmt = params.setOffset(stmt)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err

@@ -1,13 +1,68 @@
 package database
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
 	"github.com/darylhjd/oams/backend/pkg/to"
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
+
+func Test_parseFilterParam(t *testing.T) {
+	tts := []struct {
+		name            string
+		withF           string
+		withTable       Table
+		withColumnList  ColumnList
+		wantFilterParam string
+		wantErr         bool
+	}{
+		{
+			"correct column",
+			"id=NTU0001",
+			Users,
+			Users.AllColumns,
+			fmt.Sprintf("%s.id = 'NTU0001'", pq.QuoteIdentifier(Users.Alias())),
+			false,
+		},
+		{
+			"correct column integer",
+			"id=2",
+			Classes,
+			Classes.AllColumns,
+			fmt.Sprintf("%s.id = '2'", pq.QuoteIdentifier(Classes.Alias())),
+			false,
+		},
+		{
+			"wrong column",
+			"wrong=NTU0001",
+			Users,
+			Users.AllColumns,
+			"",
+			true,
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
+			filterParam, err := parseFilterParam(tt.withF, tt.withTable, tt.withColumnList)
+			if tt.wantErr {
+				a.Error(err)
+			} else {
+				a.Nil(err)
+				a.Contains(
+					SELECT(NULL).WHERE(filterParam).DebugSql(),
+					tt.wantFilterParam,
+				)
+			}
+		})
+	}
+}
 
 func Test_parseSortParam(t *testing.T) {
 	tts := []struct {
@@ -61,8 +116,49 @@ func Test_parseSortParam(t *testing.T) {
 			if tt.wantErr {
 				a.Error(err)
 			} else {
+				a.Nil(err)
 				a.Equal(tt.wantSortParam, sortParam)
 			}
+		})
+	}
+}
+
+func Test_setFilters(t *testing.T) {
+	tts := []struct {
+		name          string
+		withFilter    ListQueryParams
+		wantStatement SelectStatement
+	}{
+		{
+			"with parameters",
+			ListQueryParams{
+				FParsed: []BoolExpression{
+					RawBool(fmt.Sprintf("%s.id = 'NTU0001'", pq.QuoteIdentifier(Users.Alias()))),
+					RawBool(fmt.Sprintf("%s.id = 'NTU0002'", pq.QuoteIdentifier(Users.Alias()))),
+				},
+			},
+			SELECT(NULL).WHERE(
+				AND(
+					RawBool(fmt.Sprintf("%s.id = 'NTU0001'", pq.QuoteIdentifier(Users.Alias()))),
+					RawBool(fmt.Sprintf("%s.id = 'NTU0002'", pq.QuoteIdentifier(Users.Alias()))),
+				),
+			),
+		},
+		{
+			"with no parameters",
+			ListQueryParams{
+				FParsed: []BoolExpression{},
+			},
+			SELECT(NULL),
+		},
+	}
+
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			a := assert.New(t)
+
+			stmt := tt.withFilter.setFilters(SELECT(NULL))
+			a.Equal(tt.wantStatement.DebugSql(), stmt.DebugSql())
 		})
 	}
 }
@@ -97,7 +193,7 @@ func Test_setSorts(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
 
-			stmt := setSorts(SELECT(NULL), tt.withSorter)
+			stmt := tt.withSorter.setSorts(SELECT(NULL))
 			a.Equal(tt.wantStatement.DebugSql(), stmt.DebugSql())
 		})
 	}
@@ -127,7 +223,7 @@ func Test_setLimit(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
 
-			stmt := setLimit(SELECT(NULL), tt.withLimiter)
+			stmt := tt.withLimiter.setLimit(SELECT(NULL))
 			a.Equal(tt.wantStatement.DebugSql(), stmt.DebugSql())
 		})
 	}
@@ -156,7 +252,7 @@ func Test_setOffset(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a := assert.New(t)
 
-			stmt := setOffset(SELECT(NULL), tt.withOffset)
+			stmt := tt.withOffset.setOffset(SELECT(NULL))
 			a.Equal(tt.wantStatement.DebugSql(), stmt.DebugSql())
 		})
 	}
