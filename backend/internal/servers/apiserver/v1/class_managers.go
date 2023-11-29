@@ -31,7 +31,9 @@ type classManagersGetResponse struct {
 }
 
 func (v *APIServerV1) classManagersGet(r *http.Request) apiResponse {
-	params, err := database.DecodeListQueryParams(r.URL.Query(), table.ClassManagers.AllColumns)
+	params, err := database.DecodeListQueryParams(
+		r.URL.Query(), table.ClassManagers, table.ClassManagers.AllColumns,
+	)
 	if err != nil {
 		return newErrorResponse(http.StatusBadRequest, err.Error())
 	}

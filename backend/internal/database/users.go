@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
@@ -22,9 +23,12 @@ func (d *DB) ListUsers(ctx context.Context, params ListQueryParams) ([]model.Use
 		Users.ID.ASC(),
 	)
 
-	stmt = setSorts(stmt, params)
-	stmt = setLimit(stmt, params)
-	stmt = setOffset(stmt, params)
+	stmt = params.setFilters(stmt)
+	stmt = params.setSorts(stmt)
+	stmt = params.setLimit(stmt)
+	stmt = params.setOffset(stmt)
+
+	fmt.Println(stmt.DebugSql())
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err

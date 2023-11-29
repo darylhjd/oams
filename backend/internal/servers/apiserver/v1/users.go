@@ -31,7 +31,9 @@ type usersGetResponse struct {
 }
 
 func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
-	params, err := database.DecodeListQueryParams(r.URL.Query(), table.Users.AllColumns)
+	params, err := database.DecodeListQueryParams(
+		r.URL.Query(), table.Users, table.Users.AllColumns,
+	)
 	if err != nil {
 		return newErrorResponse(http.StatusBadRequest, err.Error())
 	}
