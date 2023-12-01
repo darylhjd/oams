@@ -36,6 +36,11 @@ func TestAPIServerV1_classManagers(t *testing.T) {
 			http.StatusBadRequest,
 		},
 		{
+			"with PUT method",
+			http.MethodPut,
+			http.StatusNotImplemented,
+		},
+		{
 			"with DELETE method",
 			http.MethodDelete,
 			http.StatusMethodNotAllowed,

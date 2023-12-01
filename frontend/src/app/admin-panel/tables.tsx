@@ -157,6 +157,8 @@ function AsyncDataTable<T extends Record<string, any>>({
         isLoading: loading,
       }}
       onPaginationChange={setPaginationState}
+      enableStickyHeader
+      enableStickyFooter
     />
   );
 }

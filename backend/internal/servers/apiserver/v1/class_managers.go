@@ -3,11 +3,18 @@ package v1
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
+)
+
+const (
+	maxClassManagersPutParseMemory      = 32 << 20
+	maxClassManagersPutFiles            = 1
+	multipartFormClassManagersFileIdent = "manager-attachments"
 )
 
 func (v *APIServerV1) classManagers(w http.ResponseWriter, r *http.Request) {
@@ -18,6 +25,8 @@ func (v *APIServerV1) classManagers(w http.ResponseWriter, r *http.Request) {
 		resp = v.classManagersGet(r)
 	case http.MethodPost:
 		resp = v.classManagersPost(r)
+	case http.MethodPut:
+		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -99,4 +108,35 @@ func (v *APIServerV1) classManagersPost(r *http.Request) apiResponse {
 			manager.CreatedAt,
 		},
 	}
+}
+
+type classManagersPutResponse struct {
+	response
+}
+
+func (v *APIServerV1) classManagerPut(r *http.Request) apiResponse {
+	if !strings.HasPrefix(r.Header.Get("Content-Type"), "multipart") {
+		return newErrorResponse(http.StatusUnsupportedMediaType, "a multipart request body is required")
+	}
+
+	resp, err := v.processClassManagerPutRequest(r)
+	if err != nil {
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not process class manager put file(s)")
+	}
+
+	return resp
+}
+
+func (v *APIServerV1) processClassManagerPutRequest(r *http.Request) (apiResponse, error) {
+	if err := r.ParseMultipartForm(maxClassManagersPutParseMemory); err != nil {
+		return classManagersPutResponse{}, err
+	}
+
+	if len(r.MultipartForm.File[multipartFormClassManagersFileIdent]) != maxClassManagersPutFiles {
+		return newErrorResponse(http.StatusBadRequest, "only one file is allowed"), nil
+	}
+
+	// TODO: Implement class managers file parsing.
+	return newErrorResponse(http.StatusNotImplemented, ""), nil
 }
