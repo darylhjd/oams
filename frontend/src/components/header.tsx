@@ -219,7 +219,12 @@ function SystemAdminMenu() {
   return (
     <>
       <Box visibleFrom="md">
-        <Menu width={200}>
+        <Menu
+          width={200}
+          classNames={{
+            dropdown: styles.systemAdminMenuDropdown,
+          }}
+        >
           <MenuTarget>
             <Button
               color="orange"
