@@ -53,7 +53,7 @@ export class APIClient {
 
   static async batchPost(files: FileWithPath[]): Promise<BatchPostResponse> {
     const form = new FormData();
-    files.forEach((file) => form.append("attachments", file));
+    files.forEach((file) => form.append("batch-attachments", file));
 
     const { data } = await this._client.post<BatchPostResponse>(
       this._batchPath,

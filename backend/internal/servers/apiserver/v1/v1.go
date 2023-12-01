@@ -127,6 +127,7 @@ func (v *APIServerV1) registerHandlers() {
 			map[string][]permissions.P{
 				http.MethodGet:  {permissions.ClassManagerRead},
 				http.MethodPost: {permissions.ClassManagerCreate},
+				http.MethodPut:  {permissions.ClassManagerCreate},
 			}),
 		v.azure, v.db,
 	))

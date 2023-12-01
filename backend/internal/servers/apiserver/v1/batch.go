@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	maxParseMemory         = 32 << 20
-	maxGoRoutines          = 10
-	multipartFormFileIdent = "attachments"
+	maxBatchPostParseMemory     = 32 << 20
+	maxBatchPostGoRoutines      = 10
+	multipartFormBatchFileIdent = "batch-attachments"
 )
 
 func (v *APIServerV1) batch(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +45,7 @@ func (v *APIServerV1) batchPost(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusUnsupportedMediaType, "a multipart request body is required")
 	}
 
-	resp, err := v.processPostBody(r)
+	resp, err := v.processBatchPostRequest(r)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not process batch file(s)")
@@ -54,15 +54,15 @@ func (v *APIServerV1) batchPost(r *http.Request) apiResponse {
 	return resp
 }
 
-func (v *APIServerV1) processPostBody(r *http.Request) (apiResponse, error) {
-	if err := r.ParseMultipartForm(maxParseMemory); err != nil {
+func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, error) {
+	if err := r.ParseMultipartForm(maxBatchPostParseMemory); err != nil {
 		return batchPostResponse{}, err
 	}
 
-	limiter := goroutines.NewLimiter(maxGoRoutines)
+	limiter := goroutines.NewLimiter(maxBatchPostGoRoutines)
 
 	saveRes := sync.Map{}
-	for _, header := range r.MultipartForm.File[multipartFormFileIdent] {
+	for _, header := range r.MultipartForm.File[multipartFormBatchFileIdent] {
 		header := header // Required for go routine to point to different file for each loop.
 		limiter.Do(func() {
 			var data common.BatchData
@@ -150,7 +150,7 @@ func (v *APIServerV1) batchPut(r *http.Request) apiResponse {
 	resp, err := v.processBatchPutRequest(r, req)
 	if err != nil {
 		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, err.Error())
+		return newErrorResponse(http.StatusInternalServerError, "could not process batch put database action")
 	}
 
 	return resp

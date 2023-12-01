@@ -97,7 +97,7 @@ func TestAPIServerV1_batchPost(t *testing.T) {
 					return nil, "", err
 				}
 
-				ww, err := w.CreateFormFile(multipartFormFileIdent, file)
+				ww, err := w.CreateFormFile(multipartFormBatchFileIdent, file)
 				if err != nil {
 					return nil, "", err
 				}
