@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"slices"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -15,11 +16,9 @@ import (
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
 func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		for _, method := range methods {
-			if method == r.Method {
-				handlerFunc(w, r)
-				return
-			}
+		if slices.Contains(methods, r.Method) {
+			handlerFunc(w, r)
+			return
 		}
 
 		w.WriteHeader(http.StatusMethodNotAllowed)
