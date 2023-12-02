@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"slices"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -16,9 +15,11 @@ import (
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
 func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if slices.Contains(methods, r.Method) {
-			handlerFunc(w, r)
-			return
+		for _, method := range methods {
+			if method == r.Method {
+				handlerFunc(w, r)
+				return
+			}
 		}
 
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -28,22 +29,21 @@ func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerF
 // AllowMethodsWithPermissions allows a handler to accept only requests from users with certain permissions.
 func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, methodPermissions map[string][]permissions.P) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authContext := values.GetAuthContext(r.Context())
+		for method, roles := range methodPermissions {
+			if method == r.Method {
+				authContext := values.GetAuthContext(r.Context())
 
-		allowed, err := permissions.RBAC(r.Context(), permissions.RBACInput{
-			UserRole:            authContext.User.Role,
-			HasPermissions:      permissions.GetPermissions(authContext.User.Role),
-			RequiredPermissions: methodPermissions[r.Method],
-		})
+				if !permissions.HasPermissions(authContext.User.Role, roles...) {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
 
-		switch {
-		case err != nil:
-			w.WriteHeader(http.StatusInternalServerError)
-		case allowed:
-			handlerFunc(w, r)
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
+				handlerFunc(w, r)
+				return
+			}
 		}
+
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 
