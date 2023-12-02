@@ -39,68 +39,20 @@ const (
 	SessionEnrollmentDelete
 )
 
-// HasPermissions checks if a user with a role has all the given permissions.
-func HasPermissions(role model.UserRole, permissions ...P) bool {
-	permModel, ok := rolePermissionMapping[role]
-	if !ok {
-		return false
-	}
-
-	for _, perm := range permissions {
-		if _, ok = permModel[perm]; !ok {
-			return false
-		}
-	}
-
-	return true
+func GetPermissions(role model.UserRole) PermissionMap {
+	return rolePermissionMapping[role]
 }
 
-type permissionMap map[P]struct{}
+type PermissionMap map[P]struct{}
 
-var rolePermissionMapping = map[model.UserRole]permissionMap{
-	model.UserRole_User:        userRolePermissions,
-	model.UserRole_SystemAdmin: systemAdminRolePermissions,
+var rolePermissionMapping = map[model.UserRole]PermissionMap{
+	model.UserRole_User: userRolePermissions,
 }
 
-var userRolePermissions = permissionMap{
+var userRolePermissions = PermissionMap{
 	UserRead:              {},
 	ClassRead:             {},
 	ClassGroupRead:        {},
 	ClassGroupSessionRead: {},
 	SessionEnrollmentRead: {},
-}
-
-var systemAdminRolePermissions = permissionMap{
-	BatchPost: {},
-	BatchPut:  {},
-
-	UserCreate: {},
-	UserRead:   {},
-	UserUpdate: {},
-	UserDelete: {},
-
-	ClassCreate: {},
-	ClassRead:   {},
-	ClassUpdate: {},
-	ClassDelete: {},
-
-	ClassManagerCreate: {},
-	ClassManagerRead:   {},
-	ClassManagerUpdate: {},
-	ClassManagerDelete: {},
-
-	ClassGroupCreate: {},
-	ClassGroupRead:   {},
-	ClassGroupUpdate: {},
-	ClassGroupDelete: {},
-
-	ClassGroupSessionCreate: {},
-	ClassGroupSessionRead:   {},
-	ClassGroupSessionUpdate: {},
-	ClassGroupSessionDelete: {},
-
-	SessionEnrollmentCreate: {},
-	SessionEnrollmentRead:   {},
-	SessionEnrollmentUpdate: {},
-	SessionEnrollmentDelete: {},
 }
