@@ -3,44 +3,21 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"slices"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/middleware/values"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
-	"github.com/darylhjd/oams/backend/internal/permissions"
 )
 
 // AllowMethods allows a handler to accept only certain specified HTTP methods.
 func AllowMethods(handlerFunc http.HandlerFunc, methods ...string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		for _, method := range methods {
-			if method == r.Method {
-				handlerFunc(w, r)
-				return
-			}
-		}
-
-		w.WriteHeader(http.StatusMethodNotAllowed)
-	}
-}
-
-// AllowMethodsWithPermissions allows a handler to accept only requests from users with certain permissions.
-func AllowMethodsWithPermissions(handlerFunc http.HandlerFunc, methodPermissions map[string][]permissions.P) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		for method, roles := range methodPermissions {
-			if method == r.Method {
-				authContext := values.GetAuthContext(r.Context())
-
-				if !permissions.HasPermissions(authContext.User.Role, roles...) {
-					w.WriteHeader(http.StatusUnauthorized)
-					return
-				}
-
-				handlerFunc(w, r)
-				return
-			}
+		if slices.Contains(methods, r.Method) {
+			handlerFunc(w, r)
+			return
 		}
 
 		w.WriteHeader(http.StatusMethodNotAllowed)

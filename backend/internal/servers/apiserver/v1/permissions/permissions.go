@@ -39,22 +39,6 @@ const (
 	SessionEnrollmentDelete
 )
 
-// HasPermissions checks if a user with a role has all the given permissions.
-func HasPermissions(role model.UserRole, permissions ...P) bool {
-	permModel, ok := rolePermissionMapping[role]
-	if !ok {
-		return false
-	}
-
-	for _, perm := range permissions {
-		if _, ok = permModel[perm]; !ok {
-			return false
-		}
-	}
-
-	return true
-}
-
 type permissionMap map[P]struct{}
 
 var rolePermissionMapping = map[model.UserRole]permissionMap{
