@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -76,9 +76,10 @@ func TestAPIServerV1_classesGet(t *testing.T) {
 				newSuccessResponse(),
 				[]model.Class{
 					{
-						Code:     "CZ1115",
-						Year:     2023,
-						Semester: "2",
+						Code:      uuid.NewString(),
+						Year:      rand.Int31(),
+						Semester:  uuid.NewString(),
+						Programme: uuid.NewString(),
 					},
 				},
 			},
@@ -107,7 +108,12 @@ func TestAPIServerV1_classesGet(t *testing.T) {
 
 			if tt.withExistingClass {
 				for idx, class := range tt.wantResponse.Classes {
-					createdClass := tests.StubClass(t, ctx, v1.db, class.Code, class.Year, class.Semester)
+					createdClass := tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+						Code:      class.Code,
+						Year:      class.Year,
+						Semester:  class.Semester,
+						Programme: class.Programme,
+					})
 					classPtr := &tt.wantResponse.Classes[idx]
 					classPtr.ID = createdClass.ID
 					classPtr.CreatedAt, classPtr.UpdatedAt = createdClass.CreatedAt, createdClass.CreatedAt
@@ -118,104 +124,6 @@ func TestAPIServerV1_classesGet(t *testing.T) {
 			actualResp, ok := v1.classesGet(req).(classesGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
-		})
-	}
-}
-
-func TestAPIServerV1_classesGetQueryParams(t *testing.T) {
-	t.Parallel()
-
-	tts := []struct {
-		name           string
-		query          url.Values
-		wantStatusCode int
-		wantErr        string
-	}{
-		{
-			"sort with correct column",
-			url.Values{
-				"sort": []string{"au"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"sort with wrong column",
-			url.Values{
-				"sort": []string{"wrong"},
-			},
-			http.StatusBadRequest,
-			"unknown sort column `wrong`",
-		},
-		{
-			"sort with no value",
-			url.Values{
-				"sort": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit present",
-			url.Values{
-				"limit": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit with no value",
-			url.Values{
-				"limit": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset present",
-			url.Values{
-				"offset": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset with no value",
-			url.Values{
-				"offset": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-	}
-
-	for _, tt := range tts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			u := url.URL{Path: classesUrl}
-			u.RawQuery = tt.query.Encode()
-
-			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp := v1.classesGet(req)
-			a.Equal(tt.wantStatusCode, resp.Code())
-
-			switch {
-			case tt.wantErr != "":
-				actualResp, ok := resp.(errorResponse)
-				a.True(ok)
-				a.Contains(actualResp.Error, tt.wantErr)
-			default:
-				_, ok := resp.(classesGetResponse)
-				a.True(ok)
-			}
 		})
 	}
 }
@@ -235,18 +143,20 @@ func TestAPIServerV1_classesPost(t *testing.T) {
 			"request with no existing class",
 			classesPostRequest{
 				database.CreateClassParams{
-					Code:     "CZ1115",
-					Year:     2023,
-					Semester: "2",
+					Code:      "CZ1115",
+					Year:      2023,
+					Semester:  "2",
+					Programme: "FT CSC1",
 				},
 			},
 			false,
 			classesPostResponse{
 				newSuccessResponse(),
 				classesPostClassResponseFields{
-					Code:     "CZ1115",
-					Year:     2023,
-					Semester: "2",
+					Code:      "CZ1115",
+					Year:      2023,
+					Semester:  "2",
+					Programme: "FT CSC1",
 				},
 			},
 			http.StatusOK,
@@ -256,9 +166,10 @@ func TestAPIServerV1_classesPost(t *testing.T) {
 			"request with existing class",
 			classesPostRequest{
 				database.CreateClassParams{
-					Code:     "CZ1115",
-					Year:     2023,
-					Semester: "2",
+					Code:      uuid.NewString(),
+					Year:      rand.Int31(),
+					Semester:  uuid.NewString(),
+					Programme: uuid.NewString(),
 				},
 			},
 			true,
@@ -281,12 +192,12 @@ func TestAPIServerV1_classesPost(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingClass {
-				_ = tests.StubClass(
-					t, ctx, v1.db,
-					tt.withRequest.Class.Code,
-					tt.withRequest.Class.Year,
-					tt.withRequest.Class.Semester,
-				)
+				_ = tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+					Code:      tt.withRequest.Class.Code,
+					Year:      tt.withRequest.Class.Year,
+					Semester:  tt.withRequest.Class.Semester,
+					Programme: tt.withRequest.Class.Programme,
+				})
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)

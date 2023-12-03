@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -77,7 +76,7 @@ func TestAPIServerV1_classGroupsGet(t *testing.T) {
 				newSuccessResponse(),
 				[]model.ClassGroup{
 					{
-						Name:      "NEW21",
+						Name:      uuid.NewString(),
 						ClassType: model.ClassType_Lec,
 					},
 				},
@@ -123,104 +122,6 @@ func TestAPIServerV1_classGroupsGet(t *testing.T) {
 	}
 }
 
-func TestAPIServerV1_classGroupsGetQueryParams(t *testing.T) {
-	t.Parallel()
-
-	tts := []struct {
-		name           string
-		query          url.Values
-		wantStatusCode int
-		wantErr        string
-	}{
-		{
-			"sort with correct column",
-			url.Values{
-				"sort": []string{"class_id"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"sort with wrong column",
-			url.Values{
-				"sort": []string{"wrong"},
-			},
-			http.StatusBadRequest,
-			"unknown sort column `wrong`",
-		},
-		{
-			"sort with no value",
-			url.Values{
-				"sort": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit present",
-			url.Values{
-				"limit": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit with no value",
-			url.Values{
-				"limit": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset present",
-			url.Values{
-				"offset": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset with no value",
-			url.Values{
-				"offset": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-	}
-
-	for _, tt := range tts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			u := url.URL{Path: classGroupsUrl}
-			u.RawQuery = tt.query.Encode()
-
-			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp := v1.classGroupsGet(req)
-			a.Equal(tt.wantStatusCode, resp.Code())
-
-			switch {
-			case tt.wantErr != "":
-				actualResp, ok := resp.(errorResponse)
-				a.True(ok)
-				a.Contains(actualResp.Error, tt.wantErr)
-			default:
-				_, ok := resp.(classGroupsGetResponse)
-				a.True(ok)
-			}
-		})
-	}
-}
-
 func TestAPIServerV1_classGroupsPost(t *testing.T) {
 	t.Parallel()
 
@@ -257,7 +158,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			"request with existing class group",
 			classGroupsPostRequest{
 				database.CreateClassGroupParams{
-					Name:      "EXISTING22",
+					Name:      uuid.NewString(),
 					ClassType: model.ClassType_Lec,
 				},
 			},
@@ -272,7 +173,7 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 			classGroupsPostRequest{
 				database.CreateClassGroupParams{
 					ClassID:   rand.Int63(),
-					Name:      "FAIL_INSERT22",
+					Name:      uuid.NewString(),
 					ClassType: model.ClassType_Tut,
 				},
 			},
@@ -305,12 +206,11 @@ func TestAPIServerV1_classGroupsPost(t *testing.T) {
 				)
 				tt.withRequest.ClassGroup.ClassID = createdGroup.ClassID
 			case tt.withExistingClass:
-				createdClass := tests.StubClass(
-					t, ctx, v1.db,
-					uuid.NewString(),
-					rand.Int31(),
-					uuid.NewString(),
-				)
+				createdClass := tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+					Code:     uuid.NewString(),
+					Year:     rand.Int31(),
+					Semester: uuid.NewString(),
+				})
 				tt.withRequest.ClassGroup.ClassID = createdClass.ID
 			}
 

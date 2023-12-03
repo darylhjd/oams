@@ -12,7 +12,6 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
-	"github.com/darylhjd/oams/backend/internal/middleware/values"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/google/uuid"
@@ -74,7 +73,6 @@ func TestAPIServerV1_userMe(t *testing.T) {
 
 	tts := []struct {
 		name                          string
-		withAuthContext               any
 		withStubAuthUser              bool
 		withUpcomingClassGroupSession bool
 		wantResponse                  userMeResponse
@@ -83,17 +81,11 @@ func TestAPIServerV1_userMe(t *testing.T) {
 	}{
 		{
 			"request with valid auth context and auth context user in database",
-			tests.NewMockAuthContext(),
 			true,
 			false,
 			userMeResponse{
 				newSuccessResponse(),
-				model.User{
-					ID:    tests.MockAuthenticatorIDTokenName,
-					Name:  "",
-					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  model.UserRole_User,
-				},
+				tests.StubAuthContext().User,
 				[]database.UpcomingClassGroupSession{},
 			},
 			http.StatusOK,
@@ -101,17 +93,11 @@ func TestAPIServerV1_userMe(t *testing.T) {
 		},
 		{
 			"request with upcoming class group sessions",
-			tests.NewMockAuthContext(),
 			true,
 			true,
 			userMeResponse{
 				newSuccessResponse(),
-				model.User{
-					ID:    tests.MockAuthenticatorIDTokenName,
-					Name:  "",
-					Email: tests.MockAuthenticatorAccountPreferredUsername,
-					Role:  model.UserRole_User,
-				},
+				tests.StubAuthContext().User,
 				[]database.UpcomingClassGroupSession{},
 			},
 			http.StatusOK,
@@ -119,7 +105,6 @@ func TestAPIServerV1_userMe(t *testing.T) {
 		},
 		{
 			"request with valid auth context but non-existent user in database",
-			tests.NewMockAuthContext(),
 			false,
 			false,
 			userMeResponse{},
@@ -141,27 +126,29 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withStubAuthUser {
-				tests.StubAuthContextUser(t, ctx, v1.db)
+				contextUser := tests.StubAuthContextUser(t, ctx, v1.db)
+
+				if tt.withUpcomingClassGroupSession {
+					createdSession := tests.StubClassGroupSession(
+						t, ctx, v1.db,
+						time.Now().Add(-time.Hour), // Test ongoing session.
+						time.Now().Add(time.Hour*24),
+						uuid.NewString(),
+					)
+
+					_, err := v1.db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
+						SessionID: createdSession.ID,
+						UserID:    contextUser.ID,
+						Attended:  false,
+					})
+					a.Nil(err)
+				}
 			}
 
-			if tt.withUpcomingClassGroupSession {
-				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db,
-					time.Now().Add(-time.Hour), // Test ongoing session.
-					time.Now().Add(time.Hour*24),
-					uuid.NewString(),
-				)
-
-				_, err := v1.db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
-					SessionID: createdSession.ID,
-					UserID:    tests.MockAuthenticatorIDTokenName,
-					Attended:  false,
-				})
-				a.Nil(err)
-			}
-
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, sessionUserId), nil)
-			req = req.WithContext(context.WithValue(req.Context(), values.AuthContextKey, tt.withAuthContext))
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", userUrl, sessionUserId), nil),
+				tests.StubAuthContext(),
+			)
 			resp := v1.userMe(req)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
@@ -204,7 +191,7 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			userGetResponse{
 				newSuccessResponse(),
 				model.User{
-					ID:   "EXISTING_USER",
+					ID:   uuid.NewString(),
 					Role: model.UserRole_User,
 				},
 			},
@@ -233,7 +220,10 @@ func TestAPIServerV1_userGet(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				createdUser := tests.StubUser(t, ctx, v1.db, tt.wantResponse.User.ID, tt.wantResponse.User.Role)
+				createdUser := tests.StubUser(t, ctx, v1.db, database.CreateUserParams{
+					ID:   tt.wantResponse.User.ID,
+					Role: tt.wantResponse.User.Role,
+				})
 				tt.wantResponse.User.CreatedAt = createdUser.CreatedAt
 				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
 			}
@@ -274,14 +264,13 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 				database.UpdateUserParams{
 					Name:  to.Ptr("NEW NAME"),
 					Email: to.Ptr("NEW EMAIL"),
-					Role:  to.Ptr(model.UserRole_User),
 				},
 			},
 			true,
 			userPatchResponse{
 				newSuccessResponse(),
 				userPatchUserResponseFields{
-					ID:    "EXISTING_ID",
+					ID:    uuid.NewString(),
 					Name:  "NEW NAME",
 					Email: "NEW EMAIL",
 					Role:  model.UserRole_User,
@@ -300,7 +289,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 			userPatchResponse{
 				newSuccessResponse(),
 				userPatchUserResponseFields{
-					ID:   "EXISTING_ID",
+					ID:   uuid.NewString(),
 					Role: model.UserRole_User,
 				},
 			},
@@ -314,11 +303,7 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 				database.UpdateUserParams{},
 			},
 			false,
-			userPatchResponse{
-				User: userPatchUserResponseFields{
-					ID: "NON_EXISTENT_ID",
-				},
-			},
+			userPatchResponse{},
 			false,
 			http.StatusNotFound,
 			"user to update does not exist",
@@ -339,7 +324,10 @@ func TestAPIServerV1_userPatch(t *testing.T) {
 
 			userId := tt.wantResponse.User.ID
 			if tt.withExistingUser {
-				createdUser := tests.StubUser(t, ctx, v1.db, userId, tt.wantResponse.User.Role)
+				createdUser := tests.StubUser(t, ctx, v1.db, database.CreateUserParams{
+					ID:   tt.wantResponse.User.ID,
+					Role: tt.wantResponse.User.Role,
+				})
 				tt.wantResponse.User.UpdatedAt = createdUser.CreatedAt
 			}
 
@@ -429,7 +417,10 @@ func TestAPIServerV1_userDelete(t *testing.T) {
 				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, true)
 				userId = createdEnrollment.UserID
 			case tt.withExistingUser:
-				_ = tests.StubUser(t, ctx, v1.db, userId, model.UserRole_User)
+				userId = tests.StubUser(t, ctx, v1.db, database.CreateUserParams{
+					ID:   uuid.NewString(),
+					Role: model.UserRole_User,
+				}).ID
 			default:
 				userId = uuid.NewString()
 			}

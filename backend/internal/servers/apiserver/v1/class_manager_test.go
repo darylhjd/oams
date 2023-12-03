@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -58,7 +59,10 @@ func TestAPIServerV1_classManager(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			req := httptest.NewRequest(tt.withMethod, fmt.Sprintf("%s%d", classManagerUrl, 1), nil)
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(tt.withMethod, fmt.Sprintf("%s%d", classManagerUrl, 1), nil),
+				tests.StubAuthContext(),
+			)
 			rr := httptest.NewRecorder()
 			v1.classManager(rr, req)
 
@@ -123,7 +127,10 @@ func TestAPIServerV1_classManagerGet(t *testing.T) {
 				tt.wantResponse.ClassManager.UpdatedAt = createdManager.CreatedAt
 			}
 
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%d", classManagerUrl, tt.wantResponse.ClassManager.ID), nil)
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%d", classManagerUrl, tt.wantResponse.ClassManager.ID), nil),
+				tests.StubAuthContext(),
+			)
 			resp := v1.classManagerGet(req, tt.wantResponse.ClassManager.ID)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
@@ -195,7 +202,7 @@ func TestAPIServerV1_classManagerPatch(t *testing.T) {
 			false,
 			classManagerPatchResponse{
 				ClassManager: classManagerPatchClassManagerResponseFields{
-					ID: 6666,
+					ID: rand.Int63(),
 				},
 			},
 			false,
@@ -228,7 +235,10 @@ func TestAPIServerV1_classManagerPatch(t *testing.T) {
 			a.Nil(err)
 
 			managerId := tt.wantResponse.ClassManager.ID
-			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classManagerUrl, managerId), bytes.NewReader(reqBodyBytes))
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classManagerUrl, managerId), bytes.NewReader(reqBodyBytes)),
+				tests.StubAuthContext(),
+			)
 			resp := v1.classManagerPatch(req, managerId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
@@ -248,7 +258,10 @@ func TestAPIServerV1_classManagerPatch(t *testing.T) {
 				a.Equal(tt.wantResponse, actualResp)
 
 				// Check that successive updates do not change anything.
-				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classManagerUrl, managerId), bytes.NewReader(reqBodyBytes))
+				req = httpRequestWithAuthContext(
+					httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classManagerUrl, managerId), bytes.NewReader(reqBodyBytes)),
+					tests.StubAuthContext(),
+				)
 				successiveResp := v1.classManagerPatch(req, managerId).(classManagerPatchResponse)
 				a.Equal(actualResp, successiveResp)
 			}
@@ -294,7 +307,7 @@ func TestAPIServerV1_classManagerDelete(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			var managerId int64 = 6666 // Choose a random ID that does not exist.
+			managerId := rand.Int63()
 			if tt.withExistingClassManager {
 				createdManager := tests.StubClassManager(t, ctx, v1.db, model.ManagingRole_CourseCoordinator)
 				managerId = createdManager.ID

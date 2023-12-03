@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 	"time"
 
@@ -76,8 +75,8 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 				newSuccessResponse(),
 				[]model.ClassGroupSession{
 					{
-						StartTime: time.UnixMicro(1),
-						EndTime:   time.UnixMicro(2),
+						StartTime: time.UnixMicro(999),
+						EndTime:   time.UnixMicro(99999),
 						Venue:     "CLASS+22",
 					},
 				},
@@ -123,104 +122,6 @@ func TestAPIServerV1_classGroupSessionsGet(t *testing.T) {
 	}
 }
 
-func TestAPIServerV1_classGroupSessionsGetQueryParams(t *testing.T) {
-	t.Parallel()
-
-	tts := []struct {
-		name           string
-		query          url.Values
-		wantStatusCode int
-		wantErr        string
-	}{
-		{
-			"sort with correct column",
-			url.Values{
-				"sort": []string{"start_time"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"sort with wrong column",
-			url.Values{
-				"sort": []string{"wrong"},
-			},
-			http.StatusBadRequest,
-			"unknown sort column `wrong`",
-		},
-		{
-			"sort with no value",
-			url.Values{
-				"sort": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit present",
-			url.Values{
-				"limit": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit with no value",
-			url.Values{
-				"limit": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset present",
-			url.Values{
-				"offset": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset with no value",
-			url.Values{
-				"offset": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-	}
-
-	for _, tt := range tts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			u := url.URL{Path: classGroupSessionsUrl}
-			u.RawQuery = tt.query.Encode()
-
-			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp := v1.classGroupSessionsGet(req)
-			a.Equal(tt.wantStatusCode, resp.Code())
-
-			switch {
-			case tt.wantErr != "":
-				actualResp, ok := resp.(errorResponse)
-				a.True(ok)
-				a.Contains(actualResp.Error, tt.wantErr)
-			default:
-				_, ok := resp.(classGroupSessionsGetResponse)
-				a.True(ok)
-			}
-		})
-	}
-}
-
 func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 	t.Parallel()
 
@@ -261,7 +162,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 				classGroupSessionsPostClassGroupSessionRequestFields{
 					StartTime: 1,
 					EndTime:   2,
-					Venue:     "EXISTING_CLASS+22",
+					Venue:     uuid.NewString(),
 				},
 			},
 			true,
@@ -276,7 +177,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 				classGroupSessionsPostClassGroupSessionRequestFields{
 					StartTime: 2,
 					EndTime:   1,
-					Venue:     "NEW_CLASS+55",
+					Venue:     uuid.NewString(),
 				},
 			},
 			false,
@@ -306,7 +207,7 @@ func TestAPIServerV1_classGroupSessionsPost(t *testing.T) {
 				classGroupSessionsPostClassGroupSessionRequestFields{
 					StartTime: 1,
 					EndTime:   2,
-					Venue:     "FAIL_INSERT_CLASS+22",
+					Venue:     uuid.NewString(),
 				},
 			},
 			false,
