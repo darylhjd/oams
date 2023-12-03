@@ -44,7 +44,7 @@ export const ClassDataTableColumns = <MRT_ColumnDef<Class>[]>[
 
 export const ClassManagerDataTableColumns = <MRT_ColumnDef<ClassManager>[]>[
   { accessorKey: "id", header: "ID" },
-  { accessorKe: "user_id", header: "User ID" },
+  { accessorKey: "user_id", header: "User ID" },
   { accessorKey: "class_id", header: "Class ID" },
   { accessorKey: "managing_role", header: "Managing Role" },
   ...CreatedAtUpdatedAtDataTableColumns,
