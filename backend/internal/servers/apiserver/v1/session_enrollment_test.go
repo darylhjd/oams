@@ -313,7 +313,10 @@ func TestAPIServerV1_sessionEnrollmentDelete(t *testing.T) {
 				enrollmentId = createdEnrollment.ID
 			}
 
-			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), nil)
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), nil),
+				tests.StubAuthContext(),
+			)
 			resp := v1.sessionEnrollmentDelete(req, enrollmentId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 

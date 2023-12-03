@@ -313,7 +313,10 @@ func TestAPIServerV1_classManagerDelete(t *testing.T) {
 				managerId = createdManager.ID
 			}
 
-			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classManagerUrl, managerId), nil)
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classManagerUrl, managerId), nil),
+				tests.StubAuthContext(),
+			)
 			resp := v1.classManagerDelete(req, managerId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
