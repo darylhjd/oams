@@ -6,8 +6,6 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	"github.com/joho/godotenv"
 )
 
 const namespace = "env"
@@ -28,21 +26,12 @@ func verifyEnvironment() error {
 		return err
 	}
 
-	var err error
 	switch environment := GetAppEnv(); environment {
-	case AppEnvLocal:
-		err = godotenv.Load(GetEnvLoc())
-	case AppEnvIntegration, AppEnvStaging:
+	case AppEnvLocal, AppEnvIntegration, AppEnvStaging:
 		return nil
 	default:
-		err = fmt.Errorf("unknown %s value: %s", appEnv, environment)
+		return fmt.Errorf("unknown %s value: %s", appEnv, environment)
 	}
-
-	if err != nil {
-		return fmt.Errorf("environment verification failed: %w", err)
-	}
-
-	return nil
 }
 
 func verifyConfiguration() error {

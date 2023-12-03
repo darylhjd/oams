@@ -1,0 +1,46 @@
+name: oams
+
+services:
+  apiserver:
+    image: oams/apiserver
+    container_name: apiserver
+    build:
+      context: .
+      dockerfile: ./cmd/apiserver/Dockerfile
+      secrets:
+        - ssh_key
+    env_file: .env.local
+    ports:
+      - "3001:3001"
+    depends_on:
+      - local-db
+
+  webserver:
+    image: oams/webserver
+    container_name: webserver
+    build:
+      context: ../frontend
+      dockerfile: ../backend/cmd/webserver/Dockerfile
+      secrets:
+        - env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - apiserver
+
+  local-db:
+    image: postgres:latest
+    container_name: local-db
+    environment:
+      POSTGRES_USER: oams
+      POSTGRES_PASSWORD: oams-local
+    ports:
+      - "3002:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+secrets:
+  ssh_key:
+    file: ~/.ssh/id_rsa
+  env:
+    file: ../frontend/.env.development.local
