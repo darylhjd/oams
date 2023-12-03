@@ -97,7 +97,9 @@ func (d *DB) UpdateClassManager(ctx context.Context, id int64, arg UpdateClassMa
 	).MODEL(
 		update,
 	).WHERE(
-		ClassManagers.ID.EQ(Int64(id)),
+		ClassManagers.ID.EQ(Int64(id)).AND(
+			classManagerRLS(ctx),
+		),
 	).RETURNING(
 		ClassManagers.AllColumns,
 	)
@@ -111,7 +113,9 @@ func (d *DB) DeleteClassManager(ctx context.Context, id int64) (model.ClassManag
 
 	stmt := ClassManagers.DELETE().
 		WHERE(
-			ClassManagers.ID.EQ(Int64(id)),
+			ClassManagers.ID.EQ(Int64(id)).AND(
+				classManagerRLS(ctx),
+			),
 		).RETURNING(ClassManagers.AllColumns)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
