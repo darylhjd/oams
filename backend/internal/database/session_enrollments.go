@@ -98,7 +98,9 @@ func (d *DB) UpdateSessionEnrollment(ctx context.Context, id int64, arg UpdateSe
 	).MODEL(
 		update,
 	).WHERE(
-		SessionEnrollments.ID.EQ(Int64(id)),
+		SessionEnrollments.ID.EQ(Int64(id)).AND(
+			sessionEnrollmentRLS(ctx),
+		),
 	).RETURNING(
 		SessionEnrollments.AllColumns,
 	)
@@ -112,7 +114,9 @@ func (d *DB) DeleteSessionEnrollment(ctx context.Context, id int64) (model.Sessi
 
 	stmt := SessionEnrollments.DELETE().
 		WHERE(
-			SessionEnrollments.ID.EQ(Int64(id)),
+			SessionEnrollments.ID.EQ(Int64(id)).AND(
+				sessionEnrollmentRLS(ctx),
+			),
 		).RETURNING(SessionEnrollments.AllColumns)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
