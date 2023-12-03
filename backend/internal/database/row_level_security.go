@@ -12,10 +12,6 @@ import (
 func sessionEnrollmentRLS(ctx context.Context) BoolExpression {
 	authContext := values.GetAuthContext(ctx)
 
-	// User has access to a row if any of these conditions are met:
-	// 1. User is a system admin.
-	// 2. The session enrollment belongs to the user.
-	// 3. User manages this enrollment information.
 	return Bool(
 		authContext.User.Role == model.UserRole_SystemAdmin,
 	).OR(
