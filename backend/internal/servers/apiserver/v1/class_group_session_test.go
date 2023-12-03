@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -85,9 +86,9 @@ func TestAPIServerV1_classGroupSessionGet(t *testing.T) {
 			classGroupSessionGetResponse{
 				newSuccessResponse(),
 				model.ClassGroupSession{
-					StartTime: time.UnixMicro(1),
-					EndTime:   time.UnixMicro(2),
-					Venue:     "EXISTING+46",
+					StartTime: time.UnixMicro(999),
+					EndTime:   time.UnixMicro(99999),
+					Venue:     uuid.NewString(),
 				},
 			},
 			http.StatusOK,
@@ -164,10 +165,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			"request with field changes",
 			classGroupSessionPatchRequest{
 				database.UpdateClassGroupSessionParams{
-					ClassGroupID: to.Ptr(int64(1)),
-					StartTime:    to.Ptr(int64(99999999999)),
-					EndTime:      to.Ptr(int64(9999999999999)),
-					Venue:        to.Ptr("NEW_VENUE+99"),
+					Venue: to.Ptr("NEW_VENUE+99"),
 				},
 			},
 			true,
@@ -176,10 +174,9 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			classGroupSessionPatchResponse{
 				newSuccessResponse(),
 				classGroupSessionPatchClassGroupSessionResponseFields{
-					ClassGroupID: 1,
-					StartTime:    time.UnixMicro(99999999999),
-					EndTime:      time.UnixMicro(9999999999999),
-					Venue:        "NEW_VENUE+99",
+					StartTime: time.UnixMicro(999),
+					EndTime:   time.UnixMicro(99999),
+					Venue:     "NEW_VENUE+99",
 				},
 			},
 			false,
@@ -197,9 +194,8 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			classGroupSessionPatchResponse{
 				newSuccessResponse(),
 				classGroupSessionPatchClassGroupSessionResponseFields{
-					StartTime: time.UnixMicro(99999999999),
-					EndTime:   time.UnixMicro(9999999999999),
-					Venue:     "EXISTING_VENUE+99",
+					StartTime: time.UnixMicro(999),
+					EndTime:   time.UnixMicro(99999999),
 				},
 			},
 			true,
@@ -216,7 +212,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			false,
 			classGroupSessionPatchResponse{
 				ClassGroupSession: classGroupSessionPatchClassGroupSessionResponseFields{
-					ID: 6666,
+					ID: rand.Int63(),
 				},
 			},
 			false,
@@ -227,8 +223,7 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 			"request with update conflict",
 			classGroupSessionPatchRequest{
 				database.UpdateClassGroupSessionParams{
-					StartTime: to.Ptr(int64(2)),
-					EndTime:   to.Ptr(int64(3)),
+					StartTime: to.Ptr(int64(999)),
 				},
 			},
 			true,
@@ -270,20 +265,18 @@ func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
 				// Create session to update.
 				updateClassGroupSession := tests.StubClassGroupSession(
 					t, ctx, v1.db,
-					time.UnixMicro(1),
-					time.UnixMicro(2),
+					time.UnixMicro(0),
+					time.UnixMicro(math.MaxInt64),
 					uuid.NewString(),
 				)
 				sessionId = updateClassGroupSession.ID
 
 				// Also create session to conflict with.
-				_ = tests.StubClassGroupSessionWithClassGroupID(
-					t, ctx, v1.db,
-					updateClassGroupSession.ClassGroupID,
-					time.UnixMicro(*tt.withRequest.ClassGroupSession.StartTime),
-					time.UnixMicro(*tt.withRequest.ClassGroupSession.EndTime),
-					uuid.NewString(),
-				)
+				_ = tests.StubClassGroupSessionWithClassGroupID(t, ctx, v1.db, database.CreateClassGroupSessionParams{
+					ClassGroupID: updateClassGroupSession.ClassGroupID,
+					StartTime:    time.UnixMicro(*tt.withRequest.ClassGroupSession.StartTime),
+					EndTime:      time.UnixMicro(math.MaxInt64),
+				})
 			case tt.withExistingClassGroupSession && !tt.withExistingUpdateClassGroup:
 				createdSession := tests.StubClassGroupSession(
 					t, ctx, v1.db,

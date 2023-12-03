@@ -16,6 +16,8 @@ func (d *DB) ListSessionEnrollments(ctx context.Context, params ListQueryParams)
 		SessionEnrollments.AllColumns,
 	).FROM(
 		SessionEnrollments,
+	).WHERE(
+		sessionEnrollmentRLS(ctx),
 	)
 
 	stmt = params.setFilters(stmt)
@@ -35,7 +37,9 @@ func (d *DB) GetSessionEnrollment(ctx context.Context, id int64) (model.SessionE
 	).FROM(
 		SessionEnrollments,
 	).WHERE(
-		SessionEnrollments.ID.EQ(Int64(id)),
+		SessionEnrollments.ID.EQ(Int64(id)).AND(
+			sessionEnrollmentRLS(ctx),
+		),
 	).LIMIT(1)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)

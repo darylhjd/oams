@@ -16,9 +16,9 @@ func StubAuthContextUser(t *testing.T, ctx context.Context, db *database.DB) mod
 	t.Helper()
 
 	user, err := db.CreateUser(ctx, database.CreateUserParams{
-		ID:    MockAuthenticatorIDTokenName,
-		Email: MockAuthenticatorAccountPreferredUsername,
-		Role:  model.UserRole_User,
+		ID:    MockAuthenticatorUserID,
+		Email: MockAuthenticatorUserEmail,
+		Role:  MockAuthenticatorUserRole,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -28,14 +28,10 @@ func StubAuthContextUser(t *testing.T, ctx context.Context, db *database.DB) mod
 }
 
 // StubUser inserts a mock user with the given ID into the database.
-func StubUser(t *testing.T, ctx context.Context, db *database.DB, id string, role model.UserRole) model.User {
+func StubUser(t *testing.T, ctx context.Context, db *database.DB, params database.CreateUserParams) model.User {
 	t.Helper()
 
-	user, err := db.CreateUser(ctx, database.CreateUserParams{
-		ID:   id,
-		Name: "",
-		Role: role,
-	})
+	user, err := db.CreateUser(ctx, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,16 +40,10 @@ func StubUser(t *testing.T, ctx context.Context, db *database.DB, id string, rol
 }
 
 // StubClass inserts a mock class with the given fields into the database.
-func StubClass(t *testing.T, ctx context.Context, db *database.DB, code string, year int32, semester string) model.Class {
+func StubClass(t *testing.T, ctx context.Context, db *database.DB, params database.CreateClassParams) model.Class {
 	t.Helper()
 
-	class, err := db.CreateClass(ctx, database.CreateClassParams{
-		Code:      code,
-		Year:      year,
-		Semester:  semester,
-		Programme: "",
-		Au:        0,
-	})
+	class, err := db.CreateClass(ctx, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,8 +56,15 @@ func StubClass(t *testing.T, ctx context.Context, db *database.DB, code string, 
 func StubClassManager(t *testing.T, ctx context.Context, db *database.DB, role model.ManagingRole) model.ClassManager {
 	t.Helper()
 
-	user := StubUser(t, ctx, db, uuid.NewString(), model.UserRole_User)
-	class := StubClass(t, ctx, db, uuid.NewString(), rand.Int31(), uuid.NewString())
+	user := StubUser(t, ctx, db, database.CreateUserParams{
+		ID:   uuid.NewString(),
+		Role: model.UserRole_User,
+	})
+	class := StubClass(t, ctx, db, database.CreateClassParams{
+		Code:     uuid.NewString(),
+		Year:     rand.Int31(),
+		Semester: uuid.NewString(),
+	})
 
 	manager, err := db.CreateClassManager(ctx, database.CreateClassManagerParams{
 		UserID:       user.ID,
@@ -85,7 +82,11 @@ func StubClassManager(t *testing.T, ctx context.Context, db *database.DB, role m
 func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name string, classType model.ClassType) model.ClassGroup {
 	t.Helper()
 
-	class := StubClass(t, ctx, db, uuid.NewString(), rand.Int31(), uuid.NewString())
+	class := StubClass(t, ctx, db, database.CreateClassParams{
+		Code:     uuid.NewString(),
+		Year:     rand.Int31(),
+		Semester: uuid.NewString(),
+	})
 
 	group, err := db.CreateClassGroup(ctx, database.CreateClassGroupParams{
 		ClassID:   class.ID,
@@ -100,14 +101,10 @@ func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name str
 }
 
 // StubClassGroupWithClassID creates a mock class group using an existing class ID.
-func StubClassGroupWithClassID(t *testing.T, ctx context.Context, db *database.DB, classId int64, name string, classType model.ClassType) model.ClassGroup {
+func StubClassGroupWithClassID(t *testing.T, ctx context.Context, db *database.DB, params database.CreateClassGroupParams) model.ClassGroup {
 	t.Helper()
 
-	group, err := db.CreateClassGroup(ctx, database.CreateClassGroupParams{
-		ClassID:   classId,
-		Name:      name,
-		ClassType: classType,
-	})
+	group, err := db.CreateClassGroup(ctx, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,15 +132,10 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, s
 }
 
 // StubClassGroupSessionWithClassGroupID creates a mock class group session using an existing class group ID.
-func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, db *database.DB, classGroupId int64, startTime, endTime time.Time, venue string) model.ClassGroupSession {
+func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, db *database.DB, params database.CreateClassGroupSessionParams) model.ClassGroupSession {
 	t.Helper()
 
-	session, err := db.CreateClassGroupSession(ctx, database.CreateClassGroupSessionParams{
-		ClassGroupID: classGroupId,
-		StartTime:    startTime,
-		EndTime:      endTime,
-		Venue:        venue,
-	})
+	session, err := db.CreateClassGroupSession(ctx, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,15 +147,15 @@ func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, db
 func StubSessionEnrollment(t *testing.T, ctx context.Context, db *database.DB, attended bool) model.SessionEnrollment {
 	t.Helper()
 
+	user := StubUser(t, ctx, db, database.CreateUserParams{
+		ID:   uuid.NewString(),
+		Role: model.UserRole_User,
+	})
+
 	session := StubClassGroupSession(t, ctx, db,
 		time.UnixMicro(1),
 		time.UnixMicro(2),
-		"VENUE+66",
-	)
-
-	user := StubUser(t, ctx, db,
 		uuid.NewString(),
-		model.UserRole_User,
 	)
 
 	enrollment, err := db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{

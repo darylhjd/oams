@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -58,7 +59,10 @@ func TestAPIServerV1_sessionEnrollment(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			req := httptest.NewRequest(tt.withMethod, fmt.Sprintf("%s%d", sessionEnrollmentUrl, 1), nil)
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(tt.withMethod, fmt.Sprintf("%s%d", sessionEnrollmentUrl, 1), nil),
+				tests.StubAuthContext(),
+			)
 			rr := httptest.NewRecorder()
 			v1.sessionEnrollment(rr, req)
 
@@ -123,7 +127,10 @@ func TestAPIServerV1_sessionEnrollmentGet(t *testing.T) {
 				tt.wantResponse.SessionEnrollment.UpdatedAt = createdEnrollment.CreatedAt
 			}
 
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%d", sessionEnrollmentUrl, tt.wantResponse.SessionEnrollment.ID), nil)
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(http.MethodGet, fmt.Sprintf("%s%d", sessionEnrollmentUrl, tt.wantResponse.SessionEnrollment.ID), nil),
+				tests.StubAuthContext(),
+			)
 			resp := v1.sessionEnrollmentGet(req, tt.wantResponse.SessionEnrollment.ID)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
@@ -195,7 +202,7 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 			false,
 			sessionEnrollmentPatchResponse{
 				SessionEnrollment: sessionEnrollmentPatchSessionEnrollmentResponseFields{
-					ID: 6666,
+					ID: rand.Int63(),
 				},
 			},
 			false,
@@ -228,7 +235,10 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 			a.Nil(err)
 
 			enrollmentId := tt.wantResponse.SessionEnrollment.ID
-			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), bytes.NewReader(reqBodyBytes))
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), bytes.NewReader(reqBodyBytes)),
+				tests.StubAuthContext(),
+			)
 			resp := v1.sessionEnrollmentPatch(req, enrollmentId)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
@@ -248,7 +258,10 @@ func TestAPIServerV1_sessionEnrollmentPatch(t *testing.T) {
 				a.Equal(tt.wantResponse, actualResp)
 
 				// Check that successive updates do not change anything.
-				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), bytes.NewReader(reqBodyBytes))
+				req = httpRequestWithAuthContext(
+					httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", sessionEnrollmentUrl, enrollmentId), bytes.NewReader(reqBodyBytes)),
+					tests.StubAuthContext(),
+				)
 				successiveResp := v1.sessionEnrollmentPatch(req, enrollmentId).(sessionEnrollmentPatchResponse)
 				a.Equal(actualResp, successiveResp)
 			}
@@ -294,7 +307,7 @@ func TestAPIServerV1_sessionEnrollmentDelete(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			var enrollmentId int64 = 6666 // Choose a random ID that does not exist.
+			enrollmentId := rand.Int63()
 			if tt.withExistingSessionEnrollment {
 				createdEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, false)
 				enrollmentId = createdEnrollment.ID

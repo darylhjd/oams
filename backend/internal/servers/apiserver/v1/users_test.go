@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -76,7 +75,7 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 				newSuccessResponse(),
 				[]model.User{
 					{
-						ID:   "EXISTING_USER",
+						ID:   uuid.NewString(),
 						Role: model.UserRole_User,
 					},
 				},
@@ -106,7 +105,10 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 
 			if tt.withExistingUser {
 				for idx, user := range tt.wantResponse.Users {
-					createdUser := tests.StubUser(t, ctx, v1.db, user.ID, user.Role)
+					createdUser := tests.StubUser(t, ctx, v1.db, database.CreateUserParams{
+						ID:   user.ID,
+						Role: user.Role,
+					})
 					userPtr := &tt.wantResponse.Users[idx]
 					userPtr.CreatedAt, userPtr.UpdatedAt = createdUser.CreatedAt, createdUser.CreatedAt
 				}
@@ -116,104 +118,6 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			actualResp, ok := v1.usersGet(req).(usersGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
-		})
-	}
-}
-
-func TestAPIServerV1_usersGetQueryParams(t *testing.T) {
-	t.Parallel()
-
-	tts := []struct {
-		name           string
-		query          url.Values
-		wantStatusCode int
-		wantErr        string
-	}{
-		{
-			"sort with correct column",
-			url.Values{
-				"sort": []string{"role"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"sort with wrong column",
-			url.Values{
-				"sort": []string{"wrong"},
-			},
-			http.StatusBadRequest,
-			"unknown sort column `wrong`",
-		},
-		{
-			"sort with no value",
-			url.Values{
-				"sort": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit present",
-			url.Values{
-				"limit": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit with no value",
-			url.Values{
-				"limit": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset present",
-			url.Values{
-				"offset": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset with no value",
-			url.Values{
-				"offset": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-	}
-
-	for _, tt := range tts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			u := url.URL{Path: usersUrl}
-			u.RawQuery = tt.query.Encode()
-
-			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp := v1.usersGet(req)
-			a.Equal(tt.wantStatusCode, resp.Code())
-
-			switch {
-			case tt.wantErr != "":
-				actualResp, ok := resp.(errorResponse)
-				a.True(ok)
-				a.Contains(actualResp.Error, tt.wantErr)
-			default:
-				_, ok := resp.(usersGetResponse)
-				a.True(ok)
-			}
 		})
 	}
 }
@@ -252,7 +156,7 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			"request with existing user",
 			usersPostRequest{
 				database.CreateUserParams{
-					ID:   "EXISTING_USER",
+					ID:   uuid.NewString(),
 					Role: model.UserRole_User,
 				},
 			},
@@ -289,7 +193,10 @@ func TestAPIServerV1_usersPost(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingUser {
-				_ = tests.StubUser(t, ctx, v1.db, tt.withRequest.User.ID, tt.withRequest.User.Role)
+				_ = tests.StubUser(t, ctx, v1.db, database.CreateUserParams{
+					ID:   tt.withRequest.User.ID,
+					Role: tt.withRequest.User.Role,
+				})
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)

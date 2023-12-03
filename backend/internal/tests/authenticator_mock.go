@@ -5,16 +5,18 @@ import (
 	"net/url"
 
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
+	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 
 	"github.com/darylhjd/oams/backend/internal/env"
 )
 
 const (
-	MockAuthenticatorAccessToken              = "mock-access-token"
-	MockAuthenticatorAccountHomeAccountID     = "mock-home-account-id"
-	MockAuthenticatorIDTokenName              = "TESTACC001"
-	MockAuthenticatorAccountPreferredUsername = "NTU0001@e.ntu.edu.sg"
+	MockAuthenticatorAccessToken          = "mock-access-token"
+	MockAuthenticatorAccountHomeAccountID = "mock-home-account-id"
+	MockAuthenticatorUserID               = "TESTACC001"
+	MockAuthenticatorUserEmail            = "NTU0001@e.ntu.edu.sg"
+	MockAuthenticatorUserRole             = model.UserRole_SystemAdmin
 )
 
 // MockAzureAuthenticator allows us to mock the calls to Microsoft's Azure AD APIs.
@@ -64,13 +66,14 @@ func (m *MockAzureAuthenticator) GetKeyCache() *jwk.Cache {
 	return m.keyCache
 }
 
+// MockAuthResult returns an AuthResult where the user is the default MockAuthenticatorUser.
 func (m *MockAzureAuthenticator) MockAuthResult() confidential.AuthResult {
 	// Do this because we cannot import IDToken type.
 	var result confidential.AuthResult
 
 	result.AccessToken = MockAuthenticatorAccessToken
 	result.Account = m.mockAccount()
-	result.IDToken.Name = MockAuthenticatorIDTokenName
+	result.IDToken.Name = MockAuthenticatorUserID
 
 	return result
 }
@@ -78,7 +81,7 @@ func (m *MockAzureAuthenticator) MockAuthResult() confidential.AuthResult {
 func (m *MockAzureAuthenticator) mockAccount() confidential.Account {
 	return confidential.Account{
 		HomeAccountID:     MockAuthenticatorAccountHomeAccountID,
-		PreferredUsername: MockAuthenticatorAccountPreferredUsername,
+		PreferredUsername: MockAuthenticatorUserEmail,
 	}
 }
 

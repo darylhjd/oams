@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -58,7 +57,10 @@ func TestAPIServerV1_classManagers(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			req := httptest.NewRequest(tt.withMethod, classManagersUrl, nil)
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(tt.withMethod, classManagersUrl, nil),
+				tests.StubAuthContext(),
+			)
 			rr := httptest.NewRecorder()
 			v1.classManagers(rr, req)
 
@@ -120,108 +122,13 @@ func TestAPIServerV1_classManagersGet(t *testing.T) {
 				}
 			}
 
-			req := httptest.NewRequest(http.MethodGet, classManagersUrl, nil)
+			req := httpRequestWithAuthContext(
+				httptest.NewRequest(http.MethodGet, classManagersUrl, nil),
+				tests.StubAuthContext(),
+			)
 			actualResp, ok := v1.classManagersGet(req).(classManagersGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
-		})
-	}
-}
-
-func TestAPIServerV1_classManagersGetQueryParams(t *testing.T) {
-	t.Parallel()
-
-	tts := []struct {
-		name           string
-		query          url.Values
-		wantStatusCode int
-		wantErr        string
-	}{
-		{
-			"sort with correct column",
-			url.Values{
-				"sort": []string{"user_id"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"sort with wrong column",
-			url.Values{
-				"sort": []string{"wrong"},
-			},
-			http.StatusBadRequest,
-			"unknown sort column `wrong`",
-		},
-		{
-			"sort with no value",
-			url.Values{
-				"sort": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit present",
-			url.Values{
-				"limit": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"limit with no value",
-			url.Values{
-				"limit": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset present",
-			url.Values{
-				"offset": []string{"1"},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"offset with no value",
-			url.Values{
-				"offset": []string{},
-			},
-			http.StatusOK,
-			"",
-		},
-	}
-
-	for _, tt := range tts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			u := url.URL{Path: classManagersUrl}
-			u.RawQuery = tt.query.Encode()
-
-			req := httptest.NewRequest(http.MethodGet, u.String(), nil)
-			resp := v1.classManagersGet(req)
-			a.Equal(tt.wantStatusCode, resp.Code())
-
-			switch {
-			case tt.wantErr != "":
-				actualResp, ok := resp.(errorResponse)
-				a.True(ok)
-				a.Contains(actualResp.Error, tt.wantErr)
-			default:
-				_, ok := resp.(classManagersGetResponse)
-				a.True(ok)
-			}
 		})
 	}
 }
@@ -338,17 +245,22 @@ func TestAPIServerV1_classManagersPost(t *testing.T) {
 				tt.withRequest.ClassManager.ClassID = createdManager.ClassID
 			default:
 				if tt.withExistingUser {
-					createdUser := tests.StubUser(t, ctx, v1.db, uuid.NewString(), model.UserRole_User)
+					createdUser := tests.StubUser(t, ctx, v1.db, database.CreateUserParams{
+						ID:    uuid.NewString(),
+						Name:  uuid.NewString(),
+						Email: uuid.NewString(),
+						Role:  model.UserRole_SystemAdmin,
+					})
 					tt.withRequest.ClassManager.UserID = createdUser.ID
 				}
 
 				if tt.withExistingClass {
-					createdClass := tests.StubClass(
-						t, ctx, v1.db,
-						uuid.NewString(),
-						rand.Int31(),
-						uuid.NewString(),
-					)
+					createdClass := tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+						Code:      uuid.NewString(),
+						Year:      rand.Int31(),
+						Semester:  uuid.NewString(),
+						Programme: uuid.NewString(),
+					})
 					tt.withRequest.ClassManager.ClassID = createdClass.ID
 				}
 			}

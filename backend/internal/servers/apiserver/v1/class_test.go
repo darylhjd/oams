@@ -84,9 +84,10 @@ func TestAPIServerV1_classGet(t *testing.T) {
 			classGetResponse{
 				newSuccessResponse(),
 				model.Class{
-					Code:     "CZ3454",
-					Year:     2023,
-					Semester: "1",
+					Code:      uuid.NewString(),
+					Year:      rand.Int31(),
+					Semester:  uuid.NewString(),
+					Programme: uuid.NewString(),
 				},
 			},
 			http.StatusOK,
@@ -114,12 +115,12 @@ func TestAPIServerV1_classGet(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withExistingClass {
-				createdClass := tests.StubClass(
-					t, ctx, v1.db,
-					tt.wantResponse.Class.Code,
-					tt.wantResponse.Class.Year,
-					tt.wantResponse.Class.Semester,
-				)
+				createdClass := tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+					Code:      tt.wantResponse.Class.Code,
+					Year:      tt.wantResponse.Class.Year,
+					Semester:  tt.wantResponse.Class.Semester,
+					Programme: tt.wantResponse.Class.Programme,
+				})
 
 				tt.wantResponse.Class.ID = createdClass.ID
 				tt.wantResponse.Class.CreatedAt = createdClass.CreatedAt
@@ -161,11 +162,7 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			"request with field changes",
 			classPatchRequest{
 				database.UpdateClassParams{
-					Code:      to.Ptr("CZ9999"),
-					Year:      to.Ptr(int32(1999)),
-					Semester:  to.Ptr("1"),
 					Programme: to.Ptr("CSC Full-time"),
-					Au:        to.Ptr(int16(3)),
 				},
 			},
 			true,
@@ -173,11 +170,10 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			classPatchResponse{
 				newSuccessResponse(),
 				classPatchClassResponseFields{
-					Code:      "CZ9999",
-					Year:      1999,
-					Semester:  "1",
+					Code:      uuid.NewString(),
+					Year:      rand.Int31(),
+					Semester:  uuid.NewString(),
 					Programme: "CSC Full-time",
-					Au:        3,
 				},
 			},
 			false,
@@ -194,9 +190,9 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			classPatchResponse{
 				newSuccessResponse(),
 				classPatchClassResponseFields{
-					Code:     "EXISTING123",
-					Year:     2023,
-					Semester: "1",
+					Code:     uuid.NewString(),
+					Year:     rand.Int31(),
+					Semester: "2",
 				},
 			},
 			true,
@@ -219,11 +215,9 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			"request with update conflict",
 			classPatchRequest{
 				database.UpdateClassParams{
-					Code:      to.Ptr("EXISTING2023"),
-					Year:      to.Ptr(int32(2023)),
-					Semester:  to.Ptr("1"),
-					Programme: to.Ptr("CSC Full-time"),
-					Au:        to.Ptr(int16(2)),
+					Code:     to.Ptr(uuid.NewString()),
+					Year:     to.Ptr(rand.Int31()),
+					Semester: to.Ptr(uuid.NewString()),
 				},
 			},
 			true,
@@ -251,28 +245,25 @@ func TestAPIServerV1_classPatch(t *testing.T) {
 			switch {
 			case tt.withUpdateConflict:
 				// Create the class to update.
-				updateClass := tests.StubClass(
-					t, ctx, v1.db,
-					uuid.NewString(),
-					2222,
-					uuid.NewString(),
-				)
+				updateClass := tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+					Code:     uuid.NewString(),
+					Year:     rand.Int31(),
+					Semester: uuid.NewString(),
+				})
 				classId = updateClass.ID
 
 				// Also create the class to conflict with.
-				_ = tests.StubClass(
-					t, ctx, v1.db,
-					*tt.withRequest.Class.Code,
-					*tt.withRequest.Class.Year,
-					*tt.withRequest.Class.Semester,
-				)
+				_ = tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+					Code:     *tt.withRequest.Class.Code,
+					Year:     *tt.withRequest.Class.Year,
+					Semester: *tt.withRequest.Class.Semester,
+				})
 			case tt.withExistingClass:
-				createdClass := tests.StubClass(
-					t, ctx, v1.db,
-					tt.wantResponse.Class.Code,
-					tt.wantResponse.Class.Year,
-					tt.wantResponse.Class.Semester,
-				)
+				createdClass := tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+					Code:     tt.wantResponse.Class.Code,
+					Year:     tt.wantResponse.Class.Year,
+					Semester: tt.wantResponse.Class.Semester,
+				})
 
 				classId = createdClass.ID
 				tt.wantResponse.Class.ID = createdClass.ID
@@ -367,7 +358,12 @@ func TestAPIServerV1_classDelete(t *testing.T) {
 				createdClassGroup := tests.StubClassGroup(t, ctx, v1.db, uuid.NewString(), model.ClassType_Lab)
 				classId = createdClassGroup.ClassID
 			case tt.withExistingClass:
-				createdClass := tests.StubClass(t, ctx, v1.db, "RANDOM_CODE", 9999, "22")
+				createdClass := tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
+					Code:      uuid.NewString(),
+					Year:      rand.Int31(),
+					Semester:  uuid.NewString(),
+					Programme: uuid.NewString(),
+				})
 				classId = createdClass.ID
 			default:
 				classId = rand.Int63()

@@ -15,6 +15,8 @@ func (d *DB) ListClassManagers(ctx context.Context, params ListQueryParams) ([]m
 		ClassManagers.AllColumns,
 	).FROM(
 		ClassManagers,
+	).WHERE(
+		classManagerRLS(ctx),
 	)
 
 	stmt = params.setFilters(stmt)
@@ -34,7 +36,9 @@ func (d *DB) GetClassManager(ctx context.Context, id int64) (model.ClassManager,
 	).FROM(
 		ClassManagers,
 	).WHERE(
-		ClassManagers.ID.EQ(Int64(id)),
+		ClassManagers.ID.EQ(Int64(id)).AND(
+			classManagerRLS(ctx),
+		),
 	).LIMIT(1)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)

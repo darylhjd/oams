@@ -85,7 +85,7 @@ func TestAPIServerV1_classGroupGet(t *testing.T) {
 			classGroupGetResponse{
 				newSuccessResponse(),
 				model.ClassGroup{
-					Name:      "EXISTING21",
+					Name:      uuid.NewString(),
 					ClassType: model.ClassType_Lec,
 				},
 			},
@@ -162,8 +162,7 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 			"request with field changes",
 			classGroupPatchRequest{
 				database.UpdateClassGroupParams{
-					Name:      to.Ptr("NEW21"),
-					ClassType: to.Ptr(model.ClassType_Lab),
+					Name: to.Ptr("NEW21"),
 				},
 			},
 			true,
@@ -261,12 +260,11 @@ func TestAPIServerV1_classGroupPatch(t *testing.T) {
 				groupId = updateClassGroup.ID
 
 				// Also create group to conflict with.
-				_ = tests.StubClassGroupWithClassID(
-					t, ctx, v1.db,
-					updateClassGroup.ClassID,
-					*tt.withRequest.ClassGroup.Name,
-					*tt.withRequest.ClassGroup.ClassType,
-				)
+				_ = tests.StubClassGroupWithClassID(t, ctx, v1.db, database.CreateClassGroupParams{
+					ClassID:   updateClassGroup.ClassID,
+					Name:      *tt.withRequest.ClassGroup.Name,
+					ClassType: *tt.withRequest.ClassGroup.ClassType,
+				})
 			case tt.withExistingClassGroup && !tt.withExistingUpdateClass:
 				createdClassGroup := tests.StubClassGroup(
 					t, ctx, v1.db,

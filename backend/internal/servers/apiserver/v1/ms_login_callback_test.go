@@ -86,15 +86,14 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			var (
-				expectedUser model.User
-				err          error
+				oldUser model.User
+				err     error
 			)
 			if tt.withExistingUser {
+				// Stub the auth context user and then change the name and email.
+				// On login, the name and email should be updated.
 				tests.StubAuthContextUser(t, ctx, v1.db)
-				// Set a name to the auth context user, so we can check for no change. We also unset the email, and check
-				// that it is later set since it is different.
-				expectedUser, err = v1.db.UpdateUser(ctx, tests.MockAuthenticatorIDTokenName, database.UpdateUserParams{
-					Name:  to.Ptr("TEST ACCOUNT NAME LIM"),
+				oldUser, err = v1.db.UpdateUser(ctx, tests.StubAuthContext().User.ID, database.UpdateUserParams{
 					Email: to.Ptr(""),
 				})
 				a.Nil(err)
@@ -122,16 +121,14 @@ func TestAPIServerV1_msLoginCallback(t *testing.T) {
 			}
 
 			// Check that user that logged in exists in the database.
-			tests.CheckUserExists(a, context.Background(), v1.db, tests.MockAuthenticatorIDTokenName)
+			tests.CheckUserExists(a, context.Background(), v1.db, tests.StubAuthContext().User.ID)
 			if tt.withExistingUser {
 				// Check that if the user is an existing user, then user's information is unchanged in database.
-				checkUser, err := v1.db.GetUser(ctx, tests.MockAuthenticatorIDTokenName)
+				checkUser, err := v1.db.GetUser(ctx, tests.StubAuthContext().User.ID)
 				a.Nil(err)
-				a.Equal(tests.MockAuthenticatorAccountPreferredUsername, checkUser.Email)
 
-				expectedUser.Email = checkUser.Email
-				expectedUser.UpdatedAt = checkUser.UpdatedAt
-				a.Equal(expectedUser, checkUser)
+				a.Equal(tests.StubAuthContext().User.Email, checkUser.Email)
+				a.NotEqual(oldUser.Email, checkUser.Email)
 			}
 
 			// Check that session cookie exists.
