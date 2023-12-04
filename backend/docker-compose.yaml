@@ -1,0 +1,61 @@
+name: oams
+
+services:
+  apiserver:
+    image: oams/apiserver
+    container_name: apiserver
+    env_file: .env.local
+    environment:
+      - DATABASE_HOST=host.docker.internal
+    build:
+      context: .
+      dockerfile: ./cmd/apiserver/Dockerfile
+      secrets:
+        - ssh_key
+    ports:
+      - "3001:3001"
+    network_mode: bridge
+    depends_on:
+      local-db:
+        condition: service_healthy
+
+  webserver:
+    image: oams/webserver
+    container_name: webserver
+    build:
+      context: ../frontend
+      dockerfile: ../backend/cmd/webserver/Dockerfile
+      secrets:
+        - env
+    ports:
+      - "3000:3000"
+    network_mode: bridge
+    depends_on:
+      apiserver:
+        condition: service_started
+
+  local-db:
+    image: postgres:latest
+    container_name: local-db
+    environment:
+      POSTGRES_USER: oams
+      POSTGRES_PASSWORD: oams-local
+    ports:
+      - "3002:5432"
+    network_mode: bridge
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_USER} -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+
+secrets:
+  ssh_key:
+    file: ~/.ssh/id_rsa
+  env:
+    file: ../frontend/.env.development
