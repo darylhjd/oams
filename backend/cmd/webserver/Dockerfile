@@ -24,4 +24,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Required for making HTTP requests in the container.
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
+ENV HOSTNAME "0.0.0.0"
+
 CMD ["node", "server.js"]
