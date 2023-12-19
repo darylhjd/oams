@@ -60,8 +60,9 @@ func (s *APIServer) Start() error {
 
 	// Set up CORS.
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{fmt.Sprintf("%s", env.GetWebServer())},
+		AllowedOrigins:   []string{env.GetWebServer()},
 		AllowCredentials: true,
+		AllowedHeaders:   []string{"Authorization"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete},
 	})
 
