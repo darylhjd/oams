@@ -10,31 +10,31 @@
     "prettier": "npx prettier . --write"
   },
   "dependencies": {
-    "@mantine/core": "^7.1.7",
-    "@mantine/dropzone": "^7.1.7",
-    "@mantine/hooks": "^7.1.7",
-    "@mantine/notifications": "^7.1.7",
+    "@mantine/core": "^7.3.2",
+    "@mantine/dropzone": "^7.3.2",
+    "@mantine/hooks": "^7.3.2",
+    "@mantine/notifications": "^7.3.2",
     "@supabase/supabase-js": "^2.39.1",
-    "@tabler/icons-react": "^2.42.0",
+    "@tabler/icons-react": "^2.44.0",
     "axios": "^1.6.2",
-    "framer-motion": "^10.16.5",
-    "mantine-react-table": "^2.0.0-alpha.4",
-    "next": "14.0.3",
+    "framer-motion": "^10.16.16",
+    "mantine-react-table": "^2.0.0-alpha.9",
+    "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",
-    "zustand": "^4.4.6"
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.0.3",
-    "eslint-config-prettier": "^9.0.0",
-    "postcss": "^8.4.31",
-    "postcss-preset-mantine": "^1.11.0",
+    "eslint-config-next": "14.0.4",
+    "eslint-config-prettier": "^9.1.0",
+    "postcss": "^8.4.32",
+    "postcss-preset-mantine": "^1.12.0",
     "postcss-simple-vars": "^7.0.1",
-    "prettier": "3.1.0",
+    "prettier": "3.1.1",
     "typescript": "^5"
   }
 }
