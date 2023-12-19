@@ -9,7 +9,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
-	"github.com/darylhjd/oams/backend/internal/middleware/values"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
@@ -49,9 +49,9 @@ func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 		UpcomingClassGroupSessions: []database.UpcomingClassGroupSession{},
 	}
 
-	authContext := values.GetAuthContext(r.Context())
+	authContext := oauth2.GetAuthContext(r.Context())
 
-	sessionUser, err := v.db.GetUser(r.Context(), authContext.AuthResult.IDToken.Name)
+	sessionUser, err := v.db.GetUser(r.Context(), authContext.User.ID)
 	if err != nil {
 		v.logInternalServerError(r, fmt.Errorf("expected session user in database: %w", err))
 		return newErrorResponse(http.StatusInternalServerError, "could get session user from database")

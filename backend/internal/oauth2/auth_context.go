@@ -1,12 +1,10 @@
-package values
+package oauth2
 
 import (
 	"context"
 	"errors"
 
-	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
-	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
 const (
@@ -20,9 +18,8 @@ var (
 
 // AuthContext stores useful information regarding an authentication.
 type AuthContext struct {
-	Claims     *oauth2.AzureClaims
-	AuthResult confidential.AuthResult
-	User       model.User
+	Claims Claims
+	User   model.User
 }
 
 // GetAuthContext is a helper function to get the authentication context from a request context. If the auth context is

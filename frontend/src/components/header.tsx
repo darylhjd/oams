@@ -20,6 +20,7 @@ import {
   Divider,
   Flex,
   Space,
+  DrawerContent,
 } from "@mantine/core";
 import { usePathname, useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
@@ -85,6 +86,9 @@ function Items() {
         opened={opened}
         onClose={close}
         onClick={close}
+        classNames={{
+          inner: styles.systemAdminMenuDropdown
+        }}
       >
         {items}
       </Drawer>
@@ -169,15 +173,13 @@ function AboutButton() {
 }
 
 function LoginButton() {
-  const router = useRouter();
   const pathname = usePathname();
 
   return (
     <Button
       onClick={async () => {
         const redirectLink = `${process.env.WEB_SERVER}${pathname}`;
-        const loginLink = await APIClient.login(redirectLink);
-        router.push(loginLink);
+        await APIClient.login(redirectLink);
       }}
     >
       Login

@@ -6,7 +6,6 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	"github.com/darylhjd/oams/backend/internal/middleware"
-	"github.com/darylhjd/oams/backend/internal/middleware/values"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
@@ -29,12 +28,12 @@ func HasPermissions(role model.UserRole, permissions ...P) bool {
 // EnforceAccessPolicy based on role-based access control.
 func EnforceAccessPolicy(
 	handlerFunc http.HandlerFunc,
-	authenticator oauth2.Authenticator,
+	auth oauth2.AuthProvider,
 	db *database.DB,
 	methodPermissions map[string][]P,
 ) http.HandlerFunc {
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		authContext := values.GetAuthContext(r.Context())
+		authContext := oauth2.GetAuthContext(r.Context())
 
 		if !HasPermissions(authContext.User.Role, methodPermissions[r.Method]...) {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -44,5 +43,5 @@ func EnforceAccessPolicy(
 		handlerFunc(w, r)
 	}
 
-	return middleware.MustAuth(handler, authenticator, db)
+	return middleware.MustAuth(handler, auth, db)
 }

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { LoginResponse } from "./login";
+import { createClient } from "@supabase/supabase-js";
 import { UserGetResponse, UserMeResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
@@ -16,11 +16,6 @@ import {
 } from "./session_enrollment";
 
 export class APIClient {
-  static _client = axios.create({
-    withCredentials: true,
-    baseURL: `${process.env.API_SERVER}/api/v1`,
-  });
-
   static readonly _loginPath = "/login";
   static readonly _logoutPath = "/logout";
   static readonly _batchPath = "/batch";
@@ -37,18 +32,39 @@ export class APIClient {
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
   static readonly _sessionEnrollmentPath = "/session-enrollments/";
 
-  static async login(redirectUrl: string = ""): Promise<string> {
-    const { data } = await this._client.get<LoginResponse>(this._loginPath, {
-      params: {
-        redirect_url: redirectUrl ? redirectUrl : process.env.WEB_SERVER,
+  static readonly _supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!,
+  );
+  static _client = axios.create({
+    baseURL: `${process.env.API_SERVER}/api/v1`,
+  });
+
+  static async login(redirectUrl: string = "") {
+    await this._supabase.auth.signInWithOAuth({
+      provider: "azure",
+      options: {
+        redirectTo: redirectUrl,
+        scopes: "api://ntuoams/Users.Login.All email",
       },
     });
-    return data.redirect_url;
   }
 
   static async logout(): Promise<boolean> {
-    await this._client.get(this._logoutPath);
+    await this._supabase.auth.signOut();
     return true;
+  }
+
+  static async loadSessionToken() {
+    const session = (await this._supabase.auth.getSession()).data.session;
+    if (session == null) {
+      return;
+    }
+
+    console.log(session)
+
+    this._client.defaults.headers.common["Authorization"] =
+      `Bearer ${session.provider_token}`;
   }
 
   static async batchPost(files: FileWithPath[]): Promise<BatchPostResponse> {
