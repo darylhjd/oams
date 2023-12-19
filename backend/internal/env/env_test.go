@@ -16,10 +16,10 @@ func Test_checkVarEmpty(t *testing.T) {
 		"":    true,
 	}
 
-	for tt, wantErr := range tests {
+	for tt, wantResult := range tests {
 		t.Run(fmt.Sprintf("with variable %+q", tt), func(t *testing.T) {
 			a := assert.New(t)
-			a.Equal(wantErr, checkVarEmpty(tt) != nil)
+			a.Equal(wantResult, checkVarEmpty(tt))
 		})
 	}
 }

@@ -9,9 +9,9 @@ const (
 type AppEnv string
 
 const (
-	AppEnvLocal       AppEnv = "local"
-	AppEnvIntegration        = "integration"
-	AppEnvStaging            = "staging"
+	AppEnvLocal      AppEnv = "local"
+	AppEnvStaging           = "staging"
+	AppEnvProduction        = "production"
 )
 
 // GetAppEnv returns the APP_ENV environment variable.
