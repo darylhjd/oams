@@ -27,32 +27,17 @@ func verifyEnvironment() error {
 	}
 
 	switch environment := GetAppEnv(); environment {
-	case AppEnvLocal, AppEnvIntegration, AppEnvStaging:
+	case AppEnvLocal, AppEnvStaging, AppEnvProduction:
 		return nil
 	default:
 		return fmt.Errorf("unknown %s value: %s", appEnv, environment)
 	}
 }
 
-func verifyConfiguration() error {
-	switch getConfiguration() {
-	case ConfigurationApiServer:
-		return verifyApiServerConfiguration()
-	case ConfigurationDatabase:
-		return verifyDatabaseConfiguration()
-	default:
-		// If no configuration is specified, all configurations are checked.
-		return errors.Join(
-			verifyApiServerConfiguration(),
-			verifyDatabaseConfiguration(),
-		)
-	}
-}
-
 func checkRequiredEnvs(envs ...string) error {
 	var errs []error
 	for _, env := range envs {
-		if err := checkVarEmpty(os.Getenv(env)); err != nil {
+		if checkVarEmpty(os.Getenv(env)) {
 			errs = append(errs, fmt.Errorf("%s not set, but is required", env))
 		}
 	}
@@ -60,10 +45,10 @@ func checkRequiredEnvs(envs ...string) error {
 	return errors.Join(errs...)
 }
 
-func checkVarEmpty(v string) error {
+func checkVarEmpty(v string) bool {
 	if strings.TrimSpace(v) == "" {
-		return errors.New("empty variable")
+		return true
 	}
 
-	return nil
+	return false
 }

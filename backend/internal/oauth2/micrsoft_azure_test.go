@@ -3,14 +3,10 @@ package oauth2
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"fmt"
-	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 
@@ -27,7 +23,7 @@ func Test_checkAzureToken(t *testing.T) {
 			"valid token",
 			jwt.NewWithClaims(jwt.SigningMethodRS256, AzureClaims{
 				RegisteredClaims: jwt.RegisteredClaims{
-					Issuer:    tokenIssuer,
+					Issuer:    microsoftTokenIssuer,
 					Audience:  jwt.ClaimStrings{env.GetAPIServerAzureClientID()},
 					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 					NotBefore: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
@@ -40,7 +36,7 @@ func Test_checkAzureToken(t *testing.T) {
 			"expired token",
 			jwt.NewWithClaims(jwt.SigningMethodRS256, AzureClaims{
 				RegisteredClaims: jwt.RegisteredClaims{
-					Issuer:    tokenIssuer,
+					Issuer:    microsoftTokenIssuer,
 					Audience:  jwt.ClaimStrings{env.GetAPIServerAzureClientID()},
 					ExpiresAt: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
 					NotBefore: jwt.NewNumericDate(time.Now().Add(-2 * time.Hour)),
@@ -66,7 +62,7 @@ func Test_checkAzureToken(t *testing.T) {
 			"token with wrong audience",
 			jwt.NewWithClaims(jwt.SigningMethodRS256, AzureClaims{
 				RegisteredClaims: jwt.RegisteredClaims{
-					Issuer:    tokenIssuer,
+					Issuer:    microsoftTokenIssuer,
 					Audience:  jwt.ClaimStrings{"bad audience"},
 					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 					NotBefore: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
@@ -79,7 +75,7 @@ func Test_checkAzureToken(t *testing.T) {
 			"token with wrong signing method",
 			jwt.NewWithClaims(jwt.SigningMethodRS384, AzureClaims{
 				RegisteredClaims: jwt.RegisteredClaims{
-					Issuer:    tokenIssuer,
+					Issuer:    microsoftTokenIssuer,
 					Audience:  jwt.ClaimStrings{env.GetAPIServerAzureClientID()},
 					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 					NotBefore: jwt.NewNumericDate(time.Now().Add(-time.Hour)),
@@ -116,46 +112,9 @@ func Test_checkAzureToken(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, _, err = CheckAzureToken(keySet, accessToken)
+			claims := &AzureClaims{}
+			_, err = parseAzureToken(keySet, claims, accessToken)
 			a.ErrorIs(err, tt.wantErr)
 		})
 	}
-}
-
-func TestSetSessionCookie(t *testing.T) {
-	// Create a few test cases.
-	var tests []string
-	for i := 0; i < 10; i++ {
-		tests = append(tests, uuid.NewString())
-	}
-
-	for _, tt := range tests {
-		t.Run(fmt.Sprintf("with home account id %+q", tt), func(t *testing.T) {
-			a := assert.New(t)
-
-			authResult := confidential.AuthResult{
-				Account: confidential.Account{
-					HomeAccountID: tt,
-				},
-			}
-
-			rr := httptest.NewRecorder()
-			a.Equal(tt, SetSessionCookie(rr, authResult).Value)
-			a.Contains(rr.Header().Get("Set-Cookie"), fmt.Sprintf("%s=%s", SessionCookieIdent, tt))
-		})
-	}
-}
-
-func TestDeleteSessionCookie(t *testing.T) {
-	a := assert.New(t)
-
-	rr := httptest.NewRecorder()
-	signOutCookie := DeleteSessionCookie(rr)
-
-	a.Empty(signOutCookie.Value)
-	a.Equal(time.Unix(0, 0), signOutCookie.Expires)
-	a.Equal(-1, signOutCookie.MaxAge)
-
-	a.Contains(rr.Header().Get("Set-Cookie"), SessionCookieIdent)
-	a.Contains(rr.Header().Get("Set-Cookie"), "Max-Age=0")
 }

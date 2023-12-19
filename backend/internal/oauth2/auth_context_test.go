@@ -1,4 +1,4 @@
-package values
+package oauth2
 
 import (
 	"context"

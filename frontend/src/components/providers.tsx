@@ -29,10 +29,9 @@ function SessionInitialiser({ children }: { children: React.ReactNode }) {
     }
 
     setFetching(true);
-    APIClient.userMe()
-      .then((data) => {
-        session.setSession(data);
-      })
+    APIClient.loadSessionToken()
+      .then((_data) => APIClient.userMe())
+      .then((data) => session.setSession(data))
       .catch((_error) => null)
       .finally(() => setLoaded(true));
   }, [fetching, session]);

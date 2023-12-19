@@ -12,7 +12,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
@@ -25,9 +24,6 @@ const (
 const (
 	baseUrl               = "/"
 	pingUrl               = "/ping"
-	loginUrl              = "/login"
-	msLoginCallbackUrl    = "/ms-login-callback"
-	logoutUrl             = "/logout"
 	batchUrl              = "/batch"
 	usersUrl              = "/users"
 	userUrl               = "/users/"
@@ -54,28 +50,24 @@ type APIServerV1 struct {
 
 	decoder *schema.Decoder
 
-	azure oauth2.Authenticator
+	auth oauth2.AuthProvider
 }
 
 // New creates a new APIServerV1. This is a sub-router and should not be used as a base router.
-func New(l *zap.Logger, db *database.DB, azureClient oauth2.Authenticator) *APIServerV1 {
-	server := APIServerV1{l, db, http.NewServeMux(), schema.NewDecoder(), azureClient}
+func New(l *zap.Logger, db *database.DB, auth oauth2.AuthProvider) *APIServerV1 {
+	server := APIServerV1{l, db, http.NewServeMux(), schema.NewDecoder(), auth}
 	server.registerHandlers()
 
 	return &server
 }
 
 func (v *APIServerV1) registerHandlers() {
-	v.mux.HandleFunc(baseUrl, middleware.AllowMethods(v.base, http.MethodGet))
-	v.mux.HandleFunc(pingUrl, middleware.AllowMethods(v.ping, http.MethodGet))
-
-	v.mux.HandleFunc(loginUrl, v.login)
-	v.mux.HandleFunc(msLoginCallbackUrl, middleware.AllowMethods(v.msLoginCallback, http.MethodPost))
-	v.mux.HandleFunc(logoutUrl, middleware.MustAuth(v.logout, v.azure, v.db))
+	v.mux.HandleFunc(baseUrl, v.base)
+	v.mux.HandleFunc(pingUrl, v.ping)
 
 	v.mux.HandleFunc(batchUrl, permissions.EnforceAccessPolicy(
 		v.batch,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodPost: {permissions.BatchPost},
 			http.MethodPut:  {permissions.BatchPut},
@@ -84,7 +76,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(usersUrl, permissions.EnforceAccessPolicy(
 		v.users,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.UserRead},
 			http.MethodPost: {permissions.UserCreate},
@@ -93,7 +85,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(userUrl, permissions.EnforceAccessPolicy(
 		v.user,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:    {permissions.UserRead},
 			http.MethodPatch:  {permissions.UserUpdate},
@@ -103,7 +95,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classesUrl, permissions.EnforceAccessPolicy(
 		v.classes,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.ClassRead},
 			http.MethodPost: {permissions.ClassCreate},
@@ -112,7 +104,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classUrl, permissions.EnforceAccessPolicy(
 		v.class,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:    {permissions.ClassRead},
 			http.MethodPatch:  {permissions.ClassUpdate},
@@ -122,7 +114,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classManagersUrl, permissions.EnforceAccessPolicy(
 		v.classManagers,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.ClassManagerRead},
 			http.MethodPost: {permissions.ClassManagerCreate},
@@ -132,7 +124,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classManagerUrl, permissions.EnforceAccessPolicy(
 		v.classManager,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:    {permissions.ClassManagerRead},
 			http.MethodPatch:  {permissions.ClassManagerUpdate},
@@ -142,7 +134,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classGroupsUrl, permissions.EnforceAccessPolicy(
 		v.classGroups,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.ClassGroupRead},
 			http.MethodPost: {permissions.ClassGroupCreate},
@@ -151,7 +143,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classGroupUrl, permissions.EnforceAccessPolicy(
 		v.classGroup,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:    {permissions.ClassGroupRead},
 			http.MethodPatch:  {permissions.ClassGroupUpdate},
@@ -161,7 +153,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classGroupSessionsUrl, permissions.EnforceAccessPolicy(
 		v.classGroupSessions,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.ClassGroupSessionRead},
 			http.MethodPost: {permissions.ClassGroupSessionCreate},
@@ -170,7 +162,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classGroupSessionUrl, permissions.EnforceAccessPolicy(
 		v.classGroupSession,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:    {permissions.ClassGroupSessionRead},
 			http.MethodPatch:  {permissions.ClassGroupSessionUpdate},
@@ -180,7 +172,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(sessionEnrollmentsUrl, permissions.EnforceAccessPolicy(
 		v.sessionEnrollments,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.SessionEnrollmentRead},
 			http.MethodPost: {permissions.SessionEnrollmentCreate},
@@ -189,7 +181,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(sessionEnrollmentUrl, permissions.EnforceAccessPolicy(
 		v.sessionEnrollment,
-		v.azure, v.db,
+		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:    {permissions.SessionEnrollmentRead},
 			http.MethodPatch:  {permissions.SessionEnrollmentUpdate},

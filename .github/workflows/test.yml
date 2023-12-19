@@ -23,6 +23,12 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Build frontend
+        env:
+          AZURE_LOGIN_SCOPE: ${{ vars.AZURE_LOGIN_SCOPE }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
+          API_SERVER: ${{ vars.API_SERVER }}
+          WEB_SERVER: ${{ vars.WEB_SERVER }}
         run: |
           cd frontend
           npx next telemetry disable
@@ -72,9 +78,6 @@ jobs:
           API_SERVER_PORT: ${{ vars.API_SERVER_PORT }}
           API_SERVER_AZURE_TENANT_ID: ${{ vars.API_SERVER_AZURE_TENANT_ID }}
           API_SERVER_AZURE_CLIENT_ID: ${{ vars.API_SERVER_AZURE_CLIENT_ID }}
-          API_SERVER_AZURE_CLIENT_SECRET: ${{ vars.API_SERVER_AZURE_CLIENT_SECRET }}
-          API_SERVER_AZURE_LOGIN_SCOPE: ${{ vars.API_SERVER_AZURE_LOGIN_SCOPE }}
-          API_SERVER_AZURE_LOGIN_CALLBACK_URL: ${{ vars.API_SERVER_AZURE_LOGIN_CALLBACK_URL }}
           WEB_SERVER: ${{ vars.WEB_SERVER }}
           DATABASE_TYPE: ${{ vars.DATABASE_TYPE }}
           DATABASE_NAME: ${{ vars.DATABASE_NAME }}

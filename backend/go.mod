@@ -3,14 +3,13 @@ module github.com/darylhjd/oams/backend
 go 1.21
 
 require (
-	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.0
 	github.com/go-jet/jet/v2 v2.10.2-0.20231201113740-5cbaa9099234
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/gorilla/schema v1.2.1
-	github.com/jackc/pgx/v5 v5.5.0
-	github.com/lestrrat-go/jwx/v2 v2.0.17
+	github.com/jackc/pgx/v5 v5.5.1
+	github.com/lestrrat-go/jwx/v2 v2.0.18
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
 	github.com/stretchr/testify v1.8.4
@@ -32,7 +31,6 @@ require (
 	github.com/jackc/pgproto3/v2 v2.3.2 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.4 // indirect
@@ -42,7 +40,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/xuri/efp v0.0.0-20231025114914-d1ff6096ae53 // indirect
 	github.com/xuri/nfp v0.0.0-20230919160717-d98342af3f05 // indirect

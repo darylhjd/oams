@@ -5,12 +5,12 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
-	"github.com/darylhjd/oams/backend/internal/middleware/values"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
 func sessionEnrollmentRLS(ctx context.Context) BoolExpression {
-	authContext := values.GetAuthContext(ctx)
+	authContext := oauth2.GetAuthContext(ctx)
 
 	return Bool(
 		authContext.User.Role == model.UserRole_SystemAdmin,
@@ -38,7 +38,7 @@ func sessionEnrollmentRLS(ctx context.Context) BoolExpression {
 }
 
 func classManagerRLS(ctx context.Context) BoolExpression {
-	authContext := values.GetAuthContext(ctx)
+	authContext := oauth2.GetAuthContext(ctx)
 
 	return Bool(
 		authContext.User.Role == model.UserRole_SystemAdmin,
