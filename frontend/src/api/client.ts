@@ -16,8 +16,6 @@ import {
 } from "./session_enrollment";
 
 export class APIClient {
-  static readonly _loginPath = "/login";
-  static readonly _logoutPath = "/logout";
   static readonly _batchPath = "/batch";
   static readonly _usersPath = "/users";
   static readonly _userPath = "/users/";
