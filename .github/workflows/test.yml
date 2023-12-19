@@ -23,6 +23,12 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Build frontend
+        env:
+          AZURE_LOGIN_SCOPE: azure-login-scope
+          SUPABASE_URL: supabase-url
+          SUPABASE_KEY: supabase-key
+          API_SERVER: api-server-host
+          WEB_SERVER: web-server-host
         run: |
           cd frontend
           npx next telemetry disable
