@@ -5,7 +5,6 @@ import (
 	"crypto/rsa"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/golang-jwt/jwt/v5"
@@ -24,8 +23,8 @@ var (
 // AzureClaims is a custom struct to hold the claims received from Microsoft Azure AD.
 type AzureClaims struct {
 	jwt.RegisteredClaims
-	Name  string
-	Email string
+	Name              string `json:"name"`
+	PreferredUsername string `json:"preferred_username"`
 }
 
 func (a AzureClaims) UserID() string {
@@ -33,7 +32,7 @@ func (a AzureClaims) UserID() string {
 }
 
 func (a AzureClaims) UserEmail() string {
-	return a.Email
+	return a.PreferredUsername
 }
 
 type AzureAuthenticator struct {
@@ -43,11 +42,11 @@ type AzureAuthenticator struct {
 func (a *AzureAuthenticator) CheckToken(ctx context.Context, tokenString string) (Claims, *jwt.Token, error) {
 	set, err := a.GetKeyCache().Get(ctx, a.GetKeySetSource())
 	if err != nil {
-		return nil, nil, fmt.Errorf("")
+		return nil, nil, errors.New("could not get key set source")
 	}
 
-	// https://learn.microsoft.com/en-us/azure/active-directory/develop/access-tokens#validating-tokens
 	claims := AzureClaims{}
+
 	token, err := parseAzureToken(set, &claims, tokenString)
 	if err != nil || !token.Valid {
 		return nil, nil, fmt.Errorf("token check failed: %w", err)
@@ -57,7 +56,7 @@ func (a *AzureAuthenticator) CheckToken(ctx context.Context, tokenString string)
 }
 
 func parseAzureToken(set jwk.Set, claims *AzureClaims, tokenString string) (*jwt.Token, error) {
-	log.Println(tokenString)
+	// https://learn.microsoft.com/en-us/azure/active-directory/develop/access-tokens#validating-tokens
 	return jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if token.Header["typ"] != "JWT" {
 			return nil, errors.New("wrong token type")

@@ -30,3 +30,7 @@
 .systemAdminMenuDropdown {
   z-index: 402 !important;
 }
+
+.systemAdminMenuDrawer {
+  z-index: 402 !important;
+}

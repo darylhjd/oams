@@ -26,9 +26,6 @@ func verifyApiServerConfiguration() error {
 		apiServerPort,
 		apiServerAzureTenantId,
 		apiServerAzureClientId,
-		apiServerAzureClientSecret,
-		apiServerAzureLoginScope,
-		apiServerAzureLoginCallbackUrl,
 		webServer,
 	}
 

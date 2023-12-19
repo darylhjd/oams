@@ -212,7 +212,7 @@ func (d *DB) RegisterUser(ctx context.Context, arg RegisterUserParams) (model.Us
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	if err != nil && errors.Is(err, qrm.ErrNoRows) {
-		return res, nil
+		return d.GetUser(ctx, arg.ID)
 	}
 
 	return res, err

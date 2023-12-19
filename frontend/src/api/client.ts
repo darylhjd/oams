@@ -45,7 +45,7 @@ export class APIClient {
       provider: "azure",
       options: {
         redirectTo: redirectUrl,
-        scopes: "api://ntuoams/Users.Login.All email",
+        scopes: `${process.env.AZURE_LOGIN_SCOPE} email`,
       },
     });
   }
@@ -60,8 +60,6 @@ export class APIClient {
     if (session == null) {
       return;
     }
-
-    console.log(session)
 
     this._client.defaults.headers.common["Authorization"] =
       `Bearer ${session.provider_token}`;

@@ -87,7 +87,7 @@ function Items() {
         onClose={close}
         onClick={close}
         classNames={{
-          inner: styles.systemAdminMenuDropdown
+          inner: styles.systemAdminMenuDrawer,
         }}
       >
         {items}
