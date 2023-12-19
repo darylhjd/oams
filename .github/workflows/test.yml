@@ -24,11 +24,11 @@ jobs:
 
       - name: Build frontend
         env:
-          AZURE_LOGIN_SCOPE: azure-login-scope
-          SUPABASE_URL: supabase-url
-          SUPABASE_KEY: supabase-key
-          API_SERVER: api-server-host
-          WEB_SERVER: web-server-host
+          AZURE_LOGIN_SCOPE: ${{ vars.AZURE_LOGIN_SCOPE }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
+          API_SERVER: ${{ vars.API_SERVER }}
+          WEB_SERVER: ${{ vars.WEB_SERVER }}
         run: |
           cd frontend
           npx next telemetry disable
