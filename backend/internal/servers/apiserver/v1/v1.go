@@ -29,8 +29,8 @@ const (
 	userUrl               = "/users/"
 	classesUrl            = "/classes"
 	classUrl              = "/classes/"
-	classManagersUrl      = "/class-managers"
-	classManagerUrl       = "/class-managers/"
+	classGroupManagersUrl = "/class-group-managers"
+	classGroupManagerUrl  = "/class-group-managers/"
 	classGroupsUrl        = "/class-groups"
 	classGroupUrl         = "/class-groups/"
 	classGroupSessionsUrl = "/class-group-sessions"
@@ -112,8 +112,8 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(classManagersUrl, permissions.EnforceAccessPolicy(
-		v.classManagers,
+	v.mux.HandleFunc(classGroupManagersUrl, permissions.EnforceAccessPolicy(
+		v.classGroupManagers,
 		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.ClassManagerRead},
@@ -122,8 +122,8 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(classManagerUrl, permissions.EnforceAccessPolicy(
-		v.classManager,
+	v.mux.HandleFunc(classGroupManagerUrl, permissions.EnforceAccessPolicy(
+		v.classGroupManager,
 		v.auth, v.db,
 		map[string][]permissions.P{
 			http.MethodGet:    {permissions.ClassManagerRead},

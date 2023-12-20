@@ -4,7 +4,7 @@ import { UserGetResponse, UserMeResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
 import { ClassGetResponse, ClassesGetResponse } from "./class";
-import { ClassManagersGetResponse } from "./class_manager";
+import { ClassGroupManagersGetResponse } from "./class_group_manager";
 import { ClassGroupGetResponse, ClassGroupsGetResponse } from "./class_group";
 import {
   ClassGroupSessionGetResponse,
@@ -22,9 +22,9 @@ export class APIClient {
   static readonly _userMePath = "/users/me";
   static readonly _classesPath = "/classes";
   static readonly _classPath = "/classes/";
-  static readonly _classManagersPath = "/class-managers";
   static readonly _classGroupsPath = "/class-groups";
   static readonly _classGroupPath = "/class-groups/";
+  static readonly _classGroupManagersPath = "/class-group-managers";
   static readonly _classGroupSessionsPath = "/class-group-sessions";
   static readonly _classGroupSessionPath = "/class-group-sessions/";
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
@@ -129,22 +129,6 @@ export class APIClient {
     return data;
   }
 
-  static async classManagersGet(
-    offset: number,
-    limit: number,
-  ): Promise<ClassManagersGetResponse> {
-    const { data } = await this._client.get<ClassManagersGetResponse>(
-      this._classManagersPath,
-      {
-        params: {
-          offset: offset,
-          limit: limit,
-        },
-      },
-    );
-    return data;
-  }
-
   static async classGroupsGet(
     offset: number,
     limit: number,
@@ -164,6 +148,22 @@ export class APIClient {
   static async classGroupGet(id: number): Promise<ClassGroupGetResponse> {
     const { data } = await this._client.get<ClassGroupGetResponse>(
       this._classGroupPath + id,
+    );
+    return data;
+  }
+
+  static async classGroupManagersGet(
+    offset: number,
+    limit: number,
+  ): Promise<ClassGroupManagersGetResponse> {
+    const { data } = await this._client.get<ClassGroupManagersGetResponse>(
+      this._classGroupManagersPath,
+      {
+        params: {
+          offset: offset,
+          limit: limit,
+        },
+      },
     );
     return data;
   }

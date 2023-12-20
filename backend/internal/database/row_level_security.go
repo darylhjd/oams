@@ -26,23 +26,21 @@ func sessionEnrollmentRLS(ctx context.Context) BoolExpression {
 				).INNER_JOIN(
 					ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
 				).INNER_JOIN(
-					Classes, Classes.ID.EQ(ClassGroups.ClassID),
-				).INNER_JOIN(
-					ClassManagers, ClassManagers.ClassID.EQ(Classes.ID),
+					ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
 				),
 			).WHERE(
-				ClassManagers.UserID.EQ(String(authContext.User.ID)),
+				ClassGroupManagers.UserID.EQ(String(authContext.User.ID)),
 			),
 		),
 	)
 }
 
-func classManagerRLS(ctx context.Context) BoolExpression {
+func classGroupManagerRLS(ctx context.Context) BoolExpression {
 	authContext := oauth2.GetAuthContext(ctx)
 
 	return Bool(
 		authContext.User.Role == model.UserRole_SystemAdmin,
 	).OR(
-		ClassManagers.UserID.EQ(String(authContext.User.ID)),
+		ClassGroupManagers.UserID.EQ(String(authContext.User.ID)),
 	)
 }

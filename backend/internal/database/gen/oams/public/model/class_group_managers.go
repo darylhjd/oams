@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-type ClassManager struct {
+type ClassGroupManager struct {
 	ID           int64        `sql:"primary_key" json:"id"`
 	UserID       string       `json:"user_id"`
-	ClassID      int64        `json:"class_id"`
+	ClassGroupID int64        `json:"class_group_id"`
 	ManagingRole ManagingRole `json:"managing_role"`
 	CreatedAt    time.Time    `json:"created_at"`
 	UpdatedAt    time.Time    `json:"updated_at"`

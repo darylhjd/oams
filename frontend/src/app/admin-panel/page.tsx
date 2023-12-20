@@ -8,7 +8,7 @@ import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import {
   ClassGroupSessionsTable,
   ClassGroupsTable,
-  ClassManagersTable,
+  ClassGroupManagersTable,
   ClassesTable,
   SessionEnrollmentsTable,
   UsersTable,
@@ -29,8 +29,8 @@ export default function AdminPanelPage() {
         <TabsList grow justify={isMobile ? "left" : "center"}>
           <TabsTab value="users">Users</TabsTab>
           <TabsTab value="classes">Classes</TabsTab>
-          <TabsTab value="classManagers">Class Managers</TabsTab>
           <TabsTab value="classGroups">Class Groups</TabsTab>
+          <TabsTab value="classGroupManagers">Class Group Managers</TabsTab>
           <TabsTab value="classGroupSessions">Class Group Sessions</TabsTab>
           <TabsTab value="sessionEnrollments">Session Enrollments</TabsTab>
         </TabsList>
@@ -41,11 +41,11 @@ export default function AdminPanelPage() {
         <TabsPanel value="classes">
           <ClassesTable />
         </TabsPanel>
-        <TabsPanel value="classManagers">
-          <ClassManagersTable />
-        </TabsPanel>
         <TabsPanel value="classGroups">
           <ClassGroupsTable />
+        </TabsPanel>
+        <TabsPanel value="classGroupManagers">
+          <ClassGroupManagersTable />
         </TabsPanel>
         <TabsPanel value="classGroupSessions">
           <ClassGroupSessionsTable />

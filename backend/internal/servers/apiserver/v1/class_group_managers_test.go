@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAPIServerV1_classManagers(t *testing.T) {
+func TestAPIServerV1_classGroupManagers(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
@@ -58,31 +58,31 @@ func TestAPIServerV1_classManagers(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			req := httpRequestWithAuthContext(
-				httptest.NewRequest(tt.withMethod, classManagersUrl, nil),
+				httptest.NewRequest(tt.withMethod, classGroupManagersUrl, nil),
 				tests.StubAuthContext(),
 			)
 			rr := httptest.NewRecorder()
-			v1.classManagers(rr, req)
+			v1.classGroupManagers(rr, req)
 
 			a.Equal(tt.wantStatusCode, rr.Code)
 		})
 	}
 }
 
-func TestAPIServerV1_classManagersGet(t *testing.T) {
+func TestAPIServerV1_classGroupManagersGet(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name                     string
-		withExistingClassManager bool
-		wantResponse             classManagersGetResponse
+		name                          string
+		withExistingClassGroupManager bool
+		wantResponse                  classGroupManagersGetResponse
 	}{
 		{
-			"request with class manager in database",
+			"request with class group manager in database",
 			true,
-			classManagersGetResponse{
+			classGroupManagersGetResponse{
 				newSuccessResponse(),
-				[]model.ClassManager{
+				[]model.ClassGroupManager{
 					{
 						ManagingRole: model.ManagingRole_CourseCoordinator,
 					},
@@ -90,11 +90,11 @@ func TestAPIServerV1_classManagersGet(t *testing.T) {
 			},
 		},
 		{
-			"request with no class manager in database",
+			"request with no class group manager in database",
 			false,
-			classManagersGetResponse{
+			classGroupManagersGetResponse{
 				newSuccessResponse(),
-				[]model.ClassManager{},
+				[]model.ClassGroupManager{},
 			},
 		},
 	}
@@ -111,54 +111,58 @@ func TestAPIServerV1_classManagersGet(t *testing.T) {
 			v1 := newTestAPIServerV1(t, id)
 			defer tests.TearDown(t, v1.db, id)
 
-			if tt.withExistingClassManager {
-				for idx, manager := range tt.wantResponse.ClassManagers {
-					createdManager := tests.StubClassManager(t, ctx, v1.db, manager.ManagingRole)
-					managerPtr := &tt.wantResponse.ClassManagers[idx]
+			if tt.withExistingClassGroupManager {
+				for idx, manager := range tt.wantResponse.ClassGroupManagers {
+					createdManager := tests.StubClassGroupManager(
+						t, ctx, v1.db,
+						manager.ManagingRole,
+						model.ClassType_Lec,
+					)
+					managerPtr := &tt.wantResponse.ClassGroupManagers[idx]
 					managerPtr.ID = createdManager.ID
 					managerPtr.UserID = createdManager.UserID
-					managerPtr.ClassID = createdManager.ClassID
+					managerPtr.ClassGroupID = createdManager.ClassGroupID
 					managerPtr.CreatedAt, managerPtr.UpdatedAt = createdManager.CreatedAt, createdManager.CreatedAt
 				}
 			}
 
 			req := httpRequestWithAuthContext(
-				httptest.NewRequest(http.MethodGet, classManagersUrl, nil),
+				httptest.NewRequest(http.MethodGet, classGroupManagersUrl, nil),
 				tests.StubAuthContext(),
 			)
-			actualResp, ok := v1.classManagersGet(req).(classManagersGetResponse)
+			actualResp, ok := v1.classGroupManagersGet(req).(classGroupManagersGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
 		})
 	}
 }
 
-func TestAPIServerV1_classManagersPost(t *testing.T) {
+func TestAPIServerV1_classGroupManagersPost(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name                     string
-		withRequest              classManagersPostRequest
-		withExistingClassManager bool
-		withExistingUser         bool
-		withExistingClass        bool
-		wantResponse             classManagersPostResponse
-		wantStatusCode           int
-		wantErr                  string
+		name                          string
+		withRequest                   classGroupManagersPostRequest
+		withExistingClassGroupManager bool
+		withExistingUser              bool
+		withExistingClass             bool
+		wantResponse                  classGroupManagersPostResponse
+		wantStatusCode                int
+		wantErr                       string
 	}{
 		{
-			"request with no existing class manager",
-			classManagersPostRequest{
-				database.CreateClassManagerParams{
+			"request with no existing class group manager",
+			classGroupManagersPostRequest{
+				database.CreateClassGroupManagerParams{
 					ManagingRole: model.ManagingRole_CourseCoordinator,
 				},
 			},
 			false,
 			true,
 			true,
-			classManagersPostResponse{
+			classGroupManagersPostResponse{
 				newSuccessResponse(),
-				classManagersPostClassManagerResponseFields{
+				classGroupManagersPostClassGroupManagerResponseFields{
 					ManagingRole: model.ManagingRole_CourseCoordinator,
 				},
 			},
@@ -166,60 +170,60 @@ func TestAPIServerV1_classManagersPost(t *testing.T) {
 			"",
 		},
 		{
-			"request with existing class manager",
-			classManagersPostRequest{
-				database.CreateClassManagerParams{
+			"request with existing class group manager",
+			classGroupManagersPostRequest{
+				database.CreateClassGroupManagerParams{
 					ManagingRole: model.ManagingRole_CourseCoordinator,
 				},
 			},
 			true,
 			true,
 			true,
-			classManagersPostResponse{},
+			classGroupManagersPostResponse{},
 			http.StatusConflict,
-			"class manager with same user_id and class_id already exists",
+			"class group manager with same user_id and class_group_id already exists",
 		},
 		{
 			"request with non-existent user dependency",
-			classManagersPostRequest{
-				database.CreateClassManagerParams{
+			classGroupManagersPostRequest{
+				database.CreateClassGroupManagerParams{
 					ManagingRole: model.ManagingRole_CourseCoordinator,
 				},
 			},
 			false,
 			false,
 			true,
-			classManagersPostResponse{},
+			classGroupManagersPostResponse{},
 			http.StatusBadRequest,
-			"user_id and/or class_id does not exist",
+			"user_id and/or class_group_id does not exist",
 		},
 		{
 			"request with non-existent class dependency",
-			classManagersPostRequest{
-				database.CreateClassManagerParams{
+			classGroupManagersPostRequest{
+				database.CreateClassGroupManagerParams{
 					ManagingRole: model.ManagingRole_CourseCoordinator,
 				},
 			},
 			false,
 			true,
 			false,
-			classManagersPostResponse{},
+			classGroupManagersPostResponse{},
 			http.StatusBadRequest,
-			"user_id and/or class_id does not exist",
+			"user_id and/or class_group_id does not exist",
 		},
 		{
 			"request with non-existent user and class dependency",
-			classManagersPostRequest{
-				database.CreateClassManagerParams{
+			classGroupManagersPostRequest{
+				database.CreateClassGroupManagerParams{
 					ManagingRole: model.ManagingRole_CourseCoordinator,
 				},
 			},
 			false,
 			false,
 			false,
-			classManagersPostResponse{},
+			classGroupManagersPostResponse{},
 			http.StatusBadRequest,
-			"user_id and/or class_id does not exist",
+			"user_id and/or class_group_id does not exist",
 		},
 	}
 
@@ -236,13 +240,14 @@ func TestAPIServerV1_classManagersPost(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			switch {
-			case tt.withExistingClassManager:
-				createdManager := tests.StubClassManager(
+			case tt.withExistingClassGroupManager:
+				createdManager := tests.StubClassGroupManager(
 					t, ctx, v1.db,
-					tt.withRequest.ClassManager.ManagingRole,
+					tt.withRequest.ClassGroupManager.ManagingRole,
+					model.ClassType_Lec,
 				)
-				tt.withRequest.ClassManager.UserID = createdManager.UserID
-				tt.withRequest.ClassManager.ClassID = createdManager.ClassID
+				tt.withRequest.ClassGroupManager.UserID = createdManager.UserID
+				tt.withRequest.ClassGroupManager.ClassGroupID = createdManager.ClassGroupID
 			default:
 				if tt.withExistingUser {
 					createdUser := tests.StubUser(t, ctx, v1.db, database.CreateUserParams{
@@ -251,7 +256,7 @@ func TestAPIServerV1_classManagersPost(t *testing.T) {
 						Email: uuid.NewString(),
 						Role:  model.UserRole_SystemAdmin,
 					})
-					tt.withRequest.ClassManager.UserID = createdUser.ID
+					tt.withRequest.ClassGroupManager.UserID = createdUser.ID
 				}
 
 				if tt.withExistingClass {
@@ -261,15 +266,15 @@ func TestAPIServerV1_classManagersPost(t *testing.T) {
 						Semester:  uuid.NewString(),
 						Programme: uuid.NewString(),
 					})
-					tt.withRequest.ClassManager.ClassID = createdClass.ID
+					tt.withRequest.ClassGroupManager.ClassGroupID = createdClass.ID
 				}
 			}
 
 			reqBodyBytes, err := json.Marshal(tt.withRequest)
 			a.Nil(err)
 
-			req := httptest.NewRequest(http.MethodPost, classManagersUrl, bytes.NewReader(reqBodyBytes))
-			resp := v1.classManagersPost(req)
+			req := httptest.NewRequest(http.MethodPost, classGroupManagersUrl, bytes.NewReader(reqBodyBytes))
+			resp := v1.classGroupManagersPost(req)
 			a.Equal(tt.wantStatusCode, resp.Code())
 
 			switch {
@@ -278,13 +283,13 @@ func TestAPIServerV1_classManagersPost(t *testing.T) {
 				a.True(ok)
 				a.Contains(actualResp.Error, tt.wantErr)
 			default:
-				actualResp, ok := resp.(classManagersPostResponse)
+				actualResp, ok := resp.(classGroupManagersPostResponse)
 				a.True(ok)
 
-				tt.wantResponse.ClassManager.ID = actualResp.ClassManager.ID
-				tt.wantResponse.ClassManager.UserID = actualResp.ClassManager.UserID
-				tt.wantResponse.ClassManager.ClassID = actualResp.ClassManager.ClassID
-				tt.wantResponse.ClassManager.CreatedAt = actualResp.ClassManager.CreatedAt
+				tt.wantResponse.ClassGroupManager.ID = actualResp.ClassGroupManager.ID
+				tt.wantResponse.ClassGroupManager.UserID = actualResp.ClassGroupManager.UserID
+				tt.wantResponse.ClassGroupManager.ClassGroupID = actualResp.ClassGroupManager.ClassGroupID
+				tt.wantResponse.ClassGroupManager.CreatedAt = actualResp.ClassGroupManager.CreatedAt
 				a.Equal(tt.wantResponse, actualResp)
 			}
 		})

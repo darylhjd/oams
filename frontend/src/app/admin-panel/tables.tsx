@@ -8,7 +8,7 @@ import {
   AsyncDataSource,
   ClassGroupSessionsDataSource,
   ClassGroupsDataSource,
-  ClassManagersDataSource,
+  ClassGroupManagersDataSource,
   ClassesDataSource,
   SessionEnrollmentsDataSource,
   UsersDataSource,
@@ -18,7 +18,7 @@ import {
   ClassDataTableColumns,
   ClassGroupDataTableColumns,
   ClassGroupSessionDataTableColumns,
-  ClassManagerDataTableColumns,
+  ClassGroupManagerDataTableColumns,
   SessionEnrollmentsDataTableColumns,
   UserDataTableColumns,
 } from "@/components/entity_columns";
@@ -60,15 +60,6 @@ export function ClassesTable() {
   );
 }
 
-export function ClassManagersTable() {
-  return (
-    <AsyncDataTable
-      columns={ClassManagerDataTableColumns}
-      dataSource={new ClassManagersDataSource()}
-    />
-  );
-}
-
 export function ClassGroupsTable() {
   const router = useRouter();
 
@@ -81,6 +72,15 @@ export function ClassGroupsTable() {
           router.push(Routes.adminPanelClassGroup + row.original.id),
         ...ROW_PROPS,
       })}
+    />
+  );
+}
+
+export function ClassGroupManagersTable() {
+  return (
+    <AsyncDataTable
+      columns={ClassGroupManagerDataTableColumns}
+      dataSource={new ClassGroupManagersDataSource()}
     />
   );
 }
