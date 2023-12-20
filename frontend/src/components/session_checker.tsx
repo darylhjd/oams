@@ -37,9 +37,12 @@ export function IsClassGroupManager({
 }) {
   const session = useSessionUserStore();
 
-  if (!session.data?.has_managed_class_groups) {
-    return <NotFoundPage />;
+  if (
+    session.data?.has_managed_class_groups ||
+    session.data?.session_user.role == UserRole.SystemAdmin
+  ) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  return <NotFoundPage />;
 }
