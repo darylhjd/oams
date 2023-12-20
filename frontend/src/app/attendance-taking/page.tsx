@@ -36,7 +36,9 @@ export default function AttendanceTakingPage() {
 
   return (
     <Container className={styles.container} fluid>
-      <Text ta="center">You have {upcomingSessions.length} upcoming attendance takings.</Text>
+      <Text ta="center">
+        You have {upcomingSessions.length} upcoming attendance takings.
+      </Text>
     </Container>
   );
 }
