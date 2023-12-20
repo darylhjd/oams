@@ -88,7 +88,7 @@ CREATE TABLE class_group_managers
             REFERENCES users (id),
     CONSTRAINT fk_class_group_id
         FOREIGN KEY (class_group_id)
-            REFERENCES classes (id)
+            REFERENCES class_groups (id)
 );
 
 CREATE TRIGGER update_updated_at
