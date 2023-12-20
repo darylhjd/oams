@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common/batch"
+	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
 	"github.com/darylhjd/oams/backend/pkg/goroutines"
 )
 
@@ -65,7 +65,7 @@ func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, err
 	for _, header := range r.MultipartForm.File[multipartFormBatchFileIdent] {
 		header := header // Required for go routine to point to different file for each loop.
 		limiter.Do(func() {
-			var data batch.BatchData
+			var data common.BatchData
 
 			file, err := header.Open()
 			if err != nil {
@@ -77,7 +77,7 @@ func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, err
 				_ = file.Close()
 			}()
 
-			data, err = batch.ParseBatchFile(header.Filename, file)
+			data, err = common.ParseBatchFile(header.Filename, file)
 			if err != nil {
 				// Save as string type. This is a request error.
 				saveRes.Store(&data, err.Error())
@@ -97,7 +97,7 @@ func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, err
 		err           error
 	)
 	saveRes.Range(func(key, value any) bool {
-		data, ok := key.(*batch.BatchData)
+		data, ok := key.(*common.BatchData)
 		if !ok {
 			err = errors.New("type assertion failed when processing batch data")
 			return false
@@ -132,7 +132,7 @@ func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, err
 }
 
 type batchPutRequest struct {
-	Batches []batch.BatchData `json:"batches"`
+	Batches []common.BatchData `json:"batches"`
 }
 
 type batchPutResponse struct {
@@ -188,7 +188,7 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		// upsertClassGroups is a helper for class group session processing. The array is in the same order in which each
 		// class group is created. This allows us to access and set variables within the class group using values
 		// that are available to us only during creation of each class group.
-		classGroups []*batch.ClassGroupData
+		classGroups []*common.ClassGroupData
 
 		classGroupSessionsParams []database.UpsertClassGroupSessionParams // Store class group session params.
 

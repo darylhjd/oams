@@ -13,7 +13,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
-	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common/batch"
+	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -165,7 +165,7 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 				now := time.Now()
 
 				body := batchPutRequest{
-					[]batch.BatchData{
+					[]common.BatchData{
 						{
 							Class: database.UpsertClassParams{
 								Code:      "SC1015",
@@ -174,7 +174,7 @@ func TestAPIServerV1_batchPut(t *testing.T) {
 								Programme: "CSC  Full-Time",
 								Au:        3,
 							},
-							ClassGroups: []batch.ClassGroupData{
+							ClassGroups: []common.ClassGroupData{
 								{
 									database.UpsertClassGroupParams{
 										Name:      "A21",

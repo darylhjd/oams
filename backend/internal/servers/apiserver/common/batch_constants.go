@@ -1,4 +1,4 @@
-package batch
+package common
 
 import (
 	"time"
@@ -14,7 +14,7 @@ const (
 	studentNameColumn   = 1
 	studentIdColumn     = 5
 
-	expectedSheetCount                         = 1
+	expectedBatchSheetCount                    = 1
 	expectedClassMetaDataRows                  = 4
 	expectedClassMetaDataRowLength             = 1
 	expectedClassGroupIDRows                   = 1
