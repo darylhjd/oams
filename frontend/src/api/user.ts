@@ -1,5 +1,3 @@
-import { ClassType } from "./class_group";
-
 export type UsersGetResponse = {
   users: User[];
 };
@@ -10,17 +8,7 @@ export type UserGetResponse = {
 
 export type UserMeResponse = {
   session_user: User;
-  upcoming_class_group_sessions: UpcomingClassGroupSession[];
-};
-
-export type UpcomingClassGroupSession = {
-  code: string;
-  year: number;
-  semester: string;
-  name: string;
-  class_type: ClassType;
-  start_time: Date;
-  end_time: Date;
+  managed_class_groups: number[];
 };
 
 export type User = {

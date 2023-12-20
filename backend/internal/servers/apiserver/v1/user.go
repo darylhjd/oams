@@ -39,14 +39,14 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 
 type userMeResponse struct {
 	response
-	SessionUser                model.User                           `json:"session_user"`
-	UpcomingClassGroupSessions []database.UpcomingClassGroupSession `json:"upcoming_class_group_sessions"`
+	SessionUser        model.User `json:"session_user"`
+	ManagedClassGroups []int64    `json:"managed_class_groups"`
 }
 
 func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 	resp := userMeResponse{
-		response:                   newSuccessResponse(),
-		UpcomingClassGroupSessions: []database.UpcomingClassGroupSession{},
+		response:           newSuccessResponse(),
+		ManagedClassGroups: []int64{},
 	}
 
 	authContext := oauth2.GetAuthContext(r.Context())
@@ -57,14 +57,17 @@ func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could get session user from database")
 	}
 
-	upcomingClassGroupSessions, err := v.db.GetUserUpcomingClassGroupSessions(r.Context(), sessionUser.ID)
+	managed, err := v.db.GetManagedClassGroupsByUserID(r.Context(), authContext.User.ID)
 	if err != nil {
-		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not get session user upcoming class group sessions")
+		v.logInternalServerError(r, fmt.Errorf("could not get user managed class groups: %w", err))
+		return newErrorResponse(http.StatusInternalServerError, "could not get session user managed class groups")
 	}
 
 	resp.SessionUser = sessionUser
-	resp.UpcomingClassGroupSessions = append(resp.UpcomingClassGroupSessions, upcomingClassGroupSessions...)
+	for _, m := range managed {
+		resp.ManagedClassGroups = append(resp.ManagedClassGroups, m.ClassGroupID)
+	}
+
 	return resp
 }
 

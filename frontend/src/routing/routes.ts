@@ -9,4 +9,5 @@ export const Routes = {
   adminPanelClassGroupSession: "/admin-panel/class-group-sessions/",
   adminPanelSessionEnrollment: "/admin-panel/session-enrollments/",
   batchProcessing: "/batch-processing",
+  attendanceTaking: "/attendance-taking",
 };

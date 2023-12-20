@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
@@ -72,40 +71,25 @@ func TestAPIServerV1_userMe(t *testing.T) {
 	t.Parallel()
 
 	tts := []struct {
-		name                          string
-		withStubAuthUser              bool
-		withUpcomingClassGroupSession bool
-		wantResponse                  userMeResponse
-		wantStatusCode                int
-		wantErr                       string
+		name             string
+		withStubAuthUser bool
+		wantResponse     userMeResponse
+		wantStatusCode   int
+		wantErr          string
 	}{
 		{
 			"request with valid auth context and auth context user in database",
 			true,
-			false,
 			userMeResponse{
 				newSuccessResponse(),
 				tests.StubAuthContext().User,
-				[]database.UpcomingClassGroupSession{},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"request with upcoming class group sessions",
-			true,
-			true,
-			userMeResponse{
-				newSuccessResponse(),
-				tests.StubAuthContext().User,
-				[]database.UpcomingClassGroupSession{},
+				[]int64{},
 			},
 			http.StatusOK,
 			"",
 		},
 		{
 			"request with valid auth context but non-existent user in database",
-			false,
 			false,
 			userMeResponse{},
 			http.StatusInternalServerError,
@@ -126,23 +110,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			defer tests.TearDown(t, v1.db, id)
 
 			if tt.withStubAuthUser {
-				contextUser := tests.StubAuthContextUser(t, ctx, v1.db)
-
-				if tt.withUpcomingClassGroupSession {
-					createdSession := tests.StubClassGroupSession(
-						t, ctx, v1.db,
-						time.Now().Add(-time.Hour), // Test ongoing session.
-						time.Now().Add(time.Hour*24),
-						uuid.NewString(),
-					)
-
-					_, err := v1.db.CreateSessionEnrollment(ctx, database.CreateSessionEnrollmentParams{
-						SessionID: createdSession.ID,
-						UserID:    contextUser.ID,
-						Attended:  false,
-					})
-					a.Nil(err)
-				}
+				tests.StubAuthContextUser(t, ctx, v1.db)
 			}
 
 			req := httpRequestWithAuthContext(
@@ -163,12 +131,6 @@ func TestAPIServerV1_userMe(t *testing.T) {
 
 				tt.wantResponse.SessionUser.CreatedAt = actualResp.SessionUser.CreatedAt
 				tt.wantResponse.SessionUser.UpdatedAt = actualResp.SessionUser.UpdatedAt
-
-				if tt.withUpcomingClassGroupSession {
-					a.NotEmptyf(actualResp.UpcomingClassGroupSessions, "expected upcoming session")
-					tt.wantResponse.UpcomingClassGroupSessions = actualResp.UpcomingClassGroupSessions
-				}
-
 				a.Equal(tt.wantResponse, actualResp)
 			}
 		})

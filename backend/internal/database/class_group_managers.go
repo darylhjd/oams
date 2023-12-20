@@ -136,3 +136,20 @@ func (d *DB) BatchUpsertClassGroupManagers(ctx context.Context, args []UpsertCla
 	// TODO: Implement SQL.
 	return nil, nil
 }
+
+func (d *DB) GetManagedClassGroupsByUserID(ctx context.Context, userId string) ([]model.ClassGroupManager, error) {
+	var res []model.ClassGroupManager
+
+	stmt := SELECT(
+		ClassGroupManagers.AllColumns,
+	).FROM(
+		ClassGroupManagers,
+	).WHERE(
+		ClassGroupManagers.UserID.EQ(String(userId)).AND(
+			classGroupManagerRLS(ctx),
+		),
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}

@@ -20,12 +20,12 @@ import {
   Divider,
   Flex,
   Space,
-  DrawerContent,
 } from "@mantine/core";
 import { usePathname, useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
 import { useDisclosure } from "@mantine/hooks";
 import {
+  IconCheck,
   IconChevronDown,
   IconFileDescription,
   IconLayoutDashboard,
@@ -120,21 +120,22 @@ function GuestItems() {
 function LoggedItems() {
   const session = useSessionUserStore();
 
+  const isSystemAdmin = session.data?.session_user.role == UserRole.SystemAdmin;
+  const isClassGroupManager = session.data?.managed_class_groups.length != 0;
+
   return (
     <>
       <Group visibleFrom="md">
-        {session.data?.session_user.role == UserRole.SystemAdmin ? (
-          <SystemAdminMenu />
-        ) : null}
+        {isSystemAdmin ? <SystemAdminMenu /> : null}
+        {isClassGroupManager ? <ClassGroupManagerMenu /> : null}
         <AboutButton />
         <ProfileButton />
         <LogoutButton />
       </Group>
 
       <Stack hiddenFrom="md" gap={0}>
-        {session.data?.session_user.role == UserRole.SystemAdmin ? (
-          <SystemAdminMenu />
-        ) : null}
+        {isSystemAdmin ? <SystemAdminMenu /> : null}
+        {isClassGroupManager ? <ClassGroupManagerMenu /> : null}
         <AboutButton />
         <Divider my="sm" />
 
@@ -215,6 +216,56 @@ function LogoutButton() {
   );
 }
 
+function ClassGroupManagerMenu() {
+  const router = useRouter();
+
+  return (
+    <>
+      <Box visibleFrom="md">
+        <Menu
+          width={200}
+          classNames={{
+            dropdown: styles.menuDropdown,
+          }}
+        >
+          <MenuTarget>
+            <Button
+              color="red"
+              variant="subtle"
+              rightSection={<IconChevronDown />}
+            >
+              Class Group Manager Menu
+            </Button>
+          </MenuTarget>
+          <MenuDropdown>
+            <MenuItem
+              leftSection={<IconCheck size={16} />}
+              onClick={() => router.push(Routes.attendanceTaking)}
+            >
+              Attendance Taking
+            </MenuItem>
+          </MenuDropdown>
+        </Menu>
+      </Box>
+
+      <NavLink
+        color="red"
+        hiddenFrom="md"
+        label="Class Group Manager Menu"
+        active
+        variant="subtle"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <NavLink
+          label="Attendance Taking"
+          leftSection={<IconCheck size={16} />}
+          onClick={() => router.push(Routes.attendanceTaking)}
+        />
+      </NavLink>
+    </>
+  );
+}
+
 function SystemAdminMenu() {
   const router = useRouter();
 
@@ -224,7 +275,7 @@ function SystemAdminMenu() {
         <Menu
           width={200}
           classNames={{
-            dropdown: styles.systemAdminMenuDropdown,
+            dropdown: styles.menuDropdown,
           }}
         >
           <MenuTarget>
