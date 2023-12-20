@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -145,7 +144,7 @@ func TestAPIServerV1_classGroupManagersPost(t *testing.T) {
 		withRequest                   classGroupManagersPostRequest
 		withExistingClassGroupManager bool
 		withExistingUser              bool
-		withExistingClass             bool
+		withExistingClassGroup        bool
 		wantResponse                  classGroupManagersPostResponse
 		wantStatusCode                int
 		wantErr                       string
@@ -259,14 +258,9 @@ func TestAPIServerV1_classGroupManagersPost(t *testing.T) {
 					tt.withRequest.ClassGroupManager.UserID = createdUser.ID
 				}
 
-				if tt.withExistingClass {
-					createdClass := tests.StubClass(t, ctx, v1.db, database.CreateClassParams{
-						Code:      uuid.NewString(),
-						Year:      rand.Int31(),
-						Semester:  uuid.NewString(),
-						Programme: uuid.NewString(),
-					})
-					tt.withRequest.ClassGroupManager.ClassGroupID = createdClass.ID
+				if tt.withExistingClassGroup {
+					createdClassGroup := tests.StubClassGroup(t, ctx, v1.db, uuid.NewString(), model.ClassType_Lec)
+					tt.withRequest.ClassGroupManager.ClassGroupID = createdClassGroup.ID
 				}
 			}
 
