@@ -56,15 +56,14 @@ func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could get session user from database")
 	}
 
+	resp.SessionUser = sessionUser
 	// TODO: Add tests for this field.
-	managed, err := v.db.HasManagedClassGroups(r.Context())
+	resp.HasManagedClassGroups, err = v.db.HasManagedClassGroups(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, fmt.Errorf("could not get user managed class groups: %w", err))
 		return newErrorResponse(http.StatusInternalServerError, "could not get session user managed class groups")
 	}
 
-	resp.SessionUser = sessionUser
-	resp.HasManagedClassGroups = managed
 	return resp
 }
 
