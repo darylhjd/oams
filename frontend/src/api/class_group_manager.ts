@@ -1,11 +1,11 @@
-export type ClassManagersGetResponse = {
-  class_managers: ClassManager[];
+export type ClassGroupManagersGetResponse = {
+  class_group_managers: ClassGroupManager[];
 };
 
-export type ClassManager = {
+export type ClassGroupManager = {
   id: number;
   user_id: string;
-  class_id: number;
+  class_group_id: number;
   managing_role: ManagingRole;
   created_at: Date;
   updated_at: Date;

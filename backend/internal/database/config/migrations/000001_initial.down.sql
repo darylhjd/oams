@@ -4,9 +4,9 @@ DROP TABLE session_enrollments;
 
 DROP TABLE class_group_sessions;
 
-DROP TABLE class_groups;
+DROP TABLE class_group_managers;
 
-DROP TABLE class_managers;
+DROP TABLE class_groups;
 
 DROP TABLE classes;
 

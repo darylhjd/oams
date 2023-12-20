@@ -52,30 +52,6 @@ CREATE TRIGGER update_updated_at
     FOR EACH ROW
 EXECUTE PROCEDURE update_updated_at();
 
-CREATE TABLE class_managers
-(
-    id            BIGSERIAL PRIMARY KEY,
-    user_id       TEXT          NOT NULL,
-    class_id      BIGINT        NOT NULL,
-    managing_role MANAGING_ROLE NOT NULL,
-    created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-    updated_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-    CONSTRAINT ux_user_id_class_id
-        UNIQUE (user_id, class_id),
-    CONSTRAINT fk_user_id
-        FOREIGN KEY (user_id)
-            REFERENCES users (id),
-    CONSTRAINT fk_class_id
-        FOREIGN KEY (class_id)
-            REFERENCES classes (id)
-);
-
-CREATE TRIGGER update_updated_at
-    BEFORE UPDATE
-    ON class_managers
-    FOR EACH ROW
-EXECUTE PROCEDURE update_updated_at();
-
 CREATE TABLE class_groups
 (
     id         BIGSERIAL PRIMARY KEY,
@@ -94,6 +70,30 @@ CREATE TABLE class_groups
 CREATE TRIGGER update_updated_at
     BEFORE UPDATE
     ON class_groups
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
+
+CREATE TABLE class_group_managers
+(
+    id             BIGSERIAL PRIMARY KEY,
+    user_id        TEXT          NOT NULL,
+    class_group_id BIGINT        NOT NULL,
+    managing_role  MANAGING_ROLE NOT NULL DEFAULT 'COURSE_COORDINATOR',
+    created_at     TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at     TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    CONSTRAINT ux_user_id_class_group_id
+        UNIQUE (user_id, class_group_id),
+    CONSTRAINT fk_user_id
+        FOREIGN KEY (user_id)
+            REFERENCES users (id),
+    CONSTRAINT fk_class_group_id
+        FOREIGN KEY (class_group_id)
+            REFERENCES classes (id)
+);
+
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE
+    ON class_group_managers
     FOR EACH ROW
 EXECUTE PROCEDURE update_updated_at();
 

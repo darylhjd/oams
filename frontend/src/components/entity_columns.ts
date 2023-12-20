@@ -7,7 +7,7 @@ import {
 import { Class } from "@/api/class";
 import { ClassGroup } from "@/api/class_group";
 import { ClassGroupSession } from "@/api/class_group_session";
-import { ClassManager } from "@/api/class_manager";
+import { ClassGroupManager } from "@/api/class_group_manager";
 import { SessionEnrollment } from "@/api/session_enrollment";
 import { User } from "@/api/user";
 import { MRT_ColumnDef } from "mantine-react-table";
@@ -42,14 +42,6 @@ export const ClassDataTableColumns = <MRT_ColumnDef<Class>[]>[
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
-export const ClassManagerDataTableColumns = <MRT_ColumnDef<ClassManager>[]>[
-  { accessorKey: "id", header: "ID" },
-  { accessorKey: "user_id", header: "User ID" },
-  { accessorKey: "class_id", header: "Class ID" },
-  { accessorKey: "managing_role", header: "Managing Role" },
-  ...CreatedAtUpdatedAtDataTableColumns,
-];
-
 export const ClassGroupBatchDataTableColumns = <
   MRT_ColumnDef<UpsertClassGroupParams>[]
 >[
@@ -60,6 +52,16 @@ export const ClassGroupBatchDataTableColumns = <
 ];
 export const ClassGroupDataTableColumns = <MRT_ColumnDef<ClassGroup>[]>[
   ...ClassGroupBatchDataTableColumns,
+  ...CreatedAtUpdatedAtDataTableColumns,
+];
+
+export const ClassGroupManagerDataTableColumns = <
+  MRT_ColumnDef<ClassGroupManager>[]
+>[
+  { accessorKey: "id", header: "ID" },
+  { accessorKey: "user_id", header: "User ID" },
+  { accessorKey: "class_group_id", header: "Class Group ID" },
+  { accessorKey: "managing_role", header: "Managing Role" },
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
