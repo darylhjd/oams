@@ -44,3 +44,13 @@ func classGroupManagerRLS(ctx context.Context) BoolExpression {
 		ClassGroupManagers.UserID.EQ(String(authContext.User.ID)),
 	)
 }
+
+func attendanceTakingRLS(ctx context.Context) BoolExpression {
+	return classGroupManagerRLS(ctx).OR(
+		Bool(
+			oauth2.GetAuthContext(ctx).User.Role == model.UserRole_SystemAdmin,
+		).AND(
+			ClassGroupManagers.UserID.IS_NULL(),
+		),
+	)
+}

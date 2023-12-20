@@ -14,6 +14,7 @@ import {
   SessionEnrollmentGetResponse,
   SessionEnrollmentsGetResponse,
 } from "./session_enrollment";
+import { AttendanceTakingGetResponse } from "./attendance_taking";
 
 export class APIClient {
   static readonly _batchPath = "/batch";
@@ -29,6 +30,7 @@ export class APIClient {
   static readonly _classGroupSessionPath = "/class-group-sessions/";
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
   static readonly _sessionEnrollmentPath = "/session-enrollments/";
+  static readonly _attendanceTakingPath = "/attendance-taking";
 
   static readonly _supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -214,6 +216,13 @@ export class APIClient {
   ): Promise<SessionEnrollmentGetResponse> {
     const { data } = await this._client.get<SessionEnrollmentGetResponse>(
       this._sessionEnrollmentPath + id,
+    );
+    return data;
+  }
+
+  static async attendanceTakingGet(): Promise<AttendanceTakingGetResponse> {
+    const { data } = await this._client.get<AttendanceTakingGetResponse>(
+      this._attendanceTakingPath,
     );
     return data;
   }
