@@ -15,9 +15,6 @@ services:
     ports:
       - "3001:3001"
     network_mode: bridge
-    depends_on:
-      local-db:
-        condition: service_healthy
 
   webserver:
     image: oams/webserver
@@ -34,12 +31,12 @@ services:
       apiserver:
         condition: service_started
 
-  local-db:
-    image: postgres:latest
-    container_name: local-db
+  test-db:
+    image: postgres:15
+    container_name: test-db
     environment:
-      POSTGRES_USER: oams
-      POSTGRES_PASSWORD: oams-local
+      POSTGRES_USER: oams-tester
+      POSTGRES_PASSWORD: oams-testing
     ports:
       - "3002:5432"
     network_mode: bridge
