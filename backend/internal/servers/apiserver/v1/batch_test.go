@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
 	"github.com/darylhjd/oams/backend/internal/tests"
 	"github.com/google/uuid"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
+	. "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
 	"github.com/darylhjd/oams/backend/pkg/to"
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/lib/pq"
