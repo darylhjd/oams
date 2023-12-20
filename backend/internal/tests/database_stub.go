@@ -52,7 +52,7 @@ func StubClass(t *testing.T, ctx context.Context, db *database.DB, params databa
 }
 
 // StubClassGroupManager inserts a mock user and class group into the database, and then makes the user
-// a manager of the mocked class.
+// a manager of the mocked class group.
 func StubClassGroupManager(t *testing.T, ctx context.Context, db *database.DB, role model.ManagingRole, classType model.ClassType) model.ClassGroupManager {
 	t.Helper()
 
