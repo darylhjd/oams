@@ -24,6 +24,7 @@ type attendanceTakingGetResponse struct {
 	UpcomingClassGroupSessions []model.ClassGroupSession `json:"upcoming_class_group_sessions"`
 }
 
+// TODO: Implement tests for this endpoint.
 func (v *APIServerV1) attendanceTakingGet(r *http.Request) apiResponse {
 	resp := attendanceTakingGetResponse{
 		response:                   newSuccessResponse(),
