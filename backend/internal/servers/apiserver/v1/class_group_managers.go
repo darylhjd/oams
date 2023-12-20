@@ -9,6 +9,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
+	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
 )
 
 const (
@@ -130,13 +131,28 @@ func (v *APIServerV1) classGroupManagerPut(r *http.Request) apiResponse {
 
 func (v *APIServerV1) processClassGroupManagerPutRequest(r *http.Request) (apiResponse, error) {
 	if err := r.ParseMultipartForm(maxClassGroupManagersPutParseMemory); err != nil {
-		return classGroupManagersPutResponse{}, err
+		return nil, err
 	}
 
 	if len(r.MultipartForm.File[multipartFormClassGroupManagersFileIdent]) != maxClassGroupManagersPutFiles {
 		return newErrorResponse(http.StatusBadRequest, "only one file is allowed"), nil
 	}
 
-	// TODO: Implement class group managers file parsing.
+	multipartFile := r.MultipartForm.File[multipartFormClassGroupManagersFileIdent][maxClassGroupManagersPutFiles-1]
+	file, err := multipartFile.Open()
+	if err != nil {
+		return nil, err
+	}
+
+	upsertData, err := common.ParseManagersFile(file)
+	if err != nil {
+		return newErrorResponse(http.StatusBadRequest, err.Error()), nil
+	}
+
+	_, err = v.db.BatchUpsertClassGroupManagers(r.Context(), upsertData)
+	if err != nil {
+		return nil, err
+	}
+
 	return newErrorResponse(http.StatusNotImplemented, ""), nil
 }

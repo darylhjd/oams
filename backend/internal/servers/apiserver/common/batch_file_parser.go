@@ -30,11 +30,11 @@ func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 	}
 
 	sheets := file.GetSheetList()
-	if len(sheets) != expectedSheetCount {
+	if len(sheets) != expectedBatchSheetCount {
 		return creationData, errors.New("invalid class creation file format")
 	}
 
-	rows, err := file.GetRows(sheets[expectedSheetCount-1])
+	rows, err := file.GetRows(sheets[expectedBatchSheetCount-1])
 	if err != nil {
 		return creationData, errors.New("cannot get data rows")
 	}
