@@ -9,6 +9,7 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
+	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common/managers"
 )
 
 const (
@@ -130,7 +131,7 @@ func (v *APIServerV1) classGroupManagerPut(r *http.Request) apiResponse {
 
 func (v *APIServerV1) processClassGroupManagerPutRequest(r *http.Request) (apiResponse, error) {
 	if err := r.ParseMultipartForm(maxClassGroupManagersPutParseMemory); err != nil {
-		return classGroupManagersPutResponse{}, err
+		return nil, err
 	}
 
 	if len(r.MultipartForm.File[multipartFormClassGroupManagersFileIdent]) != maxClassGroupManagersPutFiles {
@@ -138,5 +139,21 @@ func (v *APIServerV1) processClassGroupManagerPutRequest(r *http.Request) (apiRe
 	}
 
 	// TODO: Implement class group managers file parsing.
-	return newErrorResponse(http.StatusNotImplemented, ""), nil
+	multipartFile := r.MultipartForm.File[multipartFormClassGroupManagersFileIdent][maxClassGroupManagersPutFiles-1]
+	file, err := multipartFile.Open()
+	if err != nil {
+		return nil, err
+	}
+
+	upsertData, err := managers.ParseManagersFile(file)
+	if err != nil {
+		return newErrorResponse(http.StatusBadRequest, err.Error()), nil
+	}
+
+	res, err := v.db.BatchUpsertClassGroupManagers(r.Context(), upsertData)
+	if err != nil {
+		return nil, err
+	}
+
+	return classGroupManagersPutResponse{newSuccessResponse()}, nil
 }

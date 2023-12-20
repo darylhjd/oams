@@ -121,3 +121,17 @@ func (d *DB) DeleteClassGroupManager(ctx context.Context, id int64) (model.Class
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
+
+type UpsertClassGroupManagerParams struct {
+	UserID         string             `json:"user_id"`
+	ClassCode      string             `json:"class_code"`
+	ClassYear      int32              `json:"class_year"`
+	ClassSemester  string             `json:"class_semester"`
+	ClassGroupName string             `json:"class_group_name"`
+	ClassType      model.ClassType    `json:"class_type"`
+	ManagingRole   model.ManagingRole `json:"managing_role"`
+}
+
+func (d *DB) BatchUpsertClassGroupManagers(ctx context.Context, args []UpsertClassGroupManagerParams) ([]model.ClassGroupManager, error) {
+	return nil, nil
+}
