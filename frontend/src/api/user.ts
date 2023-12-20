@@ -8,7 +8,7 @@ export type UserGetResponse = {
 
 export type UserMeResponse = {
   session_user: User;
-  managed_class_groups: number[];
+  has_managed_class_groups: boolean;
 };
 
 export type User = {

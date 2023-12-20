@@ -121,7 +121,7 @@ function LoggedItems() {
   const session = useSessionUserStore();
 
   const isSystemAdmin = session.data?.session_user.role == UserRole.SystemAdmin;
-  const isClassGroupManager = session.data?.managed_class_groups.length != 0;
+  const isClassGroupManager = session.data?.has_managed_class_groups;
 
   return (
     <>

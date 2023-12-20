@@ -137,19 +137,23 @@ func (d *DB) BatchUpsertClassGroupManagers(ctx context.Context, args []UpsertCla
 	return nil, nil
 }
 
-func (d *DB) GetManagedClassGroupsByUserID(ctx context.Context, userId string) ([]model.ClassGroupManager, error) {
-	var res []model.ClassGroupManager
+func (d *DB) HasManagedClassGroups(ctx context.Context) (bool, error) {
+	var res struct {
+		Result bool `alias:"has_managed_class_groups"`
+	}
 
 	stmt := SELECT(
-		ClassGroupManagers.AllColumns,
-	).FROM(
-		ClassGroupManagers,
-	).WHERE(
-		ClassGroupManagers.UserID.EQ(String(userId)).AND(
-			classGroupManagerRLS(ctx),
-		),
+		EXISTS(
+			SELECT(
+				ClassGroupManagers.AllColumns,
+			).FROM(
+				ClassGroupManagers,
+			).WHERE(
+				classGroupManagerRLS(ctx),
+			),
+		).AS("has_managed_class_groups"),
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
+	return res.Result, err
 }
