@@ -1,6 +1,6 @@
 package permissions
 
-import "github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+import "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 
 type P int
 

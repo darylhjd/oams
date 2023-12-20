@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
+	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 )
 
 // BatchData is a struct containing data for processing a batch of entities.

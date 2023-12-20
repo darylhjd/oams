@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/model"
-	"github.com/darylhjd/oams/backend/internal/database/gen/oams/public/table"
+	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
 )
 
 func (v *APIServerV1) classGroups(w http.ResponseWriter, r *http.Request) {
