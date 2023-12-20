@@ -39,14 +39,13 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 
 type userMeResponse struct {
 	response
-	SessionUser        model.User `json:"session_user"`
-	ManagedClassGroups []int64    `json:"managed_class_groups"`
+	SessionUser           model.User `json:"session_user"`
+	HasManagedClassGroups bool       `json:"has_managed_class_groups"`
 }
 
 func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 	resp := userMeResponse{
-		response:           newSuccessResponse(),
-		ManagedClassGroups: []int64{},
+		response: newSuccessResponse(),
 	}
 
 	authContext := oauth2.GetAuthContext(r.Context())
@@ -57,17 +56,15 @@ func (v *APIServerV1) userMe(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could get session user from database")
 	}
 
-	managed, err := v.db.GetManagedClassGroupsByUserID(r.Context(), authContext.User.ID)
+	// TODO: Add tests for this field.
+	managed, err := v.db.HasManagedClassGroups(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, fmt.Errorf("could not get user managed class groups: %w", err))
 		return newErrorResponse(http.StatusInternalServerError, "could not get session user managed class groups")
 	}
 
 	resp.SessionUser = sessionUser
-	for _, m := range managed {
-		resp.ManagedClassGroups = append(resp.ManagedClassGroups, m.ClassGroupID)
-	}
-
+	resp.HasManagedClassGroups = managed
 	return resp
 }
 

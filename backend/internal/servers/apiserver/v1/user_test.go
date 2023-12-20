@@ -83,7 +83,7 @@ func TestAPIServerV1_userMe(t *testing.T) {
 			userMeResponse{
 				newSuccessResponse(),
 				tests.StubAuthContext().User,
-				[]int64{},
+				false,
 			},
 			http.StatusOK,
 			"",

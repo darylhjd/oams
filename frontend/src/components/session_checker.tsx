@@ -29,3 +29,17 @@ export function IsLoggedIn({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
+export function IsClassGroupManager({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = useSessionUserStore();
+
+  if (!session.data?.has_managed_class_groups) {
+    return <NotFoundPage />;
+  }
+
+  return <>{children}</>;
+}
