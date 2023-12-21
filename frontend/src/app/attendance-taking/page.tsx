@@ -2,7 +2,6 @@
 
 import styles from "@/styles/AttendanceTakingPage.module.css";
 
-import { ClassGroupSession } from "@/api/class_group_session";
 import { APIClient } from "@/api/client";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import {
@@ -12,6 +11,7 @@ import {
   Loader,
   Paper,
   SimpleGrid,
+  Space,
   Text,
   Title,
   Tooltip,
@@ -21,11 +21,13 @@ import { IconHelp } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
+import { UpcomingClassGroupSession } from "@/api/attendance_taking";
+import { UserRole } from "@/api/user";
 
 export default function AttendanceTakingPage() {
-  const [upcomingSessions, setUpcomingSessions] = useState<ClassGroupSession[]>(
-    [],
-  );
+  const [upcomingSessions, setUpcomingSessions] = useState<
+    UpcomingClassGroupSession[]
+  >([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -83,7 +85,11 @@ function PageTitle() {
   );
 }
 
-function UpcomingSessionsGrid({ sessions }: { sessions: ClassGroupSession[] }) {
+function UpcomingSessionsGrid({
+  sessions,
+}: {
+  sessions: UpcomingClassGroupSession[];
+}) {
   if (sessions.length == 0) {
     return (
       <Text ta="center">Hooray, you have no upcoming sessions to manage!</Text>
@@ -109,17 +115,22 @@ function UpcomingSessionsGrid({ sessions }: { sessions: ClassGroupSession[] }) {
   );
 }
 
-function SessionCard({ session }: { session: ClassGroupSession }) {
+function SessionCard({ session }: { session: UpcomingClassGroupSession }) {
   const router = useRouter();
 
   return (
     <Paper
       withBorder
+      p="xs"
       className={styles.sessionCard}
       component="button"
       onClick={() => router.push(Routes.attendanceTakingSession + session.id)}
     >
       <Text ta="center">{session.venue}</Text>
+      <Space h="md" />
+      <Text ta="center">
+        {session.managing_role ? session.managing_role : UserRole.SystemAdmin}
+      </Text>
     </Paper>
   );
 }
