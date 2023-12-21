@@ -1,4 +1,5 @@
 import { IsLoggedIn } from "@/components/session_checker";
+import React from "react";
 
 export const metadata = {
   title: "Profile",

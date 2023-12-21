@@ -3,11 +3,11 @@ import styles from "@/styles/EntityLoader.module.css";
 import NotFoundPage from "@/app/not-found";
 import { Center, Loader } from "@mantine/core";
 import { isAxiosError } from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 
-export function EntityLoader({
+export function RequestLoader({
   promiseFunc,
   children,
 }: {
@@ -15,7 +15,7 @@ export function EntityLoader({
   children: React.ReactNode;
 }) {
   const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState<any | null>(null);
+  const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     promiseFunc()

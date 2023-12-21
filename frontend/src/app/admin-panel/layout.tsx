@@ -1,5 +1,6 @@
 import { UserRole } from "@/api/user";
 import { CheckHasUserRole } from "@/components/session_checker";
+import React from "react";
 
 export const metadata = {
   title: "Admin Panel",

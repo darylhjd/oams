@@ -7,7 +7,7 @@ import { Center, MantineProvider, Skeleton } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { motion } from "framer-motion";
 import { useSessionUserStore } from "@/stores/session";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (

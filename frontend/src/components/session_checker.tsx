@@ -3,6 +3,7 @@
 import { UserRole } from "@/api/user";
 import { useSessionUserStore } from "@/stores/session";
 import NotFoundPage from "@/app/not-found";
+import React from "react";
 
 export function CheckHasUserRole({
   role,

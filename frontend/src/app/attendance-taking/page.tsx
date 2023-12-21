@@ -3,7 +3,6 @@
 import styles from "@/styles/AttendanceTakingPage.module.css";
 
 import { APIClient } from "@/api/client";
-import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import {
   Container,
   Group,
@@ -13,14 +12,13 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
 import { IconHelp } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
 import { UpcomingClassGroupSession } from "@/api/attendance_taking";
 import { UserRole } from "@/api/user";
-import { EntityLoader } from "@/components/entity_loader";
+import { RequestLoader } from "@/components/request_loader";
 
 export default function AttendanceTakingPage() {
   const [upcomingSessions, setUpcomingSessions] = useState<
@@ -32,24 +30,18 @@ export default function AttendanceTakingPage() {
   };
 
   return (
-    <EntityLoader promiseFunc={promiseFunc}>
+    <RequestLoader promiseFunc={promiseFunc}>
       <Container className={styles.container} fluid>
         <PageTitle />
         <UpcomingSessionsGrid sessions={upcomingSessions} />
       </Container>
-    </EntityLoader>
+    </RequestLoader>
   );
 }
 
 function PageTitle() {
-  const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
-
   return (
-    <Group
-      className={styles.title}
-      gap="xs"
-      justify={isMobile ? "flex-start" : "center"}
-    >
+    <Group className={styles.title} gap="xs" justify="center">
       <>
         <Title visibleFrom="md" order={3}>
           Upcoming Class Group Sessions

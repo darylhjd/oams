@@ -4,7 +4,7 @@ import { Text } from "@mantine/core";
 import { useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
-import { EntityLoader } from "@/components/entity_loader";
+import { RequestLoader } from "@/components/request_loader";
 import { ClassGroup } from "@/api/class_group";
 
 export default function AdminPanelClassGroupPage({
@@ -12,16 +12,16 @@ export default function AdminPanelClassGroupPage({
 }: {
   params: Params;
 }) {
-  const [classGroup, setClassGroup] = useState<ClassGroup | null>(null);
+  const [classGroup, setClassGroup] = useState<ClassGroup>({} as ClassGroup);
   const promiseFunc = async () => {
     const data = await APIClient.classGroupGet(params.id);
     return setClassGroup(data.class_group);
   };
 
   return (
-    <EntityLoader promiseFunc={promiseFunc}>
-      <ClassGroupDisplay classGroup={classGroup!} />
-    </EntityLoader>
+    <RequestLoader promiseFunc={promiseFunc}>
+      <ClassGroupDisplay classGroup={classGroup} />
+    </RequestLoader>
   );
 }
 
