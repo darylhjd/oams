@@ -1,34 +1,67 @@
 "use client";
 
+import styles from "@/styles/SessionAttendanceTaking.module.css";
+
 import { useState } from "react";
 import { Params } from "./layout";
-import { ClassGroupSession } from "@/api/class_group_session";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
-import { Text } from "@mantine/core";
+import { Center, Container, Text, Title } from "@mantine/core";
+import {
+  AttendanceTakingGetResponse,
+  UpcomingClassGroupSession,
+} from "@/api/attendance_taking";
+import { SessionEnrollment } from "@/api/session_enrollment";
 
 export default function SessionAttendanceTakingPage({
   params,
 }: {
   params: Params;
 }) {
-  const [session, setSession] = useState<ClassGroupSession>(
-    {} as ClassGroupSession,
+  const [attendance, setAttendance] = useState<AttendanceTakingGetResponse>(
+    {} as AttendanceTakingGetResponse,
   );
   const promiseFunc = async () => {
-    const data = await APIClient.classGroupSessionGet(params.id);
-    return setSession(data.class_group_session);
-
-    // TODO: Get enrollments related to session.
+    const data = await APIClient.attendanceTakingGet(params.id);
+    return setAttendance(data);
   };
 
   return (
     <RequestLoader promiseFunc={promiseFunc}>
-      <Page session={session} />
+      <Container className={styles.container} fluid>
+        <PageTitle />
+        <SessionInfo session={attendance.upcoming_class_group_session} />
+        <AttendanceTaker enrollments={attendance.enrollment_data} />
+      </Container>
     </RequestLoader>
   );
 }
 
-function Page({ session }: { session: ClassGroupSession }) {
-  return <Text ta="center">{session.venue}</Text>;
+function PageTitle() {
+  return (
+    <Center className={styles.title}>
+      <Title visibleFrom="md" order={3}>
+        Attendance Taking
+      </Title>
+      <Title hiddenFrom="md" order={4}>
+        Attendance Taking
+      </Title>
+    </Center>
+  );
+}
+
+function SessionInfo({ session }: { session: UpcomingClassGroupSession }) {
+  return null;
+}
+
+function AttendanceTaker({
+  enrollments,
+}: {
+  enrollments: SessionEnrollment[];
+}) {
+  return (
+    <Text ta="center">
+      There are {enrollments.length} enrollment data rows.
+    </Text>
+  );
 }

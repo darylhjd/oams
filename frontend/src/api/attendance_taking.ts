@@ -1,9 +1,6 @@
 import { ClassType } from "./class_group";
 import { ManagingRole } from "./class_group_manager";
-
-export type AttendanceTakingGetResponse = {
-  upcoming_class_group_sessions: UpcomingClassGroupSession[];
-};
+import { SessionEnrollment } from "@/api/session_enrollment";
 
 export type UpcomingClassGroupSession = {
   id: number;
@@ -15,4 +12,13 @@ export type UpcomingClassGroupSession = {
   semester: string;
   class_type: ClassType;
   managing_role: ManagingRole | null;
+};
+
+export type AttendanceTakingGetsResponse = {
+  upcoming_class_group_sessions: UpcomingClassGroupSession[];
+};
+
+export type AttendanceTakingGetResponse = {
+  upcoming_class_group_session: UpcomingClassGroupSession;
+  enrollment_data: SessionEnrollment[];
 };
