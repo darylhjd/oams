@@ -31,7 +31,7 @@ type attendanceTakingGetUpcomingClassGroupSessionResponseFields struct {
 	EndTime      time.Time           `json:"end_time"`
 	Venue        string              `json:"venue"`
 	ClassType    model.ClassType     `json:"class_type"`
-	ManagingRole *model.ManagingRole `json:"managing_role"` // For nil values, exposed as system admin.
+	ManagingRole *model.ManagingRole `json:"managing_role"`
 }
 
 // TODO: Implement tests for this endpoint.

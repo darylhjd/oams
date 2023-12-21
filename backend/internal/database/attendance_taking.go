@@ -19,7 +19,7 @@ type UpcomingManagedClassGroupSession struct {
 	EndTime      time.Time           `alias:"class_group_session.end_time"`
 	Venue        string              `alias:"class_group_session.venue"`
 	ClassType    model.ClassType     `alias:"class_group.class_type"`
-	ManagingRole *model.ManagingRole `alias:"class_group_manager.managing_role"`
+	ManagingRole *model.ManagingRole `alias:"class_group_manager.managing_role"` // For nil values, exposed as system admin.
 }
 
 func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]UpcomingManagedClassGroupSession, error) {
