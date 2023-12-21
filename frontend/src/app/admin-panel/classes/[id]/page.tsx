@@ -4,20 +4,20 @@ import { Text } from "@mantine/core";
 import { useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
-import { EntityLoader } from "@/components/entity_loader";
+import { RequestLoader } from "@/components/request_loader";
 import { Class } from "@/api/class";
 
 export default function AdminPanelClassPage({ params }: { params: Params }) {
-  const [cls, setClass] = useState<Class | null>(null);
+  const [cls, setClass] = useState<Class>({} as Class);
   const promiseFunc = async () => {
     const data = await APIClient.classGet(params.id);
     return setClass(data.class);
   };
 
   return (
-    <EntityLoader promiseFunc={promiseFunc}>
-      <ClassDisplay cls={cls!} />
-    </EntityLoader>
+    <RequestLoader promiseFunc={promiseFunc}>
+      <ClassDisplay cls={cls} />
+    </RequestLoader>
   );
 }
 

@@ -9,6 +9,7 @@ import { ColorSchemeScript } from "@mantine/core";
 import Header from "@/components/header";
 import CenteredPage from "@/components/centered_page";
 import Providers from "@/components/providers";
+import React from "react";
 
 export const metadata = {
   title: "OAMS",

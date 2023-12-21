@@ -4,7 +4,7 @@ import { Text } from "@mantine/core";
 import { useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
-import { EntityLoader } from "@/components/entity_loader";
+import { RequestLoader } from "@/components/request_loader";
 import { SessionEnrollment } from "@/api/session_enrollment";
 
 export default function AdminPanelSessionEnrollmentPage({
@@ -12,17 +12,18 @@ export default function AdminPanelSessionEnrollmentPage({
 }: {
   params: Params;
 }) {
-  const [sessionEnrollment, setSessionEnrollment] =
-    useState<SessionEnrollment | null>(null);
+  const [sessionEnrollment, setSessionEnrollment] = useState<SessionEnrollment>(
+    {} as SessionEnrollment,
+  );
   const promiseFunc = async () => {
     const data = await APIClient.sessionEnrollmentGet(params.id);
     return setSessionEnrollment(data.session_enrollment);
   };
 
   return (
-    <EntityLoader promiseFunc={promiseFunc}>
-      <SessionEnrollmentDisplay sessionEnrollment={sessionEnrollment!} />
-    </EntityLoader>
+    <RequestLoader promiseFunc={promiseFunc}>
+      <SessionEnrollmentDisplay sessionEnrollment={sessionEnrollment} />
+    </RequestLoader>
   );
 }
 

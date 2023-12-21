@@ -1,4 +1,5 @@
 import { IsClassGroupManager } from "@/components/session_checker";
+import React from "react";
 
 export const metadata = {
   title: "Attendance Taking",

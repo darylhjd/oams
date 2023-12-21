@@ -20,7 +20,7 @@ export default function ProfilePage() {
       </Text>
       <Space h="xs" />
       <Text c="dimmed" fs="italic" ta="center" size="sm">
-        {user.name ? user.name : "No name registed"}
+        {user.name ? user.name : "No name registered"}
       </Text>
     </Paper>
   );

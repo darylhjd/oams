@@ -5,19 +5,19 @@ import { Text } from "@mantine/core";
 import { useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
-import { EntityLoader } from "@/components/entity_loader";
+import { RequestLoader } from "@/components/request_loader";
 
 export default function AdminPanelUserPage({ params }: { params: Params }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>({} as User);
   const promiseFunc = async () => {
     const data = await APIClient.userGet(params.id);
     return setUser(data.user);
   };
 
   return (
-    <EntityLoader promiseFunc={promiseFunc}>
-      <UserDisplay user={user!} />
-    </EntityLoader>
+    <RequestLoader promiseFunc={promiseFunc}>
+      <UserDisplay user={user} />
+    </RequestLoader>
   );
 }
 
