@@ -30,6 +30,9 @@ type attendanceTakingGetUpcomingClassGroupSessionResponseFields struct {
 	StartTime    time.Time           `json:"start_time"`
 	EndTime      time.Time           `json:"end_time"`
 	Venue        string              `json:"venue"`
+	Code         string              `json:"code"`
+	Year         int32               `json:"year"`
+	Semester     string              `json:"semester"`
 	ClassType    model.ClassType     `json:"class_type"`
 	ManagingRole *model.ManagingRole `json:"managing_role"`
 }
@@ -53,6 +56,9 @@ func (v *APIServerV1) attendanceTakingGet(r *http.Request) apiResponse {
 			m.StartTime,
 			m.EndTime,
 			m.Venue,
+			m.Code,
+			m.Year,
+			m.Semester,
 			m.ClassType,
 			m.ManagingRole,
 		})

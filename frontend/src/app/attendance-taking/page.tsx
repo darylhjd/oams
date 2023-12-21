@@ -72,7 +72,7 @@ function PageTitle() {
       </>
 
       <Tooltip
-        label="Only sessions starting in 15 minutes will be shown!"
+        label="Only sessions beginning in less than 15 minutes are shown."
         events={{
           hover: true,
           focus: false,
@@ -102,21 +102,40 @@ function UpcomingSessionsGrid({
 
   return (
     <>
-      <Text ta="center">You have {sessions.length} upcoming sessions.</Text>
-      <>
-        <SimpleGrid visibleFrom="sm" cols={3}>
-          {sessionCards}
-        </SimpleGrid>
-        <SimpleGrid hiddenFrom="sm" cols={1}>
-          {sessionCards}
-        </SimpleGrid>
-      </>
+      <Text ta="center">
+        You have{" "}
+        <Text span c="green">
+          {sessions.length}
+        </Text>{" "}
+        upcoming sessions.
+      </Text>
+      <Space h="md" />
+      <Group justify="center">{sessionCards}</Group>
     </>
   );
 }
 
 function SessionCard({ session }: { session: UpcomingClassGroupSession }) {
   const router = useRouter();
+
+  const startDatetime = new Date(session.start_time);
+  const endDatetime = new Date(session.end_time);
+
+  const date = startDatetime.toLocaleString(undefined, {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  });
+  const startTime = startDatetime.toLocaleString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const endTime = endDatetime.toLocaleString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const isOngoing = new Date() >= startDatetime;
 
   return (
     <Paper
@@ -126,9 +145,29 @@ function SessionCard({ session }: { session: UpcomingClassGroupSession }) {
       component="button"
       onClick={() => router.push(Routes.attendanceTakingSession + session.id)}
     >
-      <Text ta="center">{session.venue}</Text>
-      <Space h="md" />
-      <Text ta="center">
+      <Text ta="left">
+        {session.code}{" "}
+        <Text span size="sm" c="dimmed">
+          {session.year}/{session.semester}
+        </Text>
+      </Text>
+      <Text ta="left" size="xs">
+        Class Type: {session.class_type}
+      </Text>
+      <Text ta="left" size="xs">
+        Venue: {session.venue}
+      </Text>
+      <Space h="xs" />
+      <Text ta="left" size="xs">
+        {date}
+        <br />
+        {startTime} - {endTime}
+      </Text>
+      <Text ta="left" size="xs" c={isOngoing ? "green" : "orange"}>
+        {isOngoing ? "ONGOING" : "STARTING"}
+      </Text>
+      <Space h="xs" />
+      <Text ta="left" size="xs" c="dimmed">
         {session.managing_role ? session.managing_role : UserRole.SystemAdmin}
       </Text>
     </Paper>
