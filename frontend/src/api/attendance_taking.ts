@@ -10,6 +10,9 @@ export type UpcomingClassGroupSession = {
   start_time: Date;
   end_time: Date;
   venue: string;
+  code: string;
+  year: number;
+  semester: string;
   class_type: ClassType;
   managing_role: ManagingRole | null;
 };

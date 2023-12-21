@@ -18,6 +18,9 @@ type UpcomingManagedClassGroupSession struct {
 	StartTime    time.Time           `alias:"class_group_session.start_time"`
 	EndTime      time.Time           `alias:"class_group_session.end_time"`
 	Venue        string              `alias:"class_group_session.venue"`
+	Code         string              `alias:"class.code"`
+	Year         int32               `alias:"class.year"`
+	Semester     string              `alias:"class.semester"`
 	ClassType    model.ClassType     `alias:"class_group.class_type"`
 	ManagingRole *model.ManagingRole `alias:"class_group_manager.managing_role"` // For nil values, exposed as system admin.
 }
@@ -30,11 +33,16 @@ func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]Upcomi
 		ClassGroupSessions.StartTime,
 		ClassGroupSessions.EndTime,
 		ClassGroupSessions.Venue,
+		Classes.Code,
+		Classes.Year,
+		Classes.Semester,
 		ClassGroups.ClassType,
 		ClassGroupManagers.ManagingRole,
 	).FROM(
 		ClassGroupSessions.INNER_JOIN(
 			ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
+		).INNER_JOIN(
+			Classes, Classes.ID.EQ(ClassGroups.ClassID),
 		).LEFT_JOIN(
 			ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
 		),
@@ -45,6 +53,8 @@ func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]Upcomi
 		).AND(
 			attendanceTakingRLS(ctx),
 		),
+	).ORDER_BY(
+		ClassGroupSessions.StartTime.ASC(),
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
