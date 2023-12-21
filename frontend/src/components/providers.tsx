@@ -21,20 +21,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 function SessionInitialiser({ children }: { children: React.ReactNode }) {
   const session = useSessionUserStore();
   const [loaded, setLoaded] = useState(false);
-  const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
-    if (fetching) {
-      return;
-    }
-
-    setFetching(true);
     APIClient.loadSessionToken()
       .then((_data) => APIClient.userMe())
       .then((data) => session.setSession(data))
       .catch((_error) => null)
       .finally(() => setLoaded(true));
-  }, [fetching, session]);
+  }, []);
 
   return loaded ? (
     <motion.div

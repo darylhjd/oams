@@ -4,7 +4,7 @@ import { Text } from "@mantine/core";
 import { useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
-import { EntityLoader } from "@/app/admin-panel/entity_loader";
+import { EntityLoader } from "@/components/entity_loader";
 import { ClassGroup } from "@/api/class_group";
 
 export default function AdminPanelClassGroupPage({
