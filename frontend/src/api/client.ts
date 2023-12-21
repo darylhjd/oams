@@ -14,7 +14,10 @@ import {
   SessionEnrollmentGetResponse,
   SessionEnrollmentsGetResponse,
 } from "./session_enrollment";
-import { AttendanceTakingGetResponse } from "./attendance_taking";
+import {
+  AttendanceTakingGetResponse,
+  AttendanceTakingGetsResponse,
+} from "./attendance_taking";
 
 export class APIClient {
   static readonly _batchPath = "/batch";
@@ -30,7 +33,8 @@ export class APIClient {
   static readonly _classGroupSessionPath = "/class-group-sessions/";
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
   static readonly _sessionEnrollmentPath = "/session-enrollments/";
-  static readonly _attendanceTakingPath = "/attendance-taking";
+  static readonly _attendanceTakingsPath = "/attendance-taking";
+  static readonly _attendanceTakingPath = "/attendance-taking/";
 
   static readonly _supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -220,9 +224,18 @@ export class APIClient {
     return data;
   }
 
-  static async attendanceTakingGet(): Promise<AttendanceTakingGetResponse> {
+  static async attendanceTakingsGet(): Promise<AttendanceTakingGetsResponse> {
+    const { data } = await this._client.get<AttendanceTakingGetsResponse>(
+      this._attendanceTakingsPath,
+    );
+    return data;
+  }
+
+  static async attendanceTakingGet(
+    id: number,
+  ): Promise<AttendanceTakingGetResponse> {
     const { data } = await this._client.get<AttendanceTakingGetResponse>(
-      this._attendanceTakingPath,
+      this._attendanceTakingPath + id,
     );
     return data;
   }

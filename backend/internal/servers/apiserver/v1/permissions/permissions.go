@@ -37,6 +37,8 @@ const (
 	SessionEnrollmentRead
 	SessionEnrollmentUpdate
 	SessionEnrollmentDelete
+
+	AttendanceTakingRead
 )
 
 type permissionMap map[P]struct{}
@@ -52,6 +54,7 @@ var userRolePermissions = permissionMap{
 	ClassGroupRead:        {},
 	ClassGroupSessionRead: {},
 	SessionEnrollmentRead: {},
+	AttendanceTakingRead:  {},
 }
 
 var systemAdminRolePermissions = permissionMap{
@@ -87,4 +90,6 @@ var systemAdminRolePermissions = permissionMap{
 	SessionEnrollmentRead:   {},
 	SessionEnrollmentUpdate: {},
 	SessionEnrollmentDelete: {},
+
+	AttendanceTakingRead: {},
 }

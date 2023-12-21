@@ -28,7 +28,42 @@ type UpcomingManagedClassGroupSession struct {
 func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]UpcomingManagedClassGroupSession, error) {
 	var res []UpcomingManagedClassGroupSession
 
+	stmt := selectManagedClassGroupSession(ctx)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
+func (d *DB) GetUpcomingManagedClassGroupSession(ctx context.Context, id int64) (UpcomingManagedClassGroupSession, error) {
+	var res UpcomingManagedClassGroupSession
+
+	stmt := selectManagedClassGroupSession(ctx).WHERE(
+		ClassGroupSessions.ID.EQ(Int64(id)),
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
+func (d *DB) GetUpcomingClassGroupSessionEnrollments(ctx context.Context, id int64) ([]model.SessionEnrollment, error) {
+	var res []model.SessionEnrollment
+
 	stmt := SELECT(
+		SessionEnrollments.AllColumns,
+	).FROM(
+		SessionEnrollments,
+	).WHERE(
+		SessionEnrollments.SessionID.EQ(Int64(id)).AND(
+			sessionEnrollmentRLS(ctx),
+		),
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
+func selectManagedClassGroupSession(ctx context.Context) SelectStatement {
+	return SELECT(
 		ClassGroupSessions.ID,
 		ClassGroupSessions.StartTime,
 		ClassGroupSessions.EndTime,
@@ -56,7 +91,4 @@ func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]Upcomi
 	).ORDER_BY(
 		ClassGroupSessions.StartTime.ASC(),
 	)
-
-	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
 }
