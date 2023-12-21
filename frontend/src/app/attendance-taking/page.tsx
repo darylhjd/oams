@@ -5,12 +5,9 @@ import styles from "@/styles/AttendanceTakingPage.module.css";
 import { APIClient } from "@/api/client";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import {
-  Center,
   Container,
   Group,
-  Loader,
   Paper,
-  SimpleGrid,
   Space,
   Text,
   Title,
@@ -18,38 +15,29 @@ import {
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconHelp } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
 import { UpcomingClassGroupSession } from "@/api/attendance_taking";
 import { UserRole } from "@/api/user";
+import { EntityLoader } from "@/components/entity_loader";
 
 export default function AttendanceTakingPage() {
   const [upcomingSessions, setUpcomingSessions] = useState<
     UpcomingClassGroupSession[]
   >([]);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    APIClient.attendanceTakingGet().then((data) => {
-      setUpcomingSessions(data.upcoming_class_group_sessions);
-      setLoaded(true);
-    });
-  }, []);
-
-  if (!loaded) {
-    return (
-      <Center>
-        <Loader />
-      </Center>
-    );
-  }
+  const promiseFunc = async () => {
+    const data = await APIClient.attendanceTakingGet();
+    return setUpcomingSessions(data.upcoming_class_group_sessions);
+  };
 
   return (
-    <Container className={styles.container} fluid>
-      <PageTitle />
-      <UpcomingSessionsGrid sessions={upcomingSessions} />
-    </Container>
+    <EntityLoader promiseFunc={promiseFunc}>
+      <Container className={styles.container} fluid>
+        <PageTitle />
+        <UpcomingSessionsGrid sessions={upcomingSessions} />
+      </Container>
+    </EntityLoader>
   );
 }
 
