@@ -27,19 +27,13 @@ export default function AttendanceTakingPage() {
     [],
   );
   const [loaded, setLoaded] = useState(false);
-  const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
-    if (fetching) {
-      return;
-    }
-
-    setFetching(true);
     APIClient.attendanceTakingGet().then((data) => {
       setUpcomingSessions(data.upcoming_class_group_sessions);
       setLoaded(true);
     });
-  });
+  }, []);
 
   if (!loaded) {
     return (
@@ -97,7 +91,7 @@ function UpcomingSessionsGrid({ sessions }: { sessions: ClassGroupSession[] }) {
   }
 
   const sessionCards = sessions.map((session) => (
-    <SessionCard session={session} />
+    <SessionCard key={session.id} session={session} />
   ));
 
   return (
