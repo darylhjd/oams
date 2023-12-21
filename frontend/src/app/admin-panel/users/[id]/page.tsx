@@ -5,7 +5,7 @@ import { Text } from "@mantine/core";
 import { useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
-import { EntityLoader } from "@/app/admin-panel/entity_loader";
+import { EntityLoader } from "@/components/entity_loader";
 
 export default function AdminPanelUserPage({ params }: { params: Params }) {
   const [user, setUser] = useState<User | null>(null);

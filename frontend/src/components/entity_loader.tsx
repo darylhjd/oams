@@ -1,9 +1,11 @@
 import styles from "@/styles/EntityLoader.module.css";
 
 import NotFoundPage from "@/app/not-found";
-import { Center, Loader, Text } from "@mantine/core";
+import { Center, Loader } from "@mantine/core";
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { notifications } from "@mantine/notifications";
+import { IconX } from "@tabler/icons-react";
 
 export function EntityLoader({
   promiseFunc,
@@ -13,19 +15,13 @@ export function EntityLoader({
   children: React.ReactNode;
 }) {
   const [loaded, setLoaded] = useState(false);
-  const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<any | null>(null);
 
   useEffect(() => {
-    if (fetching) {
-      return;
-    }
-
-    setFetching(true);
     promiseFunc()
       .catch((error) => setError(error))
       .finally(() => setLoaded(true));
-  }, [fetching, promiseFunc]);
+  }, []);
 
   if (!loaded) {
     return (
@@ -35,7 +31,14 @@ export function EntityLoader({
     );
   } else if (error) {
     if (!isAxiosError(error) || error.response?.status != 404) {
-      return <Text ta="center">Error getting user!</Text>;
+      notifications.show({
+        title: "API Error!",
+        message:
+          "There was a problem while executing the API request. Try again later.",
+        icon: <IconX />,
+        color: "red",
+      });
+      return null;
     } else {
       return <NotFoundPage />;
     }
