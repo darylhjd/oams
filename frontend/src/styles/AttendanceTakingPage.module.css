@@ -1,3 +1,11 @@
 .container {
   padding-top: rem(30px);
 }
+
+.title {
+  padding-bottom: rem(30px);
+}
+
+.sessionCard {
+  cursor: pointer;
+}

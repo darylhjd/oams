@@ -10,4 +10,5 @@ export const Routes = {
   adminPanelSessionEnrollment: "/admin-panel/session-enrollments/",
   batchProcessing: "/batch-processing",
   attendanceTaking: "/attendance-taking",
+  attendanceTakingSession: "/attendance-taking/",
 };
