@@ -3,7 +3,7 @@
 }
 
 .sessionInfo {
-  width: rem(500px);
+  max-width: rem(500px);
   margin: 0 auto;
 }
 
