@@ -16,5 +16,6 @@ func UseSchema(schema string) {
 	Classes = Classes.FromSchema(schema)
 	SchemaMigrations = SchemaMigrations.FromSchema(schema)
 	SessionEnrollments = SessionEnrollments.FromSchema(schema)
+	UserSignatures = UserSignatures.FromSchema(schema)
 	Users = Users.FromSchema(schema)
 }

@@ -32,6 +32,22 @@ CREATE TRIGGER update_updated_at
     FOR EACH ROW
 EXECUTE PROCEDURE update_updated_at();
 
+CREATE TABLE user_signatures
+(
+    user_id    TEXT        NOT NULL PRIMARY KEY,
+    signature  TEXT        NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_user_id
+        FOREIGN KEY (user_id)
+            REFERENCES users (id)
+);
+
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE
+    ON user_signatures
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
+
 CREATE TABLE classes
 (
     id         BIGSERIAL PRIMARY KEY,
