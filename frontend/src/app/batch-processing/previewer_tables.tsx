@@ -10,7 +10,7 @@ import {
   ClassGroupBatchDataTableColumns,
   ClassGroupSessionBatchDataTableColumns,
   UserBatchDataTableColumns,
-} from "@/components/entity_columns";
+} from "@/components/tabling";
 import { useBatchDataStore } from "@/stores/batch_processing";
 import { MantineReactTable } from "mantine-react-table";
 

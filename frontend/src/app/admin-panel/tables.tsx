@@ -21,11 +21,11 @@ import {
   ClassGroupManagerDataTableColumns,
   SessionEnrollmentsDataTableColumns,
   UserDataTableColumns,
-} from "@/components/entity_columns";
+  DEFAULT_PAGE_SIZE,
+} from "@/components/tabling";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
 
-const DEFAULT_PAGE_SIZE = 50;
 const ROW_PROPS = {
   style: { cursor: "pointer" },
 };
