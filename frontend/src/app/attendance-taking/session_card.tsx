@@ -46,6 +46,9 @@ export function SessionCard({
         </Text>
       </Text>
       <Text ta="left" size="xs">
+        Group Name: {session.name}
+      </Text>
+      <Text ta="left" size="xs">
         Class Type: {session.class_type}
       </Text>
       <Text ta="left" size="xs">

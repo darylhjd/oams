@@ -34,6 +34,7 @@ type upcomingClassGroupSession struct {
 	Code         string              `json:"code"`
 	Year         int32               `json:"year"`
 	Semester     string              `json:"semester"`
+	Name         string              `json:"name"`
 	ClassType    model.ClassType     `json:"class_type"`
 	ManagingRole *model.ManagingRole `json:"managing_role"`
 }
@@ -47,6 +48,7 @@ func (u upcomingClassGroupSession) fromDatabaseUpcomingClassGroupSession(s datab
 		s.Code,
 		s.Year,
 		s.Semester,
+		s.Name,
 		s.ClassType,
 		s.ManagingRole,
 	}

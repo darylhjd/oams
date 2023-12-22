@@ -2,8 +2,9 @@
   padding-top: rem(30px);
 }
 
-.title {
-  padding-bottom: rem(30px);
+.sessionInfo {
+  width: rem(500px);
+  margin: 0 auto;
 }
 
 .table {
