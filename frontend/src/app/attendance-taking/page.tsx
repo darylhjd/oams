@@ -32,15 +32,9 @@ export default function AttendanceTakingPage() {
 function PageTitle() {
   return (
     <Group className={styles.title} gap="xs" justify="center">
-      <>
-        <Title visibleFrom="md" order={3}>
-          Upcoming Class Group Sessions
-        </Title>
-        <Title hiddenFrom="md" order={4}>
-          Upcoming Class Group Sessions
-        </Title>
-      </>
-
+      <Title order={3} ta="center">
+        Upcoming Class Group Sessions
+      </Title>
       <Tooltip
         label="Only sessions beginning in less than 15 minutes are shown."
         events={{
@@ -49,7 +43,7 @@ function PageTitle() {
           touch: true,
         }}
       >
-        <IconHelp size={12} />
+        <IconHelp size={15} />
       </Tooltip>
     </Group>
   );
