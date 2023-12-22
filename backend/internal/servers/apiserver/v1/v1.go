@@ -30,7 +30,6 @@ const (
 	classesUrl            = "/classes"
 	classUrl              = "/classes/"
 	classGroupManagersUrl = "/class-group-managers"
-	classGroupManagerUrl  = "/class-group-managers/"
 	classGroupsUrl        = "/class-groups"
 	classGroupUrl         = "/class-groups/"
 	classGroupSessionsUrl = "/class-group-sessions"
@@ -80,8 +79,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.users,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:  {permissions.UserRead},
-			http.MethodPost: {permissions.UserCreate},
+			http.MethodGet: {permissions.UserRead},
 		},
 	))
 
@@ -89,9 +87,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.user,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:    {permissions.UserRead},
-			http.MethodPatch:  {permissions.UserUpdate},
-			http.MethodDelete: {permissions.UserDelete},
+			http.MethodGet: {permissions.UserRead},
 		},
 	))
 
@@ -99,8 +95,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.classes,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:  {permissions.ClassRead},
-			http.MethodPost: {permissions.ClassCreate},
+			http.MethodGet: {permissions.ClassRead},
 		},
 	))
 
@@ -108,9 +103,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.class,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:    {permissions.ClassRead},
-			http.MethodPatch:  {permissions.ClassUpdate},
-			http.MethodDelete: {permissions.ClassDelete},
+			http.MethodGet: {permissions.ClassRead},
 		},
 	))
 
@@ -124,22 +117,11 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(classGroupManagerUrl, permissions.EnforceAccessPolicy(
-		v.classGroupManager,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet:    {permissions.ClassManagerRead},
-			http.MethodPatch:  {permissions.ClassManagerUpdate},
-			http.MethodDelete: {permissions.ClassManagerDelete},
-		},
-	))
-
 	v.mux.HandleFunc(classGroupsUrl, permissions.EnforceAccessPolicy(
 		v.classGroups,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:  {permissions.ClassGroupRead},
-			http.MethodPost: {permissions.ClassGroupCreate},
+			http.MethodGet: {permissions.ClassGroupRead},
 		},
 	))
 
@@ -147,9 +129,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.classGroup,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:    {permissions.ClassGroupRead},
-			http.MethodPatch:  {permissions.ClassGroupUpdate},
-			http.MethodDelete: {permissions.ClassGroupDelete},
+			http.MethodGet: {permissions.ClassGroupRead},
 		},
 	))
 
@@ -157,8 +137,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.classGroupSessions,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:  {permissions.ClassGroupSessionRead},
-			http.MethodPost: {permissions.ClassGroupSessionCreate},
+			http.MethodGet: {permissions.ClassGroupSessionRead},
 		},
 	))
 
@@ -166,9 +145,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.classGroupSession,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:    {permissions.ClassGroupSessionRead},
-			http.MethodPatch:  {permissions.ClassGroupSessionUpdate},
-			http.MethodDelete: {permissions.ClassGroupSessionDelete},
+			http.MethodGet: {permissions.ClassGroupSessionRead},
 		},
 	))
 
@@ -176,8 +153,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.sessionEnrollments,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:  {permissions.SessionEnrollmentRead},
-			http.MethodPost: {permissions.SessionEnrollmentCreate},
+			http.MethodGet: {permissions.SessionEnrollmentRead},
 		},
 	))
 
@@ -185,9 +161,8 @@ func (v *APIServerV1) registerHandlers() {
 		v.sessionEnrollment,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:    {permissions.SessionEnrollmentRead},
-			http.MethodPatch:  {permissions.SessionEnrollmentUpdate},
-			http.MethodDelete: {permissions.SessionEnrollmentDelete},
+			http.MethodGet:   {permissions.SessionEnrollmentRead},
+			http.MethodPatch: {permissions.SessionEnrollmentUpdate},
 		},
 	))
 

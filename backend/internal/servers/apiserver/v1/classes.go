@@ -1,9 +1,7 @@
 package v1
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
@@ -17,7 +15,7 @@ func (v *APIServerV1) classes(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		resp = v.classesGet(r)
 	case http.MethodPost:
-		resp = v.classesPost(r)
+		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -51,53 +49,4 @@ func (v *APIServerV1) classesGet(r *http.Request) apiResponse {
 
 	resp.Classes = append(resp.Classes, classes...)
 	return resp
-}
-
-type classesPostRequest struct {
-	Class database.CreateClassParams `json:"class"`
-}
-
-type classesPostResponse struct {
-	response
-	Class classesPostClassResponseFields `json:"class"`
-}
-
-type classesPostClassResponseFields struct {
-	ID        int64     `json:"id"`
-	Code      string    `json:"code"`
-	Year      int32     `json:"year"`
-	Semester  string    `json:"semester"`
-	Programme string    `json:"programme"`
-	Au        int16     `json:"au"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-func (v *APIServerV1) classesPost(r *http.Request) apiResponse {
-	var req classesPostRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
-	}
-
-	class, err := v.db.CreateClass(r.Context(), req.Class)
-	if err != nil {
-		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
-			return newErrorResponse(http.StatusConflict, "class with same code, year, and semester already exists")
-		}
-
-		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process classes post database action")
-	}
-
-	return classesPostResponse{
-		newSuccessResponse(),
-		classesPostClassResponseFields{
-			class.ID,
-			class.Code,
-			class.Year,
-			class.Semester,
-			class.Programme,
-			class.Au,
-			class.CreatedAt,
-		},
-	}
 }
