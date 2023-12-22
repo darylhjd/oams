@@ -2,11 +2,11 @@
 
 import styles from "@/styles/SessionAttendanceTaking.module.css";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
-import { Box, Button, Center, Container, Text, Title } from "@mantine/core";
+import { Box, Button, Container, Group, Title, Tooltip } from "@mantine/core";
 import {
   AttendanceTakingGetResponse,
   UpcomingClassGroupSession,
@@ -17,6 +17,9 @@ import {
   AttendanceTakingDataTableColumns,
   DEFAULT_PAGE_SIZE,
 } from "@/components/tabling";
+import { IconHelp } from "@tabler/icons-react";
+
+const UPDATE_INTERVAL_MS = 5000;
 
 export default function SessionAttendanceTakingPage({
   params,
@@ -36,32 +39,47 @@ export default function SessionAttendanceTakingPage({
       <Container className={styles.container} fluid>
         <PageTitle />
         <SessionInfo session={attendance.upcoming_class_group_session} />
-        <AttendanceTaker enrollments={attendance.enrollment_data} />
+        <AttendanceTaker
+          id={params.id}
+          enrollments={attendance.enrollment_data}
+        />
       </Container>
     </RequestLoader>
   );
 }
 
 function PageTitle() {
+  const label = `The attendance sheet is updated automatically every ${
+    UPDATE_INTERVAL_MS / 1000
+  } seconds.`;
   return (
-    <Center className={styles.title}>
-      <Title visibleFrom="md" order={3}>
+    <Group className={styles.title} gap="xs" justify="center">
+      <Title order={3} ta="center">
         Attendance Taking
       </Title>
-      <Title hiddenFrom="md" order={4}>
-        Attendance Taking
-      </Title>
-    </Center>
+      <Tooltip
+        label={label}
+        events={{
+          hover: true,
+          focus: false,
+          touch: true,
+        }}
+      >
+        <IconHelp size={15} />
+      </Tooltip>
+    </Group>
   );
 }
 
 function SessionInfo({ session }: { session: UpcomingClassGroupSession }) {
-  return <Text ta="center">{session.venue}</Text>;
+  return null;
 }
 
 function AttendanceTaker({
+  id,
   enrollments,
 }: {
+  id: number;
   enrollments: SessionEnrollment[];
 }) {
   const [paginationState, setPaginationState] = useState<MRT_PaginationState>({
@@ -69,6 +87,15 @@ function AttendanceTaker({
     pageSize: DEFAULT_PAGE_SIZE,
   });
   const [data, setData] = useState(enrollments);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const response = await APIClient.attendanceTakingGet(id);
+      setData(response.enrollment_data);
+    }, UPDATE_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Box className={styles.table}>
