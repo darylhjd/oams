@@ -82,12 +82,13 @@ func selectManagedClassGroupSession(ctx context.Context) SelectStatement {
 			ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
 		),
 	).WHERE(
-		TimestampzT(time.Now()).BETWEEN(
-			ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
-			ClassGroupSessions.EndTime,
-		).AND(
-			attendanceTakingRLS(ctx),
-		),
+		// TODO: Uncomment in production.
+		//TimestampzT(time.Now()).BETWEEN(
+		//	ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
+		//	ClassGroupSessions.EndTime,
+		//).AND(
+		attendanceTakingRLS(ctx),
+		//),
 	).ORDER_BY(
 		ClassGroupSessions.StartTime.ASC(),
 	)

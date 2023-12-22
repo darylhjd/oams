@@ -49,12 +49,13 @@ var rolePermissionMapping = map[model.UserRole]permissionMap{
 }
 
 var userRolePermissions = permissionMap{
-	UserRead:              {},
-	ClassRead:             {},
-	ClassGroupRead:        {},
-	ClassGroupSessionRead: {},
-	SessionEnrollmentRead: {},
-	AttendanceTakingRead:  {},
+	UserRead:                {},
+	ClassRead:               {},
+	ClassGroupRead:          {},
+	ClassGroupSessionRead:   {},
+	SessionEnrollmentRead:   {},
+	SessionEnrollmentUpdate: {},
+	AttendanceTakingRead:    {},
 }
 
 var systemAdminRolePermissions = permissionMap{
