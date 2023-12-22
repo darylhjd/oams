@@ -21,6 +21,7 @@ type UpcomingManagedClassGroupSession struct {
 	Code         string              `alias:"class.code"`
 	Year         int32               `alias:"class.year"`
 	Semester     string              `alias:"class.semester"`
+	Name         string              `alias:"class_group.name"`
 	ClassType    model.ClassType     `alias:"class_group.class_type"`
 	ManagingRole *model.ManagingRole `alias:"class_group_manager.managing_role"` // For nil values, exposed as system admin.
 }
@@ -71,6 +72,7 @@ func selectManagedClassGroupSession(ctx context.Context) SelectStatement {
 		Classes.Code,
 		Classes.Year,
 		Classes.Semester,
+		ClassGroups.Name,
 		ClassGroups.ClassType,
 		ClassGroupManagers.ManagingRole,
 	).FROM(

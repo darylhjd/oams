@@ -6,7 +6,17 @@ import { useEffect, useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
-import { Box, Button, Container, Group, Title, Tooltip } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Container,
+  Group,
+  Paper,
+  Space,
+  Text,
+  Title,
+  Tooltip,
+} from "@mantine/core";
 import {
   AttendanceTakingGetResponse,
   UpcomingClassGroupSession,
@@ -38,7 +48,9 @@ export default function SessionAttendanceTakingPage({
     <RequestLoader promiseFunc={promiseFunc}>
       <Container className={styles.container} fluid>
         <PageTitle />
+        <Space h="md" />
         <SessionInfo session={attendance.upcoming_class_group_session} />
+        <Space h="md" />
         <AttendanceTaker
           id={params.id}
           enrollments={attendance.enrollment_data}
@@ -53,7 +65,7 @@ function PageTitle() {
     UPDATE_INTERVAL_MS / 1000
   } seconds.`;
   return (
-    <Group className={styles.title} gap="xs" justify="center">
+    <Group gap="xs" justify="center">
       <Title order={3} ta="center">
         Attendance Taking
       </Title>
@@ -72,7 +84,36 @@ function PageTitle() {
 }
 
 function SessionInfo({ session }: { session: UpcomingClassGroupSession }) {
-  return null;
+  const startDatetime = new Date(session.start_time);
+  const endDatetime = new Date(session.end_time);
+
+  const date = startDatetime.toLocaleString(undefined, {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  });
+  const startTime = startDatetime.toLocaleString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const endTime = endDatetime.toLocaleString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return (
+    <Paper withBorder p="xs" className={styles.sessionInfo}>
+      <Text ta="center" c="green">
+        {session.code} {session.year}/{session.semester}
+      </Text>
+      <Text ta="center" size="sm" c="orange">
+        {session.name} {session.class_type} @ {session.venue}
+      </Text>
+      <Text ta="center" c="yellow">
+        {date}, {startTime} - {endTime}
+      </Text>
+    </Paper>
+  );
 }
 
 function AttendanceTaker({

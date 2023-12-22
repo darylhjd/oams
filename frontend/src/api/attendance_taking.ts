@@ -9,6 +9,7 @@ export type UpcomingClassGroupSession = {
   venue: string;
   code: string;
   year: number;
+  name: string;
   semester: string;
   class_type: ClassType;
   managing_role: ManagingRole | null;
