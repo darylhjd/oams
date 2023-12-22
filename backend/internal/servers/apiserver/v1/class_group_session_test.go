@@ -1,21 +1,15 @@
 package v1
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"math"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/darylhjd/oams/backend/internal/tests"
-	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,12 +30,12 @@ func TestAPIServerV1_classGroupSession(t *testing.T) {
 		{
 			"with PATCH method",
 			http.MethodPatch,
-			http.StatusBadRequest,
+			http.StatusNotImplemented,
 		},
 		{
 			"with DELETE method",
 			http.MethodDelete,
-			http.StatusNotFound,
+			http.StatusNotImplemented,
 		},
 		{
 			"with PUT method",
@@ -140,277 +134,6 @@ func TestAPIServerV1_classGroupSessionGet(t *testing.T) {
 				a.Contains(actualResp.Error, tt.wantErr)
 			default:
 				actualResp, ok := resp.(classGroupSessionGetResponse)
-				a.True(ok)
-				a.Equal(tt.wantResponse, actualResp)
-			}
-		})
-	}
-}
-
-func TestAPIServerV1_classGroupSessionPatch(t *testing.T) {
-	t.Parallel()
-
-	tts := []struct {
-		name                          string
-		withRequest                   classGroupSessionPatchRequest
-		withExistingClassGroupSession bool
-		withUpdateConflict            bool
-		withExistingUpdateClassGroup  bool
-		wantResponse                  classGroupSessionPatchResponse
-		wantNoChange                  bool
-		wantStatusCode                int
-		wantErr                       string
-	}{
-		{
-			"request with field changes",
-			classGroupSessionPatchRequest{
-				database.UpdateClassGroupSessionParams{
-					Venue: to.Ptr("NEW_VENUE+99"),
-				},
-			},
-			true,
-			false,
-			true,
-			classGroupSessionPatchResponse{
-				newSuccessResponse(),
-				classGroupSessionPatchClassGroupSessionResponseFields{
-					StartTime: time.UnixMicro(999),
-					EndTime:   time.UnixMicro(99999),
-					Venue:     "NEW_VENUE+99",
-				},
-			},
-			false,
-			http.StatusOK,
-			"",
-		},
-		{
-			"request with no field changes",
-			classGroupSessionPatchRequest{
-				database.UpdateClassGroupSessionParams{},
-			},
-			true,
-			false,
-			true,
-			classGroupSessionPatchResponse{
-				newSuccessResponse(),
-				classGroupSessionPatchClassGroupSessionResponseFields{
-					StartTime: time.UnixMicro(999),
-					EndTime:   time.UnixMicro(99999999),
-				},
-			},
-			true,
-			http.StatusOK,
-			"",
-		},
-		{
-			"request updating non-existent class group session",
-			classGroupSessionPatchRequest{
-				database.UpdateClassGroupSessionParams{},
-			},
-			false,
-			false,
-			false,
-			classGroupSessionPatchResponse{
-				ClassGroupSession: classGroupSessionPatchClassGroupSessionResponseFields{
-					ID: rand.Int63(),
-				},
-			},
-			false,
-			http.StatusNotFound,
-			"class group session to update does not exist",
-		},
-		{
-			"request with update conflict",
-			classGroupSessionPatchRequest{
-				database.UpdateClassGroupSessionParams{
-					StartTime: to.Ptr(int64(999)),
-				},
-			},
-			true,
-			true,
-			true,
-			classGroupSessionPatchResponse{},
-			false,
-			http.StatusConflict,
-			"class group session with same class_group_id and start_time already exists",
-		},
-		{
-			"request with non-existent class group dependency",
-			classGroupSessionPatchRequest{},
-			true,
-			false,
-			false,
-			classGroupSessionPatchResponse{},
-			false,
-			http.StatusBadRequest,
-			"class_group_id does not exist",
-		},
-	}
-
-	for _, tt := range tts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			ctx := context.Background()
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			var sessionId int64
-			switch {
-			case tt.withUpdateConflict:
-				// Create session to update.
-				updateClassGroupSession := tests.StubClassGroupSession(
-					t, ctx, v1.db,
-					time.UnixMicro(0),
-					time.UnixMicro(math.MaxInt64),
-					uuid.NewString(),
-				)
-				sessionId = updateClassGroupSession.ID
-
-				// Also create session to conflict with.
-				_ = tests.StubClassGroupSessionWithClassGroupID(t, ctx, v1.db, database.CreateClassGroupSessionParams{
-					ClassGroupID: updateClassGroupSession.ClassGroupID,
-					StartTime:    time.UnixMicro(*tt.withRequest.ClassGroupSession.StartTime),
-					EndTime:      time.UnixMicro(math.MaxInt64),
-				})
-			case tt.withExistingClassGroupSession && !tt.withExistingUpdateClassGroup:
-				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db,
-					time.UnixMicro(1),
-					time.UnixMicro(2),
-					uuid.NewString(),
-				)
-
-				sessionId = createdSession.ID
-				tt.withRequest.ClassGroupSession.ClassGroupID = to.Ptr(createdSession.ClassGroupID + 1)
-			case tt.withExistingClassGroupSession:
-				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db,
-					tt.wantResponse.ClassGroupSession.StartTime,
-					tt.wantResponse.ClassGroupSession.EndTime,
-					tt.wantResponse.ClassGroupSession.Venue,
-				)
-
-				sessionId = createdSession.ID
-				tt.wantResponse.ClassGroupSession.ID = createdSession.ID
-				tt.wantResponse.ClassGroupSession.ClassGroupID = createdSession.ClassGroupID
-				tt.wantResponse.ClassGroupSession.UpdatedAt = createdSession.CreatedAt
-			default:
-				sessionId = rand.Int63()
-			}
-
-			reqBodyBytes, err := json.Marshal(tt.withRequest)
-			a.Nil(err)
-
-			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classGroupSessionUrl, sessionId), bytes.NewReader(reqBodyBytes))
-			resp := v1.classGroupSessionPatch(req, sessionId)
-			a.Equal(tt.wantStatusCode, resp.Code())
-
-			switch {
-			case tt.wantErr != "":
-				actualResp, ok := resp.(errorResponse)
-				a.True(ok)
-				a.Contains(actualResp.Error, tt.wantErr)
-			default:
-				actualResp, ok := resp.(classGroupSessionPatchResponse)
-				a.True(ok)
-
-				if !tt.wantNoChange {
-					tt.wantResponse.ClassGroupSession.UpdatedAt = actualResp.ClassGroupSession.UpdatedAt
-				}
-
-				a.Equal(tt.wantResponse, actualResp)
-
-				// Check that successive updates do not change anything.
-				req = httptest.NewRequest(http.MethodPatch, fmt.Sprintf("%s%d", classGroupSessionUrl, sessionId), bytes.NewReader(reqBodyBytes))
-				successiveResp := v1.classGroupSessionPatch(req, sessionId).(classGroupSessionPatchResponse)
-				a.Equal(actualResp, successiveResp)
-			}
-		})
-	}
-}
-
-func TestAPIServerV1_classGroupSessionDelete(t *testing.T) {
-	t.Parallel()
-
-	tts := []struct {
-		name                          string
-		withExistingClassGroupSession bool
-		withForeignKeyDependency      bool
-		wantResponse                  classGroupSessionDeleteResponse
-		wantStatusCode                int
-		wantErr                       string
-	}{
-		{
-			"request with existing class group session",
-			true,
-			false,
-			classGroupSessionDeleteResponse{newSuccessResponse()},
-			http.StatusOK,
-			"",
-		},
-		{
-			"request with non-existent class group",
-			false,
-			false,
-			classGroupSessionDeleteResponse{},
-			http.StatusNotFound,
-			"class group session to delete does not exist",
-		},
-		{
-			"request with class group session foreign key dependency",
-			true,
-			true,
-			classGroupSessionDeleteResponse{},
-			http.StatusConflict,
-			"class group session to delete is still referenced",
-		},
-	}
-
-	for _, tt := range tts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			ctx := context.Background()
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			var sessionId int64
-			switch {
-			case tt.withForeignKeyDependency:
-				createdSessionEnrollment := tests.StubSessionEnrollment(t, ctx, v1.db, true)
-				sessionId = createdSessionEnrollment.SessionID
-			case tt.withExistingClassGroupSession:
-				createdSession := tests.StubClassGroupSession(
-					t, ctx, v1.db,
-					time.UnixMicro(1),
-					time.UnixMicro(2),
-					uuid.NewString(),
-				)
-				sessionId = createdSession.ID
-			default:
-				sessionId = rand.Int63()
-			}
-
-			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("%s%d", classGroupSessionUrl, sessionId), nil)
-			resp := v1.classGroupSessionDelete(req, sessionId)
-			a.Equal(tt.wantStatusCode, resp.Code())
-
-			switch {
-			case tt.wantErr != "":
-				actualResp, ok := resp.(errorResponse)
-				a.True(ok)
-				a.Contains(actualResp.Error, tt.wantErr)
-			default:
-				actualResp, ok := resp.(classGroupSessionDeleteResponse)
 				a.True(ok)
 				a.Equal(tt.wantResponse, actualResp)
 			}

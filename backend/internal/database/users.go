@@ -75,65 +75,6 @@ func (d *DB) CreateUser(ctx context.Context, arg CreateUserParams) (model.User, 
 	return res, err
 }
 
-type UpdateUserParams struct {
-	Name  *string         `json:"name"`
-	Email *string         `json:"email"`
-	Role  *model.UserRole `json:"role"`
-}
-
-func (d *DB) UpdateUser(ctx context.Context, id string, arg UpdateUserParams) (model.User, error) {
-	var (
-		res    model.User
-		cols   ColumnList
-		update model.User
-	)
-
-	if arg.Name != nil {
-		cols = append(cols, Users.Name)
-		update.Name = *arg.Name
-	}
-
-	if arg.Email != nil {
-		cols = append(cols, Users.Email)
-		update.Email = *arg.Email
-	}
-
-	if arg.Role != nil {
-		cols = append(cols, Users.Role)
-		update.Role = *arg.Role
-	}
-
-	if len(cols) == 0 {
-		return d.GetUser(ctx, id)
-	}
-
-	stmt := Users.UPDATE(
-		cols,
-	).MODEL(
-		update,
-	).WHERE(
-		Users.ID.EQ(String(id)),
-	).RETURNING(
-		Users.AllColumns,
-	)
-
-	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
-}
-
-func (d *DB) DeleteUser(ctx context.Context, id string) (model.User, error) {
-	var res model.User
-
-	stmt := Users.DELETE().
-		WHERE(
-			Users.ID.EQ(String(id)),
-		).
-		RETURNING(Users.AllColumns)
-
-	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
-}
-
 type UpsertUserParams struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`

@@ -96,18 +96,6 @@ func StubClassGroup(t *testing.T, ctx context.Context, db *database.DB, name str
 	return group
 }
 
-// StubClassGroupWithClassID creates a mock class group using an existing class ID.
-func StubClassGroupWithClassID(t *testing.T, ctx context.Context, db *database.DB, params database.CreateClassGroupParams) model.ClassGroup {
-	t.Helper()
-
-	group, err := db.CreateClassGroup(ctx, params)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return group
-}
-
 // StubClassGroupSession inserts a mock class, class group and corresponding class group session into the database.
 func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, startTime, endTime time.Time, venue string) model.ClassGroupSession {
 	t.Helper()
@@ -120,18 +108,6 @@ func StubClassGroupSession(t *testing.T, ctx context.Context, db *database.DB, s
 		EndTime:      endTime,
 		Venue:        venue,
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return session
-}
-
-// StubClassGroupSessionWithClassGroupID creates a mock class group session using an existing class group ID.
-func StubClassGroupSessionWithClassGroupID(t *testing.T, ctx context.Context, db *database.DB, params database.CreateClassGroupSessionParams) model.ClassGroupSession {
-	t.Helper()
-
-	session, err := db.CreateClassGroupSession(ctx, params)
 	if err != nil {
 		t.Fatal(err)
 	}

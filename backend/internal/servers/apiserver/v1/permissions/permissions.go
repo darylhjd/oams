@@ -8,35 +8,19 @@ const (
 	BatchPost P = iota
 	BatchPut
 
-	UserCreate
 	UserRead
-	UserUpdate
-	UserDelete
 
-	ClassCreate
 	ClassRead
-	ClassUpdate
-	ClassDelete
 
 	ClassManagerCreate
 	ClassManagerRead
-	ClassManagerUpdate
-	ClassManagerDelete
 
-	ClassGroupCreate
 	ClassGroupRead
-	ClassGroupUpdate
-	ClassGroupDelete
 
-	ClassGroupSessionCreate
 	ClassGroupSessionRead
-	ClassGroupSessionUpdate
-	ClassGroupSessionDelete
 
-	SessionEnrollmentCreate
 	SessionEnrollmentRead
 	SessionEnrollmentUpdate
-	SessionEnrollmentDelete
 
 	AttendanceTakingRead
 )
@@ -62,35 +46,19 @@ var systemAdminRolePermissions = permissionMap{
 	BatchPost: {},
 	BatchPut:  {},
 
-	UserCreate: {},
-	UserRead:   {},
-	UserUpdate: {},
-	UserDelete: {},
+	UserRead: {},
 
-	ClassCreate: {},
-	ClassRead:   {},
-	ClassUpdate: {},
-	ClassDelete: {},
+	ClassRead: {},
 
 	ClassManagerCreate: {},
 	ClassManagerRead:   {},
-	ClassManagerUpdate: {},
-	ClassManagerDelete: {},
 
-	ClassGroupCreate: {},
-	ClassGroupRead:   {},
-	ClassGroupUpdate: {},
-	ClassGroupDelete: {},
+	ClassGroupRead: {},
 
-	ClassGroupSessionCreate: {},
-	ClassGroupSessionRead:   {},
-	ClassGroupSessionUpdate: {},
-	ClassGroupSessionDelete: {},
+	ClassGroupSessionRead: {},
 
-	SessionEnrollmentCreate: {},
 	SessionEnrollmentRead:   {},
 	SessionEnrollmentUpdate: {},
-	SessionEnrollmentDelete: {},
 
 	AttendanceTakingRead: {},
 }

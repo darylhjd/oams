@@ -109,20 +109,6 @@ func (d *DB) UpdateSessionEnrollment(ctx context.Context, id int64, arg UpdateSe
 	return res, err
 }
 
-func (d *DB) DeleteSessionEnrollment(ctx context.Context, id int64) (model.SessionEnrollment, error) {
-	var res model.SessionEnrollment
-
-	stmt := SessionEnrollments.DELETE().
-		WHERE(
-			SessionEnrollments.ID.EQ(Int64(id)).AND(
-				sessionEnrollmentRLS(ctx),
-			),
-		).RETURNING(SessionEnrollments.AllColumns)
-
-	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
-}
-
 type UpsertSessionEnrollmentParams struct {
 	SessionID int64  `json:"session_id"`
 	UserID    string `json:"user_id"`

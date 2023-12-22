@@ -69,64 +69,6 @@ func (d *DB) CreateClassGroup(ctx context.Context, arg CreateClassGroupParams) (
 	return res, err
 }
 
-type UpdateClassGroupParams struct {
-	ClassID   *int64           `json:"class_id"`
-	Name      *string          `json:"name"`
-	ClassType *model.ClassType `json:"class_type"`
-}
-
-func (d *DB) UpdateClassGroup(ctx context.Context, id int64, arg UpdateClassGroupParams) (model.ClassGroup, error) {
-	var (
-		res    model.ClassGroup
-		cols   ColumnList
-		update model.ClassGroup
-	)
-
-	if arg.ClassID != nil {
-		cols = append(cols, ClassGroups.ClassID)
-		update.ClassID = *arg.ClassID
-	}
-
-	if arg.Name != nil {
-		cols = append(cols, ClassGroups.Name)
-		update.Name = *arg.Name
-	}
-
-	if arg.ClassType != nil {
-		cols = append(cols, ClassGroups.ClassType)
-		update.ClassType = *arg.ClassType
-	}
-
-	if len(cols) == 0 {
-		return d.GetClassGroup(ctx, id)
-	}
-
-	stmt := ClassGroups.UPDATE(
-		cols,
-	).MODEL(
-		update,
-	).WHERE(
-		ClassGroups.ID.EQ(Int64(id)),
-	).RETURNING(
-		ClassGroups.AllColumns,
-	)
-
-	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
-}
-
-func (d *DB) DeleteClassGroup(ctx context.Context, id int64) (model.ClassGroup, error) {
-	var res model.ClassGroup
-
-	stmt := ClassGroups.DELETE().
-		WHERE(
-			ClassGroups.ID.EQ(Int64(id)),
-		).RETURNING(ClassGroups.AllColumns)
-
-	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
-}
-
 type UpsertClassGroupParams struct {
 	ClassID   int64           `json:"class_id"`
 	Name      string          `json:"name"`

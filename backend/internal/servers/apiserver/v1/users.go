@@ -1,9 +1,7 @@
 package v1
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
@@ -17,7 +15,7 @@ func (v *APIServerV1) users(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		resp = v.usersGet(r)
 	case http.MethodPost:
-		resp = v.usersPost(r)
+		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -51,54 +49,4 @@ func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 
 	resp.Users = append(resp.Users, users...)
 	return resp
-}
-
-type usersPostRequest struct {
-	User database.CreateUserParams `json:"user"`
-}
-
-type usersPostResponse struct {
-	response
-	User usersPostUserResponseFields `json:"user"`
-}
-
-type usersPostUserResponseFields struct {
-	ID        string         `json:"id"`
-	Name      string         `json:"name"`
-	Email     string         `json:"email"`
-	Role      model.UserRole `json:"role"`
-	CreatedAt time.Time      `json:"created_at"`
-}
-
-func (v *APIServerV1) usersPost(r *http.Request) apiResponse {
-	var req usersPostRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
-	}
-
-	if req.User.ID == sessionUserId {
-		return newErrorResponse(http.StatusUnprocessableEntity, "id is not allowed")
-	}
-
-	user, err := v.db.CreateUser(r.Context(), req.User)
-	if err != nil {
-		if database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex) {
-			return newErrorResponse(http.StatusConflict, "user with same id already exists")
-
-		}
-
-		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process users post database action")
-	}
-
-	return usersPostResponse{
-		newSuccessResponse(),
-		usersPostUserResponseFields{
-			user.ID,
-			user.Name,
-			user.Email,
-			user.Role,
-			user.CreatedAt,
-		},
-	}
 }

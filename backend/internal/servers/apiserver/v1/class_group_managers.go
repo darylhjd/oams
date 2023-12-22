@@ -1,10 +1,8 @@
 package v1
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
@@ -25,7 +23,7 @@ func (v *APIServerV1) classGroupManagers(w http.ResponseWriter, r *http.Request)
 	case http.MethodGet:
 		resp = v.classGroupManagersGet(r)
 	case http.MethodPost:
-		resp = v.classGroupManagersPost(r)
+		resp = newErrorResponse(http.StatusNotImplemented, "")
 	case http.MethodPut:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
@@ -61,54 +59,6 @@ func (v *APIServerV1) classGroupManagersGet(r *http.Request) apiResponse {
 
 	resp.ClassGroupManagers = append(resp.ClassGroupManagers, managers...)
 	return resp
-}
-
-type classGroupManagersPostRequest struct {
-	ClassGroupManager database.CreateClassGroupManagerParams `json:"class_group_manager"`
-}
-
-type classGroupManagersPostResponse struct {
-	response
-	ClassGroupManager classGroupManagersPostClassGroupManagerResponseFields `json:"class_group_manager"`
-}
-
-type classGroupManagersPostClassGroupManagerResponseFields struct {
-	ID           int64              `json:"id"`
-	UserID       string             `json:"user_id"`
-	ClassGroupID int64              `json:"class_group_id"`
-	ManagingRole model.ManagingRole `json:"managing_role"`
-	CreatedAt    time.Time          `json:"created_at"`
-}
-
-func (v *APIServerV1) classGroupManagersPost(r *http.Request) apiResponse {
-	var req classGroupManagersPostRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
-	}
-
-	manager, err := v.db.CreateClassGroupManager(r.Context(), req.ClassGroupManager)
-	if err != nil {
-		switch {
-		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
-			return newErrorResponse(http.StatusConflict, "class group manager with same user_id and class_group_id already exists")
-		case database.ErrSQLState(err, database.SQLStateForeignKeyViolation):
-			return newErrorResponse(http.StatusBadRequest, "user_id and/or class_group_id does not exist")
-		default:
-			v.logInternalServerError(r, err)
-			return newErrorResponse(http.StatusInternalServerError, "could not process class group managers post database action")
-		}
-	}
-
-	return classGroupManagersPostResponse{
-		newSuccessResponse(),
-		classGroupManagersPostClassGroupManagerResponseFields{
-			manager.ID,
-			manager.UserID,
-			manager.ClassGroupID,
-			manager.ManagingRole,
-			manager.CreatedAt,
-		},
-	}
 }
 
 type classGroupManagersPutResponse struct {

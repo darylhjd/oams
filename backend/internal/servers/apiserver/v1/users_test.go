@@ -1,9 +1,7 @@
 package v1
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -31,7 +29,7 @@ func TestAPIServerV1_users(t *testing.T) {
 		{
 			"with POST method",
 			http.MethodPost,
-			http.StatusBadRequest,
+			http.StatusNotImplemented,
 		},
 		{
 			"with DELETE method",
@@ -118,106 +116,6 @@ func TestAPIServerV1_usersGet(t *testing.T) {
 			actualResp, ok := v1.usersGet(req).(usersGetResponse)
 			a.True(ok)
 			a.Equal(tt.wantResponse, actualResp)
-		})
-	}
-}
-
-func TestAPIServerV1_usersPost(t *testing.T) {
-	t.Parallel()
-
-	tts := []struct {
-		name             string
-		withRequest      usersPostRequest
-		withExistingUser bool
-		wantResponse     usersPostResponse
-		wantStatusCode   int
-		wantErr          string
-	}{
-		{
-			"request with no existing user",
-			usersPostRequest{
-				database.CreateUserParams{
-					ID:   "NEW_USER",
-					Role: model.UserRole_User,
-				},
-			},
-			false,
-			usersPostResponse{
-				newSuccessResponse(),
-				usersPostUserResponseFields{
-					ID:   "NEW_USER",
-					Role: model.UserRole_User,
-				},
-			},
-			http.StatusOK,
-			"",
-		},
-		{
-			"request with existing user",
-			usersPostRequest{
-				database.CreateUserParams{
-					ID:   uuid.NewString(),
-					Role: model.UserRole_User,
-				},
-			},
-			true,
-			usersPostResponse{},
-			http.StatusConflict,
-			"user with same id already exists",
-		},
-		{
-			"request with special session user id me",
-			usersPostRequest{
-				database.CreateUserParams{
-					ID:   sessionUserId,
-					Role: model.UserRole_User,
-				},
-			},
-			false,
-			usersPostResponse{},
-			http.StatusUnprocessableEntity,
-			"id is not allowed",
-		},
-	}
-
-	for _, tt := range tts {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			a := assert.New(t)
-			ctx := context.Background()
-			id := uuid.NewString()
-
-			v1 := newTestAPIServerV1(t, id)
-			defer tests.TearDown(t, v1.db, id)
-
-			if tt.withExistingUser {
-				_ = tests.StubUser(t, ctx, v1.db, database.CreateUserParams{
-					ID:   tt.withRequest.User.ID,
-					Role: tt.withRequest.User.Role,
-				})
-			}
-
-			reqBodyBytes, err := json.Marshal(tt.withRequest)
-			a.Nil(err)
-
-			req := httptest.NewRequest(http.MethodPost, usersUrl, bytes.NewReader(reqBodyBytes))
-			resp := v1.usersPost(req)
-			a.Equal(tt.wantStatusCode, resp.Code())
-
-			switch {
-			case tt.wantErr != "":
-				actualResp, ok := resp.(errorResponse)
-				a.True(ok)
-				a.Contains(actualResp.Error, tt.wantErr)
-			default:
-				actualResp, ok := resp.(usersPostResponse)
-				a.True(ok)
-
-				tt.wantResponse.User.CreatedAt = actualResp.User.CreatedAt
-				a.Equal(tt.wantResponse, actualResp)
-			}
 		})
 	}
 }
