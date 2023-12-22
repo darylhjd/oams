@@ -12,11 +12,7 @@ import {
   UpcomingClassGroupSession,
 } from "@/api/attendance_taking";
 import { SessionEnrollment } from "@/api/session_enrollment";
-import {
-  MantineReactTable,
-  MRT_PaginationState,
-  MRT_Row,
-} from "mantine-react-table";
+import { MantineReactTable, MRT_PaginationState } from "mantine-react-table";
 import {
   AttendanceTakingDataTableColumns,
   DEFAULT_PAGE_SIZE,
