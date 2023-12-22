@@ -30,7 +30,7 @@ func TestAPIServerV1_user(t *testing.T) {
 		{
 			"with PATCH method",
 			http.MethodPatch,
-			http.StatusNotImplemented,
+			http.StatusBadRequest,
 		},
 		{
 			"with DELETE method",

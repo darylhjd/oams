@@ -108,6 +108,14 @@ export class APIClient {
     return data;
   }
 
+  static async userPatch(id: string, newSignature: string): Promise<void> {
+    await this._client.patch(this._userPath + id, {
+      user: {
+        signature: newSignature,
+      },
+    });
+  }
+
   static async userMe(): Promise<UserMeResponse> {
     const { data } = await this._client.get<UserMeResponse>(this._userMePath);
     return data;

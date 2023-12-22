@@ -1,4 +1,9 @@
 .paper {
   max-width: rem(500px);
-  margin: 30vh auto;
+  margin: 20vh auto rem(30px) auto;
+}
+
+.signatureUpdater {
+  max-width: rem(400px);
+  margin: 0 auto;
 }

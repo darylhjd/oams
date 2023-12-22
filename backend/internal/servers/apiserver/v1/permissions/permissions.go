@@ -9,6 +9,7 @@ const (
 	BatchPut
 
 	UserRead
+	UserUpdate
 
 	ClassRead
 
@@ -34,6 +35,7 @@ var rolePermissionMapping = map[model.UserRole]permissionMap{
 
 var userRolePermissions = permissionMap{
 	UserRead:                {},
+	UserUpdate:              {},
 	ClassRead:               {},
 	ClassGroupRead:          {},
 	ClassGroupSessionRead:   {},
@@ -46,7 +48,8 @@ var systemAdminRolePermissions = permissionMap{
 	BatchPost: {},
 	BatchPut:  {},
 
-	UserRead: {},
+	UserRead:   {},
+	UserUpdate: {},
 
 	ClassRead: {},
 

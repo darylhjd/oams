@@ -87,7 +87,8 @@ func (v *APIServerV1) registerHandlers() {
 		v.user,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet: {permissions.UserRead},
+			http.MethodGet:   {permissions.UserRead},
+			http.MethodPatch: {permissions.UserUpdate},
 		},
 	))
 
