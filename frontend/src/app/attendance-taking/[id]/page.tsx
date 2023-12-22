@@ -6,12 +6,21 @@ import { useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
-import { Center, Container, Text, Title } from "@mantine/core";
+import { Box, Button, Center, Container, Text, Title } from "@mantine/core";
 import {
   AttendanceTakingGetResponse,
   UpcomingClassGroupSession,
 } from "@/api/attendance_taking";
 import { SessionEnrollment } from "@/api/session_enrollment";
+import {
+  MantineReactTable,
+  MRT_PaginationState,
+  MRT_Row,
+} from "mantine-react-table";
+import {
+  AttendanceTakingDataTableColumns,
+  DEFAULT_PAGE_SIZE,
+} from "@/components/tabling";
 
 export default function SessionAttendanceTakingPage({
   params,
@@ -51,7 +60,7 @@ function PageTitle() {
 }
 
 function SessionInfo({ session }: { session: UpcomingClassGroupSession }) {
-  return null;
+  return <Text ta="center">{session.venue}</Text>;
 }
 
 function AttendanceTaker({
@@ -59,9 +68,40 @@ function AttendanceTaker({
 }: {
   enrollments: SessionEnrollment[];
 }) {
+  const [paginationState, setPaginationState] = useState<MRT_PaginationState>({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
+  const [data, setData] = useState(enrollments);
+
   return (
-    <Text ta="center">
-      There are {enrollments.length} enrollment data rows.
-    </Text>
+    <Box className={styles.table}>
+      <MantineReactTable
+        columns={AttendanceTakingDataTableColumns}
+        data={data}
+        state={{ pagination: paginationState }}
+        onPaginationChange={setPaginationState}
+        enableRowActions
+        positionActionsColumn="last"
+        renderRowActions={({ row }) =>
+          row.original.attended ? null : (
+            <TakeAttendanceButton
+              onClick={() => {
+                data[row.index].attended = true;
+                setData([...data]);
+              }}
+            />
+          )
+        }
+      />
+    </Box>
+  );
+}
+
+function TakeAttendanceButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button variant="outline" onClick={onClick}>
+      Take attendance
+    </Button>
   );
 }
