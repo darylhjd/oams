@@ -12,6 +12,7 @@ import {
 } from "./class_group_session";
 import {
   SessionEnrollmentGetResponse,
+  SessionEnrollmentPatchResponse,
   SessionEnrollmentsGetResponse,
 } from "./session_enrollment";
 import {
@@ -220,6 +221,21 @@ export class APIClient {
   ): Promise<SessionEnrollmentGetResponse> {
     const { data } = await this._client.get<SessionEnrollmentGetResponse>(
       this._sessionEnrollmentPath + id,
+    );
+    return data;
+  }
+
+  static async sessionEnrollmentPatch(
+    id: number,
+    attended: boolean,
+  ): Promise<SessionEnrollmentPatchResponse> {
+    const { data } = await this._client.patch<SessionEnrollmentPatchResponse>(
+      this._sessionEnrollmentPath + id,
+      {
+        session_enrollment: {
+          attended: attended,
+        },
+      },
     );
     return data;
   }

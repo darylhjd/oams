@@ -82,8 +82,12 @@ function AttendanceTaker({
         renderRowActions={({ row }) =>
           row.original.attended ? null : (
             <TakeAttendanceButton
-              onClick={() => {
-                data[row.index].attended = true;
+              onClick={async () => {
+                const response = await APIClient.sessionEnrollmentPatch(
+                  row.original.id,
+                  true,
+                );
+                data[row.index] = response.session_enrollment;
                 setData([...data]);
               }}
             />
