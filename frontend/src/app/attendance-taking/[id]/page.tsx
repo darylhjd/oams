@@ -103,16 +103,14 @@ function SessionInfo({ session }: { session: UpcomingClassGroupSession }) {
 
   return (
     <Paper withBorder p="xs" className={styles.sessionInfo}>
-      <Text ta="center" c="green" size="lg">
+      <Text ta="center" c="green">
         {session.code} {session.year}/{session.semester}
       </Text>
       <Text ta="center" size="sm" c="orange">
         {session.name} {session.class_type} @ {session.venue}
       </Text>
       <Text ta="center" c="yellow">
-        {date}
-        <br />
-        {startTime} - {endTime}
+        {date}, {startTime} - {endTime}
       </Text>
     </Paper>
   );
