@@ -6,6 +6,7 @@ import { isAxiosError } from "axios";
 import React, { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
+import { motion } from "framer-motion";
 
 export function RequestLoader({
   promiseFunc,
@@ -43,6 +44,14 @@ export function RequestLoader({
       return <NotFoundPage />;
     }
   } else {
-    return <>{children}</>;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {children}
+      </motion.div>
+    );
   }
 }
