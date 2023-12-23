@@ -24,6 +24,7 @@ const (
 const (
 	baseUrl               = "/"
 	pingUrl               = "/ping"
+	sessionUrl            = "/session"
 	signatureUrl          = "/signature/"
 	batchUrl              = "/batch"
 	usersUrl              = "/users"
@@ -66,6 +67,7 @@ func New(l *zap.Logger, db *database.DB, auth oauth2.AuthProvider) *APIServerV1 
 func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(baseUrl, v.base)
 	v.mux.HandleFunc(pingUrl, v.ping)
+	v.mux.HandleFunc(sessionUrl, v.session)
 
 	v.mux.HandleFunc(signatureUrl, permissions.EnforceAccessPolicy(
 		v.signature,

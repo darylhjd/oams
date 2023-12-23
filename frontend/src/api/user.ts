@@ -6,11 +6,6 @@ export type UserGetResponse = {
   user: User;
 };
 
-export type UserMeResponse = {
-  session_user: User;
-  has_managed_class_groups: boolean;
-};
-
 export type User = {
   id: string;
   name: string;

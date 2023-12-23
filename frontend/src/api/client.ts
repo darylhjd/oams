@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createClient } from "@supabase/supabase-js";
-import { UserGetResponse, UserMeResponse, UsersGetResponse } from "./user";
+import { UserGetResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
 import { ClassGetResponse, ClassesGetResponse } from "./class";
@@ -20,13 +20,14 @@ import {
   AttendanceTakingGetsResponse,
   AttendanceTakingPostResponse,
 } from "./attendance_taking";
+import { SessionResponse } from "@/api/session";
 
 export class APIClient {
+  static readonly _sessionPath = "/session";
   static readonly _signaturePath = "/signature/";
   static readonly _batchPath = "/batch";
   static readonly _usersPath = "/users";
   static readonly _userPath = "/users/";
-  static readonly _userMePath = "/users/me";
   static readonly _classesPath = "/classes";
   static readonly _classPath = "/classes/";
   static readonly _classGroupsPath = "/class-groups";
@@ -72,6 +73,11 @@ export class APIClient {
       `Bearer ${session.provider_token}`;
   }
 
+  static async sessionGet(): Promise<SessionResponse> {
+    const { data } = await this._client.get<SessionResponse>(this._sessionPath);
+    return data;
+  }
+
   static async signaturePut(id: string, newSignature: string): Promise<void> {
     await this._client.put(this._signaturePath + id, {
       signature: newSignature,
@@ -113,11 +119,6 @@ export class APIClient {
     const { data } = await this._client.get<UserGetResponse>(
       this._userPath + id,
     );
-    return data;
-  }
-
-  static async userMe(): Promise<UserMeResponse> {
-    const { data } = await this._client.get<UserMeResponse>(this._userMePath);
     return data;
   }
 

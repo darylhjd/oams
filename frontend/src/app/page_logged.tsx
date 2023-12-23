@@ -8,11 +8,11 @@ import { Title } from "@mantine/core";
 export default function LoggedPage() {
   const session = useSessionUserStore();
 
-  const name = session.data!.session_user.name;
+  const name = session.data!.user.name;
 
   return (
     <Title order={2} ta="center" className={styles.title}>
-      Welcome, {name == "" ? session.data!.session_user.email : name}
+      Welcome, {name == "" ? session.data!.user.email : name}
     </Title>
   );
 }

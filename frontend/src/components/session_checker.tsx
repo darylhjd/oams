@@ -14,7 +14,7 @@ export function CheckHasUserRole({
 }) {
   const session = useSessionUserStore();
 
-  if (session.data?.session_user.role != role) {
+  if (session.data?.user.role != role) {
     return <NotFoundPage />;
   }
 
@@ -40,7 +40,7 @@ export function IsClassGroupManager({
 
   if (
     session.data?.has_managed_class_groups ||
-    session.data?.session_user.role == UserRole.SystemAdmin
+    session.data?.user.role == UserRole.SystemAdmin
   ) {
     return <>{children}</>;
   }
