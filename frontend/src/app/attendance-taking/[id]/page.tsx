@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   Container,
+  FocusTrap,
   Group,
   Modal,
   Paper,
@@ -234,10 +235,13 @@ function SignAttendance({
             setLoading(false);
           })}
         >
-          <PasswordInput
-            label="Signature"
-            {...form.getInputProps("signature")}
-          />
+          <FocusTrap active>
+            <PasswordInput
+              label="Signature"
+              {...form.getInputProps("signature")}
+              data-autofocus
+            />
+          </FocusTrap>
           <Space h="sm" />
           <Group justify="center">
             <Button type="submit" color="green" loading={loading}>
