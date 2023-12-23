@@ -118,25 +118,19 @@ function GuestItems() {
 }
 
 function LoggedItems() {
-  const session = useSessionUserStore();
-
-  const isSystemAdmin = session.data?.session_user.role == UserRole.SystemAdmin;
-  const isClassGroupManager =
-    session.data?.has_managed_class_groups || isSystemAdmin;
-
   return (
     <>
       <Group visibleFrom="md">
-        {isSystemAdmin ? <SystemAdminMenu /> : null}
-        {isClassGroupManager ? <ClassGroupManagerMenu /> : null}
+        <SystemAdminMenu />
+        <ClassGroupManagerMenu />
         <AboutButton />
         <ProfileButton />
         <LogoutButton />
       </Group>
 
       <Stack hiddenFrom="md" gap={0}>
-        {isSystemAdmin ? <SystemAdminMenu /> : null}
-        {isClassGroupManager ? <ClassGroupManagerMenu /> : null}
+        <SystemAdminMenu />
+        <ClassGroupManagerMenu />
         <AboutButton />
         <Divider my="sm" />
 
@@ -219,6 +213,15 @@ function LogoutButton() {
 
 function ClassGroupManagerMenu() {
   const router = useRouter();
+  const session = useSessionUserStore();
+
+  const isSystemAdmin = session.data?.user.role == UserRole.SystemAdmin;
+  const isClassGroupManager =
+    session.data?.has_managed_class_groups || isSystemAdmin;
+
+  if (!isClassGroupManager) {
+    return null;
+  }
 
   return (
     <>
@@ -269,6 +272,12 @@ function ClassGroupManagerMenu() {
 
 function SystemAdminMenu() {
   const router = useRouter();
+  const session = useSessionUserStore();
+
+  const isSystemAdmin = session.data?.user.role == UserRole.SystemAdmin;
+  if (!isSystemAdmin) {
+    return null;
+  }
 
   return (
     <>

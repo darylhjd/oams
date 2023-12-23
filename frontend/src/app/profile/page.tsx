@@ -21,7 +21,7 @@ import { useState } from "react";
 
 export default function ProfilePage() {
   const session = useSessionUserStore();
-  const user = session.data!.session_user;
+  const user = session.data!.user;
 
   return (
     <Container fluid>
