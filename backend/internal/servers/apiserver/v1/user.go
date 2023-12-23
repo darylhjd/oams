@@ -25,7 +25,7 @@ func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	case m == http.MethodGet:
 		resp = v.userGet(r, userId)
 	case m == http.MethodPatch:
-		resp = v.userPatch(r, userId)
+		resp = newErrorResponse(http.StatusNotImplemented, "")
 	case m == http.MethodDelete:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
@@ -84,35 +84,5 @@ func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
 	return userGetResponse{
 		newSuccessResponse(),
 		user,
-	}
-}
-
-type userPatchRequest struct {
-	User struct {
-		Signature *string `json:"signature"`
-	} `json:"user"`
-}
-
-type userPatchResponse struct {
-	response
-	User model.User `json:"user"`
-}
-
-func (v *APIServerV1) userPatch(r *http.Request, id string) apiResponse {
-	var req userPatchRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse user request body: %s", err))
-	}
-
-	if req.User.Signature != nil {
-		if err := v.db.UpdateUserSignature(r.Context(), id, *req.User.Signature); err != nil {
-			v.logInternalServerError(r, err)
-			return newErrorResponse(http.StatusInternalServerError, "could not update user signature")
-		}
-	}
-
-	return userPatchResponse{
-		newSuccessResponse(),
-		oauth2.GetAuthContext(r.Context()).User,
 	}
 }

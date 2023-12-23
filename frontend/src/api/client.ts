@@ -22,6 +22,7 @@ import {
 } from "./attendance_taking";
 
 export class APIClient {
+  static readonly _signaturePath = "/signature/";
   static readonly _batchPath = "/batch";
   static readonly _usersPath = "/users";
   static readonly _userPath = "/users/";
@@ -71,6 +72,12 @@ export class APIClient {
       `Bearer ${session.provider_token}`;
   }
 
+  static async signaturePut(id: string, newSignature: string): Promise<void> {
+    await this._client.put(this._signaturePath + id, {
+      signature: newSignature,
+    });
+  }
+
   static async batchPost(files: FileWithPath[]): Promise<BatchPostResponse> {
     const form = new FormData();
     files.forEach((file) => form.append("batch-attachments", file));
@@ -107,14 +114,6 @@ export class APIClient {
       this._userPath + id,
     );
     return data;
-  }
-
-  static async userPatch(id: string, newSignature: string): Promise<void> {
-    await this._client.patch(this._userPath + id, {
-      user: {
-        signature: newSignature,
-      },
-    });
   }
 
   static async userMe(): Promise<UserMeResponse> {
