@@ -17,6 +17,7 @@ import { useForm } from "@mantine/form";
 import { APIClient } from "@/api/client";
 import { notifications } from "@mantine/notifications";
 import { IconCheck } from "@tabler/icons-react";
+import { useState } from "react";
 
 export default function ProfilePage() {
   const session = useSessionUserStore();
@@ -43,6 +44,7 @@ export default function ProfilePage() {
 }
 
 function SignatureUpdater({ userId }: { userId: string }) {
+  const [loading, setLoading] = useState(false);
   const form = useForm({
     initialValues: {
       signature: "",
@@ -57,8 +59,10 @@ function SignatureUpdater({ userId }: { userId: string }) {
     <Box className={styles.signatureUpdater}>
       <form
         onSubmit={form.onSubmit(async (values) => {
+          setLoading(true);
           await APIClient.userPatch(userId, values.signature);
           form.reset();
+          setLoading(false);
           notifications.show({
             title: "Update successful!",
             message: "Your signature has been updated successfully.",
@@ -76,7 +80,7 @@ function SignatureUpdater({ userId }: { userId: string }) {
           Note: Your default signature is your user ID.
         </Text>
         <Group justify="flex-end">
-          <Button variant="subtle" type="submit">
+          <Button type="submit" loading={loading}>
             Update Signature
           </Button>
         </Group>
