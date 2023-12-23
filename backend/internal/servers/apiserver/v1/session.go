@@ -26,8 +26,7 @@ func (v *APIServerV1) session(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, _, err := middleware.CheckAuthorizationToken(r, v.auth); err != nil {
-		resp := sessionResponse{newSuccessResponse(), nil}
-		v.writeResponse(w, r, resp)
+		v.writeResponse(w, r, sessionResponse{newSuccessResponse(), nil})
 		return
 	}
 
@@ -53,8 +52,6 @@ func (v *APIServerV1) getSession(w http.ResponseWriter, r *http.Request) {
 
 	v.writeResponse(w, r, sessionResponse{
 		newSuccessResponse(),
-		&session{
-			sessionUser, hasManagedClassGroups,
-		},
+		&session{sessionUser, hasManagedClassGroups},
 	})
 }
