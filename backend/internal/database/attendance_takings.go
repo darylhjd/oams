@@ -32,7 +32,9 @@ type UpcomingManagedClassGroupSession struct {
 func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]UpcomingManagedClassGroupSession, error) {
 	var res []UpcomingManagedClassGroupSession
 
-	stmt := selectManagedClassGroupSession(ctx)
+	stmt := selectManagedClassGroupSessionFields().WHERE(
+		isManagedClassGroupSession(ctx),
+	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
@@ -41,8 +43,10 @@ func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]Upcomi
 func (d *DB) GetUpcomingManagedClassGroupSession(ctx context.Context, id int64) (UpcomingManagedClassGroupSession, error) {
 	var res UpcomingManagedClassGroupSession
 
-	stmt := selectManagedClassGroupSession(ctx).WHERE(
-		ClassGroupSessions.ID.EQ(Int64(id)),
+	stmt := selectManagedClassGroupSessionFields().WHERE(
+		ClassGroupSessions.ID.EQ(Int64(id)).AND(
+			isManagedClassGroupSession(ctx),
+		),
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
@@ -113,7 +117,7 @@ func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSe
 		},
 	).WHERE(
 		EXISTS(
-			selectManagedClassGroupSession(ctx).WHERE(
+			selectManagedClassGroupSessionFields().WHERE(
 				ClassGroupSessions.ID.EQ(
 					Int64(arg.ClassGroupSessionID),
 				).AND(
@@ -128,6 +132,8 @@ func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSe
 							),
 						),
 					),
+				).AND(
+					isManagedClassGroupSession(ctx),
 				),
 			),
 		).AND(
@@ -140,7 +146,7 @@ func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSe
 	return res, err
 }
 
-func selectManagedClassGroupSession(ctx context.Context) SelectStatement {
+func selectManagedClassGroupSessionFields() SelectStatement {
 	return SELECT(
 		ClassGroupSessions.ID,
 		ClassGroupSessions.StartTime,
@@ -160,15 +166,17 @@ func selectManagedClassGroupSession(ctx context.Context) SelectStatement {
 		).LEFT_JOIN(
 			ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
 		),
-	).WHERE(
-		// TODO: Uncomment in production.
-		//TimestampzT(time.Now()).BETWEEN(
-		//	ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
-		//	ClassGroupSessions.EndTime,
-		//).AND(
-		attendanceTakingRLS(ctx),
-		//),
 	).ORDER_BY(
 		ClassGroupSessions.StartTime.ASC(),
 	)
+}
+
+func isManagedClassGroupSession(ctx context.Context) BoolExpression {
+	// TODO: Uncomment in production.
+	//return TimestampzT(time.Now()).BETWEEN(
+	//	ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
+	//	ClassGroupSessions.EndTime,
+	//).AND(
+	return attendanceTakingRLS(ctx)
+	//)
 }
