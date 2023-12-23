@@ -175,6 +175,8 @@ function SignAttendance({
   data: SessionEnrollment[];
   setData: Dispatch<SetStateAction<SessionEnrollment[]>>;
 }) {
+  const [loading, setLoading] = useState(false);
+
   const [opened, { open, close }] = useDisclosure(false);
   const form = useForm({
     initialValues: {
@@ -207,6 +209,7 @@ function SignAttendance({
       >
         <form
           onSubmit={form.onSubmit(async (values) => {
+            setLoading(true);
             try {
               const resp = await APIClient.attendanceTakingPost(
                 id,
@@ -228,6 +231,7 @@ function SignAttendance({
                 color: "red",
               });
             }
+            setLoading(false);
           })}
         >
           <PasswordInput
@@ -236,7 +240,7 @@ function SignAttendance({
           />
           <Space h="sm" />
           <Group justify="center">
-            <Button type="submit" color="green">
+            <Button type="submit" color="green" loading={loading}>
               Confirm Attendance
             </Button>
           </Group>
