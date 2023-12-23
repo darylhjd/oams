@@ -179,7 +179,8 @@ func (v *APIServerV1) registerHandlers() {
 		v.attendanceTaking,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet: {permissions.AttendanceTakingRead},
+			http.MethodGet:  {permissions.AttendanceTakingRead},
+			http.MethodPost: {permissions.AttendanceTakingUpdate},
 		},
 	))
 }

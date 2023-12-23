@@ -2,11 +2,14 @@ package database
 
 import (
 	"context"
+	"errors"
 	"time"
 
+	"github.com/alexedwards/argon2id"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/go-jet/jet/v2/qrm"
 )
 
 const (
@@ -57,9 +60,83 @@ func (d *DB) GetUpcomingClassGroupSessionEnrollments(ctx context.Context, id int
 		SessionEnrollments.SessionID.EQ(Int64(id)).AND(
 			sessionEnrollmentRLS(ctx),
 		),
+	).ORDER_BY(
+		SessionEnrollments.UserID,
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
+type UpdateSessionEnrollmentAttendanceParams struct {
+	SessionEnrollment   model.SessionEnrollment
+	ClassGroupSessionID int64
+	UserSignature       string
+}
+
+func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSessionEnrollmentAttendanceParams) (model.SessionEnrollment, error) {
+	var res model.SessionEnrollment
+
+	var signature struct {
+		Signature string `alias:"user_signature.signature"`
+	}
+	signatureStmt := SELECT(
+		UserSignatures.Signature,
+	).FROM(
+		UserSignatures.INNER_JOIN(
+			SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
+		),
+	).WHERE(
+		SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollment.ID)),
+	)
+	err := signatureStmt.QueryContext(ctx, d.qe, &signature)
+	if errors.Is(err, qrm.ErrNoRows) {
+		if arg.UserSignature != arg.SessionEnrollment.UserID {
+			return res, qrm.ErrNoRows
+		}
+	} else if err != nil {
+		return res, err
+	} else {
+		match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
+		if !match {
+			return res, qrm.ErrNoRows
+		} else if err != nil {
+			return res, err
+		}
+	}
+
+	stmt := SessionEnrollments.UPDATE(
+		SessionEnrollments.Attended,
+	).MODEL(
+		model.SessionEnrollment{
+			Attended: arg.SessionEnrollment.Attended,
+		},
+	).WHERE(
+		EXISTS(
+			selectManagedClassGroupSession(ctx).WHERE(
+				ClassGroupSessions.ID.EQ(
+					Int64(arg.ClassGroupSessionID),
+				).AND(
+					ClassGroupSessions.ID.EQ(
+						IntExp(
+							SELECT(
+								SessionEnrollments.SessionID,
+							).FROM(
+								SessionEnrollments,
+							).WHERE(
+								SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollment.ID)),
+							),
+						),
+					),
+				),
+			),
+		).AND(
+			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollment.ID)),
+		),
+	).RETURNING(
+		SessionEnrollments.AllColumns,
+	)
+	err = stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 

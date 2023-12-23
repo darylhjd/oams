@@ -23,3 +23,7 @@ export type AttendanceTakingGetResponse = {
   upcoming_class_group_session: UpcomingClassGroupSession;
   enrollment_data: SessionEnrollment[];
 };
+
+export type AttendanceTakingPostResponse = {
+  session_enrollment: SessionEnrollment;
+};
