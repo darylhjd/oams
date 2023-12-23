@@ -105,9 +105,9 @@ func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSe
 
 	match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
 	if err != nil {
-		return res, qrm.ErrNoRows
-	} else if !match {
 		return res, err
+	} else if !match {
+		return res, qrm.ErrNoRows
 	}
 
 	stmt := SessionEnrollments.UPDATE(
