@@ -12,6 +12,7 @@ import { SessionEnrollment } from "@/api/session_enrollment";
 import { User } from "@/api/user";
 import { MRT_Cell, MRT_ColumnDef } from "mantine-react-table";
 import { Badge } from "@mantine/core";
+import { AttendanceEntry } from "@/api/attendance_taking";
 
 export const DEFAULT_PAGE_SIZE = 50;
 
@@ -109,5 +110,9 @@ export const SessionEnrollmentsDataTableColumns: MRT_ColumnDef<SessionEnrollment
     ...sessionEnrollmentsSharedColumns,
     ...CreatedAtUpdatedAtDataTableColumns,
   ];
-export const AttendanceTakingDataTableColumns: MRT_ColumnDef<SessionEnrollment>[] =
-  [...sessionEnrollmentsSharedColumns];
+export const AttendanceTakingDataTableColumns: MRT_ColumnDef<AttendanceEntry>[] =
+  [
+    ...sessionEnrollmentsSharedColumns.slice(0, 1),
+    { accessorKey: "user_name", header: "Name" },
+    ...sessionEnrollmentsSharedColumns.slice(1),
+  ];

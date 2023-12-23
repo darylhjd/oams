@@ -1,6 +1,5 @@
 import { ClassType } from "./class_group";
 import { ManagingRole } from "./class_group_manager";
-import { SessionEnrollment } from "@/api/session_enrollment";
 
 export type UpcomingClassGroupSession = {
   id: number;
@@ -21,9 +20,17 @@ export type AttendanceTakingGetsResponse = {
 
 export type AttendanceTakingGetResponse = {
   upcoming_class_group_session: UpcomingClassGroupSession;
-  enrollment_data: SessionEnrollment[];
+  attendance_entries: AttendanceEntry[];
+};
+
+export type AttendanceEntry = {
+  id: number;
+  session_id: number;
+  user_id: string;
+  user_name: string;
+  attended: boolean;
 };
 
 export type AttendanceTakingPostResponse = {
-  session_enrollment: SessionEnrollment;
+  attended: boolean;
 };

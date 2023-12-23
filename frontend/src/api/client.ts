@@ -11,11 +11,11 @@ import {
   ClassGroupSessionsGetResponse,
 } from "./class_group_session";
 import {
-  SessionEnrollment,
   SessionEnrollmentGetResponse,
   SessionEnrollmentsGetResponse,
 } from "./session_enrollment";
 import {
+  AttendanceEntry,
   AttendanceTakingGetResponse,
   AttendanceTakingGetsResponse,
   AttendanceTakingPostResponse,
@@ -252,13 +252,17 @@ export class APIClient {
 
   static async attendanceTakingPost(
     id: number,
-    sessionEnrollment: SessionEnrollment,
+    sessionEnrollmentId: number,
+    userId: string,
+    attended: boolean,
     userSignature: string,
   ): Promise<AttendanceTakingPostResponse> {
     const { data } = await this._client.post<AttendanceTakingPostResponse>(
       this._attendanceTakingPath + id,
       {
-        session_enrollment: sessionEnrollment,
+        id: sessionEnrollmentId,
+        user_id: userId,
+        attended: attended,
         user_signature: userSignature,
       },
     );

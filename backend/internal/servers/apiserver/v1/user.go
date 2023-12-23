@@ -9,10 +9,6 @@ import (
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-const (
-	sessionUserId = "me"
-)
-
 func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
