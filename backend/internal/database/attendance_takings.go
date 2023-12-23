@@ -95,18 +95,19 @@ func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSe
 	)
 	err := signatureStmt.QueryContext(ctx, d.qe, &signature)
 	if errors.Is(err, qrm.ErrNoRows) {
-		if arg.UserSignature != arg.SessionEnrollment.UserID {
-			return res, qrm.ErrNoRows
+		signature.Signature, err = argon2id.CreateHash(arg.SessionEnrollment.UserID, argon2id.DefaultParams)
+		if err != nil {
+			return res, err
 		}
 	} else if err != nil {
 		return res, err
-	} else {
-		match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
-		if !match {
-			return res, qrm.ErrNoRows
-		} else if err != nil {
-			return res, err
-		}
+	}
+
+	match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
+	if !match {
+		return res, qrm.ErrNoRows
+	} else if err != nil {
+		return res, err
 	}
 
 	stmt := SessionEnrollments.UPDATE(
