@@ -162,8 +162,7 @@ func (v *APIServerV1) registerHandlers() {
 		v.sessionEnrollment,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:   {permissions.SessionEnrollmentRead},
-			http.MethodPatch: {permissions.SessionEnrollmentUpdate},
+			http.MethodGet: {permissions.SessionEnrollmentRead},
 		},
 	))
 

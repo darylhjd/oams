@@ -73,42 +73,6 @@ func (d *DB) CreateSessionEnrollment(ctx context.Context, arg CreateSessionEnrol
 	return res, err
 }
 
-type UpdateSessionEnrollmentParams struct {
-	Attended *bool `json:"attended"`
-}
-
-func (d *DB) UpdateSessionEnrollment(ctx context.Context, id int64, arg UpdateSessionEnrollmentParams) (model.SessionEnrollment, error) {
-	var (
-		res    model.SessionEnrollment
-		cols   ColumnList
-		update model.SessionEnrollment
-	)
-
-	if arg.Attended != nil {
-		cols = append(cols, SessionEnrollments.Attended)
-		update.Attended = *arg.Attended
-	}
-
-	if len(cols) == 0 {
-		return d.GetSessionEnrollment(ctx, id)
-	}
-
-	stmt := SessionEnrollments.UPDATE(
-		cols,
-	).MODEL(
-		update,
-	).WHERE(
-		SessionEnrollments.ID.EQ(Int64(id)).AND(
-			sessionEnrollmentRLS(ctx),
-		),
-	).RETURNING(
-		SessionEnrollments.AllColumns,
-	)
-
-	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
-}
-
 type UpsertSessionEnrollmentParams struct {
 	SessionID int64  `json:"session_id"`
 	UserID    string `json:"user_id"`

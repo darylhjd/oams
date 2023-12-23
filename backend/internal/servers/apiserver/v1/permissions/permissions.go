@@ -21,7 +21,6 @@ const (
 	ClassGroupSessionRead
 
 	SessionEnrollmentRead
-	SessionEnrollmentUpdate
 
 	AttendanceTakingRead
 	AttendanceTakingUpdate
@@ -35,15 +34,14 @@ var rolePermissionMapping = map[model.UserRole]permissionMap{
 }
 
 var userRolePermissions = permissionMap{
-	UserRead:                {},
-	UserUpdate:              {},
-	ClassRead:               {},
-	ClassGroupRead:          {},
-	ClassGroupSessionRead:   {},
-	SessionEnrollmentRead:   {},
-	SessionEnrollmentUpdate: {},
-	AttendanceTakingRead:    {},
-	AttendanceTakingUpdate:  {},
+	UserRead:               {},
+	UserUpdate:             {},
+	ClassRead:              {},
+	ClassGroupRead:         {},
+	ClassGroupSessionRead:  {},
+	SessionEnrollmentRead:  {},
+	AttendanceTakingRead:   {},
+	AttendanceTakingUpdate: {},
 }
 
 var systemAdminRolePermissions = permissionMap{
@@ -62,8 +60,7 @@ var systemAdminRolePermissions = permissionMap{
 
 	ClassGroupSessionRead: {},
 
-	SessionEnrollmentRead:   {},
-	SessionEnrollmentUpdate: {},
+	SessionEnrollmentRead: {},
 
 	AttendanceTakingRead:   {},
 	AttendanceTakingUpdate: {},

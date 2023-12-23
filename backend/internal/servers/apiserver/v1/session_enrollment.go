@@ -2,13 +2,10 @@ package v1
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/go-jet/jet/v2/qrm"
 )
@@ -26,7 +23,7 @@ func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) 
 	case http.MethodGet:
 		resp = v.sessionEnrollmentGet(r, enrollmentId)
 	case http.MethodPatch:
-		resp = v.sessionEnrollmentPatch(r, enrollmentId)
+		resp = newErrorResponse(http.StatusNotImplemented, "")
 	case http.MethodDelete:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
@@ -55,50 +52,5 @@ func (v *APIServerV1) sessionEnrollmentGet(r *http.Request, id int64) apiRespons
 	return sessionEnrollmentGetResponse{
 		newSuccessResponse(),
 		enrollment,
-	}
-}
-
-type sessionEnrollmentPatchRequest struct {
-	SessionEnrollment database.UpdateSessionEnrollmentParams `json:"session_enrollment"`
-}
-
-type sessionEnrollmentPatchResponse struct {
-	response
-	SessionEnrollment sessionEnrollmentPatchSessionEnrollmentResponseFields `json:"session_enrollment"`
-}
-
-type sessionEnrollmentPatchSessionEnrollmentResponseFields struct {
-	ID        int64     `json:"id"`
-	SessionID int64     `json:"session_id"`
-	UserID    string    `json:"user_id"`
-	Attended  bool      `json:"attended"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func (v *APIServerV1) sessionEnrollmentPatch(r *http.Request, id int64) apiResponse {
-	var req sessionEnrollmentPatchRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
-		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
-	}
-
-	enrollment, err := v.db.UpdateSessionEnrollment(r.Context(), id, req.SessionEnrollment)
-	if err != nil {
-		if errors.Is(err, qrm.ErrNoRows) {
-			return newErrorResponse(http.StatusNotFound, "session enrollment to update does not exist")
-		}
-
-		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollment patch database action")
-	}
-
-	return sessionEnrollmentPatchResponse{
-		newSuccessResponse(),
-		sessionEnrollmentPatchSessionEnrollmentResponseFields{
-			enrollment.ID,
-			enrollment.SessionID,
-			enrollment.UserID,
-			enrollment.Attended,
-			enrollment.UpdatedAt,
-		},
 	}
 }
