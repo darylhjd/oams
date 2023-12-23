@@ -17,16 +17,16 @@ const (
 )
 
 type UpcomingManagedClassGroupSession struct {
-	ID           int64               `alias:"class_group_session.id"`
-	StartTime    time.Time           `alias:"class_group_session.start_time"`
-	EndTime      time.Time           `alias:"class_group_session.end_time"`
-	Venue        string              `alias:"class_group_session.venue"`
-	Code         string              `alias:"class.code"`
-	Year         int32               `alias:"class.year"`
-	Semester     string              `alias:"class.semester"`
-	Name         string              `alias:"class_group.name"`
-	ClassType    model.ClassType     `alias:"class_group.class_type"`
-	ManagingRole *model.ManagingRole `alias:"class_group_manager.managing_role"` // For nil values, exposed as system admin.
+	ID           int64               `alias:"class_group_session.id" json:"id"`
+	StartTime    time.Time           `alias:"class_group_session.start_time" json:"start_time"`
+	EndTime      time.Time           `alias:"class_group_session.end_time" json:"end_time"`
+	Venue        string              `alias:"class_group_session.venue" json:"venue"`
+	Code         string              `alias:"class.code" json:"code"`
+	Year         int32               `alias:"class.year" json:"year"`
+	Semester     string              `alias:"class.semester" json:"semester"`
+	Name         string              `alias:"class_group.name" json:"name"`
+	ClassType    model.ClassType     `alias:"class_group.class_type" json:"class_type"`
+	ManagingRole *model.ManagingRole `alias:"class_group_manager.managing_role" json:"managing_role"` // For nil values, exposed as system admin.
 }
 
 func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]UpcomingManagedClassGroupSession, error) {
@@ -53,34 +53,48 @@ func (d *DB) GetUpcomingManagedClassGroupSession(ctx context.Context, id int64) 
 	return res, err
 }
 
-func (d *DB) GetUpcomingClassGroupSessionEnrollments(ctx context.Context, id int64) ([]model.SessionEnrollment, error) {
-	var res []model.SessionEnrollment
+type AttendanceEntry struct {
+	ID        int64  `alias:"session_enrollment.id" json:"id"`
+	SessionID int64  `alias:"session_enrollment.session_id" json:"session_id"`
+	UserID    string `alias:"session_enrollment.user_id" json:"user_id"`
+	UserName  string `alias:"user.name" json:"user_name"`
+	Attended  bool   `alias:"session_enrollment.attended" json:"attended"`
+}
+
+func (d *DB) GetUpcomingClassGroupAttendanceEntries(ctx context.Context, id int64) ([]AttendanceEntry, error) {
+	var res []AttendanceEntry
 
 	stmt := SELECT(
-		SessionEnrollments.AllColumns,
+		SessionEnrollments.ID,
+		SessionEnrollments.SessionID,
+		SessionEnrollments.UserID,
+		Users.Name,
+		SessionEnrollments.Attended,
 	).FROM(
-		SessionEnrollments,
+		SessionEnrollments.INNER_JOIN(
+			Users, Users.ID.EQ(SessionEnrollments.UserID),
+		),
 	).WHERE(
 		SessionEnrollments.SessionID.EQ(Int64(id)).AND(
 			sessionEnrollmentRLS(ctx),
 		),
 	).ORDER_BY(
-		SessionEnrollments.UserID,
+		Users.Name,
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 
-type UpdateSessionEnrollmentAttendanceParams struct {
-	SessionEnrollment   model.SessionEnrollment
+type UpdateAttendanceEntryParams struct {
 	ClassGroupSessionID int64
+	ID                  int64
+	UserID              string
+	Attended            bool
 	UserSignature       string
 }
 
-func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSessionEnrollmentAttendanceParams) (model.SessionEnrollment, error) {
-	var res model.SessionEnrollment
-
+func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntryParams) error {
 	var signature struct {
 		Signature string `alias:"user_signature.signature"`
 	}
@@ -91,30 +105,30 @@ func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSe
 			SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
 		),
 	).WHERE(
-		SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollment.ID)),
+		SessionEnrollments.ID.EQ(Int64(arg.ID)),
 	)
 	err := signatureStmt.QueryContext(ctx, d.qe, &signature)
 	if errors.Is(err, qrm.ErrNoRows) {
-		signature.Signature, err = argon2id.CreateHash(arg.SessionEnrollment.UserID, argon2id.DefaultParams)
+		signature.Signature, err = argon2id.CreateHash(arg.UserID, argon2id.DefaultParams)
 		if err != nil {
-			return res, err
+			return err
 		}
 	} else if err != nil {
-		return res, err
+		return err
 	}
 
 	match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
 	if err != nil {
-		return res, err
+		return err
 	} else if !match {
-		return res, qrm.ErrNoRows
+		return qrm.ErrNoRows
 	}
 
 	stmt := SessionEnrollments.UPDATE(
 		SessionEnrollments.Attended,
 	).MODEL(
 		model.SessionEnrollment{
-			Attended: arg.SessionEnrollment.Attended,
+			Attended: arg.Attended,
 		},
 	).WHERE(
 		EXISTS(
@@ -129,7 +143,7 @@ func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSe
 							).FROM(
 								SessionEnrollments,
 							).WHERE(
-								SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollment.ID)),
+								SessionEnrollments.ID.EQ(Int64(arg.ID)),
 							),
 						),
 					),
@@ -138,13 +152,11 @@ func (d *DB) UpdateSessionEnrollmentAttendance(ctx context.Context, arg UpdateSe
 				),
 			),
 		).AND(
-			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollment.ID)),
+			SessionEnrollments.ID.EQ(Int64(arg.ID)),
 		),
-	).RETURNING(
-		SessionEnrollments.AllColumns,
 	)
-	err = stmt.QueryContext(ctx, d.qe, &res)
-	return res, err
+	_, err = stmt.ExecContext(ctx, d.qe)
+	return err
 }
 
 func selectManagedClassGroupSessionFields() SelectStatement {

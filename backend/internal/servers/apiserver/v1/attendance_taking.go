@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
@@ -35,16 +34,12 @@ func (v *APIServerV1) attendanceTaking(w http.ResponseWriter, r *http.Request) {
 
 type attendanceTakingGetResponse struct {
 	response
-	UpcomingClassGroupSession upcomingClassGroupSession `json:"upcoming_class_group_session"`
-	EnrollmentData            []model.SessionEnrollment `json:"enrollment_data"`
+	UpcomingClassGroupSession database.UpcomingManagedClassGroupSession `json:"upcoming_class_group_session"`
+	AttendanceEntries         []database.AttendanceEntry                `json:"attendance_entries"`
 }
 
 // TODO: Implement tests for this endpoint.
 func (v *APIServerV1) attendanceTakingGet(r *http.Request, id int64) apiResponse {
-	resp := attendanceTakingGetResponse{
-		response: newSuccessResponse(),
-	}
-
 	upcoming, err := v.db.GetUpcomingManagedClassGroupSession(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
@@ -55,28 +50,32 @@ func (v *APIServerV1) attendanceTakingGet(r *http.Request, id int64) apiResponse
 		return newErrorResponse(http.StatusInternalServerError, "could not process attendance taking get database action")
 	}
 
-	resp.UpcomingClassGroupSession = upcomingClassGroupSession{}.fromDatabaseUpcomingClassGroupSession(upcoming)
-	enrollments, err := v.db.GetUpcomingClassGroupSessionEnrollments(r.Context(), upcoming.ID)
+	entries, err := v.db.GetUpcomingClassGroupAttendanceEntries(r.Context(), upcoming.ID)
 	if err != nil {
 		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not get upcoming class group session enrollments")
+		return newErrorResponse(http.StatusInternalServerError, "could not get upcoming class group session attendance entries")
 	}
 
-	resp.EnrollmentData = append(
-		make([]model.SessionEnrollment, 0, len(enrollments)),
-		enrollments...,
-	)
-	return resp
+	return attendanceTakingGetResponse{
+		newSuccessResponse(),
+		upcoming,
+		append(
+			make([]database.AttendanceEntry, 0, len(entries)),
+			entries...,
+		),
+	}
 }
 
 type attendanceTakingPostRequest struct {
-	SessionEnrollment model.SessionEnrollment `json:"session_enrollment"`
-	UserSignature     string                  `json:"user_signature"`
+	ID            int64  `json:"id"`
+	UserID        string `json:"user_id"`
+	Attended      bool   `json:"attended"`
+	UserSignature string `json:"user_signature"`
 }
 
 type attendanceTakingPostResponse struct {
 	response
-	SessionEnrollment model.SessionEnrollment `json:"session_enrollment"`
+	Attended bool `json:"attended"`
 }
 
 // TODO: Implement tests for this endpoint.
@@ -86,9 +85,11 @@ func (v *APIServerV1) attendanceTakingPost(r *http.Request, id int64) apiRespons
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	enrollment, err := v.db.UpdateSessionEnrollmentAttendance(r.Context(), database.UpdateSessionEnrollmentAttendanceParams{
-		SessionEnrollment:   req.SessionEnrollment,
+	err := v.db.UpdateAttendanceEntry(r.Context(), database.UpdateAttendanceEntryParams{
 		ClassGroupSessionID: id,
+		ID:                  req.ID,
+		UserID:              req.UserID,
+		Attended:            req.Attended,
 		UserSignature:       req.UserSignature,
 	})
 	if err != nil {
@@ -102,6 +103,6 @@ func (v *APIServerV1) attendanceTakingPost(r *http.Request, id int64) apiRespons
 
 	return attendanceTakingPostResponse{
 		newSuccessResponse(),
-		enrollment,
+		req.Attended,
 	}
 }

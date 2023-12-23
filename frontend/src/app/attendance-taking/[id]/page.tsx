@@ -21,10 +21,10 @@ import {
   Tooltip,
 } from "@mantine/core";
 import {
+  AttendanceEntry,
   AttendanceTakingGetResponse,
   UpcomingClassGroupSession,
 } from "@/api/attendance_taking";
-import { SessionEnrollment } from "@/api/session_enrollment";
 import {
   MantineReactTable,
   MRT_PaginationState,
@@ -63,7 +63,7 @@ export default function SessionAttendanceTakingPage({
         <Space h="md" />
         <AttendanceTaker
           id={params.id}
-          enrollments={attendance.enrollment_data}
+          attendanceEntries={attendance.attendance_entries}
         />
       </Container>
     </RequestLoader>
@@ -128,21 +128,21 @@ function SessionInfo({ session }: { session: UpcomingClassGroupSession }) {
 
 function AttendanceTaker({
   id,
-  enrollments,
+  attendanceEntries,
 }: {
   id: number;
-  enrollments: SessionEnrollment[];
+  attendanceEntries: AttendanceEntry[];
 }) {
   const [paginationState, setPaginationState] = useState<MRT_PaginationState>({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
   });
-  const [data, setData] = useState(enrollments);
+  const [data, setData] = useState(attendanceEntries);
 
   useEffect(() => {
     const interval = setInterval(async () => {
       const response = await APIClient.attendanceTakingGet(id);
-      setData(response.enrollment_data);
+      setData(response.attendance_entries);
     }, UPDATE_INTERVAL_MS);
 
     return () => clearInterval(interval);
@@ -172,9 +172,9 @@ function SignAttendance({
   setData,
 }: {
   id: number;
-  row: MRT_Row<SessionEnrollment>;
-  data: SessionEnrollment[];
-  setData: Dispatch<SetStateAction<SessionEnrollment[]>>;
+  row: MRT_Row<AttendanceEntry>;
+  data: AttendanceEntry[];
+  setData: Dispatch<SetStateAction<AttendanceEntry[]>>;
 }) {
   const [loading, setLoading] = useState(false);
 
@@ -214,13 +214,12 @@ function SignAttendance({
             try {
               const resp = await APIClient.attendanceTakingPost(
                 id,
-                {
-                  ...row.original,
-                  attended: true,
-                },
+                row.original.id,
+                row.original.user_id,
+                true,
                 values.signature,
               );
-              data[row.index] = resp.session_enrollment;
+              data[row.index].attended = resp.attended;
               setData([...data]);
               close();
               form.reset();
