@@ -60,7 +60,7 @@ function SignatureUpdater({ userId }: { userId: string }) {
       <form
         onSubmit={form.onSubmit(async (values) => {
           setLoading(true);
-          await APIClient.userPatch(userId, values.signature);
+          await APIClient.signaturePut(userId, values.signature);
           form.reset();
           setLoading(false);
           notifications.show({

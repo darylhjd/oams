@@ -5,7 +5,9 @@ import "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/m
 type P int
 
 const (
-	BatchPost P = iota
+	SignaturePut P = iota
+
+	BatchPost
 	BatchPut
 
 	UserRead
@@ -34,6 +36,7 @@ var rolePermissionMapping = map[model.UserRole]permissionMap{
 }
 
 var userRolePermissions = permissionMap{
+	SignaturePut:           {},
 	UserRead:               {},
 	UserUpdate:             {},
 	ClassRead:              {},
@@ -45,6 +48,8 @@ var userRolePermissions = permissionMap{
 }
 
 var systemAdminRolePermissions = permissionMap{
+	SignaturePut: {},
+
 	BatchPost: {},
 	BatchPut:  {},
 
