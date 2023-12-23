@@ -2,7 +2,7 @@
 
 import styles from "@/styles/SessionAttendanceTaking.module.css";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Params } from "./layout";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
@@ -11,7 +11,9 @@ import {
   Button,
   Container,
   Group,
+  Modal,
   Paper,
+  PasswordInput,
   Space,
   Text,
   Title,
@@ -22,12 +24,19 @@ import {
   UpcomingClassGroupSession,
 } from "@/api/attendance_taking";
 import { SessionEnrollment } from "@/api/session_enrollment";
-import { MantineReactTable, MRT_PaginationState } from "mantine-react-table";
+import {
+  MantineReactTable,
+  MRT_PaginationState,
+  MRT_Row,
+} from "mantine-react-table";
 import {
   AttendanceTakingDataTableColumns,
   DEFAULT_PAGE_SIZE,
 } from "@/components/tabling";
-import { IconHelp } from "@tabler/icons-react";
+import { IconHelp, IconX } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
+import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 
 const UPDATE_INTERVAL_MS = 5000;
 
@@ -147,29 +156,95 @@ function AttendanceTaker({
         onPaginationChange={setPaginationState}
         enableRowActions
         positionActionsColumn="last"
-        renderRowActions={({ row }) =>
-          row.original.attended ? null : (
-            <TakeAttendanceButton
-              onClick={async () => {
-                const response = await APIClient.sessionEnrollmentPatch(
-                  row.original.id,
-                  true,
-                );
-                data[row.index] = response.session_enrollment;
-                setData([...data]);
-              }}
-            />
-          )
-        }
+        renderRowActions={({ row }) => (
+          <SignAttendance id={id} row={row} data={data} setData={setData} />
+        )}
       />
     </Box>
   );
 }
 
-function TakeAttendanceButton({ onClick }: { onClick: () => void }) {
+function SignAttendance({
+  id,
+  row,
+  data,
+  setData,
+}: {
+  id: number;
+  row: MRT_Row<SessionEnrollment>;
+  data: SessionEnrollment[];
+  setData: Dispatch<SetStateAction<SessionEnrollment[]>>;
+}) {
+  const [opened, { open, close }] = useDisclosure(false);
+  const form = useForm({
+    initialValues: {
+      signature: "",
+    },
+    validate: {
+      signature: (value) =>
+        value.length == 0 ? "Signature cannot be empty" : null,
+    },
+  });
+
+  if (row.original.attended) {
+    return null;
+  }
+
   return (
-    <Button variant="outline" onClick={onClick}>
-      Take attendance
-    </Button>
+    <>
+      <Modal
+        opened={opened}
+        onClose={() => {
+          close();
+          form.reset();
+        }}
+        centered
+        title="Sign Attendance"
+        overlayProps={{
+          backgroundOpacity: 0.55,
+          blur: 3,
+        }}
+      >
+        <form
+          onSubmit={form.onSubmit(async (values) => {
+            try {
+              const resp = await APIClient.attendanceTakingPost(
+                id,
+                {
+                  ...row.original,
+                  attended: true,
+                },
+                values.signature,
+              );
+              data[row.index] = resp.session_enrollment;
+              setData([...data]);
+              close();
+              form.reset();
+            } catch (error) {
+              notifications.show({
+                title: "Wrong signature",
+                message: "You entered the wrong signature. Please try again.",
+                icon: <IconX />,
+                color: "red",
+              });
+            }
+          })}
+        >
+          <PasswordInput
+            label="Signature"
+            {...form.getInputProps("signature")}
+          />
+          <Space h="sm" />
+          <Group justify="center">
+            <Button type="submit" color="green">
+              Confirm Attendance
+            </Button>
+          </Group>
+        </form>
+      </Modal>
+      <Button onClick={open} variant="outline">
+        Sign Attendance
+      </Button>
+    </>
   );
 }
