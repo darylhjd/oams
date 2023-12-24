@@ -310,6 +310,12 @@ function SystemAdminMenu() {
             >
               Batch Processing
             </MenuItem>
+            <MenuItem
+              leftSection={<IconFileDescription size={16} />}
+              onClick={() => router.push(Routes.managerProcessing)}
+            >
+              Manager Processing
+            </MenuItem>
           </MenuDropdown>
         </Menu>
       </Box>
@@ -331,6 +337,11 @@ function SystemAdminMenu() {
           label="Batch Processing"
           leftSection={<IconFileDescription size={16} />}
           onClick={() => router.push(Routes.batchProcessing)}
+        />
+        <NavLink
+          label="Manager Processing"
+          leftSection={<IconFileDescription size={16} />}
+          onClick={() => router.push(Routes.managerProcessing)}
         />
       </NavLink>
     </>

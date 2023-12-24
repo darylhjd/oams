@@ -28,7 +28,7 @@ func TestAPIServerV1_classGroupManagers(t *testing.T) {
 		{
 			"with POST method",
 			http.MethodPost,
-			http.StatusNotImplemented,
+			http.StatusUnsupportedMediaType,
 		},
 		{
 			"with PUT method",

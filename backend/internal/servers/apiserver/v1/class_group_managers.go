@@ -23,7 +23,7 @@ func (v *APIServerV1) classGroupManagers(w http.ResponseWriter, r *http.Request)
 	case http.MethodGet:
 		resp = v.classGroupManagersGet(r)
 	case http.MethodPost:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classGroupManagersPost(r)
 	case http.MethodPut:
 		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
@@ -61,25 +61,26 @@ func (v *APIServerV1) classGroupManagersGet(r *http.Request) apiResponse {
 	return resp
 }
 
-type classGroupManagersPutResponse struct {
+type classGroupManagersPostResponse struct {
 	response
+	ClassGroupManagers []database.UpsertClassGroupManagerParams `json:"class_group_managers"`
 }
 
-func (v *APIServerV1) classGroupManagerPut(r *http.Request) apiResponse {
+func (v *APIServerV1) classGroupManagersPost(r *http.Request) apiResponse {
 	if !strings.HasPrefix(r.Header.Get("Content-Type"), "multipart") {
 		return newErrorResponse(http.StatusUnsupportedMediaType, "a multipart request body is required")
 	}
 
-	resp, err := v.processClassGroupManagerPutRequest(r)
+	resp, err := v.processClassGroupManagersPostRequest(r)
 	if err != nil {
 		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process class group manager put file(s)")
+		return newErrorResponse(http.StatusInternalServerError, "could not process class group manager post file(s)")
 	}
 
 	return resp
 }
 
-func (v *APIServerV1) processClassGroupManagerPutRequest(r *http.Request) (apiResponse, error) {
+func (v *APIServerV1) processClassGroupManagersPostRequest(r *http.Request) (apiResponse, error) {
 	if err := r.ParseMultipartForm(maxClassGroupManagersPutParseMemory); err != nil {
 		return nil, err
 	}
@@ -99,10 +100,13 @@ func (v *APIServerV1) processClassGroupManagerPutRequest(r *http.Request) (apiRe
 		return newErrorResponse(http.StatusBadRequest, err.Error()), nil
 	}
 
-	_, err = v.db.BatchUpsertClassGroupManagers(r.Context(), upsertData)
+	managers, err := v.db.ProcessUpsertClassGroupManagers(r.Context(), upsertData)
 	if err != nil {
 		return nil, err
 	}
 
-	return newErrorResponse(http.StatusNotImplemented, ""), nil
+	return classGroupManagersPostResponse{
+		response{true, http.StatusAccepted},
+		append(make([]database.UpsertClassGroupManagerParams, 0, len(managers)), managers...),
+	}, nil
 }

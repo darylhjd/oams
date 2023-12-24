@@ -14,13 +14,13 @@ func TestParseManagersFile(t *testing.T) {
 		name         string
 		file         string
 		wantErr      string
-		expectedData []database.UpsertClassGroupManagerParams
+		expectedData []database.ProcessUpsertClassGroupManagerParams
 	}{
 		{
 			"sample manager file",
 			"managers_file_well_formatted.xlsx",
 			"",
-			[]database.UpsertClassGroupManagerParams{
+			[]database.ProcessUpsertClassGroupManagerParams{
 				{
 					UserID:         "HARJ0002",
 					ClassCode:      "SC1005",

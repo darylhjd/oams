@@ -15,7 +15,7 @@ const (
 
 	ClassRead
 
-	ClassManagerCreate
+	ClassManagerPost
 	ClassManagerRead
 
 	ClassGroupRead
@@ -58,8 +58,8 @@ var systemAdminRolePermissions = permissionMap{
 
 	ClassRead: {},
 
-	ClassManagerCreate: {},
-	ClassManagerRead:   {},
+	ClassManagerPost: {},
+	ClassManagerRead: {},
 
 	ClassGroupRead: {},
 
