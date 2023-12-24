@@ -7,6 +7,8 @@ import { ClassGetResponse, ClassesGetResponse } from "./class";
 import {
   ClassGroupManagersGetResponse,
   ClassGroupManagersPostResponse,
+  ClassGroupManagersPutResponse,
+  UpsertClassGroupManagerParams,
 } from "./class_group_manager";
 import { ClassGroupGetResponse, ClassGroupsGetResponse } from "./class_group";
 import {
@@ -195,6 +197,18 @@ export class APIClient {
     const { data } = await this._client.post<ClassGroupManagersPostResponse>(
       this._classGroupManagersPath,
       form,
+    );
+    return data;
+  }
+
+  static async classGroupManagersPut(
+    classGroupManagers: UpsertClassGroupManagerParams[],
+  ): Promise<ClassGroupManagersPutResponse> {
+    const { data } = await this._client.put<ClassGroupManagersPutResponse>(
+      this._classGroupManagersPath,
+      {
+        class_group_managers: classGroupManagers,
+      },
     );
     return data;
   }
