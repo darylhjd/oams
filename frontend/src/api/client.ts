@@ -4,7 +4,10 @@ import { UserGetResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
 import { ClassGetResponse, ClassesGetResponse } from "./class";
-import { ClassGroupManagersGetResponse } from "./class_group_manager";
+import {
+  ClassGroupManagersGetResponse,
+  ClassGroupManagersPutResponse,
+} from "./class_group_manager";
 import { ClassGroupGetResponse, ClassGroupsGetResponse } from "./class_group";
 import {
   ClassGroupSessionGetResponse,
@@ -15,7 +18,6 @@ import {
   SessionEnrollmentsGetResponse,
 } from "./session_enrollment";
 import {
-  AttendanceEntry,
   AttendanceTakingGetResponse,
   AttendanceTakingGetsResponse,
   AttendanceTakingPostResponse,
@@ -180,6 +182,19 @@ export class APIClient {
           limit: limit,
         },
       },
+    );
+    return data;
+  }
+
+  static async classGroupManagersPut(
+    files: FileWithPath[],
+  ): Promise<ClassGroupManagersPutResponse> {
+    const form = new FormData();
+    files.forEach((file) => form.append("manager-attachments", file));
+
+    const { data } = await this._client.post<ClassGroupManagersPutResponse>(
+      this._classGroupManagersPath,
+      form,
     );
     return data;
   }
