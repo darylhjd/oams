@@ -128,9 +128,9 @@ func (d *DB) ProcessUpsertClassGroupManagers(ctx context.Context, args []Process
 }
 
 type UpsertClassGroupManagerParams struct {
-	UserID       string             `alias:"user_id" json:"user_id"`
+	UserID       string             `alias:"arguments.user_id" json:"user_id"`
 	ClassGroupID int64              `alias:"class_group.id" json:"class_group_id"`
-	ManagingRole model.ManagingRole `alias:"managing_role" json:"managing_role"`
+	ManagingRole model.ManagingRole `alias:"arguments.managing_role" json:"managing_role"`
 }
 
 func (d *DB) BatchUpsertClassGroupManagers(ctx context.Context, args []UpsertClassGroupManagerParams) ([]model.ClassGroupManager, error) {
