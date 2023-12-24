@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -63,7 +64,7 @@ func (v *APIServerV1) classGroupManagersGet(r *http.Request) apiResponse {
 
 type classGroupManagersPostResponse struct {
 	response
-	ClassGroupManagers []database.UpsertClassGroupManagerParams `json:"class_group_managers"`
+	classGroupManagersPutRequest
 }
 
 func (v *APIServerV1) classGroupManagersPost(r *http.Request) apiResponse {
@@ -107,6 +108,35 @@ func (v *APIServerV1) processClassGroupManagersPostRequest(r *http.Request) (api
 
 	return classGroupManagersPostResponse{
 		response{true, http.StatusAccepted},
-		append(make([]database.UpsertClassGroupManagerParams, 0, len(managers)), managers...),
+		classGroupManagersPutRequest{
+			append(make([]database.UpsertClassGroupManagerParams, 0, len(managers)), managers...),
+		},
 	}, nil
+}
+
+type classGroupManagersPutRequest struct {
+	ClassGroupManagers []database.UpsertClassGroupManagerParams `json:"class_group_managers"`
+}
+
+type classGroupManagersPutResponse struct {
+	response
+	ClassGroupManagers []model.ClassGroupManager `json:"class_group_managers"`
+}
+
+func (v *APIServerV1) classGroupManagersPut(r *http.Request) apiResponse {
+	var req classGroupManagersPutRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
+	}
+
+	managers, err := v.db.BatchUpsertClassGroupManagers(r.Context(), req.ClassGroupManagers)
+	if err != nil {
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not process class group managers put request")
+	}
+
+	return classGroupManagersPutResponse{
+		newSuccessResponse(),
+		append(make([]model.ClassGroupManager, 0, len(managers)), managers...),
+	}
 }
