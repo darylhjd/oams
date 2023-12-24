@@ -2,8 +2,14 @@ export type ClassGroupManagersGetResponse = {
   class_group_managers: ClassGroupManager[];
 };
 
-export type ClassGroupManagersPutResponse = {
-  class_group_managers: ClassGroupManager[];
+export type ClassGroupManagersPostResponse = {
+  class_group_managers: UpsertClassGroupManagerParams[];
+};
+
+export type UpsertClassGroupManagerParams = {
+  user_id: string;
+  class_group_id: number;
+  managing_role: ManagingRole;
 };
 
 export type ClassGroupManager = {

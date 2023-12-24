@@ -55,7 +55,7 @@ func (d *DB) CreateClassGroupManager(ctx context.Context, arg CreateClassGroupMa
 	return res, err
 }
 
-type UpsertClassGroupManagerParams struct {
+type ProcessUpsertClassGroupManagerParams struct {
 	UserID         string             `json:"user_id"`
 	ClassCode      string             `json:"class_code"`
 	ClassYear      int32              `json:"class_year"`
@@ -65,14 +65,14 @@ type UpsertClassGroupManagerParams struct {
 	ManagingRole   model.ManagingRole `json:"managing_role"`
 }
 
-func (d *DB) BatchUpsertClassGroupManagers(ctx context.Context, args []UpsertClassGroupManagerParams) ([]model.ClassGroupManager, error) {
-	var res []model.ClassGroupManager
+func (d *DB) ProcessUpsertClassGroupManagers(ctx context.Context, args []ProcessUpsertClassGroupManagerParams) ([]UpsertClassGroupManagerParams, error) {
+	var res []UpsertClassGroupManagerParams
 
 	if len(args) == 0 {
 		return res, nil
 	}
 
-	rowConverter := func(arg UpsertClassGroupManagerParams) SelectStatement {
+	rowConverter := func(arg ProcessUpsertClassGroupManagerParams) SelectStatement {
 		return SELECT(
 			String(arg.UserID).AS("user_id"),
 			String(arg.ClassCode).AS("class_code"),
@@ -103,40 +103,68 @@ func (d *DB) BatchUpsertClassGroupManagers(ctx context.Context, args []UpsertCla
 	managingRoleCol := StringColumn("managing_role").From(tempTable)
 
 	stmt := WITH(
-		tempTable,
+		tempTable.AS(u),
 	)(
-		ClassGroupManagers.INSERT(
-			ClassGroupManagers.UserID,
-			ClassGroupManagers.ClassGroupID,
-			ClassGroupManagers.ManagingRole,
-		).QUERY(
-			SELECT(
-				userIdCol, ClassGroups.ID, managingRoleCol,
-			).FROM(
-				tempTable.INNER_JOIN(
-					Classes, Classes.Code.EQ(classCodeCol).AND(
-						Classes.Year.EQ(classYearCol).AND(
-							Classes.Semester.EQ(classSemCol),
-						),
+		SELECT(
+			userIdCol, ClassGroups.ID, managingRoleCol,
+		).FROM(
+			tempTable.INNER_JOIN(
+				Classes, Classes.Code.EQ(classCodeCol).AND(
+					Classes.Year.EQ(classYearCol).AND(
+						Classes.Semester.EQ(classSemCol),
 					),
-				).INNER_JOIN(
-					ClassGroups, ClassGroups.ClassID.EQ(Classes.ID).AND(
-						ClassGroups.Name.EQ(classGroupNameCol).AND(
-							ClassGroups.ClassType.EQ(classTypeCol),
-						),
+				),
+			).INNER_JOIN(
+				ClassGroups, ClassGroups.ClassID.EQ(Classes.ID).AND(
+					ClassGroups.Name.EQ(classGroupNameCol).AND(
+						ClassGroups.ClassType.EQ(classTypeCol),
 					),
 				),
 			),
-		).ON_CONFLICT().ON_CONSTRAINT(
-			"ux_user_id_class_group_id",
-		).DO_UPDATE(
-			SET(
-				ClassGroupManagers.ManagingRole.SET(ClassGroupManagers.EXCLUDED.ManagingRole),
-			),
-		).RETURNING(
-			ClassGroupManagers.AllColumns,
 		),
 	)
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
+type UpsertClassGroupManagerParams struct {
+	UserID       string             `alias:"user_id" json:"user_id"`
+	ClassGroupID int64              `alias:"class_group.id" json:"class_group_id"`
+	ManagingRole model.ManagingRole `alias:"managing_role" json:"managing_role"`
+}
+
+func (d *DB) BatchUpsertClassGroupManagers(ctx context.Context, args []UpsertClassGroupManagerParams) ([]model.ClassGroupManager, error) {
+	var res []model.ClassGroupManager
+
+	if len(args) == 0 {
+		return res, nil
+	}
+
+	inserts := make([]model.ClassGroupManager, 0, len(args))
+	for _, arg := range args {
+		inserts = append(inserts, model.ClassGroupManager{
+			UserID:       arg.UserID,
+			ClassGroupID: arg.ClassGroupID,
+			ManagingRole: arg.ManagingRole,
+		})
+	}
+
+	stmt := ClassGroupManagers.INSERT(
+		ClassGroupManagers.UserID,
+		ClassGroupManagers.ClassGroupID,
+		ClassGroupManagers.ManagingRole,
+	).MODELS(
+		inserts,
+	).ON_CONFLICT().ON_CONSTRAINT(
+		"ux_user_id_class_group_id",
+	).DO_UPDATE(
+		SET(
+			ClassGroupManagers.ManagingRole.SET(ClassGroupManagers.EXCLUDED.ManagingRole),
+		),
+	).RETURNING(
+		ClassGroupManagers.AllColumns,
+	)
+
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }

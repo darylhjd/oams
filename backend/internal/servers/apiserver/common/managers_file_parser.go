@@ -10,7 +10,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func ParseManagersFile(f io.Reader) ([]database.UpsertClassGroupManagerParams, error) {
+func ParseManagersFile(f io.Reader) ([]database.ProcessUpsertClassGroupManagerParams, error) {
 	file, err := excelize.OpenReader(f)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open file: %w", err)
@@ -59,8 +59,8 @@ func parseSanityCheck(rows [][]string) error {
 	return nil
 }
 
-func parseManagerData(rows [][]string) ([]database.UpsertClassGroupManagerParams, error) {
-	params := make([]database.UpsertClassGroupManagerParams, 0, len(rows)-expectedSanityCheckDataRows)
+func parseManagerData(rows [][]string) ([]database.ProcessUpsertClassGroupManagerParams, error) {
+	params := make([]database.ProcessUpsertClassGroupManagerParams, 0, len(rows)-expectedSanityCheckDataRows)
 	for index := expectedSanityCheckDataRows; index < len(rows); index++ {
 		row := rows[index]
 
@@ -106,7 +106,7 @@ func parseManagerData(rows [][]string) ([]database.UpsertClassGroupManagerParams
 			return nil, fmt.Errorf("could not parse managing role: %w", err)
 		}
 
-		params = append(params, database.UpsertClassGroupManagerParams{
+		params = append(params, database.ProcessUpsertClassGroupManagerParams{
 			UserID:         userId,
 			ClassCode:      classCode,
 			ClassYear:      classYear,

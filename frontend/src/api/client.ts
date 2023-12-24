@@ -6,7 +6,7 @@ import { FileWithPath } from "@mantine/dropzone";
 import { ClassGetResponse, ClassesGetResponse } from "./class";
 import {
   ClassGroupManagersGetResponse,
-  ClassGroupManagersPutResponse,
+  ClassGroupManagersPostResponse,
 } from "./class_group_manager";
 import { ClassGroupGetResponse, ClassGroupsGetResponse } from "./class_group";
 import {
@@ -186,13 +186,13 @@ export class APIClient {
     return data;
   }
 
-  static async classGroupManagersPut(
+  static async classGroupManagersPost(
     files: FileWithPath[],
-  ): Promise<ClassGroupManagersPutResponse> {
+  ): Promise<ClassGroupManagersPostResponse> {
     const form = new FormData();
     files.forEach((file) => form.append("manager-attachments", file));
 
-    const { data } = await this._client.post<ClassGroupManagersPutResponse>(
+    const { data } = await this._client.post<ClassGroupManagersPostResponse>(
       this._classGroupManagersPath,
       form,
     );
