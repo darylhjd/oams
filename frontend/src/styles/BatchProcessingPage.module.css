@@ -1,13 +1,3 @@
-.processor {
-  padding-top: rem(30px);
-  max-width: 60rem;
-}
-
-.fileList {
-  padding: rem(10px);
-  border: rem(3px) solid var(--mantine-color-default-border);
-}
-
 .previewTabList {
   flex-wrap: nowrap;
   overflow-y: hidden;

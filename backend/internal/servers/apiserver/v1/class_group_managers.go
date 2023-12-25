@@ -26,7 +26,7 @@ func (v *APIServerV1) classGroupManagers(w http.ResponseWriter, r *http.Request)
 	case http.MethodPost:
 		resp = v.classGroupManagersPost(r)
 	case http.MethodPut:
-		resp = newErrorResponse(http.StatusNotImplemented, "")
+		resp = v.classGroupManagersPut(r)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}

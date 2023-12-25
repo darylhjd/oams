@@ -1,7 +1,6 @@
 import styles from "@/styles/BatchProcessingPage.module.css";
 
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@mantine/core";
-import { StepLayout } from "./step_layout";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import {
@@ -10,8 +9,9 @@ import {
   ClassesPreviewTable,
   UsersPreviewTable,
 } from "./previewer_tables";
+import { StepLayout } from "@/components/file_processing";
 
-export function Previewer() {
+export function BatchProcessingPreviewer() {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
   return (

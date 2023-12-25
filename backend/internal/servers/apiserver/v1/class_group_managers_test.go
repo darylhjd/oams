@@ -33,7 +33,7 @@ func TestAPIServerV1_classGroupManagers(t *testing.T) {
 		{
 			"with PUT method",
 			http.MethodPut,
-			http.StatusNotImplemented,
+			http.StatusBadRequest,
 		},
 		{
 			"with DELETE method",
