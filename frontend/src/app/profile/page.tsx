@@ -18,6 +18,7 @@ import { APIClient } from "@/api/client";
 import { notifications } from "@mantine/notifications";
 import { IconCheck } from "@tabler/icons-react";
 import { useState } from "react";
+import { signatureInputForm } from "@/components/signature_form";
 
 export default function ProfilePage() {
   const session = useSessionUserStore();
@@ -45,15 +46,7 @@ export default function ProfilePage() {
 
 function SignatureUpdater({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(false);
-  const form = useForm({
-    initialValues: {
-      signature: "",
-    },
-    validate: {
-      signature: (value) =>
-        value.length == 0 ? "Signature cannot be empty" : null,
-    },
-  });
+  const form = useForm(signatureInputForm());
 
   return (
     <Box className={styles.signatureUpdater}>
