@@ -3,6 +3,7 @@ import {
   MRT_PaginationState,
   MantineReactTable,
   MRT_DensityState,
+  useMantineReactTable,
 } from "mantine-react-table";
 import {
   AsyncDataSource,
@@ -143,22 +144,22 @@ function AsyncDataTable<T extends Record<string, any>>({
     });
   }, [paginationState]);
 
-  return (
-    <MantineReactTable
-      {...props}
-      data={data}
-      manualPagination={true}
-      rowCount={rowCount}
-      initialState={{
-        density: "sm" as MRT_DensityState,
-      }}
-      state={{
-        pagination: paginationState,
-        isLoading: loading,
-      }}
-      onPaginationChange={setPaginationState}
-      enableStickyHeader
-      enableStickyFooter
-    />
-  );
+  const table = useMantineReactTable({
+    ...props,
+    data,
+    manualPagination: true,
+    rowCount: rowCount,
+    initialState: {
+      density: "sm" as MRT_DensityState,
+    },
+    state: {
+      pagination: paginationState,
+      isLoading: loading,
+    },
+    onPaginationChange: setPaginationState,
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+  });
+
+  return <MantineReactTable table={table} />;
 }

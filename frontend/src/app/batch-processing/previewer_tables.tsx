@@ -12,7 +12,12 @@ import {
   UserBatchDataTableColumns,
 } from "@/components/tabling";
 import { useBatchDataStore } from "@/stores/batch_processing";
-import { MantineReactTable } from "mantine-react-table";
+import {
+  MantineReactTable,
+  MRT_ColumnDef,
+  MRT_DensityState,
+  useMantineReactTable,
+} from "mantine-react-table";
 
 export function UsersPreviewTable() {
   const batchDataStorage = useBatchDataStore();
@@ -23,7 +28,7 @@ export function UsersPreviewTable() {
     .map((classGroup) => classGroup.students)
     .flat();
 
-  return <MantineReactTable columns={UserBatchDataTableColumns} data={rows} />;
+  return <PreviewerTable columns={UserBatchDataTableColumns} data={rows} />;
 }
 
 export function ClassesPreviewTable() {
@@ -38,7 +43,7 @@ export function ClassesPreviewTable() {
     au: batch.class.au,
   }));
 
-  return <MantineReactTable columns={ClassBatchDataTableColumns} data={rows} />;
+  return <PreviewerTable columns={ClassBatchDataTableColumns} data={rows} />;
 }
 
 export function ClassGroupsPreviewTable() {
@@ -55,7 +60,7 @@ export function ClassGroupsPreviewTable() {
     }));
 
   return (
-    <MantineReactTable columns={ClassGroupBatchDataTableColumns} data={rows} />
+    <PreviewerTable columns={ClassGroupBatchDataTableColumns} data={rows} />
   );
 }
 
@@ -76,9 +81,27 @@ export function ClassGroupSessionsPreviewTable() {
     .flat();
 
   return (
-    <MantineReactTable
+    <PreviewerTable
       columns={ClassGroupSessionBatchDataTableColumns}
       data={rows}
     />
   );
+}
+
+function PreviewerTable<T extends Record<string, any>>({
+  columns,
+  data,
+}: {
+  columns: MRT_ColumnDef<T>[];
+  data: T[];
+}) {
+  const table = useMantineReactTable({
+    columns,
+    data,
+    initialState: {
+      density: "sm" as MRT_DensityState,
+    },
+  });
+
+  return <MantineReactTable table={table} />;
 }

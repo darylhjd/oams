@@ -33,7 +33,7 @@ export default function BatchProcessingPage() {
   const fileStorage = useBatchFilesStore();
   const batchDataStorage = useBatchDataStore();
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(batchDataStorage.data.length != 0 ? 1 : 0);
   const nextStep = () =>
     setStep((current) => Math.min(current + 1, stepDescriptions.length));
   const prevStep = () => setStep((current) => Math.max(current - 1, 0));
@@ -137,7 +137,7 @@ function Completed() {
           <br />
           <br />
           Press the &apos;Done&apos; button to restart the process, or the
-          &apos;Back&apos; button to revist the previous steps.
+          &apos;Back&apos; button to revisit the previous steps.
         </Text>
       </Container>
     </StepLayout>

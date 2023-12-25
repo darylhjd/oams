@@ -38,6 +38,7 @@ import { IconHelp, IconX } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
+import { signatureInputForm } from "@/components/signature_form";
 
 const UPDATE_INTERVAL_MS = 5000;
 
@@ -179,15 +180,7 @@ function SignAttendance({
   const [loading, setLoading] = useState(false);
 
   const [opened, { open, close }] = useDisclosure(false);
-  const form = useForm({
-    initialValues: {
-      signature: "",
-    },
-    validate: {
-      signature: (value) =>
-        value.length == 0 ? "Signature cannot be empty" : null,
-    },
-  });
+  const form = useForm(signatureInputForm());
 
   if (row.original.attended) {
     return null;
