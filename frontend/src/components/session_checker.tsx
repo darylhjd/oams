@@ -31,16 +31,34 @@ export function IsLoggedIn({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export function HasManagedClassGroups({
+export function CanTakeAttendance({
   children,
+  failNode,
 }: {
   children: React.ReactNode;
+  failNode: React.ReactNode;
 }) {
   const session = useSessionUserStore();
 
-  if (session.data?.management_details.has_managed_class_groups) {
+  if (session.data?.management_details.attendance) {
     return <>{children}</>;
   }
 
-  return <NotFoundPage />;
+  return <>{failNode}</>;
+}
+
+export function CanManageClassRules({
+  children,
+  failNode,
+}: {
+  children: React.ReactNode;
+  failNode: React.ReactNode;
+}) {
+  const session = useSessionUserStore();
+
+  if (session.data?.management_details.rules) {
+    return <>{children}</>;
+  }
+
+  return <>{failNode}</>;
 }

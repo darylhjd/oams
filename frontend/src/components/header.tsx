@@ -35,6 +35,10 @@ import { Routes } from "@/routing/routes";
 import { APIClient } from "@/api/client";
 import { UserRole } from "@/api/user";
 import React from "react";
+import {
+  CanManageClassRules,
+  CanTakeAttendance,
+} from "@/components/session_checker";
 
 export default function Header() {
   return (
@@ -217,45 +221,12 @@ function ClassGroupManagerMenu() {
   const router = useRouter();
   const session = useSessionUserStore();
 
-  const mobileNodes: React.ReactNode[] = [];
-  const desktopNodes: React.ReactNode[] = [];
-
-  if (session.data?.management_details.has_managed_class_groups) {
-    mobileNodes.push(
-      <MenuItem
-        leftSection={<IconCheck size={16} />}
-        onClick={() => router.push(Routes.attendanceTaking)}
-      >
-        Attendance Taking
-      </MenuItem>,
-    );
-    desktopNodes.push(
-      <NavLink
-        label="Attendance Taking"
-        leftSection={<IconCheck size={16} />}
-        onClick={() => router.push(Routes.attendanceTaking)}
-      />,
-    );
-  }
-  if (session.data?.management_details.is_course_coordinator) {
-    mobileNodes.push(
-      <MenuItem
-        leftSection={<IconBraces size={16} />}
-        onClick={() => router.push(Routes.attendanceRules)}
-      >
-        Attendance Rules
-      </MenuItem>,
-    );
-    desktopNodes.push(
-      <NavLink
-        label="Attendance Rules"
-        leftSection={<IconBraces size={16} />}
-        onClick={() => router.push(Routes.attendanceRules)}
-      />,
-    );
-  }
-
-  if (mobileNodes.length == 0 || desktopNodes.length == 0) {
+  if (
+    !(
+      session.data?.management_details.attendance ||
+      session.data?.management_details.rules
+    )
+  ) {
     return null;
   }
 
@@ -277,7 +248,24 @@ function ClassGroupManagerMenu() {
               Class Management Menu
             </Button>
           </MenuTarget>
-          <MenuDropdown>{mobileNodes}</MenuDropdown>
+          <MenuDropdown>
+            <CanTakeAttendance failNode={null}>
+              <MenuItem
+                leftSection={<IconCheck size={16} />}
+                onClick={() => router.push(Routes.attendanceTaking)}
+              >
+                Attendance Taking
+              </MenuItem>
+            </CanTakeAttendance>
+            <CanManageClassRules failNode={null}>
+              <MenuItem
+                leftSection={<IconBraces size={16} />}
+                onClick={() => router.push(Routes.attendanceRules)}
+              >
+                Attendance Rules
+              </MenuItem>
+            </CanManageClassRules>
+          </MenuDropdown>
         </Menu>
       </Box>
 
@@ -289,7 +277,20 @@ function ClassGroupManagerMenu() {
         variant="subtle"
         onClick={(event) => event.stopPropagation()}
       >
-        {desktopNodes}
+        <CanTakeAttendance failNode={null}>
+          <NavLink
+            label="Attendance Taking"
+            leftSection={<IconCheck size={16} />}
+            onClick={() => router.push(Routes.attendanceTaking)}
+          />
+        </CanTakeAttendance>
+        <CanManageClassRules failNode={null}>
+          <NavLink
+            label="Attendance Rules"
+            leftSection={<IconBraces size={16} />}
+            onClick={() => router.push(Routes.attendanceRules)}
+          />
+        </CanManageClassRules>
       </NavLink>
     </>
   );

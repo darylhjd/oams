@@ -1,5 +1,6 @@
-import { HasManagedClassGroups } from "@/components/session_checker";
+import { CanTakeAttendance } from "@/components/session_checker";
 import React from "react";
+import NotFoundPage from "@/app/not-found";
 
 export const metadata = {
   title: "Attendance Taking",
@@ -14,5 +15,9 @@ export default function AttendanceTakingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <HasManagedClassGroups>{children}</HasManagedClassGroups>;
+  return (
+    <CanTakeAttendance failNode={<NotFoundPage />}>
+      {children}
+    </CanTakeAttendance>
+  );
 }

@@ -10,6 +10,6 @@ export type Session = {
 };
 
 export type ManagementDetails = {
-  has_managed_class_groups: boolean;
-  is_course_coordinator: boolean;
+  attendance: boolean;
+  rules: boolean;
 };
