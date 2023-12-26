@@ -6,14 +6,11 @@ import (
 
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/gorilla/schema"
-	"github.com/lib/pq"
 )
 
 var decoder = schema.NewDecoder()
 
 type ListQueryParams struct {
-	F       []string `schema:"filter"`
-	FParsed []BoolExpression
 	S       []string `schema:"sort"`
 	SParsed []SortParam
 	L       *int64 `schema:"limit"`
@@ -23,15 +20,6 @@ type ListQueryParams struct {
 type SortParam struct {
 	Col          Column
 	IsDescending bool
-}
-
-// setFilters sets the WHERE parameters for a select statement.
-func (p ListQueryParams) setFilters(stmt SelectStatement) SelectStatement {
-	if len(p.FParsed) == 0 {
-		return stmt
-	}
-
-	return stmt.WHERE(AND(p.FParsed...))
 }
 
 // setSorts sets the ORDER BY parameters for a select statement.
@@ -77,20 +65,11 @@ func (p ListQueryParams) setOffset(stmt SelectStatement) SelectStatement {
 	return stmt
 }
 
-func DecodeListQueryParams(source map[string][]string, table Table, cList ColumnList) (ListQueryParams, error) {
+func DecodeListQueryParams(source map[string][]string, cList ColumnList) (ListQueryParams, error) {
 	var l ListQueryParams
 	err := decoder.Decode(&l, source)
 	if err != nil {
 		return l, err
-	}
-
-	for _, f := range l.F {
-		p, err := parseFilterParam(f, table, cList)
-		if err != nil {
-			return l, err
-		}
-
-		l.FParsed = append(l.FParsed, p)
 	}
 
 	for _, s := range l.S {
@@ -103,28 +82,6 @@ func DecodeListQueryParams(source map[string][]string, table Table, cList Column
 	}
 
 	return l, err
-}
-
-const (
-	filterSplitLength = 2
-	filterSeparator   = "="
-)
-
-func parseFilterParam(s string, table Table, cList ColumnList) (BoolExpression, error) {
-	parts := strings.Split(s, filterSeparator)
-	if len(parts) != filterSplitLength {
-		return nil, fmt.Errorf("filter param `%s` does not follow format `col_name%svalue`", s, filterSeparator)
-	}
-
-	for _, c := range cList {
-		if c.Name() == parts[0] {
-			return RawBool(fmt.Sprintf("%s.%s = #arg", pq.QuoteIdentifier(table.Alias()), c.Name()), RawArgs{
-				"#arg": parts[1],
-			}), nil
-		}
-	}
-
-	return nil, fmt.Errorf("invalid column `%s`", parts[0])
 }
 
 const (

@@ -17,7 +17,6 @@ func (d *DB) ListClasses(ctx context.Context, params ListQueryParams) ([]model.C
 		Classes,
 	)
 
-	stmt = params.setFilters(stmt)
 	stmt = params.setSorts(stmt)
 	stmt = params.setLimit(stmt)
 	stmt = params.setOffset(stmt)

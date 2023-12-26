@@ -29,9 +29,7 @@ type sessionEnrollmentsGetResponse struct {
 }
 
 func (v *APIServerV1) sessionEnrollmentsGet(r *http.Request) apiResponse {
-	params, err := database.DecodeListQueryParams(
-		r.URL.Query(), table.SessionEnrollments, table.SessionEnrollments.AllColumns,
-	)
+	params, err := database.DecodeListQueryParams(r.URL.Query(), table.SessionEnrollments.AllColumns)
 	if err != nil {
 		return newErrorResponse(http.StatusBadRequest, err.Error())
 	}

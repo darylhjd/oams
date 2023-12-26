@@ -40,9 +40,7 @@ type classGroupManagersGetResponse struct {
 }
 
 func (v *APIServerV1) classGroupManagersGet(r *http.Request) apiResponse {
-	params, err := database.DecodeListQueryParams(
-		r.URL.Query(), table.ClassGroupManagers, table.ClassGroupManagers.AllColumns,
-	)
+	params, err := database.DecodeListQueryParams(r.URL.Query(), table.ClassGroupManagers.AllColumns)
 	if err != nil {
 		return newErrorResponse(http.StatusBadRequest, err.Error())
 	}
