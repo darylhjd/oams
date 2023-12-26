@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import React from "react";
+import { HasManagedClassGroups } from "@/components/session_checker";
 
 export type Params = {
   id: number;
@@ -24,5 +25,5 @@ export default function SessionAttendanceTakingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <HasManagedClassGroups>{children}</HasManagedClassGroups>;
 }

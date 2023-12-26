@@ -31,7 +31,7 @@ export function IsLoggedIn({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export function IsClassGroupManager({
+export function HasManagedClassGroups({
   children,
 }: {
   children: React.ReactNode;

@@ -12,4 +12,5 @@ export const Routes = {
   managerProcessing: "/manager-processing",
   attendanceTaking: "/attendance-taking",
   attendanceTakingSession: "/attendance-taking/",
+  attendanceRules: "/attendance-rules",
 };
