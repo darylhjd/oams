@@ -25,6 +25,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
 import { useDisclosure } from "@mantine/hooks";
 import {
+  IconBraces,
   IconCheck,
   IconChevronDown,
   IconFileDescription,
@@ -33,6 +34,7 @@ import {
 import { Routes } from "@/routing/routes";
 import { APIClient } from "@/api/client";
 import { UserRole } from "@/api/user";
+import React from "react";
 
 export default function Header() {
   return (
@@ -215,9 +217,45 @@ function ClassGroupManagerMenu() {
   const router = useRouter();
   const session = useSessionUserStore();
 
-  const isClassGroupManager =
-    session.data?.management_details.has_managed_class_groups;
-  if (!isClassGroupManager) {
+  const mobileNodes: React.ReactNode[] = [];
+  const desktopNodes: React.ReactNode[] = [];
+
+  if (session.data?.management_details.has_managed_class_groups) {
+    mobileNodes.push(
+      <MenuItem
+        leftSection={<IconCheck size={16} />}
+        onClick={() => router.push(Routes.attendanceTaking)}
+      >
+        Attendance Taking
+      </MenuItem>,
+    );
+    desktopNodes.push(
+      <NavLink
+        label="Attendance Taking"
+        leftSection={<IconCheck size={16} />}
+        onClick={() => router.push(Routes.attendanceTaking)}
+      />,
+    );
+  }
+  if (session.data?.management_details.is_course_coordinator) {
+    mobileNodes.push(
+      <MenuItem
+        leftSection={<IconBraces size={16} />}
+        onClick={() => router.push(Routes.attendanceRules)}
+      >
+        Attendance Rules
+      </MenuItem>,
+    );
+    desktopNodes.push(
+      <NavLink
+        label="Attendance Rules"
+        leftSection={<IconBraces size={16} />}
+        onClick={() => router.push(Routes.attendanceRules)}
+      />,
+    );
+  }
+
+  if (mobileNodes.length == 0 || desktopNodes.length == 0) {
     return null;
   }
 
@@ -236,33 +274,22 @@ function ClassGroupManagerMenu() {
               variant="subtle"
               rightSection={<IconChevronDown />}
             >
-              Class Group Manager Menu
+              Class Management Menu
             </Button>
           </MenuTarget>
-          <MenuDropdown>
-            <MenuItem
-              leftSection={<IconCheck size={16} />}
-              onClick={() => router.push(Routes.attendanceTaking)}
-            >
-              Attendance Taking
-            </MenuItem>
-          </MenuDropdown>
+          <MenuDropdown>{mobileNodes}</MenuDropdown>
         </Menu>
       </Box>
 
       <NavLink
         color="red"
         hiddenFrom="md"
-        label="Class Group Manager Menu"
+        label="Class Management Menu"
         active
         variant="subtle"
         onClick={(event) => event.stopPropagation()}
       >
-        <NavLink
-          label="Attendance Taking"
-          leftSection={<IconCheck size={16} />}
-          onClick={() => router.push(Routes.attendanceTaking)}
-        />
+        {desktopNodes}
       </NavLink>
     </>
   );

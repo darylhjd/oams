@@ -1,4 +1,4 @@
-import { IsClassGroupManager } from "@/components/session_checker";
+import { HasManagedClassGroups } from "@/components/session_checker";
 import React from "react";
 
 export const metadata = {
@@ -14,5 +14,5 @@ export default function AttendanceTakingLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <IsClassGroupManager>{children}</IsClassGroupManager>;
+  return <HasManagedClassGroups>{children}</HasManagedClassGroups>;
 }
