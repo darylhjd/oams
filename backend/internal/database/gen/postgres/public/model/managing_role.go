@@ -12,6 +12,7 @@ import "errors"
 type ManagingRole string
 
 const (
+	ManagingRole_TeachingAssistant ManagingRole = "TEACHING_ASSISTANT"
 	ManagingRole_CourseCoordinator ManagingRole = "COURSE_COORDINATOR"
 )
 
@@ -27,6 +28,8 @@ func (e *ManagingRole) Scan(value interface{}) error {
 	}
 
 	switch enumValue {
+	case "TEACHING_ASSISTANT":
+		*e = ManagingRole_TeachingAssistant
 	case "COURSE_COORDINATOR":
 		*e = ManagingRole_CourseCoordinator
 	default:

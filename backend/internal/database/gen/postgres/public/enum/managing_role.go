@@ -10,7 +10,9 @@ package enum
 import "github.com/go-jet/jet/v2/postgres"
 
 var ManagingRole = &struct {
+	TeachingAssistant postgres.StringExpression
 	CourseCoordinator postgres.StringExpression
 }{
+	TeachingAssistant: postgres.NewEnumValue("TEACHING_ASSISTANT"),
 	CourseCoordinator: postgres.NewEnumValue("COURSE_COORDINATOR"),
 }
