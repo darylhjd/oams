@@ -40,11 +40,8 @@ func (v *APIServerV1) usersGet(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process users get database action")
 	}
 
-	resp := usersGetResponse{
+	return usersGetResponse{
 		newSuccessResponse(),
-		make([]model.User, 0, len(users)),
+		append(make([]model.User, 0, len(users)), users...),
 	}
-
-	resp.Users = append(resp.Users, users...)
-	return resp
 }

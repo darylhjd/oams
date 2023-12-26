@@ -40,11 +40,8 @@ func (v *APIServerV1) classGroupsGet(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process class groups get database action")
 	}
 
-	resp := classGroupsGetResponse{
+	return classGroupsGetResponse{
 		newSuccessResponse(),
-		make([]model.ClassGroup, 0, len(groups)),
+		append(make([]model.ClassGroup, 0, len(groups)), groups...),
 	}
-
-	resp.ClassGroups = append(resp.ClassGroups, groups...)
-	return resp
 }

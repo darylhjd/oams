@@ -40,11 +40,8 @@ func (v *APIServerV1) sessionEnrollmentsGet(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process session enrollments get database action")
 	}
 
-	resp := sessionEnrollmentsGetResponse{
+	return sessionEnrollmentsGetResponse{
 		newSuccessResponse(),
-		make([]model.SessionEnrollment, 0, len(enrollments)),
+		append(make([]model.SessionEnrollment, 0, len(enrollments)), enrollments...),
 	}
-
-	resp.SessionEnrollments = append(resp.SessionEnrollments, enrollments...)
-	return resp
 }

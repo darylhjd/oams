@@ -34,9 +34,7 @@ type errorResponse struct {
 // The client is not expected to read the body if the status code is not StatusOK.
 func newErrorResponse(code int, err string) errorResponse {
 	return errorResponse{
-		response{
-			false, code,
-		},
+		response{false, code},
 		err,
 	}
 }
