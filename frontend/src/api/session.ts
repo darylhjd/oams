@@ -6,5 +6,9 @@ export type SessionResponse = {
 
 export type Session = {
   user: User;
+  management_details: ManagementDetails;
+};
+
+export type ManagementDetails = {
   has_managed_class_groups: boolean;
 };

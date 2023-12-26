@@ -15,8 +15,12 @@ type sessionResponse struct {
 }
 
 type session struct {
-	User                  model.User `json:"user"`
-	HasManagedClassGroups bool       `json:"has_managed_class_groups"`
+	User              model.User        `json:"user"`
+	ManagementDetails managementDetails `json:"management_details"`
+}
+
+type managementDetails struct {
+	HasManagedClassGroups bool `json:"has_managed_class_groups"`
 }
 
 func (v *APIServerV1) session(w http.ResponseWriter, r *http.Request) {
@@ -52,6 +56,8 @@ func (v *APIServerV1) getSession(w http.ResponseWriter, r *http.Request) {
 
 	v.writeResponse(w, r, sessionResponse{
 		newSuccessResponse(),
-		&session{sessionUser, hasManagedClassGroups},
+		&session{sessionUser, managementDetails{
+			hasManagedClassGroups,
+		}},
 	})
 }
