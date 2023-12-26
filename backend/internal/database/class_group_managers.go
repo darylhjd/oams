@@ -168,24 +168,3 @@ func (d *DB) BatchUpsertClassGroupManagers(ctx context.Context, args []UpsertCla
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
-
-func (d *DB) HasManagedClassGroups(ctx context.Context) (bool, error) {
-	var res struct {
-		Result bool `alias:"has_managed_class_groups"`
-	}
-
-	stmt := SELECT(
-		EXISTS(
-			SELECT(
-				ClassGroupManagers.AllColumns,
-			).FROM(
-				ClassGroupManagers,
-			).WHERE(
-				classGroupManagerRLS(ctx),
-			),
-		).AS("has_managed_class_groups"),
-	)
-
-	err := stmt.QueryContext(ctx, d.qe, &res)
-	return res.Result, err
-}
