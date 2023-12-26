@@ -38,10 +38,7 @@ export function IsClassGroupManager({
 }) {
   const session = useSessionUserStore();
 
-  if (
-    session.data?.management_details.has_managed_class_groups ||
-    session.data?.user.role == UserRole.SystemAdmin
-  ) {
+  if (session.data?.management_details.has_managed_class_groups) {
     return <>{children}</>;
   }
 

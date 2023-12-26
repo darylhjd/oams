@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/darylhjd/oams/backend/internal/middleware"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
@@ -15,12 +16,8 @@ type sessionResponse struct {
 }
 
 type session struct {
-	User              model.User        `json:"user"`
-	ManagementDetails managementDetails `json:"management_details"`
-}
-
-type managementDetails struct {
-	HasManagedClassGroups bool `json:"has_managed_class_groups"`
+	User              model.User                 `json:"user"`
+	ManagementDetails database.ManagementDetails `json:"management_details"`
 }
 
 func (v *APIServerV1) session(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +44,7 @@ func (v *APIServerV1) getSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasManagedClassGroups, err := v.db.HasManagedClassGroups(r.Context())
+	details, err := v.db.GetManagementDetails(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, fmt.Errorf("could not get user managed class groups: %w", err))
 		v.writeResponse(w, r, newErrorResponse(http.StatusInternalServerError, "could not get session user managed class groups"))
@@ -56,8 +53,6 @@ func (v *APIServerV1) getSession(w http.ResponseWriter, r *http.Request) {
 
 	v.writeResponse(w, r, sessionResponse{
 		newSuccessResponse(),
-		&session{sessionUser, managementDetails{
-			hasManagedClassGroups,
-		}},
+		&session{sessionUser, details},
 	})
 }

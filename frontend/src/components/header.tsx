@@ -215,10 +215,8 @@ function ClassGroupManagerMenu() {
   const router = useRouter();
   const session = useSessionUserStore();
 
-  const isSystemAdmin = session.data?.user.role == UserRole.SystemAdmin;
   const isClassGroupManager =
-    session.data?.management_details.has_managed_class_groups || isSystemAdmin;
-
+    session.data?.management_details.has_managed_class_groups;
   if (!isClassGroupManager) {
     return null;
   }
