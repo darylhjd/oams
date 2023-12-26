@@ -230,6 +230,7 @@ function SignAttendance({
           <FocusTrap active>
             <PasswordInput
               label="Signature"
+              placeholder={`${row.original.user_name}'s signature`}
               {...form.getInputProps("signature")}
               data-autofocus
             />

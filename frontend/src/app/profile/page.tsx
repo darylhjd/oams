@@ -28,7 +28,7 @@ export default function ProfilePage() {
     <Container fluid>
       <Paper className={styles.paper} radius="md" shadow="xs" withBorder p="xl">
         <Text ta="center" size="xl" fw={1000}>
-          {user.id}
+          User ID: {user.id}
         </Text>
         <Space h="md" />
         <Text ta="center" size="sm">
@@ -66,12 +66,15 @@ function SignatureUpdater({ userId }: { userId: string }) {
       >
         <PasswordInput
           label="New Attendance Signature"
-          description="Use this signature to sign your attendance."
+          description="This signature is used for signing your attendance."
+          placeholder="New attendance signature"
           {...form.getInputProps("signature")}
         />
         <Text fs="italic" size="sm">
-          Note: Your default signature is your user ID.
+          Note: Your default signature is your User ID. We recommend that you
+          change your signature from the default.
         </Text>
+        <Space h="xs" />
         <Group justify="flex-end">
           <Button type="submit" loading={loading}>
             Update Signature
