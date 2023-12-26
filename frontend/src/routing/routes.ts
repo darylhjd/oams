@@ -5,6 +5,7 @@ export const Routes = {
   adminPanel: "/admin-panel",
   adminPanelUser: "/admin-panel/users/",
   adminPanelClass: "/admin-panel/classes/",
+  adminPanelClassAttendanceRule: "/admin-panel/class-attendance-rules/",
   adminPanelClassGroup: "/admin-panel/class-groups/",
   adminPanelClassGroupSession: "/admin-panel/class-group-sessions/",
   adminPanelSessionEnrollment: "/admin-panel/session-enrollments/",

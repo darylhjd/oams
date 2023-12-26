@@ -71,7 +71,8 @@ export function ClassAttendanceRulesTable() {
       columns={ClassAttendanceRuleDataTableColumns}
       dataSource={new ClassAttendanceRulesDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
-        onClick: (_) => router.push(Routes.attendanceRules + row.original.id),
+        onClick: (_) =>
+          router.push(Routes.adminPanelClassAttendanceRule + row.original.id),
         ...ROW_PROPS,
       })}
     />
