@@ -11,8 +11,8 @@ import (
 )
 
 type ManagementDetails struct {
-	HasManagedClassGroups bool `alias:".has_managed_class_groups" json:"has_managed_class_groups"`
-	IsCourseCoordinator   bool `alias:".is_course_coordinator" json:"is_course_coordinator"`
+	Attendance bool `alias:".attendance" json:"attendance"`
+	Rules      bool `alias:".rules" json:"rules"`
 }
 
 func (d *DB) GetManagementDetails(ctx context.Context) (ManagementDetails, error) {
@@ -31,7 +31,7 @@ func (d *DB) GetManagementDetails(ctx context.Context) (ManagementDetails, error
 			),
 		).OR(
 			Bool(isSystemAdmin),
-		).AS("has_managed_class_groups"),
+		).AS("attendance"),
 		EXISTS(
 			SELECT(
 				ClassGroupManagers.AllColumns,
@@ -44,7 +44,7 @@ func (d *DB) GetManagementDetails(ctx context.Context) (ManagementDetails, error
 			),
 		).OR(
 			Bool(isSystemAdmin),
-		).AS("is_course_coordinator"),
+		).AS("rules"),
 	)
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
