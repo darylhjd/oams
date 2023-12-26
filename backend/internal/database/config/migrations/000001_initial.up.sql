@@ -68,6 +68,28 @@ CREATE TRIGGER update_updated_at
     FOR EACH ROW
 EXECUTE PROCEDURE update_updated_at();
 
+CREATE TABLE class_attendance_rules
+(
+    id          BIGSERIAL PRIMARY KEY,
+    class_id    BIGINT      NOT NULL,
+    title       TEXT        NOT NULL,
+    description TEXT        NOT NULL DEFAULT '',
+    rule        TEXT        NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT ux_class_id_rule
+        UNIQUE (class_id, rule),
+    CONSTRAINT fk_class_id
+        FOREIGN KEY (class_id)
+            REFERENCES classes (id)
+);
+
+CREATE TRIGGER update_updated_at
+    BEFORE UPDATE
+    ON class_attendance_rules
+    FOR EACH ROW
+EXECUTE PROCEDURE update_updated_at();
+
 CREATE TABLE class_groups
 (
     id         BIGSERIAL PRIMARY KEY,

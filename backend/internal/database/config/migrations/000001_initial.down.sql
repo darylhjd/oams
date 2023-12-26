@@ -8,6 +8,8 @@ DROP TABLE class_group_managers;
 
 DROP TABLE class_groups;
 
+DROP TABLE class_attendance_rules;
+
 DROP TABLE classes;
 
 DROP TABLE user_signatures;
