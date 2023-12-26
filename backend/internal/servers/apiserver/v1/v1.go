@@ -40,6 +40,7 @@ const (
 	sessionEnrollmentUrl  = "/session-enrollments/"
 	attendanceTakingsUrl  = "/attendance-taking"
 	attendanceTakingUrl   = "/attendance-taking/"
+	attendanceRulesUrl    = "/attendance-rules"
 )
 
 var (
@@ -191,6 +192,14 @@ func (v *APIServerV1) registerHandlers() {
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.AttendanceTakingRead},
 			http.MethodPost: {permissions.AttendanceTakingUpdate},
+		},
+	))
+
+	v.mux.HandleFunc(attendanceRulesUrl, permissions.EnforceAccessPolicy(
+		v.attendanceRules,
+		v.auth, v.db,
+		map[string][]permissions.P{
+			http.MethodGet: {permissions.AttendanceRulesRead},
 		},
 	))
 }

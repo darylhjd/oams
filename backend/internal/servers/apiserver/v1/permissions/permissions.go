@@ -27,6 +27,8 @@ const (
 
 	AttendanceTakingRead
 	AttendanceTakingUpdate
+
+	AttendanceRulesRead
 )
 
 type permissionMap map[P]struct{}
@@ -37,15 +39,23 @@ var rolePermissionMapping = map[model.UserRole]permissionMap{
 }
 
 var userRolePermissions = permissionMap{
-	SignaturePut:           {},
-	UserRead:               {},
-	UserUpdate:             {},
-	ClassRead:              {},
-	ClassGroupRead:         {},
-	ClassGroupSessionRead:  {},
-	SessionEnrollmentRead:  {},
+	SignaturePut: {},
+
+	UserRead:   {},
+	UserUpdate: {},
+
+	ClassRead: {},
+
+	ClassGroupRead: {},
+
+	ClassGroupSessionRead: {},
+
+	SessionEnrollmentRead: {},
+
 	AttendanceTakingRead:   {},
 	AttendanceTakingUpdate: {},
+
+	AttendanceRulesRead: {},
 }
 
 var systemAdminRolePermissions = permissionMap{
@@ -71,4 +81,6 @@ var systemAdminRolePermissions = permissionMap{
 
 	AttendanceTakingRead:   {},
 	AttendanceTakingUpdate: {},
+
+	AttendanceRulesRead: {},
 }
