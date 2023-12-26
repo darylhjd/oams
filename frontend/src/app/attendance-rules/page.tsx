@@ -1,6 +1,6 @@
 import styles from "@/styles/AttendanceRules.module.css";
 
-import { Container, Text, Title } from "@mantine/core";
+import { Container, Title } from "@mantine/core";
 
 export default function AttendanceRulesPage() {
   return (
