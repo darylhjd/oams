@@ -22,25 +22,25 @@ const (
 )
 
 const (
-	baseUrl               = "/"
-	pingUrl               = "/ping"
-	sessionUrl            = "/session"
-	signatureUrl          = "/signature/"
-	batchUrl              = "/batch"
-	usersUrl              = "/users"
-	userUrl               = "/users/"
-	classesUrl            = "/classes"
-	classUrl              = "/classes/"
-	classGroupManagersUrl = "/class-group-managers"
-	classGroupsUrl        = "/class-groups"
-	classGroupUrl         = "/class-groups/"
-	classGroupSessionsUrl = "/class-group-sessions"
-	classGroupSessionUrl  = "/class-group-sessions/"
-	sessionEnrollmentsUrl = "/session-enrollments"
-	sessionEnrollmentUrl  = "/session-enrollments/"
-	attendanceTakingsUrl  = "/attendance-taking"
-	attendanceTakingUrl   = "/attendance-taking/"
-	attendanceRulesUrl    = "/attendance-rules"
+	baseUrl                 = "/"
+	pingUrl                 = "/ping"
+	sessionUrl              = "/session"
+	signatureUrl            = "/signature/"
+	batchUrl                = "/batch"
+	usersUrl                = "/users"
+	userUrl                 = "/users/"
+	classesUrl              = "/classes"
+	classUrl                = "/classes/"
+	classAttendanceRulesUrl = "/class-attendance-rules"
+	classGroupManagersUrl   = "/class-group-managers"
+	classGroupsUrl          = "/class-groups"
+	classGroupUrl           = "/class-groups/"
+	classGroupSessionsUrl   = "/class-group-sessions"
+	classGroupSessionUrl    = "/class-group-sessions/"
+	sessionEnrollmentsUrl   = "/session-enrollments"
+	sessionEnrollmentUrl    = "/session-enrollments/"
+	attendanceTakingsUrl    = "/attendance-taking"
+	attendanceTakingUrl     = "/attendance-taking/"
 )
 
 var (
@@ -120,6 +120,14 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
+	v.mux.HandleFunc(classAttendanceRulesUrl, permissions.EnforceAccessPolicy(
+		v.classAttendanceRules,
+		v.auth, v.db,
+		map[string][]permissions.P{
+			http.MethodGet: {permissions.ClassAttendanceRulesRead},
+		},
+	))
+
 	v.mux.HandleFunc(classGroupManagersUrl, permissions.EnforceAccessPolicy(
 		v.classGroupManagers,
 		v.auth, v.db,
@@ -192,14 +200,6 @@ func (v *APIServerV1) registerHandlers() {
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.AttendanceTakingRead},
 			http.MethodPost: {permissions.AttendanceTakingUpdate},
-		},
-	))
-
-	v.mux.HandleFunc(attendanceRulesUrl, permissions.EnforceAccessPolicy(
-		v.attendanceRules,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.AttendanceRulesRead},
 		},
 	))
 }
