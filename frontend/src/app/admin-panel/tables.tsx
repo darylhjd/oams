@@ -13,6 +13,7 @@ import {
   ClassesDataSource,
   SessionEnrollmentsDataSource,
   UsersDataSource,
+  ClassAttendanceRulesDataSource,
 } from "./data_sources";
 import { useEffect, useState } from "react";
 import {
@@ -23,6 +24,7 @@ import {
   SessionEnrollmentsDataTableColumns,
   UserDataTableColumns,
   DEFAULT_PAGE_SIZE,
+  ClassAttendanceRuleDataTableColumns,
 } from "@/components/tabling";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
@@ -55,6 +57,22 @@ export function ClassesTable() {
       dataSource={new ClassesDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
         onClick: (_) => router.push(Routes.adminPanelClass + row.original.id),
+        ...ROW_PROPS,
+      })}
+    />
+  );
+}
+
+export function ClassAttendanceRulesTable() {
+  const router = useRouter();
+
+  return (
+    <AsyncDataTable
+      columns={ClassAttendanceRuleDataTableColumns}
+      dataSource={new ClassAttendanceRulesDataSource()}
+      mantineTableBodyRowProps={({ row }) => ({
+        onClick: (_) =>
+          router.push(Routes.adminPanelClassAttendanceRule + row.original.id),
         ...ROW_PROPS,
       })}
     />

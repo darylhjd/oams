@@ -12,6 +12,7 @@ import {
   ClassesTable,
   SessionEnrollmentsTable,
   UsersTable,
+  ClassAttendanceRulesTable,
 } from "./tables";
 
 export default function AdminPanelPage() {
@@ -29,6 +30,7 @@ export default function AdminPanelPage() {
         <TabsList grow justify={isMobile ? "left" : "center"}>
           <TabsTab value="users">Users</TabsTab>
           <TabsTab value="classes">Classes</TabsTab>
+          <TabsTab value="classAttendanceRules">Class Attendance Rules</TabsTab>
           <TabsTab value="classGroups">Class Groups</TabsTab>
           <TabsTab value="classGroupManagers">Class Group Managers</TabsTab>
           <TabsTab value="classGroupSessions">Class Group Sessions</TabsTab>
@@ -40,6 +42,9 @@ export default function AdminPanelPage() {
         </TabsPanel>
         <TabsPanel value="classes">
           <ClassesTable />
+        </TabsPanel>
+        <TabsPanel value="classAttendanceRules">
+          <ClassAttendanceRulesTable />
         </TabsPanel>
         <TabsPanel value="classGroups">
           <ClassGroupsTable />
