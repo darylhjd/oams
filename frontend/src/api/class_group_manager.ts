@@ -26,5 +26,6 @@ export type ClassGroupManager = {
 };
 
 export enum ManagingRole {
+  TeachingAssistant = "TEACHING_ASSISTANT",
   CourseCoordinator = "COURSE_COORDINATOR",
 }
