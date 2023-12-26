@@ -51,13 +51,10 @@ func (v *APIServerV1) classGroupManagersGet(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group managers get database action")
 	}
 
-	resp := classGroupManagersGetResponse{
+	return classGroupManagersGetResponse{
 		newSuccessResponse(),
-		make([]model.ClassGroupManager, 0, len(managers)),
+		append(make([]model.ClassGroupManager, 0, len(managers)), managers...),
 	}
-
-	resp.ClassGroupManagers = append(resp.ClassGroupManagers, managers...)
-	return resp
 }
 
 type classGroupManagersPostResponse struct {

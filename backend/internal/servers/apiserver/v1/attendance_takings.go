@@ -26,19 +26,17 @@ type attendanceTakingsGetResponse struct {
 
 // TODO: Implement tests for this endpoint.
 func (v *APIServerV1) attendanceTakingsGet(r *http.Request) apiResponse {
-	resp := attendanceTakingsGetResponse{
-		response: newSuccessResponse(),
-	}
-
 	upcoming, err := v.db.GetUpcomingManagedClassGroupSessions(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not get upcoming managed class group sessions")
 	}
 
-	resp.UpcomingClassGroupSessions = append(
-		make([]database.UpcomingManagedClassGroupSession, 0, len(upcoming)),
-		upcoming...,
-	)
-	return resp
+	return attendanceTakingsGetResponse{
+		newSuccessResponse(),
+		append(
+			make([]database.UpcomingManagedClassGroupSession, 0, len(upcoming)),
+			upcoming...,
+		),
+	}
 }

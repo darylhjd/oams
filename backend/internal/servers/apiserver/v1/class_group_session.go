@@ -39,7 +39,7 @@ type classGroupSessionGetResponse struct {
 }
 
 func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiResponse {
-	session, err := v.db.GetClassGroupSession(r.Context(), id)
+	s, err := v.db.GetClassGroupSession(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested class group session does not exist")
@@ -51,6 +51,6 @@ func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiRespons
 
 	return classGroupSessionGetResponse{
 		newSuccessResponse(),
-		session,
+		s,
 	}
 }

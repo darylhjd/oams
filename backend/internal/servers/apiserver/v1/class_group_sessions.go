@@ -40,11 +40,8 @@ func (v *APIServerV1) classGroupSessionsGet(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process class group sessions get database action")
 	}
 
-	resp := classGroupSessionsGetResponse{
+	return classGroupSessionsGetResponse{
 		newSuccessResponse(),
-		make([]model.ClassGroupSession, 0, len(sessions)),
+		append(make([]model.ClassGroupSession, 0, len(sessions)), sessions...),
 	}
-
-	resp.ClassGroupSessions = append(resp.ClassGroupSessions, sessions...)
-	return resp
 }

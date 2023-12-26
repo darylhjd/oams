@@ -197,7 +197,7 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		users [][]string
 
 		usersParams       []database.UpsertUserParams              // Store user params.
-		enrollmentsParams []database.UpsertSessionEnrollmentParams // Store session enrollment params/
+		enrollmentsParams []database.UpsertSessionEnrollmentParams // Store session enrollment params.
 	)
 
 	for _, class := range req.Batches {

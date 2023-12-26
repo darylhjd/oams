@@ -40,11 +40,8 @@ func (v *APIServerV1) classesGet(r *http.Request) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not process classes get database action")
 	}
 
-	resp := classesGetResponse{
+	return classesGetResponse{
 		newSuccessResponse(),
-		make([]model.Class, 0, len(classes)),
+		append(make([]model.Class, 0, len(classes)), classes...),
 	}
-
-	resp.Classes = append(resp.Classes, classes...)
-	return resp
 }
