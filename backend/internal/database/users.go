@@ -21,7 +21,6 @@ func (d *DB) ListUsers(ctx context.Context, params ListQueryParams) ([]model.Use
 		Users.ID.ASC(),
 	)
 
-	stmt = params.setFilters(stmt)
 	stmt = params.setSorts(stmt)
 	stmt = params.setLimit(stmt)
 	stmt = params.setOffset(stmt)

@@ -18,7 +18,6 @@ func (d *DB) ListClassGroups(ctx context.Context, params ListQueryParams) ([]mod
 		ClassGroups,
 	)
 
-	stmt = params.setFilters(stmt)
 	stmt = params.setSorts(stmt)
 	stmt = params.setLimit(stmt)
 	stmt = params.setOffset(stmt)

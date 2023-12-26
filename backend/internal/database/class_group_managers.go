@@ -19,7 +19,6 @@ func (d *DB) ListClassGroupManagers(ctx context.Context, params ListQueryParams)
 		classGroupManagerRLS(ctx),
 	)
 
-	stmt = params.setFilters(stmt)
 	stmt = params.setSorts(stmt)
 	stmt = params.setLimit(stmt)
 	stmt = params.setOffset(stmt)
