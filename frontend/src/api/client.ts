@@ -25,6 +25,7 @@ import {
   AttendanceTakingPostResponse,
 } from "./attendance_taking";
 import { SessionResponse } from "@/api/session";
+import { ClassAttendanceRulesGetResponse } from "@/api/class_attendance_rule";
 
 export class APIClient {
   static readonly _sessionPath = "/session";
@@ -34,6 +35,7 @@ export class APIClient {
   static readonly _userPath = "/users/";
   static readonly _classesPath = "/classes";
   static readonly _classPath = "/classes/";
+  static readonly _classAttendanceRulesPath = "/class-attendance-rules";
   static readonly _classGroupsPath = "/class-groups";
   static readonly _classGroupPath = "/class-groups/";
   static readonly _classGroupManagersPath = "/class-group-managers";
@@ -145,6 +147,22 @@ export class APIClient {
   static async classGet(id: number): Promise<ClassGetResponse> {
     const { data } = await this._client.get<ClassGetResponse>(
       this._classPath + id,
+    );
+    return data;
+  }
+
+  static async classAttendanceRulesGet(
+    offset: number,
+    limit: number,
+  ): Promise<ClassAttendanceRulesGetResponse> {
+    const { data } = await this._client.get<ClassAttendanceRulesGetResponse>(
+      this._classAttendanceRulesPath,
+      {
+        params: {
+          offset: offset,
+          limit: limit,
+        },
+      },
     );
     return data;
   }

@@ -5,6 +5,7 @@ import { ClassGroupManager } from "@/api/class_group_manager";
 import { APIClient } from "@/api/client";
 import { SessionEnrollment } from "@/api/session_enrollment";
 import { User } from "@/api/user";
+import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 
 export abstract class AsyncDataSource<T> {
   constructor(public totalRecords: number = 0) {}
@@ -39,6 +40,18 @@ export class ClassesDataSource extends AsyncDataSource<Class> {
     const response = await APIClient.classesGet(offset, limit);
     super.updateRecordsEstimationState(offset, limit, response.classes.length);
     return response.classes;
+  }
+}
+
+export class ClassAttendanceRulesDataSource extends AsyncDataSource<ClassAttendanceRule> {
+  async getRows(offset: number, limit: number): Promise<ClassAttendanceRule[]> {
+    const response = await APIClient.classAttendanceRulesGet(offset, limit);
+    super.updateRecordsEstimationState(
+      offset,
+      limit,
+      response.class_attendance_rules.length,
+    );
+    return response.class_attendance_rules;
   }
 }
 

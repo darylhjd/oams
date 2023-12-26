@@ -16,6 +16,7 @@ import { User } from "@/api/user";
 import { MRT_Cell, MRT_ColumnDef } from "mantine-react-table";
 import { Badge } from "@mantine/core";
 import { AttendanceEntry } from "@/api/attendance_taking";
+import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 
 export const DEFAULT_PAGE_SIZE = 50;
 
@@ -53,6 +54,16 @@ export const ClassDataTableColumns: MRT_ColumnDef<Class>[] = [
   ...classSharedColumns,
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
+
+export const ClassAttendanceRuleDataTableColumns: MRT_ColumnDef<ClassAttendanceRule>[] =
+  [
+    { accessorKey: "id", header: "ID" },
+    { accessorKey: "class_id", header: "Class ID" },
+    { accessorKey: "title", header: "Title" },
+    { accessorKey: "description", header: "Description" },
+    { accessorKey: "rule", header: "Rule" },
+    ...CreatedAtUpdatedAtDataTableColumns,
+  ];
 
 const classGroupSharedColumns = [
   { accessorKey: "id", header: "ID" },
