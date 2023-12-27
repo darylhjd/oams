@@ -36,6 +36,30 @@ func classAttendanceRuleRLS(ctx context.Context) BoolExpression {
 	)
 }
 
+func coordinatingClassRLS(ctx context.Context) BoolExpression {
+	authContext := oauth2.GetAuthContext(ctx)
+
+	return Bool(
+		authContext.User.Role == model.UserRole_SystemAdmin,
+	).OR(
+		Classes.ID.IN(
+			SELECT(
+				Classes.ID,
+			).FROM(
+				Classes.INNER_JOIN(
+					ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
+				).INNER_JOIN(
+					ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
+				),
+			).WHERE(
+				ClassGroupManagers.UserID.EQ(String(authContext.User.ID)).AND(
+					ClassGroupManagers.ManagingRole.EQ(ManagingRole.CourseCoordinator),
+				),
+			),
+		),
+	)
+}
+
 func classGroupManagerRLS(ctx context.Context) BoolExpression {
 	authContext := oauth2.GetAuthContext(ctx)
 
@@ -68,18 +92,6 @@ func sessionEnrollmentRLS(ctx context.Context) BoolExpression {
 			).WHERE(
 				ClassGroupManagers.UserID.EQ(String(authContext.User.ID)),
 			),
-		),
-	)
-}
-
-func attendanceRuleRLS(ctx context.Context) BoolExpression {
-	authContext := oauth2.GetAuthContext(ctx)
-
-	return Bool(
-		authContext.User.Role == model.UserRole_SystemAdmin,
-	).OR(
-		ClassGroupManagers.UserID.EQ(String(authContext.User.ID)).AND(
-			ClassGroupManagers.ManagingRole.EQ(ManagingRole.CourseCoordinator),
 		),
 	)
 }
