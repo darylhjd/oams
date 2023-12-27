@@ -190,6 +190,6 @@ func isManagedClassGroupSession(ctx context.Context) BoolExpression {
 	//	ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
 	//	ClassGroupSessions.EndTime,
 	//).AND(
-	return attendanceTakingRLS(ctx)
+	return classGroupManagerRLS(ctx)
 	//)
 }
