@@ -26,6 +26,7 @@ import {
 } from "./attendance_taking";
 import { SessionResponse } from "@/api/session";
 import { ClassAttendanceRulesGetResponse } from "@/api/class_attendance_rule";
+import { AttendanceRulesGetResponse } from "@/api/attendance_rule";
 
 export class APIClient {
   static readonly _sessionPath = "/session";
@@ -45,6 +46,7 @@ export class APIClient {
   static readonly _sessionEnrollmentPath = "/session-enrollments/";
   static readonly _attendanceTakingsPath = "/attendance-taking";
   static readonly _attendanceTakingPath = "/attendance-taking/";
+  static readonly _attendanceRulesPath = "/attendance-rules";
 
   static readonly _supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -312,6 +314,13 @@ export class APIClient {
         attended: attended,
         user_signature: userSignature,
       },
+    );
+    return data;
+  }
+
+  static async attendanceRulesGet(): Promise<AttendanceRulesGetResponse> {
+    const { data } = await this._client.get<AttendanceRulesGetResponse>(
+      this._attendanceRulesPath,
     );
     return data;
   }
