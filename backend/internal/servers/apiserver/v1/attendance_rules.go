@@ -21,7 +21,7 @@ func (v *APIServerV1) attendanceRules(w http.ResponseWriter, r *http.Request) {
 
 type attendanceRulesGetResponse struct {
 	response
-	CoordinatingClasses []database.CoordinatingClasses `json:"coordinating_classes"`
+	CoordinatingClasses []database.CoordinatingClass `json:"coordinating_classes"`
 }
 
 func (v *APIServerV1) attendanceRulesGet(r *http.Request) apiResponse {
@@ -33,6 +33,6 @@ func (v *APIServerV1) attendanceRulesGet(r *http.Request) apiResponse {
 
 	return attendanceRulesGetResponse{
 		newSuccessResponse(),
-		append(make([]database.CoordinatingClasses, 0, len(classes)), classes...),
+		append(make([]database.CoordinatingClass, 0, len(classes)), classes...),
 	}
 }
