@@ -72,12 +72,14 @@ func sessionEnrollmentRLS(ctx context.Context) BoolExpression {
 	)
 }
 
-func attendanceTakingRLS(ctx context.Context) BoolExpression {
-	return classGroupManagerRLS(ctx).OR(
-		Bool(
-			oauth2.GetAuthContext(ctx).User.Role == model.UserRole_SystemAdmin,
-		).AND(
-			ClassGroupManagers.UserID.IS_NULL(),
+func attendanceRuleRLS(ctx context.Context) BoolExpression {
+	authContext := oauth2.GetAuthContext(ctx)
+
+	return Bool(
+		authContext.User.Role == model.UserRole_SystemAdmin,
+	).OR(
+		ClassGroupManagers.UserID.EQ(String(authContext.User.ID)).AND(
+			ClassGroupManagers.ManagingRole.EQ(ManagingRole.CourseCoordinator),
 		),
 	)
 }

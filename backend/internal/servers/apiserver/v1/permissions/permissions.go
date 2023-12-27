@@ -29,6 +29,8 @@ const (
 
 	AttendanceTakingRead
 	AttendanceTakingUpdate
+
+	AttendanceRuleRead
 )
 
 type permissionMap map[P]struct{}
@@ -46,8 +48,6 @@ var userRolePermissions = permissionMap{
 
 	ClassRead: {},
 
-	ClassAttendanceRulesRead: {},
-
 	ClassGroupRead: {},
 
 	ClassGroupSessionRead: {},
@@ -56,6 +56,8 @@ var userRolePermissions = permissionMap{
 
 	AttendanceTakingRead:   {},
 	AttendanceTakingUpdate: {},
+
+	AttendanceRuleRead: {},
 }
 
 var systemAdminRolePermissions = permissionMap{
@@ -83,4 +85,6 @@ var systemAdminRolePermissions = permissionMap{
 
 	AttendanceTakingRead:   {},
 	AttendanceTakingUpdate: {},
+
+	AttendanceRuleRead: {},
 }
