@@ -32,7 +32,7 @@ export default function AttendanceTakingPage() {
 function PageTitle() {
   return (
     <Group className={styles.title} gap="xs" justify="center">
-      <Title order={3} ta="center">
+      <Title order={2} ta="center">
         Upcoming Class Group Sessions
       </Title>
       <Tooltip

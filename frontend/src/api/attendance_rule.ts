@@ -7,4 +7,6 @@ export type CoordinatingClass = {
   code: string;
   year: number;
   semester: string;
+  programme: string;
+  au: number;
 };

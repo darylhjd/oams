@@ -14,4 +14,5 @@ export const Routes = {
   attendanceTaking: "/attendance-taking",
   attendanceTakingSession: "/attendance-taking/",
   attendanceRules: "/attendance-rules",
+  attendanceRule: "/attendance-rules/",
 };
