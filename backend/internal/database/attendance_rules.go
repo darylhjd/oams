@@ -8,10 +8,12 @@ import (
 )
 
 type CoordinatingClasses struct {
-	ID       int64  `alias:"class.id" json:"id"`
-	Code     string `alias:"class.code" json:"code"`
-	Year     int32  `alias:"class.year" json:"year"`
-	Semester string `alias:"class.semester" json:"semester"`
+	ID        int64  `alias:"class.id" json:"id"`
+	Code      string `alias:"class.code" json:"code"`
+	Year      int32  `alias:"class.year" json:"year"`
+	Semester  string `alias:"class.semester" json:"semester"`
+	Programme string `alias:"class.programme" json:"programme"`
+	Au        int16  `alias:"class.au" json:"au"`
 }
 
 func (d *DB) GetCoordinatingClasses(ctx context.Context) ([]CoordinatingClasses, error) {
@@ -22,6 +24,8 @@ func (d *DB) GetCoordinatingClasses(ctx context.Context) ([]CoordinatingClasses,
 		Classes.Code,
 		Classes.Year,
 		Classes.Semester,
+		Classes.Programme,
+		Classes.Au,
 	).DISTINCT().FROM(
 		Classes.INNER_JOIN(
 			ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
@@ -30,6 +34,9 @@ func (d *DB) GetCoordinatingClasses(ctx context.Context) ([]CoordinatingClasses,
 		),
 	).WHERE(
 		attendanceRuleRLS(ctx),
+	).ORDER_BY(
+		Classes.Year.DESC(),
+		Classes.Semester.DESC(),
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
