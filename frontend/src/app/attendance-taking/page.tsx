@@ -6,7 +6,7 @@ import { APIClient } from "@/api/client";
 import { Container, Group, Space, Text, Title, Tooltip } from "@mantine/core";
 import { IconHelp } from "@tabler/icons-react";
 import { useState } from "react";
-import { UpcomingClassGroupSession } from "@/api/attendance_taking";
+import { UpcomingClassGroupSession } from "@/api/upcoming_class_group_session";
 import { RequestLoader } from "@/components/request_loader";
 import { SessionCard } from "@/app/attendance-taking/session_card";
 
@@ -15,7 +15,7 @@ export default function AttendanceTakingPage() {
     UpcomingClassGroupSession[]
   >([]);
   const promiseFunc = async () => {
-    const data = await APIClient.attendanceTakingsGet();
+    const data = await APIClient.upcomingClassGroupSessionsGet();
     return setUpcomingSessions(data.upcoming_class_group_sessions);
   };
 

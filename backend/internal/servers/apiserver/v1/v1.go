@@ -22,27 +22,27 @@ const (
 )
 
 const (
-	baseUrl                 = "/"
-	pingUrl                 = "/ping"
-	sessionUrl              = "/session"
-	signatureUrl            = "/signature/"
-	batchUrl                = "/batch"
-	usersUrl                = "/users"
-	userUrl                 = "/users/"
-	classesUrl              = "/classes"
-	classUrl                = "/classes/"
-	classAttendanceRulesUrl = "/class-attendance-rules"
-	classGroupManagersUrl   = "/class-group-managers"
-	classGroupsUrl          = "/class-groups"
-	classGroupUrl           = "/class-groups/"
-	classGroupSessionsUrl   = "/class-group-sessions"
-	classGroupSessionUrl    = "/class-group-sessions/"
-	sessionEnrollmentsUrl   = "/session-enrollments"
-	sessionEnrollmentUrl    = "/session-enrollments/"
-	attendanceTakingsUrl    = "/attendance-taking"
-	attendanceTakingUrl     = "/attendance-taking/"
-	coordinatingClassesUrl  = "/coordinating-classes"
-	coordinatingClassUrl    = "/coordinating-classes/"
+	baseUrl                       = "/"
+	pingUrl                       = "/ping"
+	sessionUrl                    = "/session"
+	signatureUrl                  = "/signature/"
+	batchUrl                      = "/batch"
+	usersUrl                      = "/users"
+	userUrl                       = "/users/"
+	classesUrl                    = "/classes"
+	classUrl                      = "/classes/"
+	classAttendanceRulesUrl       = "/class-attendance-rules"
+	classGroupManagersUrl         = "/class-group-managers"
+	classGroupsUrl                = "/class-groups"
+	classGroupUrl                 = "/class-groups/"
+	classGroupSessionsUrl         = "/class-group-sessions"
+	classGroupSessionUrl          = "/class-group-sessions/"
+	sessionEnrollmentsUrl         = "/session-enrollments"
+	sessionEnrollmentUrl          = "/session-enrollments/"
+	upcomingClassGroupSessionsUrl = "/upcoming-class-group-sessions"
+	upcomingClassGroupSessionUrl  = "/upcoming-class-group-sessions/"
+	coordinatingClassesUrl        = "/coordinating-classes"
+	coordinatingClassUrl          = "/coordinating-classes/"
 )
 
 var (
@@ -188,20 +188,20 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(attendanceTakingsUrl, permissions.EnforceAccessPolicy(
-		v.attendanceTakings,
+	v.mux.HandleFunc(upcomingClassGroupSessionsUrl, permissions.EnforceAccessPolicy(
+		v.upcomingClassGroupSessions,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet: {permissions.AttendanceTakingRead},
+			http.MethodGet: {permissions.UpcomingClassGroupSessionRead},
 		},
 	))
 
-	v.mux.HandleFunc(attendanceTakingUrl, permissions.EnforceAccessPolicy(
-		v.attendanceTaking,
+	v.mux.HandleFunc(upcomingClassGroupSessionUrl, permissions.EnforceAccessPolicy(
+		v.upcomingClassGroupSession,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:  {permissions.AttendanceTakingRead},
-			http.MethodPost: {permissions.AttendanceTakingUpdate},
+			http.MethodGet:  {permissions.UpcomingClassGroupSessionRead},
+			http.MethodPost: {permissions.UpcomingClassGroupSessionUpdate},
 		},
 	))
 

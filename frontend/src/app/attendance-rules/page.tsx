@@ -12,7 +12,7 @@ import {
   MRT_DensityState,
   useMantineReactTable,
 } from "mantine-react-table";
-import { CoordinatingClassDataTableColumns } from "@/components/tabling";
+import { CoordinatingClassesDataTableColumns } from "@/components/tabling";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
 
@@ -54,7 +54,7 @@ function CoordinatingClassPicker({
   const router = useRouter();
 
   const table = useMantineReactTable({
-    columns: CoordinatingClassDataTableColumns,
+    columns: CoordinatingClassesDataTableColumns,
     data: coordinatingClasses,
     initialState: {
       density: "lg" as MRT_DensityState,

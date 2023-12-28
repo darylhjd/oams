@@ -17,14 +17,14 @@ import {
 } from "./data_sources";
 import { useEffect, useState } from "react";
 import {
-  ClassDataTableColumns,
-  ClassGroupDataTableColumns,
-  ClassGroupSessionDataTableColumns,
-  ClassGroupManagerDataTableColumns,
+  ClassesDataTableColumns,
+  ClassGroupsDataTableColumns,
+  ClassGroupSessionsDataTableColumns,
+  ClassGroupManagersDataTableColumns,
   SessionEnrollmentsDataTableColumns,
-  UserDataTableColumns,
+  UsersDataTableColumns,
   DEFAULT_PAGE_SIZE,
-  ClassAttendanceRuleDataTableColumns,
+  ClassAttendanceRulesDataTableColumns,
 } from "@/components/tabling";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
@@ -38,7 +38,7 @@ export function UsersTable() {
 
   return (
     <AsyncDataTable
-      columns={UserDataTableColumns}
+      columns={UsersDataTableColumns}
       dataSource={new UsersDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
         onClick: (_) => router.push(Routes.adminPanelUser + row.original.id),
@@ -53,7 +53,7 @@ export function ClassesTable() {
 
   return (
     <AsyncDataTable
-      columns={ClassDataTableColumns}
+      columns={ClassesDataTableColumns}
       dataSource={new ClassesDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
         onClick: (_) => router.push(Routes.adminPanelClass + row.original.id),
@@ -68,7 +68,7 @@ export function ClassAttendanceRulesTable() {
 
   return (
     <AsyncDataTable
-      columns={ClassAttendanceRuleDataTableColumns}
+      columns={ClassAttendanceRulesDataTableColumns}
       dataSource={new ClassAttendanceRulesDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
         onClick: (_) =>
@@ -84,7 +84,7 @@ export function ClassGroupsTable() {
 
   return (
     <AsyncDataTable
-      columns={ClassGroupDataTableColumns}
+      columns={ClassGroupsDataTableColumns}
       dataSource={new ClassGroupsDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
         onClick: (_) =>
@@ -98,7 +98,7 @@ export function ClassGroupsTable() {
 export function ClassGroupManagersTable() {
   return (
     <AsyncDataTable
-      columns={ClassGroupManagerDataTableColumns}
+      columns={ClassGroupManagersDataTableColumns}
       dataSource={new ClassGroupManagersDataSource()}
     />
   );
@@ -109,7 +109,7 @@ export function ClassGroupSessionsTable() {
 
   return (
     <AsyncDataTable
-      columns={ClassGroupSessionDataTableColumns}
+      columns={ClassGroupSessionsDataTableColumns}
       dataSource={new ClassGroupSessionsDataSource()}
       mantineTableBodyRowProps={({ row }) => ({
         onClick: (_) =>

@@ -22,16 +22,16 @@ import {
 } from "@mantine/core";
 import {
   AttendanceEntry,
-  AttendanceTakingGetResponse,
+  UpcomingClassGroupSessionGetResponse,
   UpcomingClassGroupSession,
-} from "@/api/attendance_taking";
+} from "@/api/upcoming_class_group_session";
 import {
   MantineReactTable,
   MRT_PaginationState,
   MRT_Row,
 } from "mantine-react-table";
 import {
-  AttendanceTakingDataTableColumns,
+  AttendanceEntriesDataTableColumns,
   DEFAULT_PAGE_SIZE,
 } from "@/components/tabling";
 import { IconHelp, IconX } from "@tabler/icons-react";
@@ -47,11 +47,12 @@ export default function SessionAttendanceTakingPage({
 }: {
   params: Params;
 }) {
-  const [attendance, setAttendance] = useState<AttendanceTakingGetResponse>(
-    {} as AttendanceTakingGetResponse,
-  );
+  const [attendance, setAttendance] =
+    useState<UpcomingClassGroupSessionGetResponse>(
+      {} as UpcomingClassGroupSessionGetResponse,
+    );
   const promiseFunc = async () => {
-    const data = await APIClient.attendanceTakingGet(params.id);
+    const data = await APIClient.upcomingClassGroupSessionGet(params.id);
     return setAttendance(data);
   };
 
@@ -142,7 +143,7 @@ function AttendanceTaker({
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const response = await APIClient.attendanceTakingGet(id);
+      const response = await APIClient.upcomingClassGroupSessionGet(id);
       setData(response.attendance_entries);
     }, UPDATE_INTERVAL_MS);
 
@@ -152,7 +153,7 @@ function AttendanceTaker({
   return (
     <Box className={styles.table}>
       <MantineReactTable
-        columns={AttendanceTakingDataTableColumns}
+        columns={AttendanceEntriesDataTableColumns}
         data={data}
         state={{ pagination: paginationState }}
         onPaginationChange={setPaginationState}
@@ -205,7 +206,7 @@ function SignAttendance({
           onSubmit={form.onSubmit(async (values) => {
             setLoading(true);
             try {
-              const resp = await APIClient.attendanceTakingPost(
+              const resp = await APIClient.upcomingClassGroupSessionPost(
                 id,
                 row.original.id,
                 row.original.user_id,

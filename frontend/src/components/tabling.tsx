@@ -15,7 +15,7 @@ import { SessionEnrollment } from "@/api/session_enrollment";
 import { User } from "@/api/user";
 import { MRT_Cell, MRT_ColumnDef } from "mantine-react-table";
 import { Badge } from "@mantine/core";
-import { AttendanceEntry } from "@/api/attendance_taking";
+import { AttendanceEntry } from "@/api/upcoming_class_group_session";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import { CoordinatingClass } from "@/api/coordinating_class";
 
@@ -26,21 +26,21 @@ const CreatedAtUpdatedAtDataTableColumns = [
   { accessorKey: "updated_at", header: "Updated At" },
 ];
 
-const userSharedColumns = [
+const usersSharedColumns = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "name", header: "Name" },
 ];
-export const UserBatchDataTableColumns: MRT_ColumnDef<UpsertUserParams>[] = [
-  ...userSharedColumns,
+export const UsersBatchDataTableColumns: MRT_ColumnDef<UpsertUserParams>[] = [
+  ...usersSharedColumns,
 ];
-export const UserDataTableColumns: MRT_ColumnDef<User>[] = [
-  ...userSharedColumns,
+export const UsersDataTableColumns: MRT_ColumnDef<User>[] = [
+  ...usersSharedColumns,
   { accessorKey: "email", header: "Email" },
   { accessorKey: "role", header: "Role" },
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
-const classSharedColumns = [
+const classesSharedColumns = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "code", header: "Code" },
   { accessorKey: "year", header: "Year" },
@@ -48,18 +48,17 @@ const classSharedColumns = [
   { accessorKey: "programme", header: "Programme" },
   { accessorKey: "au", header: "AU" },
 ];
-export const ClassBatchDataTableColumns: MRT_ColumnDef<UpsertClassParams>[] = [
-  ...classSharedColumns,
-];
-export const ClassDataTableColumns: MRT_ColumnDef<Class>[] = [
-  ...classSharedColumns,
+export const ClassesBatchDataTableColumns: MRT_ColumnDef<UpsertClassParams>[] =
+  [...classesSharedColumns];
+export const ClassesDataTableColumns: MRT_ColumnDef<Class>[] = [
+  ...classesSharedColumns,
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
-export const CoordinatingClassDataTableColumns: MRT_ColumnDef<CoordinatingClass>[] =
-  [...classSharedColumns.slice(1)];
+export const CoordinatingClassesDataTableColumns: MRT_ColumnDef<CoordinatingClass>[] =
+  [...classesSharedColumns.slice(1)];
 
-export const ClassAttendanceRuleDataTableColumns: MRT_ColumnDef<ClassAttendanceRule>[] =
+export const ClassAttendanceRulesDataTableColumns: MRT_ColumnDef<ClassAttendanceRule>[] =
   [
     { accessorKey: "id", header: "ID" },
     { accessorKey: "class_id", header: "Class ID" },
@@ -69,45 +68,45 @@ export const ClassAttendanceRuleDataTableColumns: MRT_ColumnDef<ClassAttendanceR
     ...CreatedAtUpdatedAtDataTableColumns,
   ];
 
-const classGroupSharedColumns = [
+const classGroupsSharedColumns = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "class_id", header: "Class ID" },
   { accessorKey: "name", header: "Name" },
   { accessorKey: "class_type", header: "Class Type" },
 ];
-export const ClassGroupBatchDataTableColumns: MRT_ColumnDef<UpsertClassGroupParams>[] =
-  [...classGroupSharedColumns];
-export const ClassGroupDataTableColumns: MRT_ColumnDef<ClassGroup>[] = [
-  ...classGroupSharedColumns,
+export const ClassGroupsBatchDataTableColumns: MRT_ColumnDef<UpsertClassGroupParams>[] =
+  [...classGroupsSharedColumns];
+export const ClassGroupsDataTableColumns: MRT_ColumnDef<ClassGroup>[] = [
+  ...classGroupsSharedColumns,
   ...CreatedAtUpdatedAtDataTableColumns,
 ];
 
-const classGroupManagerSharedColumns = [
+const classGroupManagersSharedColumns = [
   { accessorKey: "user_id", header: "User ID" },
   { accessorKey: "class_group_id", header: "Class Group ID" },
   { accessorKey: "managing_role", header: "Managing Role" },
 ];
-export const ClassGroupManagerDataTableColumns: MRT_ColumnDef<ClassGroupManager>[] =
+export const ClassGroupManagersDataTableColumns: MRT_ColumnDef<ClassGroupManager>[] =
   [
     { accessorKey: "id", header: "ID" },
-    ...classGroupManagerSharedColumns,
+    ...classGroupManagersSharedColumns,
     ...CreatedAtUpdatedAtDataTableColumns,
   ];
-export const ClassGroupManagerProcessingDataTableColumns: MRT_ColumnDef<UpsertClassGroupManagerParams>[] =
-  [...classGroupManagerSharedColumns];
+export const ClassGroupManagersProcessingDataTableColumns: MRT_ColumnDef<UpsertClassGroupManagerParams>[] =
+  [...classGroupManagersSharedColumns];
 
-const classGroupSessionSharedColumns = [
+const classGroupSessionsSharedColumns = [
   { accessorKey: "class_group_id", header: "Class Group ID" },
   { accessorKey: "start_time", header: "Start Time" },
   { accessorKey: "end_time", header: "End Time" },
   { accessorKey: "venue", header: "Venue" },
 ];
-export const ClassGroupSessionBatchDataTableColumns: MRT_ColumnDef<UpsertClassGroupSessionParams>[] =
-  [...classGroupSessionSharedColumns];
-export const ClassGroupSessionDataTableColumns: MRT_ColumnDef<ClassGroupSession>[] =
+export const ClassGroupSessionsBatchDataTableColumns: MRT_ColumnDef<UpsertClassGroupSessionParams>[] =
+  [...classGroupSessionsSharedColumns];
+export const ClassGroupSessionsDataTableColumns: MRT_ColumnDef<ClassGroupSession>[] =
   [
     { accessorKey: "id", header: "ID" },
-    ...classGroupSessionSharedColumns,
+    ...classGroupSessionsSharedColumns,
     ...CreatedAtUpdatedAtDataTableColumns,
   ];
 
@@ -133,7 +132,7 @@ export const SessionEnrollmentsDataTableColumns: MRT_ColumnDef<SessionEnrollment
     ...sessionEnrollmentsSharedColumns,
     ...CreatedAtUpdatedAtDataTableColumns,
   ];
-export const AttendanceTakingDataTableColumns: MRT_ColumnDef<AttendanceEntry>[] =
+export const AttendanceEntriesDataTableColumns: MRT_ColumnDef<AttendanceEntry>[] =
   [
     ...sessionEnrollmentsSharedColumns.slice(0, 1),
     { accessorKey: "user_name", header: "Name" },

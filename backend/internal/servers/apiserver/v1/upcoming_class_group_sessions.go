@@ -6,12 +6,12 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 )
 
-func (v *APIServerV1) attendanceTakings(w http.ResponseWriter, r *http.Request) {
+func (v *APIServerV1) upcomingClassGroupSessions(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
 	switch r.Method {
 	case http.MethodGet:
-		resp = v.attendanceTakingsGet(r)
+		resp = v.upcomingClassGroupSessionsGet(r)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -19,20 +19,20 @@ func (v *APIServerV1) attendanceTakings(w http.ResponseWriter, r *http.Request) 
 	v.writeResponse(w, r, resp)
 }
 
-type attendanceTakingsGetResponse struct {
+type upcomingClassGroupSessionsGetResponse struct {
 	response
 	UpcomingClassGroupSessions []database.UpcomingManagedClassGroupSession `json:"upcoming_class_group_sessions"`
 }
 
 // TODO: Implement tests for this endpoint.
-func (v *APIServerV1) attendanceTakingsGet(r *http.Request) apiResponse {
+func (v *APIServerV1) upcomingClassGroupSessionsGet(r *http.Request) apiResponse {
 	upcoming, err := v.db.GetUpcomingManagedClassGroupSessions(r.Context())
 	if err != nil {
 		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not get upcoming managed class group sessions")
+		return newErrorResponse(http.StatusInternalServerError, "could not get upcoming class group sessions")
 	}
 
-	return attendanceTakingsGetResponse{
+	return upcomingClassGroupSessionsGetResponse{
 		newSuccessResponse(),
 		append(
 			make([]database.UpcomingManagedClassGroupSession, 0, len(upcoming)),
