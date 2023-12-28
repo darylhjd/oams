@@ -1,10 +1,10 @@
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 
-export type AttendanceRulesGetResponse = {
+export type CoordinatingClassesGetResponse = {
   coordinating_classes: CoordinatingClass[];
 };
 
-export type AttendanceRuleGetResponse = {
+export type CoordinatingClassGetResponse = {
   coordinating_class: CoordinatingClass;
   rules: ClassAttendanceRule[];
 };

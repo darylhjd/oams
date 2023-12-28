@@ -17,7 +17,7 @@ import { MRT_Cell, MRT_ColumnDef } from "mantine-react-table";
 import { Badge } from "@mantine/core";
 import { AttendanceEntry } from "@/api/attendance_taking";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
-import { CoordinatingClass } from "@/api/attendance_rule";
+import { CoordinatingClass } from "@/api/coordinating_class";
 
 export const DEFAULT_PAGE_SIZE = 50;
 

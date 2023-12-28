@@ -11,10 +11,10 @@ import (
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-func (v *APIServerV1) attendanceRule(w http.ResponseWriter, r *http.Request) {
+func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	classId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, attendanceRuleUrl), 10, 64)
+	classId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, coordinatingClassUrl), 10, 64)
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
 		return
@@ -22,7 +22,7 @@ func (v *APIServerV1) attendanceRule(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		resp = v.attendanceRuleGet(r, classId)
+		resp = v.coordinatingClassGet(r, classId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -30,22 +30,22 @@ func (v *APIServerV1) attendanceRule(w http.ResponseWriter, r *http.Request) {
 	v.writeResponse(w, r, resp)
 }
 
-type attendanceRuleGetResponse struct {
+type coordinatingClassGetResponse struct {
 	response
 	CoordinatingClass database.CoordinatingClass  `json:"coordinating_class"`
 	Rules             []model.ClassAttendanceRule `json:"rules"`
 }
 
 // TODO: Implement tests for this endpoint.
-func (v *APIServerV1) attendanceRuleGet(r *http.Request, id int64) apiResponse {
+func (v *APIServerV1) coordinatingClassGet(r *http.Request, id int64) apiResponse {
 	class, err := v.db.GetCoordinatingClass(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
-			return newErrorResponse(http.StatusNotFound, "the request coordinating class does not exist")
+			return newErrorResponse(http.StatusNotFound, "the requested coordinating class does not exist")
 		}
 
 		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process attendance rule get database action")
+		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class get database action")
 	}
 
 	rules, err := v.db.GetCoordinatingClassRules(r.Context(), id)
@@ -54,7 +54,7 @@ func (v *APIServerV1) attendanceRuleGet(r *http.Request, id int64) apiResponse {
 		return newErrorResponse(http.StatusInternalServerError, "could not get coordinating class rules")
 	}
 
-	return attendanceRuleGetResponse{
+	return coordinatingClassGetResponse{
 		newSuccessResponse(),
 		class,
 		append(make([]model.ClassAttendanceRule, 0, len(rules)), rules...),

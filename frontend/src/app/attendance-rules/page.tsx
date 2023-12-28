@@ -4,7 +4,7 @@ import styles from "@/styles/AttendanceRules.module.css";
 
 import { Container, Space, Text, Title } from "@mantine/core";
 import { useState } from "react";
-import { CoordinatingClass } from "@/api/attendance_rule";
+import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
 import {
@@ -21,7 +21,7 @@ export default function AttendanceRulesPage() {
     CoordinatingClass[]
   >([]);
   const promiseFunc = async () => {
-    const data = await APIClient.attendanceRulesGet();
+    const data = await APIClient.coordinatingClassesGet();
     return setCoordinatingClasses(data.coordinating_classes);
   };
 

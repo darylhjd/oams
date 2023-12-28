@@ -27,9 +27,9 @@ import {
 import { SessionResponse } from "@/api/session";
 import { ClassAttendanceRulesGetResponse } from "@/api/class_attendance_rule";
 import {
-  AttendanceRuleGetResponse,
-  AttendanceRulesGetResponse,
-} from "@/api/attendance_rule";
+  CoordinatingClassGetResponse,
+  CoordinatingClassesGetResponse,
+} from "@/api/coordinating_class";
 
 export class APIClient {
   static readonly _sessionPath = "/session";
@@ -49,8 +49,8 @@ export class APIClient {
   static readonly _sessionEnrollmentPath = "/session-enrollments/";
   static readonly _attendanceTakingsPath = "/attendance-taking";
   static readonly _attendanceTakingPath = "/attendance-taking/";
-  static readonly _attendanceRulesPath = "/attendance-rules";
-  static readonly _attendanceRulePath = "/attendance-rules/";
+  static readonly _coordinatingClassesPath = "/coordinating-classes";
+  static readonly _coordinatingClassPath = "/coordinating-classes/";
 
   static readonly _supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -322,18 +322,18 @@ export class APIClient {
     return data;
   }
 
-  static async attendanceRulesGet(): Promise<AttendanceRulesGetResponse> {
-    const { data } = await this._client.get<AttendanceRulesGetResponse>(
-      this._attendanceRulesPath,
+  static async coordinatingClassesGet(): Promise<CoordinatingClassesGetResponse> {
+    const { data } = await this._client.get<CoordinatingClassesGetResponse>(
+      this._coordinatingClassesPath,
     );
     return data;
   }
 
-  static async attendanceRuleGet(
+  static async coordinatingClassGet(
     id: number,
-  ): Promise<AttendanceRuleGetResponse> {
-    const { data } = await this._client.get<AttendanceRuleGetResponse>(
-      this._attendanceRulePath + id,
+  ): Promise<CoordinatingClassGetResponse> {
+    const { data } = await this._client.get<CoordinatingClassGetResponse>(
+      this._coordinatingClassPath + id,
     );
     return data;
   }
