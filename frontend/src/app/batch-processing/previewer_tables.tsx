@@ -6,10 +6,10 @@ import {
   UpsertClassParams,
 } from "@/api/batch";
 import {
-  ClassBatchDataTableColumns,
-  ClassGroupBatchDataTableColumns,
-  ClassGroupSessionBatchDataTableColumns,
-  UserBatchDataTableColumns,
+  ClassesBatchDataTableColumns,
+  ClassGroupsBatchDataTableColumns,
+  ClassGroupSessionsBatchDataTableColumns,
+  UsersBatchDataTableColumns,
 } from "@/components/tabling";
 import { useBatchDataStore } from "@/stores/batch_processing";
 import {
@@ -28,7 +28,7 @@ export function UsersPreviewTable() {
     .map((classGroup) => classGroup.students)
     .flat();
 
-  return <PreviewerTable columns={UserBatchDataTableColumns} data={rows} />;
+  return <PreviewerTable columns={UsersBatchDataTableColumns} data={rows} />;
 }
 
 export function ClassesPreviewTable() {
@@ -43,7 +43,7 @@ export function ClassesPreviewTable() {
     au: batch.class.au,
   }));
 
-  return <PreviewerTable columns={ClassBatchDataTableColumns} data={rows} />;
+  return <PreviewerTable columns={ClassesBatchDataTableColumns} data={rows} />;
 }
 
 export function ClassGroupsPreviewTable() {
@@ -60,7 +60,7 @@ export function ClassGroupsPreviewTable() {
     }));
 
   return (
-    <PreviewerTable columns={ClassGroupBatchDataTableColumns} data={rows} />
+    <PreviewerTable columns={ClassGroupsBatchDataTableColumns} data={rows} />
   );
 }
 
@@ -82,7 +82,7 @@ export function ClassGroupSessionsPreviewTable() {
 
   return (
     <PreviewerTable
-      columns={ClassGroupSessionBatchDataTableColumns}
+      columns={ClassGroupSessionsBatchDataTableColumns}
       data={rows}
     />
   );

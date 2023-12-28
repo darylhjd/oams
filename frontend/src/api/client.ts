@@ -20,16 +20,16 @@ import {
   SessionEnrollmentsGetResponse,
 } from "./session_enrollment";
 import {
-  AttendanceTakingGetResponse,
-  AttendanceTakingGetsResponse,
-  AttendanceTakingPostResponse,
-} from "./attendance_taking";
+  UpcomingClassGroupSessionGetResponse,
+  UpcomingClassGroupSessionsGetResponse,
+  UpcomingClassGroupSessionPostResponse,
+} from "./upcoming_class_group_session";
 import { SessionResponse } from "@/api/session";
 import { ClassAttendanceRulesGetResponse } from "@/api/class_attendance_rule";
 import {
-  AttendanceRuleGetResponse,
-  AttendanceRulesGetResponse,
-} from "@/api/attendance_rule";
+  CoordinatingClassGetResponse,
+  CoordinatingClassesGetResponse,
+} from "@/api/coordinating_class";
 
 export class APIClient {
   static readonly _sessionPath = "/session";
@@ -47,10 +47,12 @@ export class APIClient {
   static readonly _classGroupSessionPath = "/class-group-sessions/";
   static readonly _sessionEnrollmentsPath = "/session-enrollments";
   static readonly _sessionEnrollmentPath = "/session-enrollments/";
-  static readonly _attendanceTakingsPath = "/attendance-taking";
-  static readonly _attendanceTakingPath = "/attendance-taking/";
-  static readonly _attendanceRulesPath = "/attendance-rules";
-  static readonly _attendanceRulePath = "/attendance-rules/";
+  static readonly _upcomingClassGroupSessionsPath =
+    "/upcoming-class-group-sessions";
+  static readonly _upcomingClassGroupSessionPath =
+    "/upcoming-class-group-sessions/";
+  static readonly _coordinatingClassesPath = "/coordinating-classes";
+  static readonly _coordinatingClassPath = "/coordinating-classes/";
 
   static readonly _supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -287,53 +289,56 @@ export class APIClient {
     return data;
   }
 
-  static async attendanceTakingsGet(): Promise<AttendanceTakingGetsResponse> {
-    const { data } = await this._client.get<AttendanceTakingGetsResponse>(
-      this._attendanceTakingsPath,
-    );
+  static async upcomingClassGroupSessionsGet(): Promise<UpcomingClassGroupSessionsGetResponse> {
+    const { data } =
+      await this._client.get<UpcomingClassGroupSessionsGetResponse>(
+        this._upcomingClassGroupSessionsPath,
+      );
     return data;
   }
 
-  static async attendanceTakingGet(
+  static async upcomingClassGroupSessionGet(
     id: number,
-  ): Promise<AttendanceTakingGetResponse> {
-    const { data } = await this._client.get<AttendanceTakingGetResponse>(
-      this._attendanceTakingPath + id,
-    );
+  ): Promise<UpcomingClassGroupSessionGetResponse> {
+    const { data } =
+      await this._client.get<UpcomingClassGroupSessionGetResponse>(
+        this._upcomingClassGroupSessionPath + id,
+      );
     return data;
   }
 
-  static async attendanceTakingPost(
+  static async upcomingClassGroupSessionPost(
     id: number,
     sessionEnrollmentId: number,
     userId: string,
     attended: boolean,
     userSignature: string,
-  ): Promise<AttendanceTakingPostResponse> {
-    const { data } = await this._client.post<AttendanceTakingPostResponse>(
-      this._attendanceTakingPath + id,
-      {
-        id: sessionEnrollmentId,
-        user_id: userId,
-        attended: attended,
-        user_signature: userSignature,
-      },
+  ): Promise<UpcomingClassGroupSessionPostResponse> {
+    const { data } =
+      await this._client.post<UpcomingClassGroupSessionPostResponse>(
+        this._upcomingClassGroupSessionPath + id,
+        {
+          id: sessionEnrollmentId,
+          user_id: userId,
+          attended: attended,
+          user_signature: userSignature,
+        },
+      );
+    return data;
+  }
+
+  static async coordinatingClassesGet(): Promise<CoordinatingClassesGetResponse> {
+    const { data } = await this._client.get<CoordinatingClassesGetResponse>(
+      this._coordinatingClassesPath,
     );
     return data;
   }
 
-  static async attendanceRulesGet(): Promise<AttendanceRulesGetResponse> {
-    const { data } = await this._client.get<AttendanceRulesGetResponse>(
-      this._attendanceRulesPath,
-    );
-    return data;
-  }
-
-  static async attendanceRuleGet(
+  static async coordinatingClassGet(
     id: number,
-  ): Promise<AttendanceRuleGetResponse> {
-    const { data } = await this._client.get<AttendanceRuleGetResponse>(
-      this._attendanceRulePath + id,
+  ): Promise<CoordinatingClassGetResponse> {
+    const { data } = await this._client.get<CoordinatingClassGetResponse>(
+      this._coordinatingClassPath + id,
     );
     return data;
   }

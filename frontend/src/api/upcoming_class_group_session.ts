@@ -14,11 +14,11 @@ export type UpcomingClassGroupSession = {
   managing_role: ManagingRole | null;
 };
 
-export type AttendanceTakingGetsResponse = {
+export type UpcomingClassGroupSessionsGetResponse = {
   upcoming_class_group_sessions: UpcomingClassGroupSession[];
 };
 
-export type AttendanceTakingGetResponse = {
+export type UpcomingClassGroupSessionGetResponse = {
   upcoming_class_group_session: UpcomingClassGroupSession;
   attendance_entries: AttendanceEntry[];
 };
@@ -31,6 +31,6 @@ export type AttendanceEntry = {
   attended: boolean;
 };
 
-export type AttendanceTakingPostResponse = {
+export type UpcomingClassGroupSessionPostResponse = {
   attended: boolean;
 };

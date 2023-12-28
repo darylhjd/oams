@@ -1,4 +1,4 @@
-import { UpcomingClassGroupSession } from "@/api/attendance_taking";
+import { UpcomingClassGroupSession } from "@/api/upcoming_class_group_session";
 import { useRouter } from "next/navigation";
 import { Paper, Space, Text } from "@mantine/core";
 import styles from "@/styles/AttendanceTakingPage.module.css";

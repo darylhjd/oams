@@ -4,7 +4,7 @@ import styles from "@/styles/AttendanceRules.module.css";
 
 import { Container, Space, Text, Title } from "@mantine/core";
 import { useState } from "react";
-import { CoordinatingClass } from "@/api/attendance_rule";
+import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
 import {
@@ -12,7 +12,7 @@ import {
   MRT_DensityState,
   useMantineReactTable,
 } from "mantine-react-table";
-import { CoordinatingClassDataTableColumns } from "@/components/tabling";
+import { CoordinatingClassesDataTableColumns } from "@/components/tabling";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
 
@@ -21,7 +21,7 @@ export default function AttendanceRulesPage() {
     CoordinatingClass[]
   >([]);
   const promiseFunc = async () => {
-    const data = await APIClient.attendanceRulesGet();
+    const data = await APIClient.coordinatingClassesGet();
     return setCoordinatingClasses(data.coordinating_classes);
   };
 
@@ -54,7 +54,7 @@ function CoordinatingClassPicker({
   const router = useRouter();
 
   const table = useMantineReactTable({
-    columns: CoordinatingClassDataTableColumns,
+    columns: CoordinatingClassesDataTableColumns,
     data: coordinatingClasses,
     initialState: {
       density: "lg" as MRT_DensityState,

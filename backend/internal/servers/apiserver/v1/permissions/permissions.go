@@ -27,10 +27,10 @@ const (
 
 	SessionEnrollmentRead
 
-	AttendanceTakingRead
-	AttendanceTakingUpdate
+	UpcomingClassGroupSessionRead
+	UpcomingClassGroupSessionUpdate
 
-	AttendanceRuleRead
+	CoordinatingClassRead
 )
 
 type permissionMap map[P]struct{}
@@ -54,10 +54,10 @@ var userRolePermissions = permissionMap{
 
 	SessionEnrollmentRead: {},
 
-	AttendanceTakingRead:   {},
-	AttendanceTakingUpdate: {},
+	UpcomingClassGroupSessionRead:   {},
+	UpcomingClassGroupSessionUpdate: {},
 
-	AttendanceRuleRead: {},
+	CoordinatingClassRead: {},
 }
 
 var systemAdminRolePermissions = permissionMap{
@@ -83,8 +83,8 @@ var systemAdminRolePermissions = permissionMap{
 
 	SessionEnrollmentRead: {},
 
-	AttendanceTakingRead:   {},
-	AttendanceTakingUpdate: {},
+	UpcomingClassGroupSessionRead:   {},
+	UpcomingClassGroupSessionUpdate: {},
 
-	AttendanceRuleRead: {},
+	CoordinatingClassRead: {},
 }

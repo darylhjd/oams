@@ -11,10 +11,10 @@ import (
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-func (v *APIServerV1) attendanceTaking(w http.ResponseWriter, r *http.Request) {
+func (v *APIServerV1) upcomingClassGroupSession(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	classGroupSessionId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, attendanceTakingUrl), 10, 64)
+	classGroupSessionId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, upcomingClassGroupSessionUrl), 10, 64)
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group session id"))
 		return
@@ -22,9 +22,9 @@ func (v *APIServerV1) attendanceTaking(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		resp = v.attendanceTakingGet(r, classGroupSessionId)
+		resp = v.upcomingClassGroupSessionGet(r, classGroupSessionId)
 	case http.MethodPost:
-		resp = v.attendanceTakingPost(r, classGroupSessionId)
+		resp = v.upcomingClassGroupSessionPost(r, classGroupSessionId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -32,14 +32,14 @@ func (v *APIServerV1) attendanceTaking(w http.ResponseWriter, r *http.Request) {
 	v.writeResponse(w, r, resp)
 }
 
-type attendanceTakingGetResponse struct {
+type upcomingClassGroupSessionGetResponse struct {
 	response
 	UpcomingClassGroupSession database.UpcomingManagedClassGroupSession `json:"upcoming_class_group_session"`
 	AttendanceEntries         []database.AttendanceEntry                `json:"attendance_entries"`
 }
 
 // TODO: Implement tests for this endpoint.
-func (v *APIServerV1) attendanceTakingGet(r *http.Request, id int64) apiResponse {
+func (v *APIServerV1) upcomingClassGroupSessionGet(r *http.Request, id int64) apiResponse {
 	upcoming, err := v.db.GetUpcomingManagedClassGroupSession(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
@@ -47,7 +47,7 @@ func (v *APIServerV1) attendanceTakingGet(r *http.Request, id int64) apiResponse
 		}
 
 		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process attendance taking get database action")
+		return newErrorResponse(http.StatusInternalServerError, "could not process upcoming class group session get database action")
 	}
 
 	entries, err := v.db.GetUpcomingClassGroupAttendanceEntries(r.Context(), upcoming.ID)
@@ -56,7 +56,7 @@ func (v *APIServerV1) attendanceTakingGet(r *http.Request, id int64) apiResponse
 		return newErrorResponse(http.StatusInternalServerError, "could not get upcoming class group session attendance entries")
 	}
 
-	return attendanceTakingGetResponse{
+	return upcomingClassGroupSessionGetResponse{
 		newSuccessResponse(),
 		upcoming,
 		append(
@@ -66,21 +66,21 @@ func (v *APIServerV1) attendanceTakingGet(r *http.Request, id int64) apiResponse
 	}
 }
 
-type attendanceTakingPostRequest struct {
+type upcomingClassGroupSessionPostRequest struct {
 	ID            int64  `json:"id"`
 	UserID        string `json:"user_id"`
 	Attended      bool   `json:"attended"`
 	UserSignature string `json:"user_signature"`
 }
 
-type attendanceTakingPostResponse struct {
+type upcomingClassGroupSessionPostResponse struct {
 	response
 	Attended bool `json:"attended"`
 }
 
 // TODO: Implement tests for this endpoint.
-func (v *APIServerV1) attendanceTakingPost(r *http.Request, id int64) apiResponse {
-	var req attendanceTakingPostRequest
+func (v *APIServerV1) upcomingClassGroupSessionPost(r *http.Request, id int64) apiResponse {
+	var req upcomingClassGroupSessionPostRequest
 	if err := v.parseRequestBody(r.Body, &req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
@@ -101,7 +101,7 @@ func (v *APIServerV1) attendanceTakingPost(r *http.Request, id int64) apiRespons
 		return newErrorResponse(http.StatusInternalServerError, "could not update attendance")
 	}
 
-	return attendanceTakingPostResponse{
+	return upcomingClassGroupSessionPostResponse{
 		newSuccessResponse(),
 		req.Attended,
 	}
