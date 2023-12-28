@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "@/styles/AttendanceRules.module.css";
+import styles from "@/styles/AttendanceRulesPage.module.css";
 
 import { Container, Space, Text, Title } from "@mantine/core";
 import { useState } from "react";
