@@ -1,0 +1,16 @@
+.container {
+  padding-top: rem(30px);
+}
+
+.noRulesText {
+  padding-top: rem(100px);
+}
+
+.accordion {
+  max-width: rem(1000px);
+  margin: 0 auto;
+}
+
+.divider {
+  padding-bottom: rem(15px);
+}
