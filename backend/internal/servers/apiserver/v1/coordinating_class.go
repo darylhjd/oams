@@ -88,13 +88,15 @@ func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiRespon
 		Rule:        req.Rule,
 	})
 	if err != nil {
-		if errors.Is(err, qrm.ErrNoRows) {
+		switch {
+		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusBadRequest, "not allowed to create new rule")
+		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
+			return newErrorResponse(http.StatusConflict, "rule with same title already exists")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class post database action")
 		}
-
-		// TODO: Add validation for unique constraints.
-		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class post database action")
 	}
 
 	return coordinatingClassPostResponse{

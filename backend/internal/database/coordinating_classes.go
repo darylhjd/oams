@@ -84,12 +84,12 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 		).WHERE(
 			EXISTS(
 				SELECT(
-					ClassAttendanceRules.AllColumns,
+					Classes.AllColumns,
 				).FROM(
-					ClassAttendanceRules,
+					Classes,
 				).WHERE(
-					ClassAttendanceRules.ClassID.EQ(Int64(arg.ClassID)).AND(
-						classAttendanceRuleRLS(ctx),
+					Classes.ID.EQ(Int64(arg.ClassID)).AND(
+						coordinatingClassRLS(ctx),
 					),
 				),
 			),
