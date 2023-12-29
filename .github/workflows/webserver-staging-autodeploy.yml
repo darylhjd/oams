@@ -1,4 +1,4 @@
-name: Trigger auto deployment for oams-webserver-staging
+name: Deployment for oams-webserver-staging
 
 # When this action will be executed
 on:
