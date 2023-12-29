@@ -5,7 +5,7 @@ on:
   # Automatically trigger it when detected changes in repo
   push:
     branches: 
-      [ workflows ]
+      [ main ]
     paths:
     - 'frontend/**'
     - '.github/workflows/webserver-staging-autodeploy.yml'
