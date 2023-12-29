@@ -1,4 +1,4 @@
-name: Trigger auto deployment for oams-apiserver-staging
+name: Auto deployment for oams-apiserver-staging
 
 # When this action will be executed
 on:
@@ -35,5 +35,5 @@ jobs:
           registryPassword: ${{ secrets.OAMSAPISERVERSTAGING_REGISTRY_PASSWORD }}
           containerAppName: oams-apiserver-staging
           resourceGroup: oams-staging
-          imageToBuild: oamsstaging.azurecr.io/apiserver:${{ github.sha }}
+          imageToBuild: oamsstaging.azurecr.io/oams-apiserver-staging:${{ github.sha }}
           dockerfilePath: cmd/apiserver/Dockerfile
