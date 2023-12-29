@@ -7,8 +7,7 @@ FROM node:lts-alpine3.18 as builder
 WORKDIR /app
 COPY . ./
 
-RUN --mount=type=secret,id=env cat /run/secrets/env > /app/.env.production  \
-    && npx next telemetry disable  \
+RUN npx next telemetry disable  \
     && npm install  \
     && npm run build
 

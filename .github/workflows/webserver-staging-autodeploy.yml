@@ -1,0 +1,49 @@
+name: Deployment for oams-webserver-staging
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - 'frontend/**'
+    - '.github/workflows/webserver-staging-autodeploy.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.OAMSWEBSERVERSTAGING_AZURE_CREDENTIALS }}
+
+      - name: Create environment file
+        run: |
+          cd frontend
+          touch .env.production
+          echo AZURE_LOGIN_SCOPE=${{ secrets.OAMSWEBSERVERSTAGING_AZURE_LOGIN_SCOPE }} >> .env.production
+          echo SUPABASE_URL=${{ secrets.OAMSWEBSERVERSTAGING_SUPABASE_URL }} >> .env.production
+          echo SUPABASE_KEY=${{ secrets.OAMSWEBSERVERSTAGING_SUPABASE_KEY }} >> .env.production
+          echo API_SERVER=${{ secrets.OAMSWEBSERVERSTAGING_API_SERVER }} >> .env.production
+          echo WEB_SERVER=${{ secrets.OAMSWEBSERVERSTAGING_WEB_SERVER }} >> .env.production
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}/frontend
+          registryUrl: oamsstaging.azurecr.io
+          registryUsername: ${{ secrets.OAMSWEBSERVERSTAGING_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.OAMSWEBSERVERSTAGING_REGISTRY_PASSWORD }}
+          containerAppName: oams-webserver-staging
+          resourceGroup: oams-staging
+          imageToBuild: oamsstaging.azurecr.io/oams-webserver-staging:${{ github.sha }}
+          dockerfilePath: ../backend/cmd/webserver/Dockerfile

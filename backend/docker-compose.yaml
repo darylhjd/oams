@@ -25,8 +25,6 @@ services:
     build:
       context: ../frontend
       dockerfile: ../backend/cmd/webserver/Dockerfile
-      secrets:
-        - env
     ports:
       - "3000:3000"
     network_mode: bridge
@@ -57,5 +55,3 @@ volumes:
 secrets:
   ssh_key:
     file: ~/.ssh/id_rsa
-  env:
-    file: ../frontend/.env.development
