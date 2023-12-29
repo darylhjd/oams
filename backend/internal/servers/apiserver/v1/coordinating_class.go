@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -64,12 +65,40 @@ func (v *APIServerV1) coordinatingClassGet(r *http.Request, id int64) apiRespons
 }
 
 type coordinatingClassPostRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Rule        string `json:"rule"`
 }
 
 type coordinatingClassPostResponse struct {
 	response
+	Rule model.ClassAttendanceRule `json:"rule"`
 }
 
 func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiResponse {
-	return newErrorResponse(http.StatusNotImplemented, "")
+	var req coordinatingClassPostRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
+	}
+
+	rule, err := v.db.CreateNewCoordinatingClassRule(r.Context(), database.CreateNewCoordinatingClassRuleParams{
+		ClassID:     id,
+		Title:       req.Title,
+		Description: req.Description,
+		Rule:        req.Rule,
+	})
+	if err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return newErrorResponse(http.StatusBadRequest, "not allowed to create new rule")
+		}
+
+		// TODO: Add validation for unique constraints.
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class post database action")
+	}
+
+	return coordinatingClassPostResponse{
+		newSuccessResponse(),
+		rule,
+	}
 }

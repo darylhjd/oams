@@ -21,33 +21,35 @@ import {
   Title,
 } from "@mantine/core";
 import { Params } from "@/app/attendance-rules/[id]/layout";
-import { useState } from "react";
-import {
-  CoordinatingClass,
-  CoordinatingClassGetResponse,
-} from "@/api/coordinating_class";
+import { Dispatch, SetStateAction, useState } from "react";
+import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
+import { IconX } from "@tabler/icons-react";
+import { getError } from "@/api/error";
 
 export default function AttendanceRulePage({ params }: { params: Params }) {
-  const [data, setData] = useState<CoordinatingClassGetResponse>(
-    {} as CoordinatingClassGetResponse,
+  const [coordinatingClass, setCoordinatingClass] = useState<CoordinatingClass>(
+    {} as CoordinatingClass,
   );
+  const [rules, setRules] = useState<ClassAttendanceRule[]>([]);
   const promiseFunc = async () => {
     const data = await APIClient.coordinatingClassGet(params.id);
-    return setData(data);
+    setCoordinatingClass(data.coordinating_class);
+    return setRules(data.rules);
   };
 
   return (
     <RequestLoader promiseFunc={promiseFunc}>
       <Container className={styles.container} fluid>
-        <CoordinatingClassDetails coordinatingClass={data.coordinating_class} />
+        <CoordinatingClassDetails coordinatingClass={coordinatingClass} />
         <Divider my="md" />
-        <CreateRuleButton />
-        <RuleDisplay rules={data.rules} />
+        <CreateRuleButton id={params.id} rules={rules} setRules={setRules} />
+        <RuleDisplay rules={rules} />
       </Container>
     </RequestLoader>
   );
@@ -69,7 +71,15 @@ function CoordinatingClassDetails({
   );
 }
 
-function CreateRuleButton() {
+function CreateRuleButton({
+  id,
+  rules,
+  setRules,
+}: {
+  id: number;
+  rules: ClassAttendanceRule[];
+  setRules: Dispatch<SetStateAction<ClassAttendanceRule[]>>;
+}) {
   const [loading, setLoading] = useState(false);
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -103,8 +113,25 @@ function CreateRuleButton() {
         <form
           onSubmit={form.onSubmit(async (values) => {
             setLoading(true);
-            console.log(values);
-            await new Promise((f) => setTimeout(f, 1000));
+            try {
+              const resp = await APIClient.coordinatingClassPost(
+                id,
+                values.title,
+                values.description,
+                values.rule,
+              );
+              close();
+              form.reset();
+              rules.push(resp.rule);
+              setRules([...rules]);
+            } catch (e) {
+              notifications.show({
+                title: "Rule Validation Failed",
+                message: getError(e),
+                icon: <IconX />,
+                color: "red",
+              });
+            }
             setLoading(false);
           })}
         >
