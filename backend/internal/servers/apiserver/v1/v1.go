@@ -217,7 +217,8 @@ func (v *APIServerV1) registerHandlers() {
 		v.coordinatingClass,
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet: {permissions.CoordinatingClassRead},
+			http.MethodGet:  {permissions.CoordinatingClassRead},
+			http.MethodPost: {permissions.CoordinatingClassUpdate},
 		},
 	))
 }

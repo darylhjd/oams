@@ -31,6 +31,7 @@ const (
 	UpcomingClassGroupSessionUpdate
 
 	CoordinatingClassRead
+	CoordinatingClassUpdate
 )
 
 type permissionMap map[P]struct{}
@@ -57,7 +58,8 @@ var userRolePermissions = permissionMap{
 	UpcomingClassGroupSessionRead:   {},
 	UpcomingClassGroupSessionUpdate: {},
 
-	CoordinatingClassRead: {},
+	CoordinatingClassRead:   {},
+	CoordinatingClassUpdate: {},
 }
 
 var systemAdminRolePermissions = permissionMap{
@@ -86,5 +88,6 @@ var systemAdminRolePermissions = permissionMap{
 	UpcomingClassGroupSessionRead:   {},
 	UpcomingClassGroupSessionUpdate: {},
 
-	CoordinatingClassRead: {},
+	CoordinatingClassRead:   {},
+	CoordinatingClassUpdate: {},
 }

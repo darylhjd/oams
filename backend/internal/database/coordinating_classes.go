@@ -52,6 +52,50 @@ func (d *DB) GetCoordinatingClassRules(ctx context.Context, id int64) ([]model.C
 		ClassAttendanceRules.ClassID.EQ(Int64(id)).AND(
 			classAttendanceRuleRLS(ctx),
 		),
+	).ORDER_BY(
+		ClassAttendanceRules.CreatedAt,
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
+type CreateNewCoordinatingClassRuleParams struct {
+	ClassID     int64
+	Title       string
+	Description string
+	Rule        string
+}
+
+func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCoordinatingClassRuleParams) (model.ClassAttendanceRule, error) {
+	var res model.ClassAttendanceRule
+
+	stmt := ClassAttendanceRules.INSERT(
+		ClassAttendanceRules.ClassID,
+		ClassAttendanceRules.Title,
+		ClassAttendanceRules.Description,
+		ClassAttendanceRules.Rule,
+	).QUERY(
+		SELECT(
+			Int64(arg.ClassID),
+			String(arg.Title),
+			String(arg.Description),
+			String(arg.Rule),
+		).WHERE(
+			EXISTS(
+				SELECT(
+					ClassAttendanceRules.AllColumns,
+				).FROM(
+					ClassAttendanceRules,
+				).WHERE(
+					ClassAttendanceRules.ClassID.EQ(Int64(arg.ClassID)).AND(
+						classAttendanceRuleRLS(ctx),
+					),
+				),
+			),
+		),
+	).RETURNING(
+		ClassAttendanceRules.AllColumns,
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)

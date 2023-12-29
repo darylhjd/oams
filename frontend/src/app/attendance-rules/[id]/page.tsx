@@ -7,37 +7,49 @@ import {
   AccordionControl,
   AccordionItem,
   AccordionPanel,
+  Button,
+  Center,
   Container,
   Divider,
+  FocusTrap,
+  Group,
+  Modal,
   Space,
   Text,
+  Textarea,
+  TextInput,
   Title,
 } from "@mantine/core";
 import { Params } from "@/app/attendance-rules/[id]/layout";
-import { useState } from "react";
-import {
-  CoordinatingClass,
-  CoordinatingClassGetResponse,
-} from "@/api/coordinating_class";
+import { Dispatch, SetStateAction, useState } from "react";
+import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
+import { useDisclosure } from "@mantine/hooks";
+import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
+import { IconX } from "@tabler/icons-react";
+import { getError } from "@/api/error";
 
 export default function AttendanceRulePage({ params }: { params: Params }) {
-  const [data, setData] = useState<CoordinatingClassGetResponse>(
-    {} as CoordinatingClassGetResponse,
+  const [coordinatingClass, setCoordinatingClass] = useState<CoordinatingClass>(
+    {} as CoordinatingClass,
   );
+  const [rules, setRules] = useState<ClassAttendanceRule[]>([]);
   const promiseFunc = async () => {
     const data = await APIClient.coordinatingClassGet(params.id);
-    return setData(data);
+    setCoordinatingClass(data.coordinating_class);
+    return setRules(data.rules);
   };
 
   return (
     <RequestLoader promiseFunc={promiseFunc}>
       <Container className={styles.container} fluid>
-        <CoordinatingClassDetails coordinatingClass={data.coordinating_class} />
+        <CoordinatingClassDetails coordinatingClass={coordinatingClass} />
         <Divider my="md" />
-        <RuleDisplay rules={data.rules} />
+        <CreateRuleButton id={params.id} rules={rules} setRules={setRules} />
+        <RuleDisplay rules={rules} />
       </Container>
     </RequestLoader>
   );
@@ -56,6 +68,114 @@ function CoordinatingClassDetails({
       </Text>{" "}
       - Attendance Rules
     </Title>
+  );
+}
+
+function CreateRuleButton({
+  id,
+  rules,
+  setRules,
+}: {
+  id: number;
+  rules: ClassAttendanceRule[];
+  setRules: Dispatch<SetStateAction<ClassAttendanceRule[]>>;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const [opened, { open, close }] = useDisclosure(false);
+  const form = useForm({
+    initialValues: {
+      title: "",
+      description: "",
+      rule: "",
+    },
+    validate: {
+      title: (value) => (value.length == 0 ? "Title cannot be empty" : null),
+      description: (value) =>
+        value.length == 0 ? "Description cannot be empty" : null,
+      rule: (value) => (value.length == 0 ? "Rule cannot be empty" : null),
+    },
+  });
+
+  return (
+    <>
+      <Modal
+        opened={opened}
+        onClose={close}
+        centered
+        title="Create New Rule"
+        size="lg"
+        overlayProps={{
+          backgroundOpacity: 0.55,
+          blur: 3,
+        }}
+      >
+        <form
+          onSubmit={form.onSubmit(async (values) => {
+            setLoading(true);
+            try {
+              const resp = await APIClient.coordinatingClassPost(
+                id,
+                values.title,
+                values.description,
+                values.rule,
+              );
+              close();
+              form.reset();
+              rules.push(resp.rule);
+              setRules([...rules]);
+            } catch (e) {
+              notifications.show({
+                title: "Rule Validation Failed",
+                message: getError(e),
+                icon: <IconX />,
+                color: "red",
+              });
+            }
+            setLoading(false);
+          })}
+        >
+          <FocusTrap active>
+            <TextInput
+              label="Title"
+              {...form.getInputProps("title")}
+              disabled={loading}
+              data-autofocus
+            />
+            <Textarea
+              label="Description"
+              disabled={loading}
+              {...form.getInputProps("description")}
+            />
+            <Textarea
+              label="Rule"
+              disabled={loading}
+              {...form.getInputProps("rule")}
+              autosize
+              minRows={6}
+              maxRows={15}
+            />
+          </FocusTrap>
+          <Space h="sm" />
+          <Group justify="center">
+            <Button
+              onClick={form.reset}
+              color="red"
+              variant="light"
+              disabled={loading}
+            >
+              Reset
+            </Button>
+            <Button type="submit" color="green" loading={loading}>
+              Create
+            </Button>
+          </Group>
+        </form>
+      </Modal>
+      <Center className={styles.createRuleButton}>
+        <Button onClick={open}>Create New Rule</Button>
+      </Center>
+    </>
   );
 }
 

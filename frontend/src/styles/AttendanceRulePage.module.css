@@ -2,6 +2,10 @@
   padding-top: rem(30px);
 }
 
+.createRuleButton {
+  padding-bottom: rem(20px);
+}
+
 .noRulesText {
   padding-top: rem(100px);
 }

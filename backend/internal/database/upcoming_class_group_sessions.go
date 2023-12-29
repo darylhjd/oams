@@ -176,7 +176,7 @@ func selectManagedClassGroupSessionFields() SelectStatement {
 			ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
 		).INNER_JOIN(
 			Classes, Classes.ID.EQ(ClassGroups.ClassID),
-		).LEFT_JOIN(
+		).LEFT_JOIN( // Left Join to support if user is just system admin.
 			ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
 		),
 	).ORDER_BY(

@@ -17,3 +17,7 @@ export type CoordinatingClass = {
   programme: string;
   au: number;
 };
+
+export type CoordinatingClassPostResponse = {
+  rule: ClassAttendanceRule;
+};
