@@ -4,15 +4,15 @@ name: Deployment for oams-webserver-staging
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
+    branches:
       [ main ]
     paths:
-    - 'frontend/**'
-    - '.github/workflows/webserver-staging-autodeploy.yml'
+      - 'frontend/**'
+      - '.github/workflows/webserver-staging-autodeploy.yml'
 
   # Allow manual trigger 
   workflow_dispatch:
-      
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
