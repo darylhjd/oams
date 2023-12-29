@@ -4,15 +4,15 @@ name: Deployment for oams-apiserver-staging
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
+    branches:
       [ main ]
     paths:
-    - 'backend/**'
-    - '.github/workflows/apiserver-staging-autodeploy.yml'
+      - 'backend/**'
+      - '.github/workflows/apiserver-staging-autodeploy.yml'
 
   # Allow manual trigger 
   workflow_dispatch:
-      
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
