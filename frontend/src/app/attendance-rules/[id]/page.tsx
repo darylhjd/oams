@@ -7,10 +7,17 @@ import {
   AccordionControl,
   AccordionItem,
   AccordionPanel,
+  Button,
+  Center,
   Container,
   Divider,
+  FocusTrap,
+  Group,
+  Modal,
   Space,
   Text,
+  Textarea,
+  TextInput,
   Title,
 } from "@mantine/core";
 import { Params } from "@/app/attendance-rules/[id]/layout";
@@ -22,6 +29,8 @@ import {
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
+import { useDisclosure } from "@mantine/hooks";
+import { useForm } from "@mantine/form";
 
 export default function AttendanceRulePage({ params }: { params: Params }) {
   const [data, setData] = useState<CoordinatingClassGetResponse>(
@@ -37,6 +46,7 @@ export default function AttendanceRulePage({ params }: { params: Params }) {
       <Container className={styles.container} fluid>
         <CoordinatingClassDetails coordinatingClass={data.coordinating_class} />
         <Divider my="md" />
+        <CreateRuleButton />
         <RuleDisplay rules={data.rules} />
       </Container>
     </RequestLoader>
@@ -56,6 +66,89 @@ function CoordinatingClassDetails({
       </Text>{" "}
       - Attendance Rules
     </Title>
+  );
+}
+
+function CreateRuleButton() {
+  const [loading, setLoading] = useState(false);
+
+  const [opened, { open, close }] = useDisclosure(false);
+  const form = useForm({
+    initialValues: {
+      title: "",
+      description: "",
+      rule: "",
+    },
+    validate: {
+      title: (value) => (value.length == 0 ? "Title cannot be empty" : null),
+      description: (value) =>
+        value.length == 0 ? "Description cannot be empty" : null,
+      rule: (value) => (value.length == 0 ? "Rule cannot be empty" : null),
+    },
+  });
+
+  return (
+    <>
+      <Modal
+        opened={opened}
+        onClose={close}
+        centered
+        title="Create New Rule"
+        size="lg"
+        overlayProps={{
+          backgroundOpacity: 0.55,
+          blur: 3,
+        }}
+      >
+        <form
+          onSubmit={form.onSubmit(async (values) => {
+            setLoading(true);
+            console.log(values);
+            await new Promise((f) => setTimeout(f, 1000));
+            setLoading(false);
+          })}
+        >
+          <FocusTrap active>
+            <TextInput
+              label="Title"
+              {...form.getInputProps("title")}
+              disabled={loading}
+              data-autofocus
+            />
+            <Textarea
+              label="Description"
+              disabled={loading}
+              {...form.getInputProps("description")}
+            />
+            <Textarea
+              label="Rule"
+              disabled={loading}
+              {...form.getInputProps("rule")}
+              autosize
+              minRows={6}
+              maxRows={15}
+            />
+          </FocusTrap>
+          <Space h="sm" />
+          <Group justify="center">
+            <Button
+              onClick={form.reset}
+              color="red"
+              variant="light"
+              disabled={loading}
+            >
+              Reset
+            </Button>
+            <Button type="submit" color="green" loading={loading}>
+              Create
+            </Button>
+          </Group>
+        </form>
+      </Modal>
+      <Center className={styles.createRuleButton}>
+        <Button onClick={open}>Create New Rule</Button>
+      </Center>
+    </>
   );
 }
 

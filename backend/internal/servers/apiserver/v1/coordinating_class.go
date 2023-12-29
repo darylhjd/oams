@@ -23,6 +23,8 @@ func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) 
 	switch r.Method {
 	case http.MethodGet:
 		resp = v.coordinatingClassGet(r, classId)
+	case http.MethodPost:
+		resp = v.coordinatingClassPost(r, classId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -59,4 +61,15 @@ func (v *APIServerV1) coordinatingClassGet(r *http.Request, id int64) apiRespons
 		class,
 		append(make([]model.ClassAttendanceRule, 0, len(rules)), rules...),
 	}
+}
+
+type coordinatingClassPostRequest struct {
+}
+
+type coordinatingClassPostResponse struct {
+	response
+}
+
+func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiResponse {
+	return newErrorResponse(http.StatusNotImplemented, "")
 }
