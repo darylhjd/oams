@@ -1,6 +1,4 @@
-# This workflow executes all tests in OAMS.
-
-name: Test
+name: Backend
 
 on:
   pull_request:
@@ -9,7 +7,7 @@ on:
       - 'backend/**'
       - '.github/workflows/backend-test.yml'
 jobs:
-  backend:
+  test:
     runs-on: ubuntu-latest
 
     services:

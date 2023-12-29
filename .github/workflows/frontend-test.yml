@@ -1,6 +1,4 @@
-# This workflow executes all tests in OAMS.
-
-name: Test
+name: Frontend
 
 on:
   pull_request:
@@ -10,7 +8,7 @@ on:
       - '.github/workflows/frontend-test.yml'
 
 jobs:
-  frontend:
+  test:
     runs-on: ubuntu-latest
 
     steps:
