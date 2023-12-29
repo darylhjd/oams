@@ -73,12 +73,12 @@ CREATE TABLE class_attendance_rules
     id          BIGSERIAL PRIMARY KEY,
     class_id    BIGINT      NOT NULL,
     title       TEXT        NOT NULL,
-    description TEXT        NOT NULL DEFAULT '',
+    description TEXT        NOT NULL,
     rule        TEXT        NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT ux_class_id_rule
-        UNIQUE (class_id, rule),
+    CONSTRAINT ux_class_id_title
+        UNIQUE (class_id, title),
     CONSTRAINT fk_class_id
         FOREIGN KEY (class_id)
             REFERENCES classes (id)
