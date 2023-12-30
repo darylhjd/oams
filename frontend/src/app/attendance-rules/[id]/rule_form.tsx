@@ -102,7 +102,7 @@ export function RuleForm({
           },
           {
             value: RuleType.MinPercentageAttendanceFromSession,
-            label: "Minimum Percentage Attendance From Session",
+            label: "Minimum Percentage Attendance",
           },
           {
             value: RuleType.Advanced,
