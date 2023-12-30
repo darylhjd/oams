@@ -118,7 +118,7 @@ function CreateRuleButton({
       // );
       close();
       form.reset();
-      rules.push(resp.rule);
+      // rules.push(resp.rule);
       setRules([...rules]);
     } catch (e) {
       notifications.show({
