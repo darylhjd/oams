@@ -10,100 +10,118 @@ import (
 
 var (
 	//go:embed missed_consecutive_classes.expr
-	missedConsecutiveClasses string
+	consecutiveRule string
 
 	//go:embed min_percentage_attendance_from_session.expr
-	minPercentageAttendanceFromSession string
+	percentageRule string
 )
 
 type RuleType string
 
 const (
-	RuleTypeSimple   RuleType = "simple"
-	RuleTypeAdvanced RuleType = "advanced"
+	RuleTypeMissedConsecutiveClasses           RuleType = "missed_consecutive_classes"
+	RuleTypeMinPercentageAttendanceFromSession RuleType = "min_percentage_attendance_from_session"
+	RuleTypeAdvanced                           RuleType = "advanced"
 )
 
-type SimpleRule string
-
-const (
-	SimpleRuleMissedConsecutiveClasses           SimpleRule = "missed_consecutive_classes"
-	SimpleRuleMinPercentageAttendanceFromSession SimpleRule = "min_percentage_attendance_from_session"
-)
-
-type baseEnv struct {
+type baseEnvironment struct {
 	Enrollments []model.SessionEnrollment `expr:"enrollments"`
 }
 
+var baseEnv = baseEnvironment{
+	Enrollments: []model.SessionEnrollment{},
+}
+
 type missedConsecutiveClassesEnv struct {
-	baseEnv
+	baseEnvironment
 	ConsecutiveClasses int `expr:"consecutive_classes"`
 }
 
 type minPercentageAttendanceFromSessionEnv struct {
-	baseEnv
-	Percentage float64 `expr:"percentage"`
-	From       int     `expr:"from"`
-}
-
-var baseEnvironment = baseEnv{
-	Enrollments: []model.SessionEnrollment{},
+	baseEnvironment
+	Percentage  float64 `expr:"percentage"`
+	FromSession int     `expr:"from_session"`
 }
 
 type RuleParams struct {
-	Title             string     `json:"title"`
-	Description       string     `json:"description"`
-	RuleType          RuleType   `json:"rule_type"`
-	PresetRule        SimpleRule `json:"preset_rule"`
-	ConsecutiveParams struct {
-		Num int `json:"num"`
-	} `json:"consecutive_params"`
-	PercentageParams struct {
-		Percentage float64 `json:"percentage"`
-		From       int     `json:"from"`
-	} `json:"percentage_params"`
+	Title             string            `json:"title"`
+	Description       string            `json:"description"`
+	RuleType          RuleType          `json:"rule_type"`
+	ConsecutiveParams consecutiveParams `json:"consecutive_params"`
+	PercentageParams  percentageParams  `json:"percentage_params"`
+	AdvancedParams    advancedParams    `json:"advanced_params"`
+}
+
+type consecutiveParams struct {
+	ConsecutiveClasses int `json:"consecutive_classes"`
+}
+
+type percentageParams struct {
+	Percentage  float64 `json:"percentage"`
+	FromSession int     `json:"from_session"`
+}
+
+type advancedParams struct {
 	Rule string `json:"rule"`
 }
 
-func (r RuleParams) Verify() error {
+func (r RuleParams) Verify() (rule string, env any, err error) {
 	if len(r.Title) == 0 {
-		return errors.New("title is empty")
+		return "", nil, errors.New("title is empty")
 	}
 
 	if len(r.Description) == 0 {
-		return errors.New("description is empty")
+		return "", nil, errors.New("description is empty")
 	}
 
 	switch r.RuleType {
-	case RuleTypeSimple:
-		return r.verifySimpleRule()
+	case RuleTypeMissedConsecutiveClasses:
+		return r.verifyConsecutiveRule()
+	case RuleTypeMinPercentageAttendanceFromSession:
+		return r.verifyPercentageRule()
 	case RuleTypeAdvanced:
 		return r.verifyAdvancedRule()
 	default:
-		return errors.New("unknown rule type")
+		return "", nil, errors.New("unknown rule type")
 	}
 }
 
-func (r RuleParams) verifySimpleRule() error {
-	switch r.PresetRule {
-	case SimpleRuleMissedConsecutiveClasses:
-		_, err := expr.Compile(missedConsecutiveClasses, expr.AsBool(), expr.Env(missedConsecutiveClassesEnv{
-			baseEnvironment,
-			r.ConsecutiveParams.Num,
-		}))
-		return err
-	case SimpleRuleMinPercentageAttendanceFromSession:
-		_, err := expr.Compile(minPercentageAttendanceFromSession, expr.AsBool(), expr.Env(minPercentageAttendanceFromSessionEnv{
-			baseEnvironment,
-			r.PercentageParams.Percentage,
-			r.PercentageParams.From,
-		}))
-		return err
-	default:
-		return errors.New("unknown simple rule")
+func (r RuleParams) verifyConsecutiveRule() (rule string, env any, err error) {
+	if r.ConsecutiveParams.ConsecutiveClasses < 1 {
+		return "", nil, errors.New("number of consecutive classes cannot be less than 1")
 	}
+
+	env = missedConsecutiveClassesEnv{
+		baseEnv,
+		r.ConsecutiveParams.ConsecutiveClasses,
+	}
+
+	_, err = expr.Compile(consecutiveRule, expr.AsBool(), expr.Env(env))
+	return consecutiveRule, env, err
 }
 
-func (r RuleParams) verifyAdvancedRule() error {
-	_, err := expr.Compile(r.Rule, expr.AsBool(), expr.Env(baseEnvironment))
-	return err
+func (r RuleParams) verifyPercentageRule() (rule string, env any, err error) {
+	params := r.PercentageParams
+
+	if params.Percentage < 0 {
+		return "", nil, errors.New("percentage cannot be negative")
+	}
+
+	if params.FromSession < 1 {
+		return "", nil, errors.New("number of sessions cannot be less than 1")
+	}
+
+	env = minPercentageAttendanceFromSessionEnv{
+		baseEnv,
+		params.Percentage,
+		params.FromSession,
+	}
+
+	_, err = expr.Compile(percentageRule, expr.AsBool(), expr.Env(env))
+	return percentageRule, env, err
+}
+
+func (r RuleParams) verifyAdvancedRule() (rule string, env any, err error) {
+	_, err = expr.Compile(r.AdvancedParams.Rule, expr.AsBool(), expr.Env(baseEnv))
+	return r.AdvancedParams.Rule, baseEnv, err
 }
