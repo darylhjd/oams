@@ -110,12 +110,12 @@ function CreateRuleButton({
   const formSubmit = form.onSubmit(async (values) => {
     setLoading(true);
     try {
-      const resp = await APIClient.coordinatingClassPost(
-        id,
-        values.title,
-        values.description,
-        values.rule,
-      );
+      // const resp = await APIClient.coordinatingClassPost(
+      //   id,
+      //   values.title,
+      //   values.description,
+      //   values.rule,
+      // );
       close();
       form.reset();
       rules.push(resp.rule);
