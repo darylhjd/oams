@@ -80,30 +80,31 @@ func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiRespon
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	_, _, err := req.Verify()
+	ruleString, _, err := req.Verify()
 	if err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("rule failed validation: %s", err))
 	}
 
-	//rule, err := v.db.CreateNewCoordinatingClassRule(r.Context(), database.CreateNewCoordinatingClassRuleParams{
-	//	ClassID:     id,
-	//	Title:       req.Title,
-	//	Description: req.Description,
-	//	Rule:        req.AdvancedParams.Rule,
-	//})
-	//if err != nil {
-	//	switch {
-	//	case errors.Is(err, qrm.ErrNoRows):
-	//		return newErrorResponse(http.StatusBadRequest, "not allowed to create new rule")
-	//	case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
-	//		return newErrorResponse(http.StatusConflict, "rule with same title already exists")
-	//	default:
-	//		v.logInternalServerError(r, err)
-	//		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class post database action")
-	//	}
-	//}
+	rule, err := v.db.CreateNewCoordinatingClassRule(r.Context(), database.CreateNewCoordinatingClassRuleParams{
+		ClassID:     id,
+		Title:       req.Title,
+		Description: req.Description,
+		Rule:        ruleString,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, qrm.ErrNoRows):
+			return newErrorResponse(http.StatusBadRequest, "not allowed to create new rule")
+		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
+			return newErrorResponse(http.StatusConflict, "rule with same title already exists")
+		default:
+			v.logInternalServerError(r, err)
+			return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class post database action")
+		}
+	}
 
 	return coordinatingClassPostResponse{
-		response: newSuccessResponse(),
+		newSuccessResponse(),
+		rule,
 	}
 }

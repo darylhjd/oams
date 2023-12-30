@@ -108,10 +108,10 @@ function CreateRuleButton({
   const formSubmit = form.onSubmit(async (values) => {
     setLoading(true);
     try {
-      await APIClient.coordinatingClassPost(id, values);
+      const resp = await APIClient.coordinatingClassPost(id, values);
       close();
       form.reset();
-      // rules.push(resp.rule);
+      rules.push(resp.rule);
       setRules([...rules]);
     } catch (e) {
       notifications.show({
@@ -150,7 +150,7 @@ function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
   if (rules.length == 0) {
     return (
       <Text className={styles.noRulesText} ta="center">
-        No rules for this class have been defined.
+        No rules have been defined for this class.
       </Text>
     );
   }
