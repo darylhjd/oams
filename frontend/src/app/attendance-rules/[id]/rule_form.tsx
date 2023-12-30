@@ -8,10 +8,9 @@ import {
   Fieldset,
   FocusTrap,
   Group,
+  NativeSelect,
   NumberInput,
   Popover,
-  SegmentedControl,
-  Select,
   Space,
   Text,
   Textarea,
@@ -22,26 +21,29 @@ export type RuleFormParams = {
   title: string;
   description: string;
   rule_type: string;
-  preset_rule: string;
-  consecutive_params: {
-    num: number;
-  };
-  percentage_params: {
-    percentage: number;
-    from: number;
-  };
-  rule: string;
+  consecutive_params: MissedConsecutiveClassParams;
+  percentage_params: MinPercentageAttendanceFromSessionParams;
+  advanced_params: AdvancedParams;
 };
 
 export enum RuleType {
-  Simple = "simple",
+  MissedConsecutiveClasses = "missed_consecutive_classes",
+  MinPercentageAttendanceFromSession = "min_percentage_attendance_from_session",
   Advanced = "advanced",
 }
 
-export enum PresetRule {
-  MissedConsecutiveClasses = "missed_consecutive_classes",
-  MinPercentageAttendanceFromSession = "min_percentage_attendance_from_session",
-}
+type MissedConsecutiveClassParams = {
+  consecutive_classes: number;
+};
+
+type MinPercentageAttendanceFromSessionParams = {
+  percentage: number;
+  from_session: number;
+};
+
+type AdvancedParams = {
+  rule: string;
+};
 
 export function RuleForm({
   form,
@@ -52,6 +54,25 @@ export function RuleForm({
   loading: boolean;
   onSubmit: (event?: FormEvent<HTMLFormElement> | undefined) => void;
 }) {
+  let ruleDetailComponent: React.ReactNode;
+  switch (form.getInputProps("rule_type").value) {
+    case RuleType.MissedConsecutiveClasses:
+      ruleDetailComponent = (
+        <ConsecutiveClassRule form={form} loading={loading} />
+      );
+      break;
+    case RuleType.MinPercentageAttendanceFromSession:
+      ruleDetailComponent = (
+        <PercentageClassRule form={form} loading={loading} />
+      );
+      break;
+    case RuleType.Advanced:
+      ruleDetailComponent = <AdvancedForm form={form} loading={loading} />;
+      break;
+    default:
+      ruleDetailComponent = null;
+  }
+
   return (
     <form onSubmit={onSubmit}>
       <FocusTrap active>
@@ -71,20 +92,27 @@ export function RuleForm({
         {...form.getInputProps("description")}
       />
       <Space h="sm" />
-      <SegmentedControl
+      <NativeSelect
         disabled={loading}
-        fullWidth
+        label="Rule Type"
         data={[
-          { value: RuleType.Simple, label: "Simple" },
-          { value: RuleType.Advanced, label: "Advanced" },
+          {
+            value: RuleType.MissedConsecutiveClasses,
+            label: "Missed Consecutive Classes",
+          },
+          {
+            value: RuleType.MinPercentageAttendanceFromSession,
+            label: "Minimum Percentage Attendance From Session",
+          },
+          {
+            value: RuleType.Advanced,
+            label: "Advanced",
+          },
         ]}
         {...form.getInputProps("rule_type")}
       />
       <Space h="sm" />
-      <>
-        <SimpleRule form={form} loading={loading} />
-        <AdvancedForm form={form} loading={loading} />
-      </>
+      <Fieldset legend="Rule Details">{ruleDetailComponent}</Fieldset>
       <Space h="sm" />
       <Group justify="center">
         <Button
@@ -103,45 +131,6 @@ export function RuleForm({
   );
 }
 
-function SimpleRule({
-  form,
-  loading,
-}: {
-  form: UseFormReturnType<RuleFormParams>;
-  loading: boolean;
-}) {
-  if (form.getInputProps("rule_type").value != RuleType.Simple) {
-    return null;
-  }
-
-  return (
-    <>
-      <Select
-        disabled={loading}
-        label="Preset Rule"
-        allowDeselect={false}
-        defaultValue={PresetRule.MissedConsecutiveClasses}
-        data={[
-          {
-            value: PresetRule.MissedConsecutiveClasses,
-            label: "Missed Consecutive Classes",
-          },
-          {
-            value: PresetRule.MinPercentageAttendanceFromSession,
-            label: "Minimum Percentage Attendance From Session",
-          },
-        ]}
-        {...form.getInputProps("preset_rule")}
-      />
-      <Space h="sm" />
-      <Fieldset legend="Rule Details">
-        <ConsecutiveClassRule form={form} loading={loading} />
-        <PercentageClassRule form={form} loading={loading} />
-      </Fieldset>
-    </>
-  );
-}
-
 function ConsecutiveClassRule({
   form,
   loading,
@@ -149,13 +138,6 @@ function ConsecutiveClassRule({
   form: UseFormReturnType<RuleFormParams>;
   loading: boolean;
 }) {
-  if (
-    form.getInputProps("preset_rule").value !=
-    PresetRule.MissedConsecutiveClasses
-  ) {
-    return null;
-  }
-
   return (
     <>
       <Text c="dimmed" size="sm" ta="center">
@@ -167,11 +149,11 @@ function ConsecutiveClassRule({
         disabled={loading}
         withAsterisk
         label="Number of consecutive missed classes"
-        defaultValue={2}
+        defaultValue={4}
         allowNegative={false}
         allowDecimal={false}
         min={1}
-        {...form.getInputProps("consecutive_params.num")}
+        {...form.getInputProps("consecutive_params.consecutive_classes")}
       />
     </>
   );
@@ -184,13 +166,6 @@ function PercentageClassRule({
   form: UseFormReturnType<RuleFormParams>;
   loading: boolean;
 }) {
-  if (
-    form.getInputProps("preset_rule").value !=
-    PresetRule.MinPercentageAttendanceFromSession
-  ) {
-    return null;
-  }
-
   return (
     <>
       <Text c="dimmed" size="sm" ta="center">
@@ -218,7 +193,7 @@ function PercentageClassRule({
         allowNegative={false}
         allowDecimal={false}
         min={1}
-        {...form.getInputProps("percentage_params.from")}
+        {...form.getInputProps("percentage_params.from_session")}
       />
     </>
   );
@@ -231,10 +206,6 @@ function AdvancedForm({
   form: UseFormReturnType<RuleFormParams>;
   loading: boolean;
 }) {
-  if (form.getInputProps("rule_type").value != RuleType.Advanced) {
-    return null;
-  }
-
   const variables = `var enrollments []struct {
 	ID        int64    
 	SessionID int64    
@@ -245,7 +216,7 @@ function AdvancedForm({
 }`;
 
   return (
-    <Fieldset>
+    <>
       <Text c="dimmed" size="sm" ta="center">
         OAMS allows you to specify custom rules. Use the provided variables to
         form custom conditions to trigger alerts. The language definition can be
@@ -279,8 +250,8 @@ function AdvancedForm({
         label="Rule"
         minRows={5}
         maxRows={5}
-        {...form.getInputProps("rule")}
+        {...form.getInputProps("advanced_params.rule")}
       />
-    </Fieldset>
+    </>
   );
 }

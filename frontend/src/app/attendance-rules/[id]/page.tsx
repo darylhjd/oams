@@ -31,7 +31,6 @@ import {
   RuleFormParams,
   RuleForm,
   RuleType,
-  PresetRule,
 } from "@/app/attendance-rules/[id]/rule_form";
 
 export default function AttendanceRulePage({ params }: { params: Params }) {
@@ -89,16 +88,15 @@ function CreateRuleButton({
     initialValues: {
       title: "",
       description: "",
-      rule_type: RuleType.Simple as string,
-      preset_rule: PresetRule.MissedConsecutiveClasses as string,
+      rule_type: RuleType.MissedConsecutiveClasses as string,
       consecutive_params: {
-        num: 1,
+        consecutive_classes: 4,
       },
       percentage_params: {
-        percentage: 75,
-        from: 4,
+        percentage: 70,
+        from_session: 4,
       },
-      rule: "",
+      advanced_params: { rule: "" },
     },
     validate: {
       title: (value) => (value.length == 0 ? "Title cannot be empty" : null),
