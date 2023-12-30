@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/darylhjd/oams/backend/internal/database/types"
+	"github.com/darylhjd/oams/backend/internal/database/config/types"
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/go-jet/jet/v2/generator/metadata"
 	"github.com/go-jet/jet/v2/generator/postgres"

@@ -8,7 +8,7 @@
 package model
 
 import (
-	"github.com/darylhjd/oams/backend/internal/database/types"
+	"github.com/darylhjd/oams/backend/internal/database/config/types"
 	"time"
 )
 
@@ -17,7 +17,6 @@ type ClassAttendanceRule struct {
 	ClassID     int64             `json:"class_id"`
 	Title       string            `json:"title"`
 	Description string            `json:"description"`
-	RuleType    RuleType          `json:"rule_type"`
 	Rule        string            `json:"rule"`
 	Environment types.Environment `json:"environment"`
 	CreatedAt   time.Time         `json:"created_at"`
