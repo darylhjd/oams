@@ -6,6 +6,8 @@ CREATE TYPE USER_ROLE AS ENUM ('USER', 'SYSTEM_ADMIN');
 
 CREATE TYPE MANAGING_ROLE AS ENUM ('TEACHING_ASSISTANT', 'COURSE_COORDINATOR');
 
+CREATE TYPE RULE_TYPE AS ENUM ('CONSECUTIVE', 'PERCENTAGE', 'ADVANCED');
+
 CREATE FUNCTION update_updated_at() RETURNS TRIGGER AS
 $$
 BEGIN
@@ -74,7 +76,9 @@ CREATE TABLE class_attendance_rules
     class_id    BIGINT      NOT NULL,
     title       TEXT        NOT NULL,
     description TEXT        NOT NULL,
+    rule_type   RULE_TYPE   NOT NULL,
     rule        TEXT        NOT NULL,
+    environment JSONB       NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT ux_class_id_title
