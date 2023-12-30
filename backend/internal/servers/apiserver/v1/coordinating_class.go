@@ -9,6 +9,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/rules"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
@@ -65,9 +66,7 @@ func (v *APIServerV1) coordinatingClassGet(r *http.Request, id int64) apiRespons
 }
 
 type coordinatingClassPostRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Rule        string `json:"rule"`
+	rules.RuleParams
 }
 
 type coordinatingClassPostResponse struct {
@@ -79,6 +78,10 @@ func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiRespon
 	var req coordinatingClassPostRequest
 	if err := v.parseRequestBody(r.Body, &req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
+	}
+
+	if err := req.Verify(); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("rule failed validation: %s", err))
 	}
 
 	rule, err := v.db.CreateNewCoordinatingClassRule(r.Context(), database.CreateNewCoordinatingClassRuleParams{
