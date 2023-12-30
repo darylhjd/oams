@@ -11,26 +11,28 @@ import {
   Center,
   Container,
   Divider,
-  FocusTrap,
-  Group,
   Modal,
   Space,
   Text,
-  Textarea,
-  TextInput,
   Title,
 } from "@mantine/core";
 import { Params } from "@/app/attendance-rules/[id]/layout";
-import { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import { useDisclosure } from "@mantine/hooks";
-import { useForm } from "@mantine/form";
+import { useForm, UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 import { getError } from "@/api/error";
+import {
+  RuleFormParams,
+  RuleForm,
+  RuleType,
+  PresetRule,
+} from "@/app/attendance-rules/[id]/rule_form";
 
 export default function AttendanceRulePage({ params }: { params: Params }) {
   const [coordinatingClass, setCoordinatingClass] = useState<CoordinatingClass>(
@@ -80,21 +82,53 @@ function CreateRuleButton({
   rules: ClassAttendanceRule[];
   setRules: Dispatch<SetStateAction<ClassAttendanceRule[]>>;
 }) {
-  const [loading, setLoading] = useState(false);
-
   const [opened, { open, close }] = useDisclosure(false);
-  const form = useForm({
+
+  const [loading, setLoading] = useState(false);
+  const form: UseFormReturnType<RuleFormParams> = useForm({
     initialValues: {
       title: "",
       description: "",
+      rule_type: RuleType.Simple as string,
+      preset_rule: PresetRule.MissedConsecutiveClasses as string,
+      consecutive_params: {
+        num: 1,
+      },
+      percentage_params: {
+        percentage: 75,
+        from: 4,
+      },
       rule: "",
     },
     validate: {
       title: (value) => (value.length == 0 ? "Title cannot be empty" : null),
       description: (value) =>
         value.length == 0 ? "Description cannot be empty" : null,
-      rule: (value) => (value.length == 0 ? "Rule cannot be empty" : null),
     },
+  });
+
+  const formSubmit = form.onSubmit(async (values) => {
+    setLoading(true);
+    try {
+      // const resp = await APIClient.coordinatingClassPost(
+      //   id,
+      //   values.title,
+      //   values.description,
+      //   values.rule,
+      // );
+      close();
+      form.reset();
+      // rules.push(resp.rule);
+      setRules([...rules]);
+    } catch (e) {
+      notifications.show({
+        title: "Rule Validation Failed",
+        message: getError(e),
+        icon: <IconX />,
+        color: "red",
+      });
+    }
+    setLoading(false);
   });
 
   return (
@@ -110,67 +144,7 @@ function CreateRuleButton({
           blur: 3,
         }}
       >
-        <form
-          onSubmit={form.onSubmit(async (values) => {
-            setLoading(true);
-            try {
-              const resp = await APIClient.coordinatingClassPost(
-                id,
-                values.title,
-                values.description,
-                values.rule,
-              );
-              close();
-              form.reset();
-              rules.push(resp.rule);
-              setRules([...rules]);
-            } catch (e) {
-              notifications.show({
-                title: "Rule Validation Failed",
-                message: getError(e),
-                icon: <IconX />,
-                color: "red",
-              });
-            }
-            setLoading(false);
-          })}
-        >
-          <FocusTrap active>
-            <TextInput
-              label="Title"
-              {...form.getInputProps("title")}
-              disabled={loading}
-              data-autofocus
-            />
-            <Textarea
-              label="Description"
-              disabled={loading}
-              {...form.getInputProps("description")}
-            />
-            <Textarea
-              label="Rule"
-              disabled={loading}
-              {...form.getInputProps("rule")}
-              autosize
-              minRows={6}
-              maxRows={15}
-            />
-          </FocusTrap>
-          <Space h="sm" />
-          <Group justify="center">
-            <Button
-              onClick={form.reset}
-              color="red"
-              variant="light"
-              disabled={loading}
-            >
-              Reset
-            </Button>
-            <Button type="submit" color="green" loading={loading}>
-              Create
-            </Button>
-          </Group>
-        </form>
+        <RuleForm form={form} loading={loading} onSubmit={formSubmit} />
       </Modal>
       <Center className={styles.createRuleButton}>
         <Button onClick={open}>Create New Rule</Button>
