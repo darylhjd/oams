@@ -1,0 +1,6 @@
+// Returns true if the student has missed n consecutive classes.
+// Params:
+// - enrollments: Array of SessionEnrollments for a student.
+// - consecutive_classes: Number of consecutive classes to trigger the rule.
+
+len(enrollments) >= consecutive_classes && all(enrollments[-consecutive_classes:], {!.Attended})

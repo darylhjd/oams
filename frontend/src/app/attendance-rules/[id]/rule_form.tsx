@@ -16,41 +16,17 @@ import {
   Textarea,
   TextInput,
 } from "@mantine/core";
-
-export type RuleFormParams = {
-  title: string;
-  description: string;
-  rule_type: string;
-  consecutive_params: MissedConsecutiveClassParams;
-  percentage_params: MinPercentageAttendanceFromSessionParams;
-  advanced_params: AdvancedParams;
-};
-
-export enum RuleType {
-  MissedConsecutiveClasses = "missed_consecutive_classes",
-  MinPercentageAttendanceFromSession = "min_percentage_attendance_from_session",
-  Advanced = "advanced",
-}
-
-type MissedConsecutiveClassParams = {
-  consecutive_classes: number;
-};
-
-type MinPercentageAttendanceFromSessionParams = {
-  percentage: number;
-  from_session: number;
-};
-
-type AdvancedParams = {
-  rule: string;
-};
+import {
+  CoordinatingClassPostRequest,
+  RuleType,
+} from "@/api/coordinating_class";
 
 export function RuleForm({
   form,
   loading,
   onSubmit,
 }: {
-  form: UseFormReturnType<RuleFormParams>;
+  form: UseFormReturnType<CoordinatingClassPostRequest>;
   loading: boolean;
   onSubmit: (event?: FormEvent<HTMLFormElement> | undefined) => void;
 }) {
@@ -135,7 +111,7 @@ function ConsecutiveClassRule({
   form,
   loading,
 }: {
-  form: UseFormReturnType<RuleFormParams>;
+  form: UseFormReturnType<CoordinatingClassPostRequest>;
   loading: boolean;
 }) {
   return (
@@ -163,7 +139,7 @@ function PercentageClassRule({
   form,
   loading,
 }: {
-  form: UseFormReturnType<RuleFormParams>;
+  form: UseFormReturnType<CoordinatingClassPostRequest>;
   loading: boolean;
 }) {
   return (
@@ -203,7 +179,7 @@ function AdvancedForm({
   form,
   loading,
 }: {
-  form: UseFormReturnType<RuleFormParams>;
+  form: UseFormReturnType<CoordinatingClassPostRequest>;
   loading: boolean;
 }) {
   const variables = `var enrollments []struct {

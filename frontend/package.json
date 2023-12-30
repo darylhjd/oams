@@ -18,7 +18,7 @@
     "@mantine/notifications": "^7.3.2",
     "@supabase/supabase-js": "^2.39.1",
     "@tabler/icons-react": "^2.44.0",
-    "axios": "^1.6.2",
+    "axios": "^1.6.3",
     "framer-motion": "^10.16.16",
     "mantine-react-table": "^2.0.0-alpha.9",
     "next": "14.0.4",

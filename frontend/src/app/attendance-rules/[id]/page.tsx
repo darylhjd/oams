@@ -18,7 +18,11 @@ import {
 } from "@mantine/core";
 import { Params } from "@/app/attendance-rules/[id]/layout";
 import React, { Dispatch, SetStateAction, useState } from "react";
-import { CoordinatingClass } from "@/api/coordinating_class";
+import {
+  CoordinatingClass,
+  CoordinatingClassPostRequest,
+  RuleType,
+} from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
@@ -27,11 +31,7 @@ import { useForm, UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 import { getError } from "@/api/error";
-import {
-  RuleFormParams,
-  RuleForm,
-  RuleType,
-} from "@/app/attendance-rules/[id]/rule_form";
+import { RuleForm } from "@/app/attendance-rules/[id]/rule_form";
 
 export default function AttendanceRulePage({ params }: { params: Params }) {
   const [coordinatingClass, setCoordinatingClass] = useState<CoordinatingClass>(
@@ -84,7 +84,7 @@ function CreateRuleButton({
   const [opened, { open, close }] = useDisclosure(false);
 
   const [loading, setLoading] = useState(false);
-  const form: UseFormReturnType<RuleFormParams> = useForm({
+  const form: UseFormReturnType<CoordinatingClassPostRequest> = useForm({
     initialValues: {
       title: "",
       description: "",
@@ -108,12 +108,7 @@ function CreateRuleButton({
   const formSubmit = form.onSubmit(async (values) => {
     setLoading(true);
     try {
-      // const resp = await APIClient.coordinatingClassPost(
-      //   id,
-      //   values.title,
-      //   values.description,
-      //   values.rule,
-      // );
+      await APIClient.coordinatingClassPost(id, values);
       close();
       form.reset();
       // rules.push(resp.rule);

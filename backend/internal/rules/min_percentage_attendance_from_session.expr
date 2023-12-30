@@ -1,0 +1,10 @@
+// Returns true if the student has not achieved a minimum percentage of attendances by a given session.
+// Params:
+// - enrollments: Array of SessionEnrollments for a student.
+// - percentage: Minimum percentage of attended classes.
+// - from_session: Enforce the rule only from this session number.
+
+let enrollments_view = enrollments[from_session-1:];
+let attended_count = count(enrollments_view, {.Attended});
+
+(len(enrollments) >= from_session) && ((attended_count / len(enrollments)) < (percentage / 100))

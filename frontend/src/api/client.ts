@@ -30,6 +30,7 @@ import {
   CoordinatingClassGetResponse,
   CoordinatingClassesGetResponse,
   CoordinatingClassPostResponse,
+  CoordinatingClassPostRequest,
 } from "@/api/coordinating_class";
 
 export class APIClient {
@@ -346,17 +347,11 @@ export class APIClient {
 
   static async coordinatingClassPost(
     id: number,
-    title: string,
-    description: string,
-    rule: string,
+    params: CoordinatingClassPostRequest,
   ): Promise<CoordinatingClassPostResponse> {
     const { data } = await this._client.post<CoordinatingClassPostResponse>(
       this._coordinatingClassPath + id,
-      {
-        title,
-        description,
-        rule,
-      },
+      params,
     );
     return data;
   }

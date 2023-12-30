@@ -9,6 +9,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/rules"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
@@ -51,7 +52,7 @@ func (v *APIServerV1) coordinatingClassGet(r *http.Request, id int64) apiRespons
 		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class get database action")
 	}
 
-	rules, err := v.db.GetCoordinatingClassRules(r.Context(), id)
+	classRules, err := v.db.GetCoordinatingClassRules(r.Context(), id)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not get coordinating class rules")
@@ -60,14 +61,12 @@ func (v *APIServerV1) coordinatingClassGet(r *http.Request, id int64) apiRespons
 	return coordinatingClassGetResponse{
 		newSuccessResponse(),
 		class,
-		append(make([]model.ClassAttendanceRule, 0, len(rules)), rules...),
+		append(make([]model.ClassAttendanceRule, 0, len(classRules)), classRules...),
 	}
 }
 
 type coordinatingClassPostRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Rule        string `json:"rule"`
+	rules.RuleParams
 }
 
 type coordinatingClassPostResponse struct {
@@ -81,26 +80,30 @@ func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiRespon
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	rule, err := v.db.CreateNewCoordinatingClassRule(r.Context(), database.CreateNewCoordinatingClassRuleParams{
-		ClassID:     id,
-		Title:       req.Title,
-		Description: req.Description,
-		Rule:        req.Rule,
-	})
+	_, _, err := req.Verify()
 	if err != nil {
-		switch {
-		case errors.Is(err, qrm.ErrNoRows):
-			return newErrorResponse(http.StatusBadRequest, "not allowed to create new rule")
-		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
-			return newErrorResponse(http.StatusConflict, "rule with same title already exists")
-		default:
-			v.logInternalServerError(r, err)
-			return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class post database action")
-		}
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("rule failed validation: %s", err))
 	}
 
+	//rule, err := v.db.CreateNewCoordinatingClassRule(r.Context(), database.CreateNewCoordinatingClassRuleParams{
+	//	ClassID:     id,
+	//	Title:       req.Title,
+	//	Description: req.Description,
+	//	Rule:        req.AdvancedParams.Rule,
+	//})
+	//if err != nil {
+	//	switch {
+	//	case errors.Is(err, qrm.ErrNoRows):
+	//		return newErrorResponse(http.StatusBadRequest, "not allowed to create new rule")
+	//	case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
+	//		return newErrorResponse(http.StatusConflict, "rule with same title already exists")
+	//	default:
+	//		v.logInternalServerError(r, err)
+	//		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class post database action")
+	//	}
+	//}
+
 	return coordinatingClassPostResponse{
-		newSuccessResponse(),
-		rule,
+		response: newSuccessResponse(),
 	}
 }
