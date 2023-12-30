@@ -52,57 +52,59 @@ export function RuleForm({
   return (
     <form onSubmit={onSubmit}>
       <FocusTrap active>
-        <TextInput
-          disabled={loading}
-          withAsterisk
-          label="Title"
-          {...form.getInputProps("title")}
-          data-autofocus
-        />
+        <div>
+          <TextInput
+            disabled={loading}
+            withAsterisk
+            label="Title"
+            {...form.getInputProps("title")}
+            data-autofocus
+          />
+          <Space h="sm" />
+          <Textarea
+            disabled={loading}
+            withAsterisk
+            label="Description"
+            {...form.getInputProps("description")}
+          />
+          <Space h="sm" />
+          <NativeSelect
+            disabled={loading}
+            label="Rule Type"
+            data={[
+              {
+                value: RuleType.MissedConsecutiveClasses,
+                label: "Missed Consecutive Classes",
+              },
+              {
+                value: RuleType.MinPercentageAttendanceFromSession,
+                label: "Minimum Percentage Attendance",
+              },
+              {
+                value: RuleType.Advanced,
+                label: "Advanced",
+              },
+            ]}
+            {...form.getInputProps("rule_type")}
+          />
+          <Space h="sm" />
+          <Fieldset legend="Rule Details">{ruleDetailComponent}</Fieldset>
+          <Space h="sm" />
+          <Group justify="center">
+            <Button
+              disabled={loading}
+              onClick={form.reset}
+              color="red"
+              variant="light"
+            >
+              Reset
+            </Button>
+            <Button type="submit" color="green" loading={loading}>
+              Create
+            </Button>
+          </Group>
+        </div>
       </FocusTrap>
-      <Space h="sm" />
-      <Textarea
-        disabled={loading}
-        withAsterisk
-        label="Description"
-        {...form.getInputProps("description")}
-      />
-      <Space h="sm" />
-      <NativeSelect
-        disabled={loading}
-        label="Rule Type"
-        data={[
-          {
-            value: RuleType.MissedConsecutiveClasses,
-            label: "Missed Consecutive Classes",
-          },
-          {
-            value: RuleType.MinPercentageAttendanceFromSession,
-            label: "Minimum Percentage Attendance",
-          },
-          {
-            value: RuleType.Advanced,
-            label: "Advanced",
-          },
-        ]}
-        {...form.getInputProps("rule_type")}
-      />
-      <Space h="sm" />
-      <Fieldset legend="Rule Details">{ruleDetailComponent}</Fieldset>
-      <Space h="sm" />
-      <Group justify="center">
-        <Button
-          disabled={loading}
-          onClick={form.reset}
-          color="red"
-          variant="light"
-        >
-          Reset
-        </Button>
-        <Button type="submit" color="green" loading={loading}>
-          Create
-        </Button>
-      </Group>
     </form>
   );
 }
@@ -117,8 +119,8 @@ function ConsecutiveClassRule({
   return (
     <>
       <Text c="dimmed" size="sm" ta="center">
-        This rule triggers when a student misses at least the last few
-        consecutive classes.
+        This rule triggers when a student misses the last few consecutive
+        classes.
       </Text>
       <Space h="sm" />
       <NumberInput
@@ -146,7 +148,8 @@ function PercentageClassRule({
     <>
       <Text c="dimmed" size="sm" ta="center">
         This rule triggers if a student fails to maintain the required
-        percentage of attendance beginning from a certain session.
+        percentage of attendance beginning from a certain session. Sessions
+        before will be considered in the total number of sessions.
       </Text>
       <Space h="sm" />
       <NumberInput
