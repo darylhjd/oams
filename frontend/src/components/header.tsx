@@ -84,7 +84,6 @@ function Items() {
   return (
     <>
       <Box visibleFrom="md">{items}</Box>
-
       <Burger hiddenFrom="md" opened={opened} onClick={toggle} />
       <Drawer
         size="sm"
@@ -92,9 +91,6 @@ function Items() {
         opened={opened}
         onClose={close}
         onClick={close}
-        classNames={{
-          inner: styles.systemAdminMenuDrawer,
-        }}
       >
         {items}
       </Drawer>
@@ -233,12 +229,7 @@ function ClassGroupManagerMenu() {
   return (
     <>
       <Box visibleFrom="md">
-        <Menu
-          width={200}
-          classNames={{
-            dropdown: styles.menuDropdown,
-          }}
-        >
+        <Menu width={200}>
           <MenuTarget>
             <Button
               color="red"
@@ -308,12 +299,7 @@ function SystemAdminMenu() {
   return (
     <>
       <Box visibleFrom="md">
-        <Menu
-          width={200}
-          classNames={{
-            dropdown: styles.menuDropdown,
-          }}
-        >
+        <Menu width={200}>
           <MenuTarget>
             <Button
               color="orange"
