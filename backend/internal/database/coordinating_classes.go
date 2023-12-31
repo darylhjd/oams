@@ -5,6 +5,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
+	"github.com/darylhjd/oams/backend/internal/rules/environment"
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
@@ -65,22 +66,30 @@ type CreateNewCoordinatingClassRuleParams struct {
 	Title       string
 	Description string
 	Rule        string
+	Env         environment.E
 }
 
 func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCoordinatingClassRuleParams) (model.ClassAttendanceRule, error) {
 	var res model.ClassAttendanceRule
+
+	envString, err := (&environment.Environment{Env: arg.Env}).Value()
+	if err != nil {
+		return res, err
+	}
 
 	stmt := ClassAttendanceRules.INSERT(
 		ClassAttendanceRules.ClassID,
 		ClassAttendanceRules.Title,
 		ClassAttendanceRules.Description,
 		ClassAttendanceRules.Rule,
+		ClassAttendanceRules.Environment,
 	).QUERY(
 		SELECT(
 			Int64(arg.ClassID),
 			String(arg.Title),
 			String(arg.Description),
 			String(arg.Rule),
+			Json(envString),
 		).WHERE(
 			EXISTS(
 				SELECT(
@@ -98,7 +107,7 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 		ClassAttendanceRules.AllColumns,
 	)
 
-	err := stmt.QueryContext(ctx, d.qe, &res)
+	err = stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
 

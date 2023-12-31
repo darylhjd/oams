@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/env"
+	"github.com/darylhjd/oams/backend/internal/rules/environment"
 	"github.com/go-jet/jet/v2/generator/metadata"
 	"github.com/go-jet/jet/v2/generator/postgres"
 	"github.com/go-jet/jet/v2/generator/template"
@@ -41,7 +42,13 @@ func main() {
 						return template.DefaultTableModel(table).
 							// Add json tags to model fields.
 							UseField(func(columnMetaData metadata.Column) template.TableModelField {
-								return template.DefaultTableModelField(columnMetaData).UseTags(
+								defaultTableModelField := template.DefaultTableModelField(columnMetaData)
+
+								if table.Name == "class_attendance_rules" && columnMetaData.Name == "environment" {
+									defaultTableModelField.Type = template.NewType(environment.Environment{})
+								}
+
+								return defaultTableModelField.UseTags(
 									fmt.Sprintf(`json:"%s"`, columnMetaData.Name))
 							}).
 							// Use singular of table plural name for model name.

@@ -23,15 +23,15 @@ export type CoordinatingClassPostResponse = {
 };
 
 export enum RuleType {
-  MissedConsecutiveClasses = "missed_consecutive_classes",
-  MinPercentageAttendanceFromSession = "min_percentage_attendance_from_session",
-  Advanced = "advanced",
+  MissedConsecutiveClasses = 0,
+  MinPercentageAttendanceFromSession = 1,
+  Advanced = 2,
 }
 
 export type CoordinatingClassPostRequest = {
   title: string;
   description: string;
-  rule_type: string;
+  rule_type: RuleType;
   consecutive_params: MissedConsecutiveClassParams;
   percentage_params: MinPercentageAttendanceFromSessionParams;
   advanced_params: AdvancedParams;

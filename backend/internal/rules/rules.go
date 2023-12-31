@@ -4,7 +4,8 @@ import (
 	_ "embed"
 	"errors"
 
-	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/rules/environment"
+	"github.com/darylhjd/oams/backend/internal/rules/environment/types"
 	"github.com/expr-lang/expr"
 )
 
@@ -16,37 +17,10 @@ var (
 	percentageRule string
 )
 
-type RuleType string
-
-const (
-	RuleTypeMissedConsecutiveClasses           RuleType = "missed_consecutive_classes"
-	RuleTypeMinPercentageAttendanceFromSession RuleType = "min_percentage_attendance_from_session"
-	RuleTypeAdvanced                           RuleType = "advanced"
-)
-
-type baseEnvironment struct {
-	Enrollments []model.SessionEnrollment `expr:"enrollments"`
-}
-
-var baseEnv = baseEnvironment{
-	Enrollments: []model.SessionEnrollment{},
-}
-
-type missedConsecutiveClassesEnv struct {
-	baseEnvironment
-	ConsecutiveClasses int `expr:"consecutive_classes"`
-}
-
-type minPercentageAttendanceFromSessionEnv struct {
-	baseEnvironment
-	Percentage  float64 `expr:"percentage"`
-	FromSession int     `expr:"from_session"`
-}
-
 type RuleParams struct {
 	Title             string            `json:"title"`
 	Description       string            `json:"description"`
-	RuleType          RuleType          `json:"rule_type"`
+	RuleType          types.T           `json:"rule_type"`
 	ConsecutiveParams consecutiveParams `json:"consecutive_params"`
 	PercentageParams  percentageParams  `json:"percentage_params"`
 	AdvancedParams    advancedParams    `json:"advanced_params"`
@@ -65,7 +39,7 @@ type advancedParams struct {
 	Rule string `json:"rule"`
 }
 
-func (r RuleParams) Verify() (rule string, env any, err error) {
+func (r RuleParams) Verify() (rule string, env environment.E, err error) {
 	if len(r.Title) == 0 {
 		return "", nil, errors.New("title is empty")
 	}
@@ -75,32 +49,34 @@ func (r RuleParams) Verify() (rule string, env any, err error) {
 	}
 
 	switch r.RuleType {
-	case RuleTypeMissedConsecutiveClasses:
+	case types.TConsecutive:
 		return r.verifyConsecutiveRule()
-	case RuleTypeMinPercentageAttendanceFromSession:
+	case types.TPercentage:
 		return r.verifyPercentageRule()
-	case RuleTypeAdvanced:
+	case types.TAdvanced:
 		return r.verifyAdvancedRule()
 	default:
 		return "", nil, errors.New("unknown rule type")
 	}
 }
 
-func (r RuleParams) verifyConsecutiveRule() (rule string, env any, err error) {
+func (r RuleParams) verifyConsecutiveRule() (rule string, env environment.E, err error) {
 	if r.ConsecutiveParams.ConsecutiveClasses < 1 {
 		return "", nil, errors.New("number of consecutive classes cannot be less than 1")
 	}
 
-	env = missedConsecutiveClassesEnv{
-		baseEnv,
-		r.ConsecutiveParams.ConsecutiveClasses,
+	env = environment.ConsecutiveE{
+		BaseE: environment.BaseE{
+			EnvType: types.TConsecutive,
+		},
+		ConsecutiveClasses: r.ConsecutiveParams.ConsecutiveClasses,
 	}
 
 	_, err = expr.Compile(consecutiveRule, expr.AsBool(), expr.Env(env))
 	return consecutiveRule, env, err
 }
 
-func (r RuleParams) verifyPercentageRule() (rule string, env any, err error) {
+func (r RuleParams) verifyPercentageRule() (rule string, env environment.E, err error) {
 	params := r.PercentageParams
 
 	if params.Percentage < 0 {
@@ -111,17 +87,23 @@ func (r RuleParams) verifyPercentageRule() (rule string, env any, err error) {
 		return "", nil, errors.New("number of sessions cannot be less than 1")
 	}
 
-	env = minPercentageAttendanceFromSessionEnv{
-		baseEnv,
-		params.Percentage,
-		params.FromSession,
+	env = environment.PercentageE{
+		BaseE: environment.BaseE{
+			EnvType: types.TPercentage,
+		},
+		Percentage:  params.Percentage,
+		FromSession: params.FromSession,
 	}
 
 	_, err = expr.Compile(percentageRule, expr.AsBool(), expr.Env(env))
 	return percentageRule, env, err
 }
 
-func (r RuleParams) verifyAdvancedRule() (rule string, env any, err error) {
-	_, err = expr.Compile(r.AdvancedParams.Rule, expr.AsBool(), expr.Env(baseEnv))
-	return r.AdvancedParams.Rule, baseEnv, err
+func (r RuleParams) verifyAdvancedRule() (rule string, env environment.E, err error) {
+	env = environment.BaseE{
+		EnvType: types.TAdvanced,
+	}
+
+	_, err = expr.Compile(r.AdvancedParams.Rule, expr.AsBool(), expr.Env(env))
+	return r.AdvancedParams.Rule, env, err
 }

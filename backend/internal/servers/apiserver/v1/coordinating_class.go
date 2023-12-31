@@ -80,7 +80,7 @@ func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiRespon
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	ruleString, _, err := req.Verify()
+	ruleString, env, err := req.Verify()
 	if err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("rule failed validation: %s", err))
 	}
@@ -90,6 +90,7 @@ func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiRespon
 		Title:       req.Title,
 		Description: req.Description,
 		Rule:        ruleString,
+		Env:         env,
 	})
 	if err != nil {
 		switch {

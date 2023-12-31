@@ -75,6 +75,7 @@ CREATE TABLE class_attendance_rules
     title       TEXT        NOT NULL,
     description TEXT        NOT NULL,
     rule        TEXT        NOT NULL,
+    environment JSONB       NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT ux_class_id_title
