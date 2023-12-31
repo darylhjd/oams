@@ -3,6 +3,7 @@ package environment
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"errors"
 
 	"github.com/darylhjd/oams/backend/internal/rules/environment/types"
 	"github.com/darylhjd/oams/backend/internal/rules/fact"
@@ -32,6 +33,8 @@ func (e *Environment) Scan(value any) error {
 		e.Env = &BaseE{
 			EnvType: t.EnvType,
 		}
+	default:
+		return errors.New("unknown rule environment type")
 	}
 
 	return json.Unmarshal(value.([]byte), e.Env)
