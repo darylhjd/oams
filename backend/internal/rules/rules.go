@@ -81,6 +81,8 @@ func (r RuleParams) verifyPercentageRule() (rule string, env environment.E, err 
 
 	if params.Percentage < 0 {
 		return "", nil, errors.New("percentage cannot be negative")
+	} else if params.Percentage > 100 {
+		return "", nil, errors.New("percentage cannot be more than 100")
 	}
 
 	if params.FromSession < 1 {
