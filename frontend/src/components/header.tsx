@@ -87,6 +87,7 @@ function Items() {
       <Burger hiddenFrom="md" opened={opened} onClick={toggle} />
       <Drawer
         size="sm"
+        position="right"
         padding="lg"
         opened={opened}
         onClose={close}
@@ -111,7 +112,7 @@ function GuestItems() {
         <Divider my="sm" />
 
         <Space h="md" />
-        <Group>
+        <Group grow preventGrowOverflow>
           <LoginButton />
         </Group>
       </Stack>
@@ -137,7 +138,7 @@ function LoggedItems() {
         <Divider my="sm" />
 
         <Space h="md" />
-        <Group>
+        <Group grow preventGrowOverflow>
           <ProfileButton />
           <LogoutButton />
         </Group>
