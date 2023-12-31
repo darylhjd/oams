@@ -32,6 +32,7 @@ import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 import { getError } from "@/api/error";
 import { RuleForm } from "@/app/attendance-rules/[id]/rule_form";
+import { CodeHighlightTabs } from "@mantine/code-highlight";
 
 export default function AttendanceRulePage({ params }: { params: Params }) {
   const [coordinatingClass, setCoordinatingClass] = useState<CoordinatingClass>(
@@ -195,7 +196,24 @@ function AccordionContent({ rule }: { rule: ClassAttendanceRule }) {
   return (
     <>
       <Divider className={styles.divider} />
-      {rule.rule}
+      <CodeHighlightTabs
+        code={[
+          {
+            fileName: "Rule",
+            code: rule.rule,
+            language: "typescript",
+          },
+          {
+            fileName: "Environment",
+            code: JSON.stringify(
+              rule.environment.data,
+              (k, v) => (k == "env_type" ? undefined : v),
+              4,
+            ),
+            language: "json",
+          },
+        ]}
+      />
     </>
   );
 }

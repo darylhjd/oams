@@ -11,7 +11,7 @@ import (
 
 // Environment is a wrapper type for the database. A custom scanner and valuer is defined for this type.
 type Environment struct {
-	Env E `json:"env"`
+	Data E `json:"data"`
 }
 
 func (e *Environment) Scan(value any) error {
@@ -22,26 +22,26 @@ func (e *Environment) Scan(value any) error {
 
 	switch t.EnvType {
 	case types.TConsecutive:
-		e.Env = &ConsecutiveE{
+		e.Data = &ConsecutiveE{
 			BaseE: BaseE{EnvType: t.EnvType},
 		}
 	case types.TPercentage:
-		e.Env = &PercentageE{
+		e.Data = &PercentageE{
 			BaseE: BaseE{EnvType: t.EnvType},
 		}
 	case types.TAdvanced:
-		e.Env = &BaseE{
+		e.Data = &BaseE{
 			EnvType: t.EnvType,
 		}
 	default:
 		return errors.New("unknown rule environment type")
 	}
 
-	return json.Unmarshal(value.([]byte), e.Env)
+	return json.Unmarshal(value.([]byte), e.Data)
 }
 
 func (e *Environment) Value() (driver.Value, error) {
-	return json.Marshal(e.Env)
+	return json.Marshal(e.Data)
 }
 
 // E is an interface that all environments for any rule must satisfy.
