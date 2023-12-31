@@ -88,7 +88,7 @@ function CreateRuleButton({
     initialValues: {
       title: "",
       description: "",
-      rule_type: RuleType.MissedConsecutiveClasses as string,
+      rule_type: RuleType.MissedConsecutiveClasses as number,
       consecutive_params: {
         consecutive_classes: 4,
       },

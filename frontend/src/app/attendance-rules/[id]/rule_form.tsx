@@ -73,19 +73,21 @@ export function RuleForm({
             label="Rule Type"
             data={[
               {
-                value: RuleType.MissedConsecutiveClasses,
+                value: RuleType.MissedConsecutiveClasses.toString(),
                 label: "Missed Consecutive Classes",
               },
               {
-                value: RuleType.MinPercentageAttendanceFromSession,
+                value: RuleType.MinPercentageAttendanceFromSession.toString(),
                 label: "Minimum Percentage Attendance",
               },
               {
-                value: RuleType.Advanced,
+                value: RuleType.Advanced.toString(),
                 label: "Advanced",
               },
             ]}
-            {...form.getInputProps("rule_type")}
+            onChange={(value) =>
+              form.setFieldValue("rule_type", Number(value.currentTarget.value))
+            }
           />
           <Space h="sm" />
           <Fieldset legend="Rule Details">{ruleDetailComponent}</Fieldset>

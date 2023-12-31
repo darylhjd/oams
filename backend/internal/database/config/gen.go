@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/darylhjd/oams/backend/internal/database/config/types"
 	"github.com/darylhjd/oams/backend/internal/env"
+	"github.com/darylhjd/oams/backend/internal/rules/environment"
 	"github.com/go-jet/jet/v2/generator/metadata"
 	"github.com/go-jet/jet/v2/generator/postgres"
 	"github.com/go-jet/jet/v2/generator/template"
@@ -45,7 +45,7 @@ func main() {
 								defaultTableModelField := template.DefaultTableModelField(columnMetaData)
 
 								if table.Name == "class_attendance_rules" && columnMetaData.Name == "environment" {
-									defaultTableModelField.Type = template.NewType(types.Environment{})
+									defaultTableModelField.Type = template.NewType(environment.Environment{})
 								}
 
 								return defaultTableModelField.UseTags(
