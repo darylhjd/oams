@@ -162,6 +162,8 @@ function PercentageClassRule({
         allowNegative={false}
         decimalScale={2}
         fixedDecimalScale
+        max={100}
+        clampBehavior="strict"
         suffix="%"
         {...form.getInputProps("percentage_params.percentage")}
       />
