@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/logger"
@@ -31,4 +32,6 @@ func main() {
 			lg.Fatal(fmt.Sprintf("%s - could not close database connection", namespace), zap.Error(err))
 		}
 	}()
+
+	lg.Info(fmt.Sprintf("%s - ran service", namespace), zap.Time("time", time.Now()))
 }
