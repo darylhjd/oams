@@ -3,7 +3,7 @@ package azmail
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 )
 
@@ -78,5 +78,5 @@ func (c *Client) sendMail(msg mailMessage) error {
 		return err
 	}
 
-	return fmt.Errorf("%s - error sending mail: %s", namespace, errResp.Error.Message)
+	return errors.New(errResp.Error.Message)
 }

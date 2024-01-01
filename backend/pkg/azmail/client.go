@@ -6,8 +6,6 @@ import (
 )
 
 const (
-	namespace = "azmail"
-
 	apiPath    = "/emails:send"
 	apiVersion = "2023-03-31"
 )

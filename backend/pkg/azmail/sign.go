@@ -14,7 +14,7 @@ import (
 
 func (c *Client) generateSignedMailRequest(msg mailMessage) (*http.Request, error) {
 	// https://learn.microsoft.com/en-us/rest/api/communication/dataplane/email/send?view=rest-communication-dataplane-2023-03-31&viewFallbackFrom=rest-communication-dataplane-2023-04-01-preview&tabs=HTTP
-	body, err := json.MarshalIndent(msg, "", "  ")
+	body, err := json.Marshal(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -38,9 +38,11 @@ func (c *Client) generateSignedMailRequest(msg mailMessage) (*http.Request, erro
 	)
 
 	hm := hmac.New(sha256.New, c.accessKey)
-	hm.Write([]byte(stringToSign))
-	signature := base64.StdEncoding.EncodeToString(hm.Sum(nil))
+	if _, err = hm.Write([]byte(stringToSign)); err != nil {
+		return nil, err
+	}
 
+	signature := base64.StdEncoding.EncodeToString(hm.Sum(nil))
 	authorization := fmt.Sprintf("HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256&Signature=%s", signature)
 
 	req.Header.Set("Content-Type", "application/json")
