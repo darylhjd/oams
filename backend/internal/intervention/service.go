@@ -62,7 +62,7 @@ func (s *Service) Run(ctx context.Context) error {
 }
 
 func (s *Service) doStuff(ctx context.Context) error {
-	data, err := s.db.GetTodayClassGroupSessions(ctx)
+	data, err := s.db.Intervention(ctx)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (s *Service) doStuff(ctx context.Context) error {
 		Html:      "",
 	}
 
-	return s.mailer.SendMails(mail)
+	return nil
 }
 
 // Stop the intervention service gracefully.

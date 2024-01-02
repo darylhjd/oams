@@ -199,6 +199,10 @@ func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr
 			return nil, err
 		}
 
+		if day == time.Sunday {
+			day = time.Saturday + 1
+		}
+
 		startTime, err := time.Parse(classGroupSessionTimeFormat, from)
 		if err != nil {
 			return nil, fmt.Errorf("could not parse session start time: %w", err)
