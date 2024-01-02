@@ -72,7 +72,7 @@ func parseClassMetaData(batchData *BatchData, rows [][]string) error {
 			return fmt.Errorf("could not parse class year and semester: %w", err)
 		}
 
-		date, err := time.ParseInLocation(creationDateFormat, fmt.Sprintf("%s %s", d, t), location)
+		date, err := time.ParseInLocation(creationDateFormat, fmt.Sprintf("%s %s", d, t), datetime.Location)
 		if err != nil {
 			return fmt.Errorf("could not parse class creation file creation date: %w", err)
 		}
@@ -212,7 +212,7 @@ func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr
 		startHour, startMinute, _ := startTime.Clock()
 		endHour, endMinute, _ := endTime.Clock()
 
-		firstSessionDate := datetime.WeekStart(year, week, location).AddDate(0, 0, int(day)-1)
+		firstSessionDate := datetime.WeekStart(year, week, datetime.Location).AddDate(0, 0, int(day)-1)
 
 		firstSessionStartDateTime = firstSessionDate.
 			Add(time.Hour*time.Duration(startHour) + time.Minute*time.Duration(startMinute))

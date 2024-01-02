@@ -25,16 +25,6 @@ func WeekStart(year, week int, location *time.Location) time.Time {
 	return t
 }
 
-var weekdays = map[string]time.Weekday{}
-
-func init() {
-	for d := time.Sunday; d <= time.Saturday; d++ {
-		name := d.String()
-		weekdays[name] = d
-		weekdays[name[:3]] = d
-	}
-}
-
 // ParseWeekday returns a time.Weekday corresponding to the given name.
 // Both long names such as "Monday", "Friday" and short names such as "Mon", "Fri" are recognized.
 func ParseWeekday(s string) (time.Weekday, error) {

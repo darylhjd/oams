@@ -2,7 +2,7 @@ package intervention
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -50,10 +50,10 @@ func New(ctx context.Context) (*Service, error) {
 	}, nil
 }
 
-func (s *Service) Run() error {
+func (s *Service) Run(ctx context.Context) error {
 	s.l.Info(fmt.Sprintf("%s - intervention service invoked", Namespace), zap.Time("time", time.Now()))
 
-	if err := s.doStuff(); err != nil {
+	if err := s.doStuff(ctx); err != nil {
 		return err
 	}
 
@@ -61,8 +61,33 @@ func (s *Service) Run() error {
 	return nil
 }
 
-func (s *Service) doStuff() error {
-	return errors.New("not implemented")
+func (s *Service) doStuff(ctx context.Context) error {
+	data, err := s.db.GetTodayClassGroupSessions(ctx)
+	if err != nil {
+		return err
+	}
+
+	body, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	mail := azmail.NewMail()
+	mail.Recipients = azmail.MailRecipients{
+		To: []azmail.MailAddress{
+			{
+				Address:     "",
+				DisplayName: "",
+			},
+		},
+	}
+	mail.Content = azmail.MailContent{
+		Subject:   "Today's Class Group Sessions",
+		PlainText: fmt.Sprintf("Here are today's sessions: %s", string(body)),
+		Html:      "",
+	}
+
+	return s.mailer.SendMails(mail)
 }
 
 // Stop the intervention service gracefully.

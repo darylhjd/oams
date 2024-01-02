@@ -1,12 +1,10 @@
 package common
 
 import (
-	"time"
 	_ "time/tzdata"
 )
 
 const (
-	timezoneLocation    = "Asia/Singapore"
 	yearSemesterDateRow = 0
 	courseProgrammeRow  = 1
 	courseCodeRow       = 2
@@ -49,9 +47,3 @@ const (
 	semester2YearWeek   = 2
 	recessWeekAfterWeek = 7
 )
-
-var location *time.Location
-
-func init() {
-	location, _ = time.LoadLocation(timezoneLocation)
-}

@@ -20,7 +20,7 @@ func main() {
 		}
 	}()
 
-	if err = service.Run(); err != nil {
+	if err = service.Run(ctx); err != nil {
 		log.Printf("%s - error running service: %s", intervention.Namespace, err)
 	}
 }
