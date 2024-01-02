@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (c *Client) generateSignedMailRequest(msg mailMessage) (*http.Request, error) {
+func (c *Client) generateSignedMessageRequest(msg mailMessage) (*http.Request, error) {
 	// https://learn.microsoft.com/en-us/rest/api/communication/dataplane/email/send?view=rest-communication-dataplane-2023-03-31&viewFallbackFrom=rest-communication-dataplane-2023-04-01-preview&tabs=HTTP
 	body, err := json.Marshal(msg)
 	if err != nil {

@@ -18,19 +18,19 @@ type mailMessage struct {
 
 func (c *Client) newMailMessage(mail Mail) mailMessage {
 	return mailMessage{
-		Attachments:                    nil,
-		Content:                        mail.Content,
-		Recipients:                     mail.Recipients,
-		ReplyTo:                        nil,
-		SenderAddr:                     c.senderAddr,
-		UserEngagementTrackingDisabled: true,
+		nil,
+		mail.Content,
+		mail.Recipients,
+		nil,
+		c.senderAddr,
+		true,
 	}
 }
 
 func (c *Client) SendMails(mails ...*Mail) error {
 	for _, mail := range mails {
 		msg := c.newMailMessage(*mail)
-		if err := c.sendMail(msg); err != nil {
+		if err := c.sendMessage(msg); err != nil {
 			return err
 		}
 	}
@@ -51,8 +51,8 @@ type errorResponse struct {
 	} `json:"error"`
 }
 
-func (c *Client) sendMail(msg mailMessage) error {
-	req, err := c.generateSignedMailRequest(msg)
+func (c *Client) sendMessage(msg mailMessage) error {
+	req, err := c.generateSignedMessageRequest(msg)
 	if err != nil {
 		return err
 	}
