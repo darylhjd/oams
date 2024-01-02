@@ -52,7 +52,6 @@ func New(ctx context.Context) (*Service, error) {
 func (s *Service) Run(ctx context.Context) error {
 	s.l.Info(fmt.Sprintf("%s - intervention service invoked", Namespace), zap.Time("time", time.Now()))
 
-	// Get data and rules to perform checks.
 	facts, rules, err := s.db.Intervention(ctx)
 	if err != nil {
 		return err

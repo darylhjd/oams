@@ -8,7 +8,6 @@ import (
 )
 
 func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) error {
-	// For each class rule, check which user fails the rule.
 	for classId, students := range fGroup {
 		s.l.Info(fmt.Sprintf("%s - performing rule checks", Namespace), zap.Int64("class_id", classId))
 
