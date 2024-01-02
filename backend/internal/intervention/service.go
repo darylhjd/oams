@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/logger"
 	"github.com/darylhjd/oams/backend/pkg/azmail"
 	"go.uber.org/zap"
@@ -37,9 +37,9 @@ func New(ctx context.Context) (*Service, error) {
 	}
 
 	mailer, err := azmail.NewClient(
-		os.Getenv("AZURE_EMAIL_ENDPOINT"),
-		os.Getenv("AZURE_EMAIL_ACCESS_KEY"),
-		os.Getenv("AZURE_EMAIL_SENDER_ADDRESS"),
+		env.GetAzureEmailEndpoint(),
+		env.GetAzureEmailAccessKey(),
+		env.GetAzureEmailSenderAddress(),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("%s - could not create mailer client: %w", Namespace, err)

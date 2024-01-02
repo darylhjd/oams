@@ -1,41 +1,21 @@
 package env
 
 import (
-	"fmt"
+	"os"
 )
 
-func verifyConfiguration() error {
-	envs := []string{
-		apiServerPort,
-		apiServerAzureTenantId,
-		apiServerAzureClientId,
-		webServer,
-		databaseType,
-		databaseName,
-		databaseUser,
-		databasePassword,
-		databaseHost,
-		databasePort,
-		databaseSslMode,
-	}
+const (
+	configuration = "CONFIGURATION"
+)
 
-	if err := checkRequiredEnvs(envs...); err != nil {
-		return err
-	}
+type Conf string
 
-	// Check SSL mode and root cert.
-	mode := GetDatabaseSSLMode()
-	env := GetAppEnv()
-	switch mode {
-	case databaseSslModeVerifyFull:
-		return checkRequiredEnvs(databaseSslRootCertLoc)
-	case databaseSslModeDisable:
-		if env == AppEnvLocal {
-			return nil
-		}
+const (
+	ConfAPIServer    Conf = "apiserver"
+	ConfIntervention Conf = "intervention"
+)
 
-		return fmt.Errorf("database connection ssl mode disabled for critical environment %q", env)
-	default:
-		return fmt.Errorf("invalid %s value %q", databaseSslMode, mode)
-	}
+// GetConfiguration returns the CONFIGURATION environment variable.
+func GetConfiguration() Conf {
+	return Conf(os.Getenv(configuration))
 }
