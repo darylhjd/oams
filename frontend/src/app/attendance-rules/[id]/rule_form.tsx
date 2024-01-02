@@ -4,6 +4,7 @@ import {
   Anchor,
   Button,
   Center,
+  Code,
   Fieldset,
   FocusTrap,
   Group,
@@ -189,7 +190,9 @@ function AdvancedForm({
   form: UseFormReturnType<CoordinatingClassPostRequest>;
   loading: boolean;
 }) {
-  const variables = `var enrollments []struct {
+  const variables = `// Array of enrollment info for a user.
+// The array is sorted by start time and then end time in ascending order.
+var enrollments []struct {
   ClassID   int64     
   StartTime time.Time 
   EndTime   time.Time 
@@ -202,8 +205,8 @@ function AdvancedForm({
     <>
       <Text c="dimmed" size="sm" ta="center">
         OAMS allows you to specify custom rules. Use the provided variables to
-        form custom conditions to trigger alerts. The language definition can be
-        found{" "}
+        form custom conditions. An alert is triggered when the condition returns{" "}
+        <Code>true</Code> for a user. The language definition can be found{" "}
         <Anchor
           href="https://expr-lang.org/docs/language-definition"
           target="_blank"
