@@ -11,25 +11,32 @@ import (
 )
 
 type InterventionData struct {
-	model.ClassGroupSession
+	ClassGroup        model.ClassGroup
+	ClassGroupSession model.ClassGroupSession
+	SessionEnrollment model.SessionEnrollment
 }
 
-func (d *DB) GetTodayClassGroupSessions(ctx context.Context) ([]InterventionData, error) {
+// Intervention gets all session enrollments of class group sessions that occurred in the past.
+func (d *DB) Intervention(ctx context.Context) ([]InterventionData, error) {
 	var res []InterventionData
 
 	now := time.Now()
 	startOfDay := Timestampz(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, datetime.Location.String())
-	endOfDay := Timestampz(
-		now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, datetime.Location.String(),
-	).SUB(INTERVALd(1 * time.Microsecond)) // Precision of Postgres is microsecond.
+	endOfDay := Timestampz(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, datetime.Location.String())
 
 	stmt := SELECT(
+		ClassGroups.AllColumns,
 		ClassGroupSessions.AllColumns,
+		SessionEnrollments.AllColumns,
 	).FROM(
-		ClassGroupSessions,
+		ClassGroupSessions.INNER_JOIN(
+			SessionEnrollments, SessionEnrollments.SessionID.EQ(ClassGroupSessions.ID),
+		).INNER_JOIN(
+			ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
+		),
 	).WHERE(
 		ClassGroupSessions.StartTime.GT_EQ(startOfDay).AND(
-			ClassGroupSessions.EndTime.LT_EQ(endOfDay),
+			ClassGroupSessions.EndTime.LT(endOfDay),
 		),
 	)
 
