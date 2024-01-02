@@ -1,12 +1,20 @@
-package environment
+package rules
 
 import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
 
-	"github.com/darylhjd/oams/backend/internal/rules/environment/types"
-	"github.com/darylhjd/oams/backend/internal/rules/fact"
+	"github.com/darylhjd/oams/backend/internal/intervention/fact"
+)
+
+// T is an identifier for the type of environment.
+type T int
+
+const (
+	TConsecutive T = iota
+	TPercentage
+	TAdvanced
 )
 
 // Environment is a wrapper type for the database. A custom scanner and valuer is defined for this type.
@@ -21,15 +29,15 @@ func (e *Environment) Scan(value any) error {
 	}
 
 	switch t.EnvType {
-	case types.TConsecutive:
+	case TConsecutive:
 		e.Data = &ConsecutiveE{
 			BaseE: BaseE{EnvType: t.EnvType},
 		}
-	case types.TPercentage:
+	case TPercentage:
 		e.Data = &PercentageE{
 			BaseE: BaseE{EnvType: t.EnvType},
 		}
-	case types.TAdvanced:
+	case TAdvanced:
 		e.Data = &BaseE{
 			EnvType: t.EnvType,
 		}
@@ -46,16 +54,16 @@ func (e *Environment) Value() (driver.Value, error) {
 
 // E is an interface that all environments for any rule must satisfy.
 type E interface {
-	Type() types.T
+	Type() T
 }
 
 // BaseE represents the base environment variables that all environments must have.
 type BaseE struct {
-	EnvType     types.T  `json:"env_type"`
+	EnvType     T        `json:"env_type"`
 	Enrollments []fact.F `expr:"enrollments" json:"-"`
 }
 
-func (e BaseE) Type() types.T {
+func (e BaseE) Type() T {
 	return e.EnvType
 }
 
