@@ -2,7 +2,6 @@ package intervention
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -53,40 +52,26 @@ func New(ctx context.Context) (*Service, error) {
 func (s *Service) Run(ctx context.Context) error {
 	s.l.Info(fmt.Sprintf("%s - intervention service invoked", Namespace), zap.Time("time", time.Now()))
 
-	if err := s.doStuff(ctx); err != nil {
+	// Get data and rules to perform checks.
+	facts, rules, err := s.db.Intervention(ctx)
+	if err != nil {
+		return err
+	}
+
+	s.l.Info(
+		fmt.Sprintf("%s - retrieved data from database", Namespace),
+		zap.Int("num_facts", len(facts)),
+		zap.Int("num_rules", len(rules)),
+	)
+
+	factGroups := s.groupFacts(facts)
+	ruleGroups := s.groupRules(rules)
+
+	if err = s.performChecks(factGroups, ruleGroups); err != nil {
 		return err
 	}
 
 	s.l.Info(fmt.Sprintf("%s - intervention service completed", Namespace), zap.Time("time", time.Now()))
-	return nil
-}
-
-func (s *Service) doStuff(ctx context.Context) error {
-	data, err := s.db.Intervention(ctx)
-	if err != nil {
-		return err
-	}
-
-	body, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	mail := azmail.NewMail()
-	mail.Recipients = azmail.MailRecipients{
-		To: []azmail.MailAddress{
-			{
-				Address:     "",
-				DisplayName: "",
-			},
-		},
-	}
-	mail.Content = azmail.MailContent{
-		Subject:   "Today's Class Group Sessions",
-		PlainText: fmt.Sprintf("Here are today's sessions: %s", string(body)),
-		Html:      "",
-	}
-
 	return nil
 }
 
