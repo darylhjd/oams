@@ -14,5 +14,5 @@ export type ClassAttendanceRule = {
 };
 
 export type Environment = {
-  data: JSON;
+  env: JSON;
 };
