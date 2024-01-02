@@ -14,11 +14,11 @@ func main() {
 	}
 	defer func() {
 		if err = apiServer.Stop(); err != nil {
-			log.Fatalf("%s - %s", apiserver.Namespace, err)
+			log.Printf("%s - %s", apiserver.Namespace, err)
 		}
 	}()
 
 	if err = apiServer.Start(); err != nil {
-		log.Fatalf("%s - %s", apiserver.Namespace, err)
+		log.Printf("%s - %s", apiserver.Namespace, err)
 	}
 }

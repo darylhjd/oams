@@ -16,11 +16,11 @@ func main() {
 	}
 	defer func() {
 		if err = service.Stop(); err != nil {
-			log.Fatalf("%s - could not gracefully stop service: %s", intervention.Namespace, err)
+			log.Printf("%s - could not gracefully stop service: %s", intervention.Namespace, err)
 		}
 	}()
 
 	if err = service.Run(); err != nil {
-		log.Fatalf("%s - error running service: %s", intervention.Namespace, err)
+		log.Printf("%s - error running service: %s", intervention.Namespace, err)
 	}
 }
