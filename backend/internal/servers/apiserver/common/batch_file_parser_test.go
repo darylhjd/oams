@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/pkg/datetime"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -24,7 +25,7 @@ func TestParseBatchFile(t *testing.T) {
 			"",
 			&BatchData{
 				"batch_file_well_formatted.xlsx",
-				time.Date(2023, time.June, 15, 13, 1, 0, 0, location),
+				time.Date(2023, time.June, 15, 13, 1, 0, 0, datetime.Location),
 				database.UpsertClassParams{
 					Code:      "SC1015",
 					Year:      2023,
@@ -40,23 +41,23 @@ func TestParseBatchFile(t *testing.T) {
 						},
 						[]database.UpsertClassGroupSessionParams{
 							{
-								StartTime: time.Date(2024, time.January, 15, 8, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.January, 15, 9, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.January, 15, 8, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.January, 15, 9, 20, 0, 0, datetime.Location),
 								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: time.Date(2024, time.April, 8, 8, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.April, 8, 9, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.April, 8, 8, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.April, 8, 9, 20, 0, 0, datetime.Location),
 								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: time.Date(2024, time.January, 16, 9, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.January, 16, 10, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.January, 16, 9, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.January, 16, 10, 20, 0, 0, datetime.Location),
 								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: time.Date(2024, time.April, 9, 9, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.April, 9, 10, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.April, 9, 9, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.April, 9, 10, 20, 0, 0, datetime.Location),
 								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 						},
@@ -72,13 +73,13 @@ func TestParseBatchFile(t *testing.T) {
 						},
 						[]database.UpsertClassGroupSessionParams{
 							{
-								StartTime: time.Date(2024, time.January, 15, 1, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.January, 15, 2, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.January, 15, 1, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.January, 15, 2, 20, 0, 0, datetime.Location),
 								Venue:     "TR+19 NORTH,NS4-05-97",
 							},
 							{
-								StartTime: time.Date(2024, time.April, 8, 1, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.April, 8, 2, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.April, 8, 1, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.April, 8, 2, 20, 0, 0, datetime.Location),
 								Venue:     "TR+19 NORTH,NS4-05-97",
 							},
 						},
@@ -94,23 +95,23 @@ func TestParseBatchFile(t *testing.T) {
 						},
 						[]database.UpsertClassGroupSessionParams{
 							{
-								StartTime: time.Date(2024, time.January, 16, 11, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.January, 16, 12, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.January, 16, 11, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.January, 16, 12, 20, 0, 0, datetime.Location),
 								Venue:     "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								StartTime: time.Date(2024, time.January, 30, 11, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.January, 30, 12, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.January, 30, 11, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.January, 30, 12, 20, 0, 0, datetime.Location),
 								Venue:     "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								StartTime: time.Date(2024, time.March, 19, 11, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.March, 19, 12, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.March, 19, 11, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.March, 19, 12, 20, 0, 0, datetime.Location),
 								Venue:     "TR+37 NORTH,NS2-05-30",
 							},
 							{
-								StartTime: time.Date(2024, time.April, 2, 11, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.April, 2, 12, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.April, 2, 11, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.April, 2, 12, 20, 0, 0, datetime.Location),
 								Venue:     "TR+37 NORTH,NS2-05-30",
 							},
 						},
@@ -129,7 +130,7 @@ func TestParseBatchFile(t *testing.T) {
 			"",
 			&BatchData{
 				"batch_file_empty_class_group_enrollments.xlsx",
-				time.Date(2023, time.June, 15, 13, 1, 0, 0, location),
+				time.Date(2023, time.June, 15, 13, 1, 0, 0, datetime.Location),
 				database.UpsertClassParams{
 					Code:      "SC1015",
 					Year:      2023,
@@ -145,23 +146,23 @@ func TestParseBatchFile(t *testing.T) {
 						},
 						[]database.UpsertClassGroupSessionParams{
 							{
-								StartTime: time.Date(2024, time.January, 15, 8, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.January, 15, 9, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.January, 15, 8, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.January, 15, 9, 20, 0, 0, datetime.Location),
 								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: time.Date(2024, time.April, 8, 8, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.April, 8, 9, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.April, 8, 8, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.April, 8, 9, 20, 0, 0, datetime.Location),
 								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: time.Date(2024, time.January, 16, 9, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.January, 16, 10, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.January, 16, 9, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.January, 16, 10, 20, 0, 0, datetime.Location),
 								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 							{
-								StartTime: time.Date(2024, time.April, 9, 9, 30, 0, 0, location),
-								EndTime:   time.Date(2024, time.April, 9, 10, 20, 0, 0, location),
+								StartTime: time.Date(2024, time.April, 9, 9, 30, 0, 0, datetime.Location),
+								EndTime:   time.Date(2024, time.April, 9, 10, 20, 0, 0, datetime.Location),
 								Venue:     "TR+15 NORTH,NS4-05-93",
 							},
 						},
@@ -177,7 +178,7 @@ func TestParseBatchFile(t *testing.T) {
 			"",
 			&BatchData{
 				"batch_file_no_class_groups.xlsx",
-				time.Date(2023, time.June, 15, 13, 1, 0, 0, location),
+				time.Date(2023, time.June, 15, 13, 1, 0, 0, datetime.Location),
 				database.UpsertClassParams{
 					Code:      "SC1015",
 					Year:      2023,
