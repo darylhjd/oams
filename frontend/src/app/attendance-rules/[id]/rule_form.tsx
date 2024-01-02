@@ -20,6 +20,7 @@ import {
   CoordinatingClassPostRequest,
   RuleType,
 } from "@/api/coordinating_class";
+import { CodeHighlight } from "@mantine/code-highlight";
 
 export function RuleForm({
   form,
@@ -189,21 +190,23 @@ function AdvancedForm({
   form: UseFormReturnType<CoordinatingClassPostRequest>;
   loading: boolean;
 }) {
-  const variables = `var enrollments []struct {
-	ID        int64    
-	SessionID int64    
-	UserID    string   
-	Attended  bool     
-	CreatedAt time.Time
-	UpdatedAt time.Time
+  const variables = `// Array of enrollment info for a user.
+// The array is sorted by start time and then end time in ascending order.
+var enrollments []struct {
+  ClassID   int64     
+  StartTime time.Time 
+  EndTime   time.Time 
+  Venue     string    
+  UserID    string    
+  Attended  bool      
 }`;
 
   return (
     <>
       <Text c="dimmed" size="sm" ta="center">
         OAMS allows you to specify custom rules. Use the provided variables to
-        form custom conditions to trigger alerts. The language definition can be
-        found{" "}
+        form custom conditions. An alert is triggered when the condition returns{" "}
+        <Code>true</Code> for a user. The language definition can be found{" "}
         <Anchor
           href="https://expr-lang.org/docs/language-definition"
           target="_blank"
@@ -221,7 +224,11 @@ function AdvancedForm({
             </Button>
           </Popover.Target>
           <Popover.Dropdown>
-            <Code block>{variables}</Code>
+            <CodeHighlight
+              code={variables}
+              language="golang"
+              withCopyButton={false}
+            />
           </Popover.Dropdown>
         </Popover>
       </Center>

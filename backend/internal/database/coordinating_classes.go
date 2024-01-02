@@ -72,7 +72,7 @@ type CreateNewCoordinatingClassRuleParams struct {
 func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCoordinatingClassRuleParams) (model.ClassAttendanceRule, error) {
 	var res model.ClassAttendanceRule
 
-	envString, err := (&rules.Environment{Data: arg.Env}).Value()
+	envString, err := (&rules.Environment{Env: arg.Env}).Value()
 	if err != nil {
 		return res, err
 	}

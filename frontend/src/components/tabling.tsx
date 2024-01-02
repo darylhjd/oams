@@ -83,7 +83,7 @@ export const ClassAttendanceRulesDataTableColumns: MRT_ColumnDef<ClassAttendance
         const environment = cell.getValue<Environment>();
         return (
           <Text lineClamp={2} size="sm">
-            {JSON.stringify(environment.data)}
+            {JSON.stringify(environment.env)}
           </Text>
         );
       },
