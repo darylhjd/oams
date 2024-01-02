@@ -12,12 +12,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("%s - cannot start service: %s\n", apiserver.Namespace, err)
 	}
+	defer func() {
+		if err = apiServer.Stop(); err != nil {
+			log.Printf("%s - %s", apiserver.Namespace, err)
+		}
+	}()
 
 	if err = apiServer.Start(); err != nil {
-		log.Fatalf("%s - %s", apiserver.Namespace, err)
-	}
-
-	if err = apiServer.Stop(); err != nil {
-		log.Fatalf("%s - %s", apiserver.Namespace, err)
+		log.Printf("%s - %s", apiserver.Namespace, err)
 	}
 }

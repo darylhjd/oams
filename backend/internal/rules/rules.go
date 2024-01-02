@@ -4,8 +4,6 @@ import (
 	_ "embed"
 	"errors"
 
-	"github.com/darylhjd/oams/backend/internal/rules/environment"
-	"github.com/darylhjd/oams/backend/internal/rules/environment/types"
 	"github.com/expr-lang/expr"
 )
 
@@ -20,7 +18,7 @@ var (
 type RuleParams struct {
 	Title             string            `json:"title"`
 	Description       string            `json:"description"`
-	RuleType          types.T           `json:"rule_type"`
+	RuleType          T                 `json:"rule_type"`
 	ConsecutiveParams consecutiveParams `json:"consecutive_params"`
 	PercentageParams  percentageParams  `json:"percentage_params"`
 	AdvancedParams    advancedParams    `json:"advanced_params"`
@@ -39,7 +37,7 @@ type advancedParams struct {
 	Rule string `json:"rule"`
 }
 
-func (r RuleParams) Verify() (rule string, env environment.E, err error) {
+func (r RuleParams) Verify() (rule string, env E, err error) {
 	if len(r.Title) == 0 {
 		return "", nil, errors.New("title is empty")
 	}
@@ -49,25 +47,25 @@ func (r RuleParams) Verify() (rule string, env environment.E, err error) {
 	}
 
 	switch r.RuleType {
-	case types.TConsecutive:
+	case TConsecutive:
 		return r.verifyConsecutiveRule()
-	case types.TPercentage:
+	case TPercentage:
 		return r.verifyPercentageRule()
-	case types.TAdvanced:
+	case TAdvanced:
 		return r.verifyAdvancedRule()
 	default:
 		return "", nil, errors.New("unknown rule type")
 	}
 }
 
-func (r RuleParams) verifyConsecutiveRule() (rule string, env environment.E, err error) {
+func (r RuleParams) verifyConsecutiveRule() (rule string, env E, err error) {
 	if r.ConsecutiveParams.ConsecutiveClasses < 1 {
 		return "", nil, errors.New("number of consecutive classes cannot be less than 1")
 	}
 
-	env = environment.ConsecutiveE{
-		BaseE: environment.BaseE{
-			EnvType: types.TConsecutive,
+	env = ConsecutiveE{
+		BaseE: BaseE{
+			EnvType: TConsecutive,
 		},
 		ConsecutiveClasses: r.ConsecutiveParams.ConsecutiveClasses,
 	}
@@ -76,7 +74,7 @@ func (r RuleParams) verifyConsecutiveRule() (rule string, env environment.E, err
 	return consecutiveRule, env, err
 }
 
-func (r RuleParams) verifyPercentageRule() (rule string, env environment.E, err error) {
+func (r RuleParams) verifyPercentageRule() (rule string, env E, err error) {
 	params := r.PercentageParams
 
 	if params.Percentage < 0 {
@@ -89,9 +87,9 @@ func (r RuleParams) verifyPercentageRule() (rule string, env environment.E, err 
 		return "", nil, errors.New("number of sessions cannot be less than 1")
 	}
 
-	env = environment.PercentageE{
-		BaseE: environment.BaseE{
-			EnvType: types.TPercentage,
+	env = PercentageE{
+		BaseE: BaseE{
+			EnvType: TPercentage,
 		},
 		Percentage:  params.Percentage,
 		FromSession: params.FromSession,
@@ -101,9 +99,9 @@ func (r RuleParams) verifyPercentageRule() (rule string, env environment.E, err 
 	return percentageRule, env, err
 }
 
-func (r RuleParams) verifyAdvancedRule() (rule string, env environment.E, err error) {
-	env = environment.BaseE{
-		EnvType: types.TAdvanced,
+func (r RuleParams) verifyAdvancedRule() (rule string, env E, err error) {
+	env = BaseE{
+		EnvType: TAdvanced,
 	}
 
 	_, err = expr.Compile(r.AdvancedParams.Rule, expr.AsBool(), expr.Env(env))
