@@ -59,6 +59,9 @@ jobs:
           DATABASE_HOST: ${{ vars.DATABASE_HOST }}
           DATABASE_PORT: ${{ vars.DATABASE_PORT }}
           DATABASE_SSL_MODE: ${{ vars.DATABASE_SSL_MODE }}
+          AZURE_EMAIL_ENDPOINT: ${{ vars.AZURE_EMAIL_ENDPOINT }}
+          AZURE_EMAIL_ACCESS_KEY: ${{ vars.AZURE_EMAIL_ACCESS_KEY }}
+          AZURE_EMAIL_SENDER_ADDRESS: ${{ vars.AZURE_EMAIL_SENDER_ADDRESS }}
         run: |
           cd backend
           go test ./...
