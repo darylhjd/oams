@@ -9,10 +9,12 @@ import (
 )
 
 const (
+	userEmailSubject = "OAMS: Attendance Check Failure"
+)
+
+const (
 	textTemplate = "user_text_email.tmpl"
 	htmlTemplate = "user_html_email.tmpl"
-
-	userEmailSubject = "OAMS: Attendance Check Failure"
 )
 
 var (

@@ -25,6 +25,10 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []model.ClassAttendanc
 
 	stmt := SELECT(
 		Classes.ID,
+		Classes.Code,
+		Classes.Year,
+		Classes.Semester,
+		ClassGroups.ClassType,
 		ClassGroupSessions.StartTime,
 		ClassGroupSessions.EndTime,
 		ClassGroupSessions.Venue,

@@ -197,12 +197,18 @@ function AdvancedForm({
   const variables = `// Array of enrollment info for a user.
 // The array is sorted by start time and then end time in ascending order.
 var enrollments []struct {
-  ClassID   int64     
-  StartTime time.Time 
-  EndTime   time.Time 
-  Venue     string    
-  UserID    string    
-  Attended  bool      
+	ClassID       int64    
+	ClassCode     string   
+	ClassYear     int32    
+	ClassSemester string    
+	ClassType     string    
+	StartTime     time.Time 
+	EndTime       time.Time 
+	Venue         string    
+	UserID        string    
+	UserName      string    
+	UserEmail     string   
+	Attended      bool     
 }`;
 
   return (
