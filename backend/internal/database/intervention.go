@@ -20,11 +20,15 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []model.ClassAttendanc
 	startOfNextDay := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
 
 	classGroupSessionPredicate := ClassGroupSessions.StartTime.GT_EQ(TimestampzT(startOfDay)).AND(
-		ClassGroupSessions.EndTime.LT(TimestampzT(startOfNextDay)),
+		ClassGroupSessions.EndTime.LT(TimestampzT(startOfNextDay).ADD(INTERVALd(time.Hour * 24 * 20))),
 	)
 
 	stmt := SELECT(
 		Classes.ID,
+		Classes.Code,
+		Classes.Year,
+		Classes.Semester,
+		ClassGroups.ClassType,
 		ClassGroupSessions.StartTime,
 		ClassGroupSessions.EndTime,
 		ClassGroupSessions.Venue,
