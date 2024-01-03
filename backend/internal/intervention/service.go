@@ -74,10 +74,6 @@ func (s *Service) Run(ctx context.Context) error {
 	}
 
 	for _, mail := range mails {
-		s.l.Info(
-			fmt.Sprintf("%s - email generated", Namespace),
-			zap.Any("recipients", mail.Recipients.To),
-		)
 		log.Println(mail.Content.PlainText)
 	}
 
