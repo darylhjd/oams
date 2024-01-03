@@ -5,7 +5,7 @@ import (
 	htmltemplate "html/template"
 	texttemplate "text/template"
 
-	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/database"
 )
 
 const (
@@ -27,7 +27,7 @@ var (
 
 type EmailArgs struct {
 	UserInfo userKey
-	Rules    []model.ClassAttendanceRule
+	Rules    []database.RuleInfo
 }
 
 func init() {

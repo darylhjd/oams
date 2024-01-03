@@ -1,7 +1,7 @@
 package intervention
 
 import (
-	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/intervention/fact"
 )
 
@@ -38,10 +38,10 @@ func (s *Service) groupFacts(facts []fact.F) factGrouping {
 	return grouping
 }
 
-type ruleGrouping map[int64][]model.ClassAttendanceRule
+type ruleGrouping map[int64][]database.RuleInfo
 
 // groupRules by class.
-func (s *Service) groupRules(rules []model.ClassAttendanceRule) ruleGrouping {
+func (s *Service) groupRules(rules []database.RuleInfo) ruleGrouping {
 	grouping := ruleGrouping{}
 
 	for _, rule := range rules {

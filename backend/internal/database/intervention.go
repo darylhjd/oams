@@ -10,9 +10,15 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
+type RuleInfo struct {
+	model.ClassAttendanceRule
+	CreatorName  string `alias:"user.name"`
+	CreatorEmail string `alias:"user.email"`
+}
+
 // Intervention gets all session enrollments of class group sessions that occurred on the current day,
 // as well as all the rules for the classes that these class group sessions belong to.
-func (d *DB) Intervention(ctx context.Context) ([]fact.F, []model.ClassAttendanceRule, error) {
+func (d *DB) Intervention(ctx context.Context) ([]fact.F, []RuleInfo, error) {
 	var facts []fact.F
 
 	now := time.Now()
@@ -72,10 +78,12 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []model.ClassAttendanc
 		return nil, nil, err
 	}
 
-	var rules []model.ClassAttendanceRule
+	var rules []RuleInfo
 
 	stmt = SELECT(
 		ClassAttendanceRules.AllColumns,
+		Users.Name,
+		Users.Email,
 	).FROM(
 		ClassAttendanceRules.INNER_JOIN(
 			Classes, Classes.ID.EQ(ClassAttendanceRules.ClassID),
@@ -83,6 +91,8 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []model.ClassAttendanc
 			ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
 		).INNER_JOIN(
 			ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
+		).INNER_JOIN(
+			Users, Users.ID.EQ(ClassAttendanceRules.CreatorID),
 		),
 	).WHERE(
 		classGroupSessionPredicate,
