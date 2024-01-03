@@ -27,15 +27,19 @@ func (c *Client) newMailMessage(mail Mail) mailMessage {
 	}
 }
 
+// SendMails sends multiple mails. If any errors are encountered, the error is saved and later returned.
+// Encountering errors does not stop later emails from being sent.
 func (c *Client) SendMails(mails ...*Mail) error {
+	var errs []error
+
 	for _, mail := range mails {
 		msg := c.newMailMessage(*mail)
 		if err := c.sendMessage(msg); err != nil {
-			return err
+			errs = append(errs, err)
 		}
 	}
 
-	return nil
+	return errors.Join(errs...)
 }
 
 type errorResponse struct {

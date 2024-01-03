@@ -69,9 +69,18 @@ func (s *Service) Run(ctx context.Context) error {
 		return err
 	}
 
-	_, err = s.generateNotificationMails(users, ruleCreators)
+	mails, err := s.generateNotificationMails(users, ruleCreators)
 	if err != nil {
 		return err
+	}
+
+	s.l.Info(fmt.Sprintf("%s - sending notification mails", Namespace), zap.Int("num_mails", len(mails)))
+
+	if err = s.mailer.SendMails(mails...); err != nil {
+		s.l.Warn(
+			fmt.Sprintf("%s - some errors were encountered while sending notification mails", Namespace),
+			zap.Error(err),
+		)
 	}
 
 	s.l.Info(fmt.Sprintf("%s - intervention service completed", Namespace), zap.Time("time", time.Now()))
