@@ -2,10 +2,10 @@ package intervention
 
 import (
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/internal/intervention/fact"
+	"github.com/darylhjd/oams/backend/internal/rules"
 )
 
-type factGrouping map[int64]map[userKey][]fact.F
+type factGrouping map[int64]map[userKey][]rules.Fact
 
 type userKey struct {
 	ID    string
@@ -14,12 +14,12 @@ type userKey struct {
 }
 
 // groupFacts first by class, and then by user.
-func (s *Service) groupFacts(facts []fact.F) factGrouping {
+func (s *Service) groupFacts(facts []rules.Fact) factGrouping {
 	grouping := factGrouping{}
 
 	for _, f := range facts {
 		if _, ok := grouping[f.ClassID]; !ok {
-			grouping[f.ClassID] = map[userKey][]fact.F{}
+			grouping[f.ClassID] = map[userKey][]rules.Fact{}
 		}
 
 		key := userKey{
@@ -29,7 +29,7 @@ func (s *Service) groupFacts(facts []fact.F) factGrouping {
 		}
 
 		if _, ok := grouping[f.ClassID][key]; !ok {
-			grouping[f.ClassID][key] = []fact.F{}
+			grouping[f.ClassID][key] = []rules.Fact{}
 		}
 
 		grouping[f.ClassID][key] = append(grouping[f.ClassID][key], f)
