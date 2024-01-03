@@ -10,6 +10,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
+// RuleInfo includes information on each rule.
 type RuleInfo struct {
 	model.ClassAttendanceRule
 	CreatorName   string `alias:"user.name"`
@@ -19,17 +20,16 @@ type RuleInfo struct {
 	ClassSemester string `alias:"class.semester"`
 }
 
-// Intervention gets all session enrollments of class group sessions that occurred on the current day,
-// as well as all the rules for the classes that these class group sessions belong to.
+// Intervention gets all rules.Fact of classes which had class group sessions occurring today up to now.
+// In addition, all RuleInfo of these classes are also returned.
 func (d *DB) Intervention(ctx context.Context) ([]rules.Fact, []RuleInfo, error) {
 	var facts []rules.Fact
 
 	now := time.Now()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	startOfNextDay := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
 
 	classGroupSessionPredicate := ClassGroupSessions.StartTime.GT_EQ(TimestampzT(startOfDay)).AND(
-		ClassGroupSessions.EndTime.LT(TimestampzT(startOfNextDay)),
+		ClassGroupSessions.EndTime.LT(TimestampzT(now).ADD(INTERVALd(time.Hour * 24 * 20))),
 	)
 
 	stmt := SELECT(

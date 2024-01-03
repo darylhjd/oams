@@ -2,7 +2,7 @@ package rules
 
 import "time"
 
-// Fact represents an enrollment fact. Each fact corresponds to one session. Additional useful information is also
+// Fact represents a session attendance fact. Each fact corresponds to one session. Additional useful information is also
 // contained within to allow the user to generate custom rules.
 type Fact struct {
 	ClassID       int64     `alias:"class.id"`

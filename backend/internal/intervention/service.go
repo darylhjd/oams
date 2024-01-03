@@ -64,11 +64,13 @@ func (s *Service) Run(ctx context.Context) error {
 		zap.Int("num_rules", len(rules)),
 	)
 
-	factGroups := s.groupFacts(facts)
-	ruleGroups := s.groupRules(rules)
+	factGroups, ruleGroups := s.groupFacts(facts), s.groupRules(rules)
+	users, ruleCreators, err := s.performChecks(factGroups, ruleGroups)
+	if err != nil {
+		return err
+	}
 
-	results := s.performChecks(factGroups, ruleGroups)
-	mails, err := s.processCheckResults(results)
+	mails, err := s.generateNotificationMails(users, ruleCreators)
 	if err != nil {
 		return err
 	}
