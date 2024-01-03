@@ -3,14 +3,13 @@ package intervention
 import (
 	"strings"
 
-	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/darylhjd/oams/backend/pkg/azmail"
 )
 
-func (s *Service) generateMails(failures map[userKey][]model.ClassAttendanceRule) ([]*azmail.Mail, error) {
-	mails := make([]*azmail.Mail, 0, len(failures))
+func (s *Service) generateMails(cFailures checkFailures) ([]*azmail.Mail, error) {
+	mails := make([]*azmail.Mail, 0, len(cFailures))
 
-	for user, rules := range failures {
+	for user, rules := range cFailures {
 		var (
 			textBuilder strings.Builder
 			htmlBuilder strings.Builder

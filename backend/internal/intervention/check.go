@@ -10,17 +10,23 @@ import (
 )
 
 type checkResults struct {
-	RuleFailures  map[int64][]ruleFailure                 // Map of Class IDs to rule execution failures.
-	CheckFailures map[userKey][]model.ClassAttendanceRule // Map of User IDs to rule check failures.
+	RuleFailures  ruleFailures
+	CheckFailures checkFailures
 }
 
-type ruleFailure struct {
+// ruleFailures is a map of Class IDs to rule execution failures.
+type ruleFailures map[int64][]ruleError
+
+type ruleError struct {
 	Rule  model.ClassAttendanceRule
 	Error error
 }
 
-func (s *Service) informRuleFailures(ruleFailures map[int64][]ruleFailure) {
-	for classId, failures := range ruleFailures {
+// checkFailures is a map of User IDs to failed rules.
+type checkFailures map[userKey][]model.ClassAttendanceRule
+
+func (s *Service) informRuleFailures(rFailures ruleFailures) {
+	for classId, failures := range rFailures {
 		for _, failure := range failures {
 			s.l.Error(fmt.Sprintf("%s - rule failed to execute", Namespace),
 				zap.Int64("class_id", classId),
@@ -33,7 +39,7 @@ func (s *Service) informRuleFailures(ruleFailures map[int64][]ruleFailure) {
 
 func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) checkResults {
 	results := checkResults{
-		RuleFailures:  map[int64][]ruleFailure{},
+		RuleFailures:  ruleFailures{},
 		CheckFailures: map[userKey][]model.ClassAttendanceRule{},
 	}
 
@@ -47,7 +53,7 @@ func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) checkR
 					fmt.Sprintf("%s - error compiling rule", Namespace),
 					zap.Int64("rule_id", rule.ID),
 				)
-				results.RuleFailures[classId] = append(results.RuleFailures[classId], ruleFailure{
+				results.RuleFailures[classId] = append(results.RuleFailures[classId], ruleError{
 					rule, err,
 				})
 				continue
@@ -63,7 +69,7 @@ func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) checkR
 						zap.Int64("rule_id", rule.ID),
 						zap.String("user_id", user.ID),
 					)
-					results.RuleFailures[classId] = append(results.RuleFailures[classId], ruleFailure{
+					results.RuleFailures[classId] = append(results.RuleFailures[classId], ruleError{
 						rule, err,
 					})
 					continue
