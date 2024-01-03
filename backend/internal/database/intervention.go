@@ -29,6 +29,8 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []model.ClassAttendanc
 		ClassGroupSessions.EndTime,
 		ClassGroupSessions.Venue,
 		SessionEnrollments.UserID,
+		Users.Name,
+		Users.Email,
 		SessionEnrollments.Attended,
 	).FROM(
 		Classes.INNER_JOIN(
@@ -37,6 +39,8 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []model.ClassAttendanc
 			ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
 		).INNER_JOIN(
 			SessionEnrollments, SessionEnrollments.SessionID.EQ(ClassGroupSessions.ID),
+		).INNER_JOIN(
+			Users, Users.ID.EQ(SessionEnrollments.UserID),
 		),
 	).WHERE(
 		Classes.ID.IN(

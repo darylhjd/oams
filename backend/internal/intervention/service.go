@@ -3,6 +3,7 @@ package intervention
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -66,8 +67,14 @@ func (s *Service) Run(ctx context.Context) error {
 	factGroups := s.groupFacts(facts)
 	ruleGroups := s.groupRules(rules)
 
-	if err = s.performChecks(factGroups, ruleGroups); err != nil {
+	results := s.performChecks(factGroups, ruleGroups)
+	mails, err := s.processCheckResults(results)
+	if err != nil {
 		return err
+	}
+
+	for _, mail := range mails {
+		log.Println(mail.Recipients)
 	}
 
 	s.l.Info(fmt.Sprintf("%s - intervention service completed", Namespace), zap.Time("time", time.Now()))
