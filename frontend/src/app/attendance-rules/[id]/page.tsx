@@ -11,6 +11,7 @@ import {
   Center,
   Container,
   Divider,
+  Group,
   Modal,
   Space,
   Text,
@@ -159,7 +160,7 @@ function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
   const items = rules.map((rule, idx) => (
     <AccordionItem value={idx.toString()} key={idx}>
       <AccordionControl>
-        <AccordionLabel title={rule.title} description={rule.description} />
+        <AccordionLabel rule={rule} />
       </AccordionControl>
       <AccordionPanel>
         <AccordionContent rule={rule} />
@@ -174,21 +175,22 @@ function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
   );
 }
 
-function AccordionLabel({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+function AccordionLabel({ rule }: { rule: ClassAttendanceRule }) {
   return (
-    <>
-      <Title order={4}>{title}</Title>
-      <Space h="xs" />
-      <Text size="sm" c="dimmed" lineClamp={3}>
-        {description}
-      </Text>
-    </>
+    <Group justify="space-between">
+      <div>
+        <Title order={4}>{rule.title}</Title>
+        <Space h="xs" />
+        <Text size="sm" c="dimmed" lineClamp={3}>
+          {rule.description}
+        </Text>
+      </div>
+      <div>
+        <Text size="sm" c="dimmed" className={styles.creatorLabel}>
+          Created By: {rule.creator_id}
+        </Text>
+      </div>
+    </Group>
   );
 }
 

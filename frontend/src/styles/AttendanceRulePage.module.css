@@ -15,6 +15,10 @@
   margin: 0 auto;
 }
 
+.creatorLabel {
+  padding-right: rem(10px);
+}
+
 .divider {
   padding-bottom: rem(15px);
 }
