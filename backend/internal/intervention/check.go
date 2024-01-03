@@ -3,7 +3,7 @@ package intervention
 import (
 	"fmt"
 
-	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/pkg/azmail"
 	"github.com/expr-lang/expr"
 	"go.uber.org/zap"
@@ -18,12 +18,12 @@ type checkResults struct {
 type ruleFailures map[int64][]ruleError
 
 type ruleError struct {
-	Rule  model.ClassAttendanceRule
+	Rule  database.RuleInfo
 	Error error
 }
 
 // checkFailures is a map of User IDs to failed rules.
-type checkFailures map[userKey][]model.ClassAttendanceRule
+type checkFailures map[userKey][]database.RuleInfo
 
 func (s *Service) informRuleFailures(rFailures ruleFailures) {
 	for classId, failures := range rFailures {
@@ -40,13 +40,17 @@ func (s *Service) informRuleFailures(rFailures ruleFailures) {
 func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) checkResults {
 	results := checkResults{
 		RuleFailures:  ruleFailures{},
-		CheckFailures: map[userKey][]model.ClassAttendanceRule{},
+		CheckFailures: checkFailures{},
 	}
 
 	for classId, users := range fGroup {
-		s.l.Info(fmt.Sprintf("%s - performing rule checks", Namespace), zap.Int64("class_id", classId))
-
 		for _, rule := range rGroup[classId] {
+			s.l.Info(
+				fmt.Sprintf("%s - performing rule checks", Namespace),
+				zap.Int64("class_id", classId),
+				zap.Int64("rule_id", rule.ID),
+			)
+
 			prg, err := expr.Compile(rule.Rule, expr.AsBool(), expr.Env(rule.Environment.Env))
 			if err != nil {
 				s.l.Error(

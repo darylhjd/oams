@@ -1,0 +1,14 @@
+Dear {{ if .CreatorName }}{{ .CreatorName }}{{ else }}{{ .CreatorEmail }}{{ end }},
+
+Today's automated attendance rule checking is complete.
+
+Here is the list of students who have failed to meet your rules:
+{{ range $ruleKey, $userKeys := .RuleAndUsers }}- [{{ $ruleKey.ClassCode }}, {{ $ruleKey.ClassYear }}/{{ $ruleKey.ClassSemester }}] {{ $ruleKey.Title }}
+{{ range $userKeys }} - {{ .ID }} | {{ .Name }} | {{ .Email }}
+{{ end }}{{ end }}
+The students have also been contacted by OAMS regarding their failure to meet your defined rules.
+You may wish to personally contact them to take follow-up actions.
+
+Have a nice day.
+
+OAMS
