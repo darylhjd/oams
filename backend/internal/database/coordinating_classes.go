@@ -63,6 +63,7 @@ func (d *DB) GetCoordinatingClassRules(ctx context.Context, id int64) ([]model.C
 
 type CreateNewCoordinatingClassRuleParams struct {
 	ClassID     int64
+	CreatorID   string
 	Title       string
 	Description string
 	Rule        string
@@ -79,6 +80,7 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 
 	stmt := ClassAttendanceRules.INSERT(
 		ClassAttendanceRules.ClassID,
+		ClassAttendanceRules.CreatorID,
 		ClassAttendanceRules.Title,
 		ClassAttendanceRules.Description,
 		ClassAttendanceRules.Rule,
@@ -86,6 +88,7 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 	).QUERY(
 		SELECT(
 			Int64(arg.ClassID),
+			String(arg.CreatorID),
 			String(arg.Title),
 			String(arg.Description),
 			String(arg.Rule),
