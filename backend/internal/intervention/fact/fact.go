@@ -11,5 +11,7 @@ type F struct {
 	EndTime   time.Time `alias:"class_group_session.end_time"`
 	Venue     string    `alias:"class_group_session.venue"`
 	UserID    string    `alias:"session_enrollment.user_id"`
+	UserName  string    `alias:"user.name"`
+	UserEmail string    `alias:"user.email"`
 	Attended  bool      `alias:"session_enrollment.attended"`
 }

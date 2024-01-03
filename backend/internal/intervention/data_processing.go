@@ -5,7 +5,13 @@ import (
 	"github.com/darylhjd/oams/backend/internal/intervention/fact"
 )
 
-type factGrouping map[int64]map[string][]fact.F
+type factGrouping map[int64]map[userKey][]fact.F
+
+type userKey struct {
+	ID    string
+	Name  string
+	Email string
+}
 
 // groupFacts first by class, and then by user.
 func (s *Service) groupFacts(facts []fact.F) factGrouping {
@@ -13,12 +19,20 @@ func (s *Service) groupFacts(facts []fact.F) factGrouping {
 
 	for _, f := range facts {
 		if _, ok := grouping[f.ClassID]; !ok {
-			grouping[f.ClassID] = map[string][]fact.F{}
-		} else if _, ok = grouping[f.ClassID][f.UserID]; !ok {
-			grouping[f.ClassID][f.UserID] = []fact.F{}
+			grouping[f.ClassID] = map[userKey][]fact.F{}
 		}
 
-		grouping[f.ClassID][f.UserID] = append(grouping[f.ClassID][f.UserID], f)
+		key := userKey{
+			ID:    f.UserID,
+			Name:  f.UserName,
+			Email: f.UserEmail,
+		}
+
+		if _, ok := grouping[f.ClassID][key]; !ok {
+			grouping[f.ClassID][key] = []fact.F{}
+		}
+
+		grouping[f.ClassID][key] = append(grouping[f.ClassID][key], f)
 	}
 
 	return grouping

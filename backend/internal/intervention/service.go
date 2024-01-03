@@ -66,8 +66,17 @@ func (s *Service) Run(ctx context.Context) error {
 	factGroups := s.groupFacts(facts)
 	ruleGroups := s.groupRules(rules)
 
-	if err = s.performChecks(factGroups, ruleGroups); err != nil {
+	results := s.performChecks(factGroups, ruleGroups)
+	mails, err := s.processCheckResults(results)
+	if err != nil {
 		return err
+	}
+
+	for _, mail := range mails {
+		s.l.Info(
+			fmt.Sprintf("%s - email generated", Namespace),
+			zap.Any("recipients", mail.Recipients.To),
+		)
 	}
 
 	s.l.Info(fmt.Sprintf("%s - intervention service completed", Namespace), zap.Time("time", time.Now()))
