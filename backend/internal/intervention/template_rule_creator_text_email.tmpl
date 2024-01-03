@@ -2,7 +2,7 @@ Dear {{ if .CreatorInfo.Name }}{{ .CreatorInfo.Name }}{{ else }}{{ .CreatorInfo.
 
 Today's automated attendance rule checking is complete.
 
-Here is the list of students who have failed to meet your rules:
+The report for each of your rules are shown below:
 {{ range .RuleAndUsers }}- [{{ .Rule.ClassCode }}, {{ .Rule.ClassYear }}/{{ .Rule.ClassSemester }}] {{ .Rule.Title }}
 {{ range .FailedUsers }}    - {{ printf "%-15s" .ID }} | {{ or .Name "<No name registered>" | printf "%-25s" }} | {{ or .Email "<No email registered>" }}
 {{ end }}{{ end }}
