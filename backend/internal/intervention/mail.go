@@ -6,49 +6,16 @@ import (
 	"github.com/darylhjd/oams/backend/pkg/azmail"
 )
 
-// ruleCreatorEmailGrouping is a map of rule creator ID to their email arguments.
-// This is a helper type to help generate the arguments required.
-type ruleCreatorEmailGrouping map[string]ruleCreatorEmailArgs
-
-func (s *Service) generateMails(cFailures checkFailures) ([]*azmail.Mail, error) {
-	mails := make([]*azmail.Mail, 0, len(cFailures)*2)
-
-	ruleCreatorArgs := ruleCreatorEmailGrouping{}
+func (s *Service) generateNotificationMails(users userFailedRules, ruleCreators ruleCreatorRuleFailedUsers) ([]*azmail.Mail, error) {
+	mails := make([]*azmail.Mail, 0, len(users)+len(ruleCreators))
 
 	// For each pair of user and the rule the user failed.
-	for user, rules := range cFailures {
+	for user, rules := range users {
 		var (
 			textBuilder strings.Builder
 			htmlBuilder strings.Builder
 			args        = userEmailArgs{user, rules}
 		)
-
-		for _, rule := range rules {
-			if _, ok := ruleCreatorArgs[rule.CreatorID]; !ok {
-				ruleCreatorArgs[rule.CreatorID] = ruleCreatorEmailArgs{
-					rule.CreatorName,
-					rule.CreatorEmail,
-					map[ruleKey][]userKey{},
-				}
-			}
-
-			key := ruleKey{
-				rule.ID,
-				rule.Title,
-				rule.Description,
-				rule.ClassCode,
-				rule.ClassYear,
-				rule.ClassSemester,
-			}
-			if _, ok := ruleCreatorArgs[rule.CreatorID].RuleAndUsers[key]; !ok {
-				ruleCreatorArgs[rule.CreatorID].RuleAndUsers[key] = []userKey{}
-			}
-
-			ruleCreatorArgs[rule.CreatorID].RuleAndUsers[key] = append(
-				ruleCreatorArgs[rule.CreatorID].RuleAndUsers[key],
-				user,
-			)
-		}
 
 		if err := userTextEmail.Execute(&textBuilder, args); err != nil {
 			return nil, err
@@ -71,10 +38,12 @@ func (s *Service) generateMails(cFailures checkFailures) ([]*azmail.Mail, error)
 		mails = append(mails, mail)
 	}
 
-	for _, args := range ruleCreatorArgs {
+	// For each pair of rule creator and their rule with failed users.
+	for creator, ruleWithFailedUsers := range ruleCreators {
 		var (
 			textBuilder strings.Builder
 			htmlBuilder strings.Builder
+			args        = ruleCreatorEmailArgs{creator, ruleWithFailedUsers}
 		)
 
 		if err := ruleCreatorTextEmail.Execute(&textBuilder, args); err != nil {
@@ -87,7 +56,7 @@ func (s *Service) generateMails(cFailures checkFailures) ([]*azmail.Mail, error)
 
 		mail := azmail.NewMail()
 		mail.Recipients = azmail.MailRecipients{
-			To: []azmail.MailAddress{{args.CreatorEmail, args.CreatorName}},
+			To: []azmail.MailAddress{{creator.Email, creator.Name}},
 		}
 		mail.Content = azmail.MailContent{
 			Subject:   ruleCreatorEmailSubject,

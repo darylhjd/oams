@@ -7,12 +7,6 @@ import (
 
 type factGrouping map[int64]map[userKey][]rules.Fact
 
-type userKey struct {
-	ID    string
-	Name  string
-	Email string
-}
-
 // groupFacts first by class, and then by user.
 func (s *Service) groupFacts(facts []rules.Fact) factGrouping {
 	grouping := factGrouping{}
@@ -22,12 +16,7 @@ func (s *Service) groupFacts(facts []rules.Fact) factGrouping {
 			grouping[f.ClassID] = map[userKey][]rules.Fact{}
 		}
 
-		key := userKey{
-			ID:    f.UserID,
-			Name:  f.UserName,
-			Email: f.UserEmail,
-		}
-
+		key := userKey{f.UserID, f.UserName, f.UserEmail}
 		if _, ok := grouping[f.ClassID][key]; !ok {
 			grouping[f.ClassID][key] = []rules.Fact{}
 		}

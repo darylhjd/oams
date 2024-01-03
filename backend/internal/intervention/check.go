@@ -4,46 +4,23 @@ import (
 	"fmt"
 
 	"github.com/darylhjd/oams/backend/internal/database"
-	"github.com/darylhjd/oams/backend/pkg/azmail"
 	"github.com/expr-lang/expr"
 	"go.uber.org/zap"
 )
 
-type checkResults struct {
-	RuleFailures  ruleFailures
-	CheckFailures checkFailures
-}
+// userFailedRules contains lists of database.RuleInfo for each user.
+// The list consists of database.RuleInfo that each user broke.
+type userFailedRules map[userKey][]database.RuleInfo
 
-// ruleFailures is a map of Class IDs to rule execution failures.
-type ruleFailures map[int64][]ruleError
+// ruleCreatorRuleFailedUsers contains lists of ruleAndFailedUsers for each rule creator.
+// The list consists of ruleAndFailedUsers, of which the rule belongs to the creator.
+type ruleCreatorRuleFailedUsers map[userKey][]ruleAndFailedUsers
 
-type ruleError struct {
-	Rule  database.RuleInfo
-	Error error
-}
+func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) (userFailedRules, ruleCreatorRuleFailedUsers, error) {
+	userRules := userFailedRules{}
+	ruleCreatorUsers := ruleCreatorRuleFailedUsers{}
 
-// checkFailures is a map of User IDs to failed rules.
-type checkFailures map[userKey][]database.RuleInfo
-
-func (s *Service) informRuleFailures(rFailures ruleFailures) {
-	for classId, failures := range rFailures {
-		for _, failure := range failures {
-			s.l.Error(fmt.Sprintf("%s - rule failed to execute", Namespace),
-				zap.Int64("class_id", classId),
-				zap.Int64("rule_id", failure.Rule.ID),
-				zap.Error(failure.Error),
-			)
-		}
-	}
-}
-
-func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) checkResults {
-	results := checkResults{
-		RuleFailures:  ruleFailures{},
-		CheckFailures: checkFailures{},
-	}
-
-	for classId, users := range fGroup {
+	for classId, group := range fGroup {
 		for _, rule := range rGroup[classId] {
 			s.l.Info(
 				fmt.Sprintf("%s - performing rule checks", Namespace),
@@ -53,43 +30,27 @@ func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) checkR
 
 			prg, err := expr.Compile(rule.Rule, expr.AsBool(), expr.Env(rule.Environment.Env))
 			if err != nil {
-				s.l.Error(
-					fmt.Sprintf("%s - error compiling rule", Namespace),
-					zap.Int64("rule_id", rule.ID),
-				)
-				results.RuleFailures[classId] = append(results.RuleFailures[classId], ruleError{
-					rule, err,
-				})
-				continue
+				return nil, nil, fmt.Errorf("failed to compile rule with id %d: %w", rule.ID, err)
 			}
 
-			for user, userFacts := range users {
-				runEnv := rule.Environment.Env.SetFacts(userFacts)
+			ruleFailedUsers := ruleAndFailedUsers{Rule: rule}
+			for user, facts := range group {
+				runEnv := rule.Environment.Env.SetFacts(facts)
 
 				res, err := expr.Run(prg, runEnv)
-				if err != nil {
-					s.l.Error(
-						fmt.Sprintf("%s - error running rule for user", Namespace),
-						zap.Int64("rule_id", rule.ID),
-						zap.String("user_id", user.ID),
-					)
-					results.RuleFailures[classId] = append(results.RuleFailures[classId], ruleError{
-						rule, err,
-					})
-					continue
-				}
-
-				if res.(bool) {
-					results.CheckFailures[user] = append(results.CheckFailures[user], rule)
+				switch {
+				case err != nil:
+					return nil, nil, fmt.Errorf("failed to run rule with id %d: %w", rule.ID, err)
+				case res.(bool):
+					userRules[user] = append(userRules[user], rule)
+					ruleFailedUsers.FailedUsers = append(ruleFailedUsers.FailedUsers, user)
 				}
 			}
+
+			creatorKey := userKey{rule.CreatorID, rule.CreatorName, rule.CreatorEmail}
+			ruleCreatorUsers[creatorKey] = append(ruleCreatorUsers[creatorKey], ruleFailedUsers)
 		}
 	}
 
-	return results
-}
-
-func (s *Service) processCheckResults(results checkResults) ([]*azmail.Mail, error) {
-	s.informRuleFailures(results.RuleFailures)
-	return s.generateMails(results.CheckFailures)
+	return userRules, ruleCreatorUsers, nil
 }

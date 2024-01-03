@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	//go:embed missed_consecutive_classes.expr
+	//go:embed rule_missed_consecutive_classes.expr
 	consecutiveRule string
 
-	//go:embed min_percentage_attendance_from_session.expr
+	//go:embed rule_min_percentage_attendance_from_session.expr
 	percentageRule string
 )
 

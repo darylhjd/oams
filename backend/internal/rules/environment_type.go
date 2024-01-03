@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-// Environment is a wrapper type for the database. A custom scanner and valuer is defined for this type.
+// Environment is a wrapper type for a database type. A custom scanner and valuer is defined for this type.
 type Environment struct {
 	Env E `json:"env"`
 }

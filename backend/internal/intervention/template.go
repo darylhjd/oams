@@ -14,10 +14,10 @@ const (
 )
 
 const (
-	userTextTemplate        = "user_text_email.tmpl"
-	userHtmlTemplate        = "user_html_email.tmpl"
-	ruleCreatorTextTemplate = "rule_creator_text_email.tmpl"
-	ruleCreatorHtmlTemplate = "rule_creator_html_email.tmpl"
+	userTextTemplate        = "template_user_text_email.tmpl"
+	userHtmlTemplate        = "template_user_html_email.tmpl"
+	ruleCreatorTextTemplate = "template_rule_creator_text_email.tmpl"
+	ruleCreatorHtmlTemplate = "template_rule_creator_html_email.tmpl"
 )
 
 var (
@@ -31,24 +31,25 @@ var (
 	ruleCreatorHtmlEmail *htmltemplate.Template
 )
 
+type userKey struct {
+	ID    string
+	Name  string
+	Email string
+}
+
 type userEmailArgs struct {
 	UserInfo userKey
 	Rules    []database.RuleInfo
 }
 
 type ruleCreatorEmailArgs struct {
-	CreatorName  string
-	CreatorEmail string
-	RuleAndUsers map[ruleKey][]userKey
+	CreatorInfo  userKey
+	RuleAndUsers []ruleAndFailedUsers
 }
 
-type ruleKey struct {
-	ID            int64
-	Title         string
-	Description   string
-	ClassCode     string
-	ClassYear     int32
-	ClassSemester string
+type ruleAndFailedUsers struct {
+	Rule        database.RuleInfo
+	FailedUsers []userKey
 }
 
 func init() {
