@@ -19,6 +19,7 @@ type classAttendanceRulesTable struct {
 	// Columns
 	ID          postgres.ColumnInteger
 	ClassID     postgres.ColumnInteger
+	CreatorID   postgres.ColumnString
 	Title       postgres.ColumnString
 	Description postgres.ColumnString
 	Rule        postgres.ColumnString
@@ -67,14 +68,15 @@ func newClassAttendanceRulesTableImpl(schemaName, tableName, alias string) class
 	var (
 		IDColumn          = postgres.IntegerColumn("id")
 		ClassIDColumn     = postgres.IntegerColumn("class_id")
+		CreatorIDColumn   = postgres.StringColumn("creator_id")
 		TitleColumn       = postgres.StringColumn("title")
 		DescriptionColumn = postgres.StringColumn("description")
 		RuleColumn        = postgres.StringColumn("rule")
 		EnvironmentColumn = postgres.StringColumn("environment")
 		CreatedAtColumn   = postgres.TimestampzColumn("created_at")
 		UpdatedAtColumn   = postgres.TimestampzColumn("updated_at")
-		allColumns        = postgres.ColumnList{IDColumn, ClassIDColumn, TitleColumn, DescriptionColumn, RuleColumn, EnvironmentColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns    = postgres.ColumnList{ClassIDColumn, TitleColumn, DescriptionColumn, RuleColumn, EnvironmentColumn, CreatedAtColumn, UpdatedAtColumn}
+		allColumns        = postgres.ColumnList{IDColumn, ClassIDColumn, CreatorIDColumn, TitleColumn, DescriptionColumn, RuleColumn, EnvironmentColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns    = postgres.ColumnList{ClassIDColumn, CreatorIDColumn, TitleColumn, DescriptionColumn, RuleColumn, EnvironmentColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return classAttendanceRulesTable{
@@ -83,6 +85,7 @@ func newClassAttendanceRulesTableImpl(schemaName, tableName, alias string) class
 		//Columns
 		ID:          IDColumn,
 		ClassID:     ClassIDColumn,
+		CreatorID:   CreatorIDColumn,
 		Title:       TitleColumn,
 		Description: DescriptionColumn,
 		Rule:        RuleColumn,

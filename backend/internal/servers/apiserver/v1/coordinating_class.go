@@ -9,6 +9,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 	"github.com/darylhjd/oams/backend/internal/rules"
 	"github.com/go-jet/jet/v2/qrm"
 )
@@ -87,6 +88,7 @@ func (v *APIServerV1) coordinatingClassPost(r *http.Request, id int64) apiRespon
 
 	rule, err := v.db.CreateNewCoordinatingClassRule(r.Context(), database.CreateNewCoordinatingClassRuleParams{
 		ClassID:     id,
+		CreatorID:   oauth2.GetAuthContext(r.Context()).User.ID,
 		Title:       req.Title,
 		Description: req.Description,
 		Rule:        ruleString,

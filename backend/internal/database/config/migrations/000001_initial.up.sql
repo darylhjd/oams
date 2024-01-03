@@ -72,6 +72,7 @@ CREATE TABLE class_attendance_rules
 (
     id          BIGSERIAL PRIMARY KEY,
     class_id    BIGINT      NOT NULL,
+    creator_id  TEXT        NOT NULL,
     title       TEXT        NOT NULL,
     description TEXT        NOT NULL,
     rule        TEXT        NOT NULL,
@@ -82,7 +83,10 @@ CREATE TABLE class_attendance_rules
         UNIQUE (class_id, title),
     CONSTRAINT fk_class_id
         FOREIGN KEY (class_id)
-            REFERENCES classes (id)
+            REFERENCES classes (id),
+    CONSTRAINT fk_creator_id
+        FOREIGN KEY (creator_id)
+            REFERENCES users (id)
 );
 
 CREATE TRIGGER update_updated_at

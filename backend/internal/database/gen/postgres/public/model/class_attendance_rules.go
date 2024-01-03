@@ -15,6 +15,7 @@ import (
 type ClassAttendanceRule struct {
 	ID          int64             `sql:"primary_key" json:"id"`
 	ClassID     int64             `json:"class_id"`
+	CreatorID   string            `json:"creator_id"`
 	Title       string            `json:"title"`
 	Description string            `json:"description"`
 	Rule        string            `json:"rule"`

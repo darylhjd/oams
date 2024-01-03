@@ -62,6 +62,7 @@ export const ClassAttendanceRulesDataTableColumns: MRT_ColumnDef<ClassAttendance
   [
     { accessorKey: "id", header: "ID" },
     { accessorKey: "class_id", header: "Class ID" },
+    { accessorKey: "creator_id", header: "Creator ID" },
     { accessorKey: "title", header: "Title" },
     { accessorKey: "description", header: "Description" },
     {

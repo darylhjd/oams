@@ -5,6 +5,7 @@ export type ClassAttendanceRulesGetResponse = {
 export type ClassAttendanceRule = {
   id: number;
   class_id: number;
+  creator_id: string;
   title: string;
   description: string;
   rule: string;
