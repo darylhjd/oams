@@ -3,7 +3,6 @@ package intervention
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -70,13 +69,9 @@ func (s *Service) Run(ctx context.Context) error {
 		return err
 	}
 
-	mails, err := s.generateNotificationMails(users, ruleCreators)
+	_, err = s.generateNotificationMails(users, ruleCreators)
 	if err != nil {
 		return err
-	}
-
-	for _, mail := range mails {
-		log.Println(mail.Content.PlainText)
 	}
 
 	s.l.Info(fmt.Sprintf("%s - intervention service completed", Namespace), zap.Time("time", time.Now()))

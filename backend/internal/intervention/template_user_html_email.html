@@ -1,0 +1,49 @@
+<style>
+    table, tr, td {
+        border: 1px solid;
+        border-collapse: collapse;
+    }
+
+    table {
+        width: 100%;
+        max-width: 600px;
+    }
+
+    th, td {
+        padding: 5px 5px;
+    }
+</style>
+<body>
+<div>
+    Dear {{ if .UserInfo.Name }}{{ .UserInfo.Name }}{{ else }}{{ .UserInfo.Email }}{{ end }},
+    <br/><br/>
+    OAMS has identified that you have failed certain attendance rules set by your course coordinators.
+    <br/>
+    Your respective course coordinators have also been notified.
+    <br/><br/>
+    The details of the failed checks are provided below.
+    <br/><br/>
+</div>
+<div>
+    <table>
+        {{ range .Rules }}
+        <tr>
+            <td>
+                <h4 style="text-align: center">[{{ .ClassCode }}, {{ .ClassYear }}/{{ .ClassSemester }}] {{ .Title }}</h4>
+                <i>Description:</i>
+                <br/>
+                {{ .Description }}
+            </td>
+        </tr>
+        {{ end }}
+    </table>
+</div>
+<div>
+    <br/>
+    Please contact your course coordinator(s) for more details and follow-up actions.
+    <br/>
+    We wish you best of luck in your studies.
+    <br/><br/>
+    OAMS
+</div>
+</body>

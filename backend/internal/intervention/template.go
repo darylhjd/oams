@@ -15,13 +15,13 @@ const (
 
 const (
 	userTextTemplate        = "template_user_text_email.tmpl"
-	userHtmlTemplate        = "template_user_html_email.tmpl"
+	userHtmlTemplate        = "template_user_html_email.html"
 	ruleCreatorTextTemplate = "template_rule_creator_text_email.tmpl"
-	ruleCreatorHtmlTemplate = "template_rule_creator_html_email.tmpl"
+	ruleCreatorHtmlTemplate = "template_rule_creator_html_email.html"
 )
 
 var (
-	//go:embed *.tmpl
+	//go:embed *.tmpl *.html
 	templates embed.FS
 
 	userTextEmail *texttemplate.Template
