@@ -6,7 +6,7 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
-	"github.com/darylhjd/oams/backend/internal/intervention/fact"
+	"github.com/darylhjd/oams/backend/internal/rules"
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
@@ -21,8 +21,8 @@ type RuleInfo struct {
 
 // Intervention gets all session enrollments of class group sessions that occurred on the current day,
 // as well as all the rules for the classes that these class group sessions belong to.
-func (d *DB) Intervention(ctx context.Context) ([]fact.F, []RuleInfo, error) {
-	var facts []fact.F
+func (d *DB) Intervention(ctx context.Context) ([]rules.Fact, []RuleInfo, error) {
+	var facts []rules.Fact
 
 	now := time.Now()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
@@ -81,7 +81,7 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []RuleInfo, error) {
 		return nil, nil, err
 	}
 
-	var rules []RuleInfo
+	var ruleInfos []RuleInfo
 
 	stmt = SELECT(
 		ClassAttendanceRules.AllColumns,
@@ -106,6 +106,6 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []RuleInfo, error) {
 		Classes.ID,
 	)
 
-	err = stmt.QueryContext(ctx, d.qe, &rules)
-	return facts, rules, err
+	err = stmt.QueryContext(ctx, d.qe, &ruleInfos)
+	return facts, ruleInfos, err
 }

@@ -1,13 +1,10 @@
-// Package fact cannot import database model package.
-package fact
+package rules
 
-import (
-	"time"
-)
+import "time"
 
-// F represents an enrollment fact. Each fact corresponds to one session. Additional useful information is also
+// Fact represents an enrollment fact. Each fact corresponds to one session. Additional useful information is also
 // contained within to allow the user to generate custom rules.
-type F struct {
+type Fact struct {
 	ClassID       int64     `alias:"class.id"`
 	ClassCode     string    `alias:"class.code"`
 	ClassYear     int32     `alias:"class.year"`
