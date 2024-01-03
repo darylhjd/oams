@@ -12,8 +12,11 @@ import (
 
 type RuleInfo struct {
 	model.ClassAttendanceRule
-	CreatorName  string `alias:"user.name"`
-	CreatorEmail string `alias:"user.email"`
+	CreatorName   string `alias:"user.name"`
+	CreatorEmail  string `alias:"user.email"`
+	ClassCode     string `alias:"class.code"`
+	ClassYear     int32  `alias:"class.year"`
+	ClassSemester string `alias:"class.semester"`
 }
 
 // Intervention gets all session enrollments of class group sessions that occurred on the current day,
@@ -84,6 +87,9 @@ func (d *DB) Intervention(ctx context.Context) ([]fact.F, []RuleInfo, error) {
 		ClassAttendanceRules.AllColumns,
 		Users.Name,
 		Users.Email,
+		Classes.Code,
+		Classes.Year,
+		Classes.Semester,
 	).FROM(
 		ClassAttendanceRules.INNER_JOIN(
 			Classes, Classes.ID.EQ(ClassAttendanceRules.ClassID),
