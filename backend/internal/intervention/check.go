@@ -65,7 +65,7 @@ func (s *Service) performChecks(fGroup factGrouping, rGroup ruleGrouping) checkR
 				res, err := expr.Run(prg, runEnv)
 				if err != nil {
 					s.l.Error(
-						fmt.Sprintf("%s - error running rule for student", Namespace),
+						fmt.Sprintf("%s - error running rule for user", Namespace),
 						zap.Int64("rule_id", rule.ID),
 						zap.String("user_id", user.ID),
 					)
