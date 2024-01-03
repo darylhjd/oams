@@ -18,3 +18,7 @@
 .divider {
   padding-bottom: rem(15px);
 }
+
+.variableDropdown {
+  max-width: 100%;
+}

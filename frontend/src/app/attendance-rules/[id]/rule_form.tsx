@@ -1,3 +1,5 @@
+import styles from "@/styles/AttendanceRulePage.module.css";
+
 import { UseFormReturnType } from "@mantine/form";
 import React, { FormEvent } from "react";
 import {
@@ -11,6 +13,8 @@ import {
   NativeSelect,
   NumberInput,
   Popover,
+  PopoverDropdown,
+  PopoverTarget,
   Space,
   Text,
   Textarea,
@@ -217,19 +221,26 @@ var enrollments []struct {
       </Text>
       <Space h="xs" />
       <Center>
-        <Popover position="bottom" withArrow shadow="md">
-          <Popover.Target>
+        <Popover
+          position="bottom"
+          withArrow
+          shadow="md"
+          classNames={{
+            dropdown: styles.variableDropdown,
+          }}
+        >
+          <PopoverTarget>
             <Button variant="outline" size="sm" color="gray">
               View variables
             </Button>
-          </Popover.Target>
-          <Popover.Dropdown>
+          </PopoverTarget>
+          <PopoverDropdown>
             <CodeHighlight
               code={variables}
               language="golang"
               withCopyButton={false}
             />
-          </Popover.Dropdown>
+          </PopoverDropdown>
         </Popover>
       </Center>
       <Space h="sm" />
