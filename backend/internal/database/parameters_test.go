@@ -119,8 +119,7 @@ func Test_setLimit(t *testing.T) {
 		{
 			"with no parameters",
 			ListQueryParams{},
-			SELECT(NULL).
-				LIMIT(ListDefaultLimit),
+			SELECT(NULL),
 		},
 	}
 
