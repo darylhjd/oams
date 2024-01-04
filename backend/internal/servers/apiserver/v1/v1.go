@@ -43,6 +43,7 @@ const (
 	upcomingClassGroupSessionUrl  = "/upcoming-class-group-sessions/"
 	coordinatingClassesUrl        = "/coordinating-classes"
 	coordinatingClassUrl          = "/coordinating-classes/"
+	reportsUrl                    = "/reports"
 )
 
 var (
@@ -219,6 +220,14 @@ func (v *APIServerV1) registerHandlers() {
 		map[string][]permissions.P{
 			http.MethodGet:  {permissions.CoordinatingClassRead},
 			http.MethodPost: {permissions.CoordinatingClassUpdate},
+		},
+	))
+
+	v.mux.HandleFunc(reportsUrl, permissions.EnforceAccessPolicy(
+		v.reports,
+		v.auth, v.db,
+		map[string][]permissions.P{
+			http.MethodGet: {permissions.ReportsRead},
 		},
 	))
 }

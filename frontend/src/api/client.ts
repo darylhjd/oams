@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { UserGetResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
-import { ClassGetResponse, ClassesGetResponse } from "./class";
+import { ClassesGetResponse, ClassGetResponse } from "./class";
 import {
   ClassGroupManagersGetResponse,
   ClassGroupManagersPostResponse,
@@ -21,16 +21,16 @@ import {
 } from "./session_enrollment";
 import {
   UpcomingClassGroupSessionGetResponse,
-  UpcomingClassGroupSessionsGetResponse,
   UpcomingClassGroupSessionPostResponse,
+  UpcomingClassGroupSessionsGetResponse,
 } from "./upcoming_class_group_session";
 import { SessionResponse } from "@/api/session";
 import { ClassAttendanceRulesGetResponse } from "@/api/class_attendance_rule";
 import {
-  CoordinatingClassGetResponse,
   CoordinatingClassesGetResponse,
-  CoordinatingClassPostResponse,
+  CoordinatingClassGetResponse,
   CoordinatingClassPostRequest,
+  CoordinatingClassPostResponse,
 } from "@/api/coordinating_class";
 
 export class APIClient {
@@ -55,6 +55,7 @@ export class APIClient {
     "/upcoming-class-group-sessions/";
   static readonly _coordinatingClassesPath = "/coordinating-classes";
   static readonly _coordinatingClassPath = "/coordinating-classes/";
+  static readonly _reportsPath = "/reports";
 
   static readonly _supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -354,5 +355,11 @@ export class APIClient {
       params,
     );
     return data;
+  }
+
+  static async reportsGet() {
+    return await this._client.get(this._reportsPath, {
+      responseType: "blob",
+    });
   }
 }
