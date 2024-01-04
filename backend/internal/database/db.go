@@ -25,8 +25,8 @@ type queryExecutable interface {
 
 // AsTx returns a new DB and *sql.Tx object, with the new DB making use of the following transaction. The caller should
 // commit or rollback as required, and the provided DB should not be used once a commit or rollback is done.
-func (d *DB) AsTx(ctx context.Context) (*DB, *sql.Tx, error) {
-	tx, err := d.Conn.BeginTx(ctx, nil)
+func (d *DB) AsTx(ctx context.Context, opts *sql.TxOptions) (*DB, *sql.Tx, error) {
+	tx, err := d.Conn.BeginTx(ctx, opts)
 	if err != nil {
 		return nil, nil, err
 	}

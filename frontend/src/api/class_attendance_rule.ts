@@ -9,11 +9,7 @@ export type ClassAttendanceRule = {
   title: string;
   description: string;
   rule: string;
-  environment: Environment;
+  environment: JSON;
   created_at: Date;
   updated_at: Date;
-};
-
-export type Environment = {
-  env: JSON;
 };

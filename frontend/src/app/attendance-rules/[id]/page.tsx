@@ -208,7 +208,7 @@ function AccordionContent({ rule }: { rule: ClassAttendanceRule }) {
           {
             fileName: "Environment",
             code: JSON.stringify(
-              rule.environment.env,
+              rule.environment,
               (k, v) => (k == "env_type" ? undefined : v),
               4,
             ),

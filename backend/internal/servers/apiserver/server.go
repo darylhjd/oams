@@ -64,6 +64,7 @@ func (s *APIServer) Start() error {
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete},
+		ExposedHeaders:   []string{"Content-Disposition"},
 	})
 
 	port := env.GetAPIServerPort()

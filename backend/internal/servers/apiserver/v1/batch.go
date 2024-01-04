@@ -163,7 +163,7 @@ func (v *APIServerV1) processBatchPutRequest(r *http.Request, req batchPutReques
 		response: newSuccessResponse(),
 	}
 
-	txDb, tx, err := v.db.AsTx(r.Context())
+	txDb, tx, err := v.db.AsTx(r.Context(), nil)
 	if err != nil {
 		return resp, err
 	}

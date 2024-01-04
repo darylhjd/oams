@@ -2,16 +2,8 @@
 
 import styles from "@/styles/DataExportPage.module.css";
 
-import {
-  Button,
-  Center,
-  Container,
-  Modal,
-  Space,
-  Text,
-  Title,
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { Button, Center, Container, Space, Text, Title } from "@mantine/core";
+import { APIClient } from "@/api/client";
 
 export default function DataExportPage() {
   return (
@@ -51,7 +43,30 @@ function Details() {
 function DataExportButton() {
   return (
     <Center>
-      <Button>Start Data Export</Button>
+      <Button
+        onClick={async () => {
+          const response = await APIClient.reportsGet();
+
+          // Do ugly stuff to save file :(
+          const blob = new Blob([response.data]);
+
+          const link = document.createElement("a");
+          const url = window.URL.createObjectURL(blob);
+          const [, filename] =
+            response.headers["content-disposition"].split("filename=");
+          link.href = url;
+          link.setAttribute("download", filename);
+          document.body.appendChild(link);
+
+          link.click();
+
+          // Clean up and remove the link
+          link.parentNode?.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }}
+      >
+        Start Data Export
+      </Button>
     </Center>
   );
 }

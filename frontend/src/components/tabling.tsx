@@ -16,7 +16,7 @@ import { User } from "@/api/user";
 import { MRT_Cell, MRT_ColumnDef } from "mantine-react-table";
 import { Badge, Text } from "@mantine/core";
 import { AttendanceEntry } from "@/api/upcoming_class_group_session";
-import { ClassAttendanceRule, Environment } from "@/api/class_attendance_rule";
+import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import { CoordinatingClass } from "@/api/coordinating_class";
 
 export const DEFAULT_PAGE_SIZE = 50;
@@ -81,10 +81,10 @@ export const ClassAttendanceRulesDataTableColumns: MRT_ColumnDef<ClassAttendance
       accessorKey: "environment",
       header: "Environment",
       Cell: ({ cell }: { cell: MRT_Cell<ClassAttendanceRule> }) => {
-        const environment = cell.getValue<Environment>();
+        const environment = cell.getValue<JSON>();
         return (
           <Text lineClamp={2} size="sm">
-            {JSON.stringify(environment.env)}
+            {JSON.stringify(environment)}
           </Text>
         );
       },
