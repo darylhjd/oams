@@ -41,16 +41,10 @@ func (p ListQueryParams) setSorts(stmt SelectStatement) SelectStatement {
 	return stmt.ORDER_BY(orders...)
 }
 
-const (
-	ListDefaultLimit = 50
-)
-
 // setLimit sets a limit to the number of returned rows in a select statement.
 func (p ListQueryParams) setLimit(stmt SelectStatement) SelectStatement {
 	if p.L != nil && *p.L > 0 {
 		stmt = stmt.LIMIT(*p.L)
-	} else {
-		stmt = stmt.LIMIT(ListDefaultLimit)
 	}
 
 	return stmt

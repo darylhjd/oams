@@ -37,6 +37,14 @@ func (e *Environment) Scan(value any) error {
 	return json.Unmarshal(value.([]byte), e.Env)
 }
 
-func (e *Environment) Value() (driver.Value, error) {
+func (e Environment) Value() (driver.Value, error) {
+	return json.Marshal(e.Env)
+}
+
+func (e *Environment) UnmarshalJSON(data []byte) error {
+	return e.Scan(data)
+}
+
+func (e Environment) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.Env)
 }
