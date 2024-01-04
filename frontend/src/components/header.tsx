@@ -28,6 +28,7 @@ import {
   IconBraces,
   IconCheck,
   IconChevronDown,
+  IconCloudDownload,
   IconFileDescription,
   IconLayoutDashboard,
 } from "@tabler/icons-react";
@@ -329,6 +330,12 @@ function SystemAdminMenu() {
             >
               Manager Processing
             </MenuItem>
+            <MenuItem
+              leftSection={<IconCloudDownload size={16} />}
+              onClick={() => router.push(Routes.dataExport)}
+            >
+              Data Export
+            </MenuItem>
           </MenuDropdown>
         </Menu>
       </Box>
@@ -355,6 +362,11 @@ function SystemAdminMenu() {
           label="Manager Processing"
           leftSection={<IconFileDescription size={16} />}
           onClick={() => router.push(Routes.managerProcessing)}
+        />
+        <NavLink
+          label="Data Export"
+          leftSection={<IconCloudDownload size={16} />}
+          onClick={() => router.push(Routes.dataExport)}
         />
       </NavLink>
     </>
