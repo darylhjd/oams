@@ -11,9 +11,9 @@ import (
 	"github.com/darylhjd/oams/backend/internal/database"
 )
 
-// GenerateReportArchive generates a full CSV snapshot of the database within a zip file that
+// GenerateDataExportArchive generates a full CSV snapshot of the database within a zip file that
 // is written to a http.ResponseWriter.
-func GenerateReportArchive(w http.ResponseWriter, r *http.Request, txDb *database.DB) error {
+func GenerateDataExportArchive(w http.ResponseWriter, r *http.Request, txDb *database.DB) error {
 	archive := zip.NewWriter(w)
 
 	if err := generateUsersCSV(r, txDb, archive); err != nil {

@@ -55,7 +55,7 @@ export class APIClient {
     "/upcoming-class-group-sessions/";
   static readonly _coordinatingClassesPath = "/coordinating-classes";
   static readonly _coordinatingClassPath = "/coordinating-classes/";
-  static readonly _reportsPath = "/reports";
+  static readonly _dataExportPath = "/data-export";
 
   static readonly _supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -357,8 +357,8 @@ export class APIClient {
     return data;
   }
 
-  static async reportsGet() {
-    return await this._client.get(this._reportsPath, {
+  static async dataExportGet() {
+    return await this._client.get(this._dataExportPath, {
       responseType: "blob",
     });
   }

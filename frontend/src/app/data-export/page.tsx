@@ -45,7 +45,7 @@ function DataExportButton() {
     <Center>
       <Button
         onClick={async () => {
-          const response = await APIClient.reportsGet();
+          const response = await APIClient.dataExportGet();
 
           // Do ugly stuff to save file :(
           const blob = new Blob([response.data]);
