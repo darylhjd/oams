@@ -21,7 +21,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import {
-  CoordinatingClassPostRequest,
+  CoordinatingClassRulesPostRequest,
   RuleType,
 } from "@/api/coordinating_class";
 import { CodeHighlight } from "@mantine/code-highlight";
@@ -31,7 +31,7 @@ export function RuleForm({
   loading,
   onSubmit,
 }: {
-  form: UseFormReturnType<CoordinatingClassPostRequest>;
+  form: UseFormReturnType<CoordinatingClassRulesPostRequest>;
   loading: boolean;
   onSubmit: (event?: FormEvent<HTMLFormElement> | undefined) => void;
 }) {
@@ -120,7 +120,7 @@ function ConsecutiveClassRule({
   form,
   loading,
 }: {
-  form: UseFormReturnType<CoordinatingClassPostRequest>;
+  form: UseFormReturnType<CoordinatingClassRulesPostRequest>;
   loading: boolean;
 }) {
   return (
@@ -148,7 +148,7 @@ function PercentageClassRule({
   form,
   loading,
 }: {
-  form: UseFormReturnType<CoordinatingClassPostRequest>;
+  form: UseFormReturnType<CoordinatingClassRulesPostRequest>;
   loading: boolean;
 }) {
   return (
@@ -191,7 +191,7 @@ function AdvancedForm({
   form,
   loading,
 }: {
-  form: UseFormReturnType<CoordinatingClassPostRequest>;
+  form: UseFormReturnType<CoordinatingClassRulesPostRequest>;
   loading: boolean;
 }) {
   const variables = `// Array of enrollment info for a user.

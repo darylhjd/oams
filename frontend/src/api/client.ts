@@ -28,9 +28,9 @@ import { SessionResponse } from "@/api/session";
 import { ClassAttendanceRulesGetResponse } from "@/api/class_attendance_rule";
 import {
   CoordinatingClassesGetResponse,
-  CoordinatingClassGetResponse,
-  CoordinatingClassPostRequest,
-  CoordinatingClassPostResponse,
+  CoordinatingClassRulesGetResponse,
+  CoordinatingClassRulesPostRequest,
+  CoordinatingClassRulesPostResponse,
 } from "@/api/coordinating_class";
 
 export class APIClient {
@@ -55,6 +55,7 @@ export class APIClient {
     "/upcoming-class-group-sessions/";
   static readonly _coordinatingClassesPath = "/coordinating-classes";
   static readonly _coordinatingClassPath = "/coordinating-classes/";
+  static readonly _coordinatingClassRulesPathPart = "/rules";
   static readonly _dataExportPath = "/data-export";
 
   static readonly _supabase = createClient(
@@ -337,23 +338,24 @@ export class APIClient {
     return data;
   }
 
-  static async coordinatingClassGet(
+  static async coordinatingClassRulesGet(
     id: number,
-  ): Promise<CoordinatingClassGetResponse> {
-    const { data } = await this._client.get<CoordinatingClassGetResponse>(
-      this._coordinatingClassPath + id,
+  ): Promise<CoordinatingClassRulesGetResponse> {
+    const { data } = await this._client.get<CoordinatingClassRulesGetResponse>(
+      this._coordinatingClassPath + id + this._coordinatingClassRulesPathPart,
     );
     return data;
   }
 
-  static async coordinatingClassPost(
+  static async coordinatingClassRulesPost(
     id: number,
-    params: CoordinatingClassPostRequest,
-  ): Promise<CoordinatingClassPostResponse> {
-    const { data } = await this._client.post<CoordinatingClassPostResponse>(
-      this._coordinatingClassPath + id,
-      params,
-    );
+    params: CoordinatingClassRulesPostRequest,
+  ): Promise<CoordinatingClassRulesPostResponse> {
+    const { data } =
+      await this._client.post<CoordinatingClassRulesPostResponse>(
+        this._coordinatingClassPath + id + this._coordinatingClassRulesPathPart,
+        params,
+      );
     return data;
   }
 

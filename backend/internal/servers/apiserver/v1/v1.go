@@ -214,14 +214,7 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(coordinatingClassUrl, permissions.EnforceAccessPolicy(
-		v.coordinatingClass,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet:  {permissions.CoordinatingClassRead},
-			http.MethodPost: {permissions.CoordinatingClassUpdate},
-		},
-	))
+	v.mux.HandleFunc(coordinatingClassUrl, v.coordinatingClass)
 
 	v.mux.HandleFunc(dataExportUrl, permissions.EnforceAccessPolicy(
 		v.dataExport,
