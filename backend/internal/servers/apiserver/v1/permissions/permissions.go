@@ -28,7 +28,9 @@ const (
 	SessionEnrollmentRead
 
 	UpcomingClassGroupSessionRead
-	UpcomingClassGroupSessionUpdate
+
+	UpcomingClassGroupSessionAttendanceRead
+	UpcomingClassGroupSessionAttendanceUpdate
 
 	CoordinatingClassRead
 
@@ -61,8 +63,10 @@ var userRolePermissions = permissionMap{
 
 	SessionEnrollmentRead: {},
 
-	UpcomingClassGroupSessionRead:   {},
-	UpcomingClassGroupSessionUpdate: {},
+	UpcomingClassGroupSessionRead: {},
+
+	UpcomingClassGroupSessionAttendanceRead:   {},
+	UpcomingClassGroupSessionAttendanceUpdate: {},
 
 	CoordinatingClassRead: {},
 
@@ -95,8 +99,10 @@ var systemAdminRolePermissions = permissionMap{
 
 	SessionEnrollmentRead: {},
 
-	UpcomingClassGroupSessionRead:   {},
-	UpcomingClassGroupSessionUpdate: {},
+	UpcomingClassGroupSessionRead: {},
+
+	UpcomingClassGroupSessionAttendanceRead:   {},
+	UpcomingClassGroupSessionAttendanceUpdate: {},
 
 	CoordinatingClassRead: {},
 

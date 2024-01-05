@@ -22,7 +22,7 @@ import {
 } from "@mantine/core";
 import {
   AttendanceEntry,
-  UpcomingClassGroupSessionGetResponse,
+  UpcomingClassGroupSessionAttendancesGetResponse,
   UpcomingClassGroupSession,
 } from "@/api/upcoming_class_group_session";
 import {
@@ -48,11 +48,13 @@ export default function SessionAttendanceTakingPage({
   params: Params;
 }) {
   const [attendance, setAttendance] =
-    useState<UpcomingClassGroupSessionGetResponse>(
-      {} as UpcomingClassGroupSessionGetResponse,
+    useState<UpcomingClassGroupSessionAttendancesGetResponse>(
+      {} as UpcomingClassGroupSessionAttendancesGetResponse,
     );
   const promiseFunc = async () => {
-    const data = await APIClient.upcomingClassGroupSessionGet(params.id);
+    const data = await APIClient.upcomingClassGroupSessionAttendancesGet(
+      params.id,
+    );
     return setAttendance(data);
   };
 
@@ -143,7 +145,8 @@ function AttendanceTaker({
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const response = await APIClient.upcomingClassGroupSessionGet(id);
+      const response =
+        await APIClient.upcomingClassGroupSessionAttendancesGet(id);
       setData(response.attendance_entries);
     }, UPDATE_INTERVAL_MS);
 
@@ -206,13 +209,14 @@ function SignAttendance({
           onSubmit={form.onSubmit(async (values) => {
             setLoading(true);
             try {
-              const resp = await APIClient.upcomingClassGroupSessionPost(
-                id,
-                row.original.id,
-                row.original.user_id,
-                true,
-                values.signature,
-              );
+              const resp =
+                await APIClient.upcomingClassGroupSessionAttendancePatch(
+                  id,
+                  row.original.id,
+                  true,
+                  row.original.user_id,
+                  values.signature,
+                );
               data[row.index].attended = resp.attended;
               setData([...data]);
               close();

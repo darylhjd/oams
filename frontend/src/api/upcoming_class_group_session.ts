@@ -18,7 +18,7 @@ export type UpcomingClassGroupSessionsGetResponse = {
   upcoming_class_group_sessions: UpcomingClassGroupSession[];
 };
 
-export type UpcomingClassGroupSessionGetResponse = {
+export type UpcomingClassGroupSessionAttendancesGetResponse = {
   upcoming_class_group_session: UpcomingClassGroupSession;
   attendance_entries: AttendanceEntry[];
 };
@@ -31,6 +31,6 @@ export type AttendanceEntry = {
   attended: boolean;
 };
 
-export type UpcomingClassGroupSessionPostResponse = {
+export type UpcomingClassGroupSessionAttendancePatchResponse = {
   attended: boolean;
 };

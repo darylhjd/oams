@@ -20,8 +20,8 @@ import {
   SessionEnrollmentsGetResponse,
 } from "./session_enrollment";
 import {
-  UpcomingClassGroupSessionGetResponse,
-  UpcomingClassGroupSessionPostResponse,
+  UpcomingClassGroupSessionAttendancesGetResponse,
+  UpcomingClassGroupSessionAttendancePatchResponse,
   UpcomingClassGroupSessionsGetResponse,
 } from "./upcoming_class_group_session";
 import { SessionResponse } from "@/api/session";
@@ -34,30 +34,6 @@ import {
 } from "@/api/coordinating_class";
 
 export class APIClient {
-  static readonly _sessionPath = "/session";
-  static readonly _signaturePath = "/signature/";
-  static readonly _batchPath = "/batch";
-  static readonly _usersPath = "/users";
-  static readonly _userPath = "/users/";
-  static readonly _classesPath = "/classes";
-  static readonly _classPath = "/classes/";
-  static readonly _classAttendanceRulesPath = "/class-attendance-rules";
-  static readonly _classGroupsPath = "/class-groups";
-  static readonly _classGroupPath = "/class-groups/";
-  static readonly _classGroupManagersPath = "/class-group-managers";
-  static readonly _classGroupSessionsPath = "/class-group-sessions";
-  static readonly _classGroupSessionPath = "/class-group-sessions/";
-  static readonly _sessionEnrollmentsPath = "/session-enrollments";
-  static readonly _sessionEnrollmentPath = "/session-enrollments/";
-  static readonly _upcomingClassGroupSessionsPath =
-    "/upcoming-class-group-sessions";
-  static readonly _upcomingClassGroupSessionPath =
-    "/upcoming-class-group-sessions/";
-  static readonly _coordinatingClassesPath = "/coordinating-classes";
-  static readonly _coordinatingClassPath = "/coordinating-classes/";
-  static readonly _coordinatingClassRulesPathPart = "/rules";
-  static readonly _dataExportPath = "/data-export";
-
   static readonly _supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_KEY!,
@@ -92,12 +68,12 @@ export class APIClient {
   }
 
   static async sessionGet(): Promise<SessionResponse> {
-    const { data } = await this._client.get<SessionResponse>(this._sessionPath);
+    const { data } = await this._client.get<SessionResponse>("/session");
     return data;
   }
 
   static async signaturePut(id: string, newSignature: string): Promise<void> {
-    await this._client.put(this._signaturePath + id, {
+    await this._client.put(`/signature/${id}`, {
       signature: newSignature,
     });
   }
@@ -106,15 +82,12 @@ export class APIClient {
     const form = new FormData();
     files.forEach((file) => form.append("batch-attachments", file));
 
-    const { data } = await this._client.post<BatchPostResponse>(
-      this._batchPath,
-      form,
-    );
+    const { data } = await this._client.post<BatchPostResponse>("/batch", form);
     return data;
   }
 
   static async batchPut(batchData: BatchData[]): Promise<BatchPutResponse> {
-    const { data } = await this._client.put<BatchPutResponse>(this._batchPath, {
+    const { data } = await this._client.put<BatchPutResponse>("/batch", {
       batches: batchData,
     });
     return data;
@@ -124,7 +97,7 @@ export class APIClient {
     offset: number,
     limit: number,
   ): Promise<UsersGetResponse> {
-    const { data } = await this._client.get<UsersGetResponse>(this._usersPath, {
+    const { data } = await this._client.get<UsersGetResponse>("/users", {
       params: {
         offset: offset,
         limit: limit,
@@ -134,9 +107,7 @@ export class APIClient {
   }
 
   static async userGet(id: string): Promise<UserGetResponse> {
-    const { data } = await this._client.get<UserGetResponse>(
-      this._userPath + id,
-    );
+    const { data } = await this._client.get<UserGetResponse>(`/users/${id}`);
     return data;
   }
 
@@ -144,22 +115,17 @@ export class APIClient {
     offset: number,
     limit: number,
   ): Promise<ClassesGetResponse> {
-    const { data } = await this._client.get<ClassesGetResponse>(
-      this._classesPath,
-      {
-        params: {
-          offset: offset,
-          limit: limit,
-        },
+    const { data } = await this._client.get<ClassesGetResponse>("/classes", {
+      params: {
+        offset: offset,
+        limit: limit,
       },
-    );
+    });
     return data;
   }
 
   static async classGet(id: number): Promise<ClassGetResponse> {
-    const { data } = await this._client.get<ClassGetResponse>(
-      this._classPath + id,
-    );
+    const { data } = await this._client.get<ClassGetResponse>(`/classes/${id}`);
     return data;
   }
 
@@ -168,7 +134,7 @@ export class APIClient {
     limit: number,
   ): Promise<ClassAttendanceRulesGetResponse> {
     const { data } = await this._client.get<ClassAttendanceRulesGetResponse>(
-      this._classAttendanceRulesPath,
+      "/class-attendance-rules",
       {
         params: {
           offset: offset,
@@ -184,7 +150,7 @@ export class APIClient {
     limit: number,
   ): Promise<ClassGroupsGetResponse> {
     const { data } = await this._client.get<ClassGroupsGetResponse>(
-      this._classGroupsPath,
+      "/class-groups",
       {
         params: {
           offset: offset,
@@ -197,7 +163,7 @@ export class APIClient {
 
   static async classGroupGet(id: number): Promise<ClassGroupGetResponse> {
     const { data } = await this._client.get<ClassGroupGetResponse>(
-      this._classGroupPath + id,
+      `/class-groups/${id}`,
     );
     return data;
   }
@@ -207,7 +173,7 @@ export class APIClient {
     limit: number,
   ): Promise<ClassGroupManagersGetResponse> {
     const { data } = await this._client.get<ClassGroupManagersGetResponse>(
-      this._classGroupManagersPath,
+      "/class-group-managers",
       {
         params: {
           offset: offset,
@@ -225,7 +191,7 @@ export class APIClient {
     files.forEach((file) => form.append("manager-attachments", file));
 
     const { data } = await this._client.post<ClassGroupManagersPostResponse>(
-      this._classGroupManagersPath,
+      "/class-group-managers",
       form,
     );
     return data;
@@ -235,7 +201,7 @@ export class APIClient {
     classGroupManagers: UpsertClassGroupManagerParams[],
   ): Promise<ClassGroupManagersPutResponse> {
     const { data } = await this._client.put<ClassGroupManagersPutResponse>(
-      this._classGroupManagersPath,
+      "/class-group-managers",
       {
         class_group_managers: classGroupManagers,
       },
@@ -248,7 +214,7 @@ export class APIClient {
     limit: number,
   ): Promise<ClassGroupSessionsGetResponse> {
     const { data } = await this._client.get<ClassGroupSessionsGetResponse>(
-      this._classGroupSessionsPath,
+      "/class-group-sessions",
       {
         params: {
           offset: offset,
@@ -263,7 +229,7 @@ export class APIClient {
     id: number,
   ): Promise<ClassGroupSessionGetResponse> {
     const { data } = await this._client.get<ClassGroupSessionGetResponse>(
-      this._classGroupSessionPath + id,
+      `/class-group-sessions/${id}`,
     );
     return data;
   }
@@ -273,7 +239,7 @@ export class APIClient {
     limit: number,
   ): Promise<SessionEnrollmentsGetResponse> {
     const { data } = await this._client.get<SessionEnrollmentsGetResponse>(
-      this._sessionEnrollmentsPath,
+      "/session-enrollments",
       {
         params: {
           offset: offset,
@@ -288,7 +254,7 @@ export class APIClient {
     id: number,
   ): Promise<SessionEnrollmentGetResponse> {
     const { data } = await this._client.get<SessionEnrollmentGetResponse>(
-      this._sessionEnrollmentPath + id,
+      `/session-enrollments/${id}`,
     );
     return data;
   }
@@ -296,35 +262,34 @@ export class APIClient {
   static async upcomingClassGroupSessionsGet(): Promise<UpcomingClassGroupSessionsGetResponse> {
     const { data } =
       await this._client.get<UpcomingClassGroupSessionsGetResponse>(
-        this._upcomingClassGroupSessionsPath,
+        "/upcoming-class-group-sessions",
       );
     return data;
   }
 
-  static async upcomingClassGroupSessionGet(
+  static async upcomingClassGroupSessionAttendancesGet(
     id: number,
-  ): Promise<UpcomingClassGroupSessionGetResponse> {
+  ): Promise<UpcomingClassGroupSessionAttendancesGetResponse> {
     const { data } =
-      await this._client.get<UpcomingClassGroupSessionGetResponse>(
-        this._upcomingClassGroupSessionPath + id,
+      await this._client.get<UpcomingClassGroupSessionAttendancesGetResponse>(
+        `/upcoming-class-group-sessions/${id}/attendances`,
       );
     return data;
   }
 
-  static async upcomingClassGroupSessionPost(
+  static async upcomingClassGroupSessionAttendancePatch(
     id: number,
     sessionEnrollmentId: number,
-    userId: string,
     attended: boolean,
+    userId: string,
     userSignature: string,
-  ): Promise<UpcomingClassGroupSessionPostResponse> {
+  ): Promise<UpcomingClassGroupSessionAttendancePatchResponse> {
     const { data } =
-      await this._client.post<UpcomingClassGroupSessionPostResponse>(
-        this._upcomingClassGroupSessionPath + id,
+      await this._client.patch<UpcomingClassGroupSessionAttendancePatchResponse>(
+        `/upcoming-class-group-sessions/${id}/attendances/${sessionEnrollmentId}`,
         {
-          id: sessionEnrollmentId,
-          user_id: userId,
           attended: attended,
+          user_id: userId,
           user_signature: userSignature,
         },
       );
@@ -333,7 +298,7 @@ export class APIClient {
 
   static async coordinatingClassesGet(): Promise<CoordinatingClassesGetResponse> {
     const { data } = await this._client.get<CoordinatingClassesGetResponse>(
-      this._coordinatingClassesPath,
+      "/coordinating-classes",
     );
     return data;
   }
@@ -342,7 +307,7 @@ export class APIClient {
     id: number,
   ): Promise<CoordinatingClassRulesGetResponse> {
     const { data } = await this._client.get<CoordinatingClassRulesGetResponse>(
-      this._coordinatingClassPath + id + this._coordinatingClassRulesPathPart,
+      `/coordinating-classes/${id}/rules`,
     );
     return data;
   }
@@ -353,14 +318,14 @@ export class APIClient {
   ): Promise<CoordinatingClassRulesPostResponse> {
     const { data } =
       await this._client.post<CoordinatingClassRulesPostResponse>(
-        this._coordinatingClassPath + id + this._coordinatingClassRulesPathPart,
+        `/coordinating-classes/${id}/rules`,
         params,
       );
     return data;
   }
 
   static async dataExportGet() {
-    return await this._client.get(this._dataExportPath, {
+    return await this._client.get("/data-export", {
       responseType: "blob",
     });
   }

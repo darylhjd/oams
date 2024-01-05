@@ -88,7 +88,7 @@ func (d *DB) GetUpcomingClassGroupAttendanceEntries(ctx context.Context, id int6
 
 type UpdateAttendanceEntryParams struct {
 	ClassGroupSessionID int64
-	ID                  int64
+	SessionEnrollmentID int64
 	UserID              string
 	Attended            bool
 	UserSignature       string
@@ -105,7 +105,7 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 			SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
 		),
 	).WHERE(
-		SessionEnrollments.ID.EQ(Int64(arg.ID)),
+		SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 	)
 	err := signatureStmt.QueryContext(ctx, d.qe, &signature)
 	if errors.Is(err, qrm.ErrNoRows) {
@@ -143,7 +143,7 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 							).FROM(
 								SessionEnrollments,
 							).WHERE(
-								SessionEnrollments.ID.EQ(Int64(arg.ID)),
+								SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 							),
 						),
 					),
@@ -152,7 +152,7 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 				),
 			),
 		).AND(
-			SessionEnrollments.ID.EQ(Int64(arg.ID)),
+			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 		),
 	)
 	_, err = stmt.ExecContext(ctx, d.qe)

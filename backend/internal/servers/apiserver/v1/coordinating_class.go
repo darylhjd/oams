@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	coordinatingClassRulesFormat = fmt.Sprintf("%s%%d/%%s", coordinatingClassUrl)
+	coordinatingClassSubFormat = fmt.Sprintf("%s%%d/%%s", coordinatingClassUrl)
 )
 
 func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) {
@@ -22,8 +22,8 @@ func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) 
 		classId int64
 		throw   string
 	)
-	if _, err := fmt.Sscanf(r.URL.Path, coordinatingClassRulesFormat, &classId, &throw); err != nil {
-		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, ""))
+	if _, err := fmt.Sscanf(r.URL.Path, coordinatingClassSubFormat, &classId, &throw); err != nil {
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
 		return
 	}
 
