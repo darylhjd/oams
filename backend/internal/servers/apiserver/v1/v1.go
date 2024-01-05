@@ -197,14 +197,7 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(upcomingClassGroupSessionUrl, permissions.EnforceAccessPolicy(
-		v.upcomingClassGroupSession,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet:  {permissions.UpcomingClassGroupSessionRead},
-			http.MethodPost: {permissions.UpcomingClassGroupSessionUpdate},
-		},
-	))
+	v.mux.HandleFunc(upcomingClassGroupSessionUrl, v.upcomingClassGroupSession)
 
 	v.mux.HandleFunc(coordinatingClassesUrl, permissions.EnforceAccessPolicy(
 		v.coordinatingClasses,
