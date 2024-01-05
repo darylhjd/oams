@@ -31,13 +31,14 @@ import {
   IconCloudDownload,
   IconFileDescription,
   IconLayoutDashboard,
+  IconReportAnalytics,
 } from "@tabler/icons-react";
 import { Routes } from "@/routing/routes";
 import { APIClient } from "@/api/client";
 import { UserRole } from "@/api/user";
 import React from "react";
 import {
-  CanManageClassRules,
+  CanManageClassRulesAndReports,
   CanTakeAttendance,
 } from "@/components/session_checker";
 
@@ -222,7 +223,7 @@ function ClassGroupManagerMenu() {
   if (
     !(
       session.data?.management_details.attendance ||
-      session.data?.management_details.rules
+      session.data?.management_details.rules_and_reports
     )
   ) {
     return null;
@@ -250,14 +251,22 @@ function ClassGroupManagerMenu() {
                 Attendance Taking
               </MenuItem>
             </CanTakeAttendance>
-            <CanManageClassRules failNode={null}>
+            <CanManageClassRulesAndReports failNode={null}>
               <MenuItem
                 leftSection={<IconBraces size={16} />}
                 onClick={() => router.push(Routes.attendanceRules)}
               >
                 Attendance Rules
               </MenuItem>
-            </CanManageClassRules>
+            </CanManageClassRulesAndReports>
+            <CanManageClassRulesAndReports failNode={null}>
+              <MenuItem
+                leftSection={<IconReportAnalytics size={16} />}
+                onClick={() => router.push(Routes.classReports)}
+              >
+                Class Reports
+              </MenuItem>
+            </CanManageClassRulesAndReports>
           </MenuDropdown>
         </Menu>
       </Box>
@@ -277,13 +286,20 @@ function ClassGroupManagerMenu() {
             onClick={() => router.push(Routes.attendanceTaking)}
           />
         </CanTakeAttendance>
-        <CanManageClassRules failNode={null}>
+        <CanManageClassRulesAndReports failNode={null}>
           <NavLink
             label="Attendance Rules"
             leftSection={<IconBraces size={16} />}
             onClick={() => router.push(Routes.attendanceRules)}
           />
-        </CanManageClassRules>
+        </CanManageClassRulesAndReports>
+        <CanManageClassRulesAndReports failNode={null}>
+          <NavLink
+            label="Class Reports"
+            leftSection={<IconReportAnalytics size={16} />}
+            onClick={() => router.push(Routes.classReports)}
+          />
+        </CanManageClassRulesAndReports>
       </NavLink>
     </>
   );
