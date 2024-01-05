@@ -3,14 +3,14 @@ import React from "react";
 import NotFoundPage from "@/app/not-found";
 
 export const metadata = {
-  title: "Attendance Rules",
-  description: "OAMS Attendance Rule Management Service",
+  title: "Class Reports",
+  description: "OAMS Class Reports Service",
   icons: {
     icon: "/favicon.svg",
   },
 };
 
-export default function AttendanceRulesLayout({
+export default function ClassReportsLayout({
   children,
 }: {
   children: React.ReactNode;

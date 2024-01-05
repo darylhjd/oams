@@ -11,5 +11,5 @@ export type Session = {
 
 export type ManagementDetails = {
   attendance: boolean;
-  rules: boolean;
+  rules_and_reports: boolean;
 };

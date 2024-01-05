@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import React from "react";
-import { CanManageClassRules } from "@/components/session_checker";
+import { CanManageClassRulesAndReports } from "@/components/session_checker";
 import NotFoundPage from "@/app/not-found";
 
 export type Params = {
@@ -27,8 +27,8 @@ export default function AttendanceRuleLayout({
   children: React.ReactNode;
 }) {
   return (
-    <CanManageClassRules failNode={<NotFoundPage />}>
+    <CanManageClassRulesAndReports failNode={<NotFoundPage />}>
       {children}
-    </CanManageClassRules>
+    </CanManageClassRulesAndReports>
   );
 }

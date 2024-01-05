@@ -47,7 +47,7 @@ export function CanTakeAttendance({
   return <>{failNode}</>;
 }
 
-export function CanManageClassRules({
+export function CanManageClassRulesAndReports({
   children,
   failNode,
 }: {
@@ -56,7 +56,7 @@ export function CanManageClassRules({
 }) {
   const session = useSessionUserStore();
 
-  if (session.data?.management_details.rules) {
+  if (session.data?.management_details.rules_and_reports) {
     return <>{children}</>;
   }
 
