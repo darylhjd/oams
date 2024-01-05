@@ -33,7 +33,7 @@ const (
 	CoordinatingClassRead
 	CoordinatingClassUpdate
 
-	ReportsRead
+	DataExportRead
 )
 
 type permissionMap map[P]struct{}
@@ -93,5 +93,5 @@ var systemAdminRolePermissions = permissionMap{
 	CoordinatingClassRead:   {},
 	CoordinatingClassUpdate: {},
 
-	ReportsRead: {},
+	DataExportRead: {},
 }

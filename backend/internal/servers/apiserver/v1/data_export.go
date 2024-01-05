@@ -11,13 +11,13 @@ import (
 	"github.com/darylhjd/oams/backend/pkg/to"
 )
 
-func (v *APIServerV1) reports(w http.ResponseWriter, r *http.Request) {
+func (v *APIServerV1) dataExport(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
 	switch r.Method {
 	case http.MethodGet:
 		// Special case for file download, cannot use v.writeResponse helper.
-		if err := v.reportsGet(w, r); err != nil {
+		if err := v.dataExportGet(w, r); err != nil {
 			resp = *err
 		} else {
 			return
@@ -29,7 +29,7 @@ func (v *APIServerV1) reports(w http.ResponseWriter, r *http.Request) {
 	v.writeResponse(w, r, resp)
 }
 
-func (v *APIServerV1) reportsGet(w http.ResponseWriter, r *http.Request) *errorResponse {
+func (v *APIServerV1) dataExportGet(w http.ResponseWriter, r *http.Request) *errorResponse {
 	txDb, tx, err := v.db.AsTx(r.Context(), &sql.TxOptions{
 		Isolation: sql.LevelRepeatableRead,
 	})
@@ -46,9 +46,9 @@ func (v *APIServerV1) reportsGet(w http.ResponseWriter, r *http.Request) *errorR
 	}))
 	w.Header().Set("Content-Type", "application/octet-stream")
 
-	if err := common.GenerateReportArchive(w, r, txDb); err != nil {
+	if err := common.GenerateDataExportArchive(w, r, txDb); err != nil {
 		v.logInternalServerError(r, err)
-		return to.Ptr(newErrorResponse(http.StatusInternalServerError, "could not generate reports zip"))
+		return to.Ptr(newErrorResponse(http.StatusInternalServerError, "could not generate data export zip"))
 	}
 
 	if err = tx.Commit(); err != nil {
