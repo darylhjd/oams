@@ -4,11 +4,6 @@ export type CoordinatingClassesGetResponse = {
   coordinating_classes: CoordinatingClass[];
 };
 
-export type CoordinatingClassGetResponse = {
-  coordinating_class: CoordinatingClass;
-  rules: ClassAttendanceRule[];
-};
-
 export type CoordinatingClass = {
   id: number;
   code: string;
@@ -18,17 +13,12 @@ export type CoordinatingClass = {
   au: number;
 };
 
-export type CoordinatingClassPostResponse = {
-  rule: ClassAttendanceRule;
+export type CoordinatingClassRulesGetResponse = {
+  coordinating_class: CoordinatingClass;
+  rules: ClassAttendanceRule[];
 };
 
-export enum RuleType {
-  MissedConsecutiveClasses = 0,
-  MinPercentageAttendanceFromSession = 1,
-  Advanced = 2,
-}
-
-export type CoordinatingClassPostRequest = {
+export type CoordinatingClassRulesPostRequest = {
   title: string;
   description: string;
   rule_type: RuleType;
@@ -36,6 +26,12 @@ export type CoordinatingClassPostRequest = {
   percentage_params: MinPercentageAttendanceFromSessionParams;
   advanced_params: AdvancedParams;
 };
+
+export enum RuleType {
+  MissedConsecutiveClasses = 0,
+  MinPercentageAttendanceFromSession = 1,
+  Advanced = 2,
+}
 
 export type MissedConsecutiveClassParams = {
   consecutive_classes: number;
@@ -48,4 +44,8 @@ export type MinPercentageAttendanceFromSessionParams = {
 
 export type AdvancedParams = {
   rule: string;
+};
+
+export type CoordinatingClassRulesPostResponse = {
+  rule: ClassAttendanceRule;
 };

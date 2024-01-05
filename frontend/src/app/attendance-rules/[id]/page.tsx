@@ -21,7 +21,7 @@ import { Params } from "@/app/attendance-rules/[id]/layout";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import {
   CoordinatingClass,
-  CoordinatingClassPostRequest,
+  CoordinatingClassRulesPostRequest,
   RuleType,
 } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
@@ -41,7 +41,7 @@ export default function AttendanceRulePage({ params }: { params: Params }) {
   );
   const [rules, setRules] = useState<ClassAttendanceRule[]>([]);
   const promiseFunc = async () => {
-    const data = await APIClient.coordinatingClassGet(params.id);
+    const data = await APIClient.coordinatingClassRulesGet(params.id);
     setCoordinatingClass(data.coordinating_class);
     return setRules(data.rules);
   };
@@ -86,7 +86,7 @@ function CreateRuleButton({
   const [opened, { open, close }] = useDisclosure(false);
 
   const [loading, setLoading] = useState(false);
-  const form: UseFormReturnType<CoordinatingClassPostRequest> = useForm({
+  const form: UseFormReturnType<CoordinatingClassRulesPostRequest> = useForm({
     initialValues: {
       title: "",
       description: "",
@@ -110,7 +110,7 @@ function CreateRuleButton({
   const formSubmit = form.onSubmit(async (values) => {
     setLoading(true);
     try {
-      const resp = await APIClient.coordinatingClassPost(id, values);
+      const resp = await APIClient.coordinatingClassRulesPost(id, values);
       close();
       form.reset();
       rules.push(resp.rule);

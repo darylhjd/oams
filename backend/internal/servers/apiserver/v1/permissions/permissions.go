@@ -31,7 +31,9 @@ const (
 	UpcomingClassGroupSessionUpdate
 
 	CoordinatingClassRead
-	CoordinatingClassUpdate
+
+	CoordinatingClassRuleRead
+	CoordinatingClassRuleCreate
 
 	DataExportRead
 )
@@ -60,8 +62,10 @@ var userRolePermissions = permissionMap{
 	UpcomingClassGroupSessionRead:   {},
 	UpcomingClassGroupSessionUpdate: {},
 
-	CoordinatingClassRead:   {},
-	CoordinatingClassUpdate: {},
+	CoordinatingClassRead: {},
+
+	CoordinatingClassRuleRead:   {},
+	CoordinatingClassRuleCreate: {},
 }
 
 var systemAdminRolePermissions = permissionMap{
@@ -90,8 +94,10 @@ var systemAdminRolePermissions = permissionMap{
 	UpcomingClassGroupSessionRead:   {},
 	UpcomingClassGroupSessionUpdate: {},
 
-	CoordinatingClassRead:   {},
-	CoordinatingClassUpdate: {},
+	CoordinatingClassRead: {},
+
+	CoordinatingClassRuleRead:   {},
+	CoordinatingClassRuleCreate: {},
 
 	DataExportRead: {},
 }
