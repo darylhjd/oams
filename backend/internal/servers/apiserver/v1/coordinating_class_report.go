@@ -15,6 +15,6 @@ func (v *APIServerV1) coordinatingClassReport(w http.ResponseWriter, r *http.Req
 	v.writeResponse(w, r, resp)
 }
 
-func (v *APIServerV1) coordinatingClassReportGet(r *http.Request, id int64) apiResponse {
+func (v *APIServerV1) coordinatingClassReportGet(r *http.Request, classId int64) apiResponse {
 	return newErrorResponse(http.StatusNotImplemented, "")
 }

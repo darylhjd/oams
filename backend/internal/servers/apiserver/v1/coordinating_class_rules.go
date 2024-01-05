@@ -34,8 +34,8 @@ type coordinatingClassRulesGetResponse struct {
 }
 
 // TODO: Implement tests for this endpoint.
-func (v *APIServerV1) coordinatingClassRulesGet(r *http.Request, id int64) apiResponse {
-	class, err := v.db.GetCoordinatingClass(r.Context(), id)
+func (v *APIServerV1) coordinatingClassRulesGet(r *http.Request, classId int64) apiResponse {
+	class, err := v.db.GetCoordinatingClass(r.Context(), classId)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested coordinating class does not exist")
@@ -45,7 +45,7 @@ func (v *APIServerV1) coordinatingClassRulesGet(r *http.Request, id int64) apiRe
 		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class get database action")
 	}
 
-	classRules, err := v.db.GetCoordinatingClassRules(r.Context(), id)
+	classRules, err := v.db.GetCoordinatingClassRules(r.Context(), classId)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not get coordinating class rules")
@@ -67,7 +67,7 @@ type coordinatingClassRulesPostResponse struct {
 	Rule model.ClassAttendanceRule `json:"rule"`
 }
 
-func (v *APIServerV1) coordinatingClassRulesPost(r *http.Request, id int64) apiResponse {
+func (v *APIServerV1) coordinatingClassRulesPost(r *http.Request, classId int64) apiResponse {
 	var req coordinatingClassRulesPostRequest
 	if err := v.parseRequestBody(r.Body, &req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
@@ -79,7 +79,7 @@ func (v *APIServerV1) coordinatingClassRulesPost(r *http.Request, id int64) apiR
 	}
 
 	rule, err := v.db.CreateNewCoordinatingClassRule(r.Context(), database.CreateNewCoordinatingClassRuleParams{
-		ClassID:     id,
+		ClassID:     classId,
 		CreatorID:   oauth2.GetAuthContext(r.Context()).User.ID,
 		Title:       req.Title,
 		Description: req.Description,

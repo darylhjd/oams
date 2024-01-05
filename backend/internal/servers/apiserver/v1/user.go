@@ -32,8 +32,8 @@ type userGetResponse struct {
 	User model.User `json:"user"`
 }
 
-func (v *APIServerV1) userGet(r *http.Request, id string) apiResponse {
-	user, err := v.db.GetUser(r.Context(), id)
+func (v *APIServerV1) userGet(r *http.Request, userId string) apiResponse {
+	user, err := v.db.GetUser(r.Context(), userId)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested user does not exist")

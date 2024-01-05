@@ -39,8 +39,8 @@ type upcomingClassGroupSessionGetResponse struct {
 }
 
 // TODO: Implement tests for this endpoint.
-func (v *APIServerV1) upcomingClassGroupSessionGet(r *http.Request, id int64) apiResponse {
-	upcoming, err := v.db.GetUpcomingManagedClassGroupSession(r.Context(), id)
+func (v *APIServerV1) upcomingClassGroupSessionGet(r *http.Request, sessionId int64) apiResponse {
+	upcoming, err := v.db.GetUpcomingManagedClassGroupSession(r.Context(), sessionId)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested upcoming class group session does not exist")
@@ -79,14 +79,14 @@ type upcomingClassGroupSessionPostResponse struct {
 }
 
 // TODO: Implement tests for this endpoint.
-func (v *APIServerV1) upcomingClassGroupSessionPost(r *http.Request, id int64) apiResponse {
+func (v *APIServerV1) upcomingClassGroupSessionPost(r *http.Request, sessionId int64) apiResponse {
 	var req upcomingClassGroupSessionPostRequest
 	if err := v.parseRequestBody(r.Body, &req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
 	err := v.db.UpdateAttendanceEntry(r.Context(), database.UpdateAttendanceEntryParams{
-		ClassGroupSessionID: id,
+		ClassGroupSessionID: sessionId,
 		ID:                  req.ID,
 		UserID:              req.UserID,
 		Attended:            req.Attended,

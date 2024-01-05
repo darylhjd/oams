@@ -38,8 +38,8 @@ type classGroupSessionGetResponse struct {
 	ClassGroupSession model.ClassGroupSession `json:"class_group_session"`
 }
 
-func (v *APIServerV1) classGroupSessionGet(r *http.Request, id int64) apiResponse {
-	s, err := v.db.GetClassGroupSession(r.Context(), id)
+func (v *APIServerV1) classGroupSessionGet(r *http.Request, sessionId int64) apiResponse {
+	s, err := v.db.GetClassGroupSession(r.Context(), sessionId)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested class group session does not exist")
