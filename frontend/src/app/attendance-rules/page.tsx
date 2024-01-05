@@ -7,19 +7,16 @@ import { useState } from "react";
 import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
-import {
-  MantineReactTable,
-  MRT_DensityState,
-  useMantineReactTable,
-} from "mantine-react-table";
-import { CoordinatingClassesDataTableColumns } from "@/components/tabling";
-import { useRouter } from "next/navigation";
+import { CoordinatingClassPicker } from "@/components/tabling";
 import { Routes } from "@/routing/routes";
+import { useRouter } from "next/navigation";
 
 export default function AttendanceRulesPage() {
   const [coordinatingClasses, setCoordinatingClasses] = useState<
     CoordinatingClass[]
   >([]);
+  const router = useRouter();
+
   const promiseFunc = async () => {
     const data = await APIClient.coordinatingClassesGet();
     return setCoordinatingClasses(data.coordinating_classes);
@@ -30,9 +27,14 @@ export default function AttendanceRulesPage() {
       <Container className={styles.container} fluid>
         <PageTitle />
         <Space h="md" />
-        <Text ta="center">Click each row to view associated rules.</Text>
+        <Text ta="center">Choose the class to manage rules.</Text>
         <Space h="xs" />
-        <CoordinatingClassPicker coordinatingClasses={coordinatingClasses} />
+        <CoordinatingClassPicker
+          coordinatingClasses={coordinatingClasses}
+          onRowClick={(row) =>
+            router.push(Routes.attendanceRule + row.original.id)
+          }
+        />
       </Container>
     </RequestLoader>
   );
@@ -44,26 +46,4 @@ function PageTitle() {
       Attendance Rules
     </Title>
   );
-}
-
-function CoordinatingClassPicker({
-  coordinatingClasses,
-}: {
-  coordinatingClasses: CoordinatingClass[];
-}) {
-  const router = useRouter();
-
-  const table = useMantineReactTable({
-    columns: CoordinatingClassesDataTableColumns,
-    data: coordinatingClasses,
-    initialState: {
-      density: "lg" as MRT_DensityState,
-    },
-    mantineTableBodyRowProps: ({ row }) => ({
-      onClick: (_) => router.push(Routes.attendanceRule + row.original.id),
-      style: { cursor: "pointer" },
-    }),
-  });
-
-  return <MantineReactTable table={table} />;
 }

@@ -19,4 +19,5 @@ export const Routes = {
   attendanceRules: "/attendance-rules",
   attendanceRule: "/attendance-rules/",
   classReports: "/class-reports",
+  classReport: "/class-reports/",
 };

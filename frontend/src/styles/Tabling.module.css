@@ -1,0 +1,5 @@
+.tableRow {
+  @mixin hover {
+    cursor: pointer;
+  }
+}

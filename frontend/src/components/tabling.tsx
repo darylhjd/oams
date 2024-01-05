@@ -1,3 +1,5 @@
+import styles from "@/styles/Tabling.module.css";
+
 import {
   UpsertClassGroupParams,
   UpsertClassGroupSessionParams,
@@ -13,8 +15,26 @@ import {
 } from "@/api/class_group_manager";
 import { SessionEnrollment } from "@/api/session_enrollment";
 import { User } from "@/api/user";
-import { MRT_Cell, MRT_ColumnDef } from "mantine-react-table";
-import { Badge, Text } from "@mantine/core";
+import {
+  flexRender,
+  MRT_Cell,
+  MRT_ColumnDef,
+  MRT_Row,
+  MRT_TablePagination,
+  useMantineReactTable,
+} from "mantine-react-table";
+import {
+  Badge,
+  Group,
+  Table,
+  TableScrollContainer,
+  TableTbody,
+  TableTd,
+  TableTh,
+  TableThead,
+  TableTr,
+  Text,
+} from "@mantine/core";
 import { AttendanceEntry } from "@/api/upcoming_class_group_session";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import { CoordinatingClass } from "@/api/coordinating_class";
@@ -165,3 +185,66 @@ export const AttendanceEntriesDataTableColumns: MRT_ColumnDef<AttendanceEntry>[]
     { accessorKey: "user_name", header: "Name" },
     ...getSessionEnrollmentsSharedColumns<AttendanceEntry>().slice(1),
   ];
+
+export function CoordinatingClassPicker({
+  coordinatingClasses,
+  onRowClick,
+}: {
+  coordinatingClasses: CoordinatingClass[];
+  onRowClick: (row: MRT_Row<CoordinatingClass>) => void;
+}) {
+  const table = useMantineReactTable({
+    columns: CoordinatingClassesDataTableColumns,
+    data: coordinatingClasses,
+    initialState: {
+      pagination: { pageSize: 5, pageIndex: 0 },
+    },
+  });
+
+  return (
+    <>
+      <TableScrollContainer minWidth={500}>
+        <Table verticalSpacing="md" highlightOnHover withTableBorder>
+          <TableThead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableTr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableTh key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.Header ??
+                            header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableTh>
+                ))}
+              </TableTr>
+            ))}
+          </TableThead>
+          <TableTbody>
+            {table.getRowModel().rows.map((row) => (
+              <TableTr
+                key={row.id}
+                className={styles.tableRow}
+                onClick={() => onRowClick(row)}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableTd key={cell.id}>
+                    {flexRender(
+                      cell.column.columnDef.Cell ?? cell.column.columnDef.cell,
+                      cell.getContext(),
+                    )}
+                  </TableTd>
+                ))}
+              </TableTr>
+            ))}
+          </TableTbody>
+        </Table>
+      </TableScrollContainer>
+      <Group justify="right">
+        <MRT_TablePagination table={table} />
+      </Group>
+    </>
+  );
+}

@@ -22,6 +22,7 @@ import { IconFile, IconUpload, IconX } from "@tabler/icons-react";
 import { FileStoreType } from "@/stores/file_store";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
+import { AxiosResponse } from "axios";
 
 const MAX_FILE_SIZE = 5 * 1024 ** 2; // 5MB
 
@@ -226,4 +227,23 @@ function ResetFilesButton({ fileStorage }: { fileStorage: FileStoreType }) {
       </Button>
     </Center>
   );
+}
+
+export function saveBlobResponseAsFile(response: AxiosResponse<any, any>) {
+  // Do ugly stuff to save file :(
+  const blob = new Blob([response.data]);
+
+  const link = document.createElement("a");
+  const url = window.URL.createObjectURL(blob);
+  const [, filename] =
+    response.headers["content-disposition"].split("filename=");
+  link.href = url;
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+
+  link.click();
+
+  // Clean up and remove the link
+  link.parentNode?.removeChild(link);
+  window.URL.revokeObjectURL(url);
 }
