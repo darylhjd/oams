@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	coordinatingClassRulesUrl = "/coordinating-classes/%d/rules"
+	coordinatingClassRulesUrl  = "/rules"
+	coordinatingClassReportUrl = "/report"
 )
 
 var (
@@ -28,7 +29,7 @@ func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) 
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(fmt.Sprintf(coordinatingClassRulesUrl, classId), permissions.EnforceAccessPolicy(
+	mux.HandleFunc(coordinatingClassRulesUrl, permissions.EnforceAccessPolicy(
 		middleware.WithID(classId, v.coordinatingClassRules),
 		v.auth, v.db,
 		map[string][]permissions.P{
@@ -37,5 +38,14 @@ func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) 
 		},
 	))
 
-	mux.ServeHTTP(w, r)
+	mux.HandleFunc(coordinatingClassReportUrl, permissions.EnforceAccessPolicy(
+		middleware.WithID(classId, v.coordinatingClassReport),
+		v.auth, v.db,
+		map[string][]permissions.P{
+			http.MethodGet: {permissions.CoordinatingClassReportRead},
+		},
+	))
+
+	prefix := fmt.Sprintf("%s%d", coordinatingClassUrl, classId)
+	http.StripPrefix(prefix, mux).ServeHTTP(w, r)
 }
