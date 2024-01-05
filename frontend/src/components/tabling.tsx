@@ -134,31 +134,34 @@ export const ClassGroupSessionsDataTableColumns: MRT_ColumnDef<ClassGroupSession
     ...CreatedAtUpdatedAtDataTableColumns,
   ];
 
-const sessionEnrollmentsSharedColumns = [
-  { accessorKey: "user_id", header: "User ID" },
-  {
-    accessorKey: "attended",
-    header: "Attended",
-    Cell: ({ cell }: { cell: MRT_Cell<any> }) => {
-      const attended = cell.getValue<boolean>();
-      return (
-        <Badge color={attended ? "green" : "red"}>
-          {attended ? "Attended" : "Not attended"}
-        </Badge>
-      );
+function getSessionEnrollmentsSharedColumns<T extends Record<string, any>>() {
+  return [
+    { accessorKey: "user_id", header: "User ID" },
+    {
+      accessorKey: "attended",
+      header: "Attended",
+      Cell: ({ cell }: { cell: MRT_Cell<T> }) => {
+        const attended = cell.getValue<boolean>();
+        return (
+          <Badge color={attended ? "green" : "red"}>
+            {attended ? "Attended" : "Not attended"}
+          </Badge>
+        );
+      },
     },
-  },
-];
+  ];
+}
+
 export const SessionEnrollmentsDataTableColumns: MRT_ColumnDef<SessionEnrollment>[] =
   [
     { accessorKey: "id", header: "ID" },
     { accessorKey: "session_id", header: "Session ID" },
-    ...sessionEnrollmentsSharedColumns,
+    ...getSessionEnrollmentsSharedColumns<SessionEnrollment>(),
     ...CreatedAtUpdatedAtDataTableColumns,
   ];
 export const AttendanceEntriesDataTableColumns: MRT_ColumnDef<AttendanceEntry>[] =
   [
-    ...sessionEnrollmentsSharedColumns.slice(0, 1),
+    ...getSessionEnrollmentsSharedColumns<AttendanceEntry>().slice(0, 1),
     { accessorKey: "user_name", header: "Name" },
-    ...sessionEnrollmentsSharedColumns.slice(1),
+    ...getSessionEnrollmentsSharedColumns<AttendanceEntry>().slice(1),
   ];
