@@ -134,6 +134,7 @@ func generateClassAttendanceRulesCSV(r *http.Request, txDb *database.DB, archive
 		records = append(records, []string{
 			strconv.FormatInt(rule.ID, 10),
 			strconv.FormatInt(rule.ClassID, 10),
+			rule.CreatorID,
 			rule.Title,
 			rule.Description,
 			rule.Rule,
