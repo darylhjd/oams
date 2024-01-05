@@ -38,8 +38,8 @@ type sessionEnrollmentGetResponse struct {
 	SessionEnrollment model.SessionEnrollment `json:"session_enrollment"`
 }
 
-func (v *APIServerV1) sessionEnrollmentGet(r *http.Request, id int64) apiResponse {
-	enrollment, err := v.db.GetSessionEnrollment(r.Context(), id)
+func (v *APIServerV1) sessionEnrollmentGet(r *http.Request, enrollmentId int64) apiResponse {
+	enrollment, err := v.db.GetSessionEnrollment(r.Context(), enrollmentId)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested session enrollment does not exist")

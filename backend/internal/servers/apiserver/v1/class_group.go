@@ -38,8 +38,8 @@ type classGroupGetResponse struct {
 	ClassGroup model.ClassGroup `json:"class_group"`
 }
 
-func (v *APIServerV1) classGroupGet(r *http.Request, id int64) apiResponse {
-	group, err := v.db.GetClassGroup(r.Context(), id)
+func (v *APIServerV1) classGroupGet(r *http.Request, groupId int64) apiResponse {
+	group, err := v.db.GetClassGroup(r.Context(), groupId)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested class group does not exist")

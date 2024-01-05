@@ -28,13 +28,13 @@ type signaturePutResponse struct {
 	response
 }
 
-func (v *APIServerV1) signaturePut(r *http.Request, id string) apiResponse {
+func (v *APIServerV1) signaturePut(r *http.Request, userId string) apiResponse {
 	var req signaturePutRequest
 	if err := v.parseRequestBody(r.Body, &req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse user request body: %s", err))
 	}
 
-	if err := v.db.UpdateUserSignature(r.Context(), id, req.Signature); err != nil {
+	if err := v.db.UpdateUserSignature(r.Context(), userId, req.Signature); err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not update user signature")
 	}

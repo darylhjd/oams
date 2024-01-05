@@ -38,8 +38,8 @@ type classGetResponse struct {
 	Class model.Class `json:"class"`
 }
 
-func (v *APIServerV1) classGet(r *http.Request, id int64) apiResponse {
-	class, err := v.db.GetClass(r.Context(), id)
+func (v *APIServerV1) classGet(r *http.Request, classId int64) apiResponse {
+	class, err := v.db.GetClass(r.Context(), classId)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusNotFound, "the requested class does not exist")
