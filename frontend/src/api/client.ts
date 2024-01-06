@@ -324,6 +324,12 @@ export class APIClient {
     return data;
   }
 
+  static async coordinatingClassReportGet(id: number) {
+    return await this._client.get(`/coordinating-classes/${id}/report`, {
+      responseType: "blob",
+    });
+  }
+
   static async dataExportGet() {
     return await this._client.get("/data-export", {
       responseType: "blob",

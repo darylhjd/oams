@@ -4,6 +4,7 @@ import styles from "@/styles/DataExportPage.module.css";
 
 import { Button, Center, Container, Space, Text, Title } from "@mantine/core";
 import { APIClient } from "@/api/client";
+import { saveBlobResponseAsFile } from "@/components/file_processing";
 
 export default function DataExportPage() {
   return (
@@ -46,23 +47,7 @@ function DataExportButton() {
       <Button
         onClick={async () => {
           const response = await APIClient.dataExportGet();
-
-          // Do ugly stuff to save file :(
-          const blob = new Blob([response.data]);
-
-          const link = document.createElement("a");
-          const url = window.URL.createObjectURL(blob);
-          const [, filename] =
-            response.headers["content-disposition"].split("filename=");
-          link.href = url;
-          link.setAttribute("download", filename);
-          document.body.appendChild(link);
-
-          link.click();
-
-          // Clean up and remove the link
-          link.parentNode?.removeChild(link);
-          window.URL.revokeObjectURL(url);
+          saveBlobResponseAsFile(response);
         }}
       >
         Start Data Export
