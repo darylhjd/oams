@@ -114,6 +114,99 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 	return res, err
 }
 
+type CoordinatingClassReportData struct {
+	Class       model.Class
+	Rules       []model.ClassAttendanceRule
+	Managers    []model.ClassGroupManager
+	ClassGroups []ClassGroupReportData
+}
+
+type ClassGroupReportData struct {
+	ClassGroup        model.ClassGroup
+	ClassGroupSession model.ClassGroupSession
+	SessionEnrollment model.SessionEnrollment
+}
+
+func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (CoordinatingClassReportData, error) {
+	var res CoordinatingClassReportData
+
+	classStmt := SELECT(
+		Classes.AllColumns,
+	).FROM(
+		Classes,
+	).WHERE(
+		Classes.ID.EQ(Int64(id)).AND(
+			coordinatingClassRLS(ctx),
+		),
+	)
+	if err := classStmt.QueryContext(ctx, d.qe, &res.Class); err != nil {
+		return res, err
+	}
+
+	rulesStmt := SELECT(
+		ClassAttendanceRules.AllColumns,
+	).FROM(
+		ClassAttendanceRules.INNER_JOIN(
+			Classes, Classes.ID.EQ(ClassAttendanceRules.ClassID),
+		),
+	).WHERE(
+		Classes.ID.EQ(Int64(id)).AND(
+			coordinatingClassRLS(ctx),
+		),
+	).ORDER_BY(
+		ClassAttendanceRules.CreatorID,
+	)
+	if err := rulesStmt.QueryContext(ctx, d.qe, &res.Rules); err != nil {
+		return res, err
+	}
+
+	managersStmt := SELECT(
+		ClassGroupManagers.AllColumns,
+	).FROM(
+		Classes.INNER_JOIN(
+			ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
+		).INNER_JOIN(
+			ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
+		),
+	).WHERE(
+		Classes.ID.EQ(Int64(id)).AND(
+			coordinatingClassRLS(ctx),
+		),
+	).ORDER_BY(
+		ClassGroupManagers.ManagingRole,
+	)
+	if err := managersStmt.QueryContext(ctx, d.qe, &res.Managers); err != nil {
+		return res, err
+	}
+
+	classGroupsStmt := SELECT(
+		ClassGroups.AllColumns,
+		ClassGroupSessions.AllColumns,
+		SessionEnrollments.AllColumns,
+	).FROM(
+		Classes.INNER_JOIN(
+			ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
+		).INNER_JOIN(
+			ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
+		).INNER_JOIN(
+			SessionEnrollments, SessionEnrollments.SessionID.EQ(ClassGroupSessions.ID),
+		),
+	).WHERE(
+		coordinatingClassRLS(ctx),
+	).ORDER_BY(
+		ClassGroups.Name,
+		ClassGroups.ClassType,
+		ClassGroupSessions.StartTime,
+		ClassGroupSessions.EndTime,
+		SessionEnrollments.UserID,
+	)
+	if err := classGroupsStmt.QueryContext(ctx, d.qe, &res.ClassGroups); err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
 func selectCoordinatingClassFields() SelectStatement {
 	return SELECT(
 		Classes.ID,
