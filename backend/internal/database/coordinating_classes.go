@@ -117,8 +117,15 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 type CoordinatingClassReportData struct {
 	Class       model.Class
 	Rules       []model.ClassAttendanceRule
-	Managers    []model.ClassGroupManager
+	Managers    []ClassGroupManagerReportData
 	ClassGroups []ClassGroupReportData
+}
+
+type ClassGroupManagerReportData struct {
+	UserID         string             `alias:"user.id"`
+	UserName       string             `alias:"user.name"`
+	ClassGroupName string             `alias:"class_group.name"`
+	ManagingRole   model.ManagingRole `alias:"class_group_manager.managing_role"`
 }
 
 type ClassGroupReportData struct {
@@ -161,18 +168,24 @@ func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (Coor
 	}
 
 	managersStmt := SELECT(
-		ClassGroupManagers.AllColumns,
+		Users.ID,
+		Users.Name,
+		ClassGroups.Name,
+		ClassGroupManagers.ManagingRole,
 	).FROM(
 		Classes.INNER_JOIN(
 			ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
 		).INNER_JOIN(
 			ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
+		).INNER_JOIN(
+			Users, Users.ID.EQ(ClassGroupManagers.UserID),
 		),
 	).WHERE(
 		Classes.ID.EQ(Int64(id)).AND(
 			coordinatingClassRLS(ctx),
 		),
 	).ORDER_BY(
+		ClassGroups.Name,
 		ClassGroupManagers.ManagingRole,
 	)
 	if err := managersStmt.QueryContext(ctx, d.qe, &res.Managers); err != nil {
