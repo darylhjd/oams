@@ -1,6 +1,6 @@
 import { UserRole } from "@/api/user";
 import { CheckHasUserRole } from "@/components/session_checker";
-import React from "react";
+import { ReactNode } from "react";
 
 export const metadata = {
   title: "Manager Processing",
@@ -13,7 +13,7 @@ export const metadata = {
 export default function ManagerProcessingLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <CheckHasUserRole role={UserRole.SystemAdmin}>{children}</CheckHasUserRole>

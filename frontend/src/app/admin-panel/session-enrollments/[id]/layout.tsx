@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import React from "react";
+import { ReactNode } from "react";
 
 export type Params = {
   id: number;
@@ -22,7 +22,7 @@ export async function generateMetadata({
 export default function AdminPanelSessionEnrollmentLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return <>{children}</>;
 }

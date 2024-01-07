@@ -1,7 +1,7 @@
-import styles from "@/styles/AttendanceRulePage.module.css";
+import styles from "@/styles/ClassAdministrationPage.module.css";
 
 import { UseFormReturnType } from "@mantine/form";
-import React, { FormEvent } from "react";
+import { FormEvent, ReactNode } from "react";
 import {
   Anchor,
   Button,
@@ -35,7 +35,7 @@ export function RuleForm({
   loading: boolean;
   onSubmit: (event?: FormEvent<HTMLFormElement> | undefined) => void;
 }) {
-  let ruleDetailComponent: React.ReactNode;
+  let ruleDetailComponent: ReactNode;
   switch (form.getInputProps("rule_type").value) {
     case RuleType.MissedConsecutiveClasses:
       ruleDetailComponent = (

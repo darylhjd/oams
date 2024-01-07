@@ -1,7 +1,7 @@
 import { Metadata } from "next";
-import { CanTakeAttendance } from "@/components/session_checker";
-import NotFoundPage from "@/app/not-found";
 import { ReactNode } from "react";
+import { CanAdministerClass } from "@/components/session_checker";
+import NotFoundPage from "@/app/not-found";
 
 export type Params = {
   id: number;
@@ -13,22 +13,22 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   return {
-    title: `Attendance Taking: ${params.id}`,
-    description: "OAMS Attendance Taking",
+    title: `Class Administration: ${params.id}`,
+    description: "OAMS Class Administration",
     icons: {
       icon: "/favicon.svg",
     },
   };
 }
 
-export default function SessionAttendanceTakingLayout({
+export default function ClassAdministrationLayout({
   children,
 }: {
   children: ReactNode;
 }) {
   return (
-    <CanTakeAttendance failNode={<NotFoundPage />}>
+    <CanAdministerClass failNode={<NotFoundPage />}>
       {children}
-    </CanTakeAttendance>
+    </CanAdministerClass>
   );
 }

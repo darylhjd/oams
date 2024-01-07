@@ -3,14 +3,14 @@
 import { UserRole } from "@/api/user";
 import { useSessionUserStore } from "@/stores/session";
 import NotFoundPage from "@/app/not-found";
-import React from "react";
+import { ReactNode } from "react";
 
 export function CheckHasUserRole({
   role,
   children,
 }: {
   role: UserRole;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const session = useSessionUserStore();
 
@@ -21,7 +21,7 @@ export function CheckHasUserRole({
   return <>{children}</>;
 }
 
-export function IsLoggedIn({ children }: { children: React.ReactNode }) {
+export function IsLoggedIn({ children }: { children: ReactNode }) {
   const session = useSessionUserStore();
 
   if (!session.data) {
@@ -35,8 +35,8 @@ export function CanTakeAttendance({
   children,
   failNode,
 }: {
-  children: React.ReactNode;
-  failNode: React.ReactNode;
+  children: ReactNode;
+  failNode: ReactNode;
 }) {
   const session = useSessionUserStore();
 
@@ -47,16 +47,16 @@ export function CanTakeAttendance({
   return <>{failNode}</>;
 }
 
-export function CanManageClassRulesAndReports({
+export function CanAdministerClass({
   children,
   failNode,
 }: {
-  children: React.ReactNode;
-  failNode: React.ReactNode;
+  children: ReactNode;
+  failNode: ReactNode;
 }) {
   const session = useSessionUserStore();
 
-  if (session.data?.management_details.rules_and_reports) {
+  if (session.data?.management_details.administrative) {
     return <>{children}</>;
   }
 

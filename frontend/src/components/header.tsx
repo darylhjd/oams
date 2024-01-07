@@ -25,20 +25,18 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
 import { useDisclosure } from "@mantine/hooks";
 import {
-  IconBraces,
+  IconAdjustments,
   IconCheck,
   IconChevronDown,
   IconCloudDownload,
   IconFileDescription,
   IconLayoutDashboard,
-  IconReportAnalytics,
 } from "@tabler/icons-react";
 import { Routes } from "@/routing/routes";
 import { APIClient } from "@/api/client";
 import { UserRole } from "@/api/user";
-import React from "react";
 import {
-  CanManageClassRulesAndReports,
+  CanAdministerClass,
   CanTakeAttendance,
 } from "@/components/session_checker";
 
@@ -223,7 +221,7 @@ function ClassGroupManagerMenu() {
   if (
     !(
       session.data?.management_details.attendance ||
-      session.data?.management_details.rules_and_reports
+      session.data?.management_details.administrative
     )
   ) {
     return null;
@@ -251,22 +249,14 @@ function ClassGroupManagerMenu() {
                 Attendance Taking
               </MenuItem>
             </CanTakeAttendance>
-            <CanManageClassRulesAndReports failNode={null}>
+            <CanAdministerClass failNode={null}>
               <MenuItem
-                leftSection={<IconBraces size={16} />}
-                onClick={() => router.push(Routes.attendanceRules)}
+                leftSection={<IconAdjustments size={16} />}
+                onClick={() => router.push(Routes.classAdministrations)}
               >
-                Attendance Rules
+                Class Administration
               </MenuItem>
-            </CanManageClassRulesAndReports>
-            <CanManageClassRulesAndReports failNode={null}>
-              <MenuItem
-                leftSection={<IconReportAnalytics size={16} />}
-                onClick={() => router.push(Routes.classReports)}
-              >
-                Class Reports
-              </MenuItem>
-            </CanManageClassRulesAndReports>
+            </CanAdministerClass>
           </MenuDropdown>
         </Menu>
       </Box>
@@ -286,20 +276,13 @@ function ClassGroupManagerMenu() {
             onClick={() => router.push(Routes.attendanceTaking)}
           />
         </CanTakeAttendance>
-        <CanManageClassRulesAndReports failNode={null}>
+        <CanAdministerClass failNode={null}>
           <NavLink
-            label="Attendance Rules"
-            leftSection={<IconBraces size={16} />}
-            onClick={() => router.push(Routes.attendanceRules)}
+            label="Class Administration"
+            leftSection={<IconAdjustments size={16} />}
+            onClick={() => router.push(Routes.classAdministrations)}
           />
-        </CanManageClassRulesAndReports>
-        <CanManageClassRulesAndReports failNode={null}>
-          <NavLink
-            label="Class Reports"
-            leftSection={<IconReportAnalytics size={16} />}
-            onClick={() => router.push(Routes.classReports)}
-          />
-        </CanManageClassRulesAndReports>
+        </CanAdministerClass>
       </NavLink>
     </>
   );

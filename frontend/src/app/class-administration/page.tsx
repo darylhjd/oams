@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "@/styles/AttendanceRulesPage.module.css";
+import styles from "@/styles/ClassAdministrationsPage.module.css";
 
 import { Container, Space, Text, Title } from "@mantine/core";
 import { useState } from "react";
@@ -11,7 +11,7 @@ import { CoordinatingClassPicker } from "@/components/tabling";
 import { Routes } from "@/routing/routes";
 import { useRouter } from "next/navigation";
 
-export default function AttendanceRulesPage() {
+export default function ClassAdministrationsPage() {
   const [coordinatingClasses, setCoordinatingClasses] = useState<
     CoordinatingClass[]
   >([]);
@@ -27,12 +27,12 @@ export default function AttendanceRulesPage() {
       <Container className={styles.container} fluid>
         <PageTitle />
         <Space h="md" />
-        <Text ta="center">Choose the class to manage rules.</Text>
+        <Text ta="center">Select a class to manage.</Text>
         <Space h="xs" />
         <CoordinatingClassPicker
           coordinatingClasses={coordinatingClasses}
           onRowClick={(row) =>
-            router.push(Routes.attendanceRule + row.original.id)
+            router.push(Routes.classAdministration + row.original.id)
           }
         />
       </Container>
@@ -43,7 +43,7 @@ export default function AttendanceRulesPage() {
 function PageTitle() {
   return (
     <Title order={2} ta="center">
-      Attendance Rules
+      Class Administration
     </Title>
   );
 }

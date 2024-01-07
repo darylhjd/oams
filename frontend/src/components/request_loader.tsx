@@ -3,7 +3,7 @@ import styles from "@/styles/EntityLoader.module.css";
 import NotFoundPage from "@/app/not-found";
 import { Center, Loader } from "@mantine/core";
 import { isAxiosError } from "axios";
-import React, { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 import { motion } from "framer-motion";
@@ -13,7 +13,7 @@ export function RequestLoader({
   children,
 }: {
   promiseFunc: () => Promise<void>;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<any>(null);
