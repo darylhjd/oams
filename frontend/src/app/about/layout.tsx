@@ -1,4 +1,4 @@
-import React from "react";
+import { ReactNode } from "react";
 
 export const metadata = {
   title: "About",
@@ -8,10 +8,6 @@ export const metadata = {
   },
 };
 
-export default function AboutLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AboutLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

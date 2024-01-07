@@ -1,6 +1,6 @@
 import styles from "@/styles/FileProcessing.module.css";
 
-import React, { useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   Button,
   Center,
@@ -46,7 +46,7 @@ export function FileProcessingStepper({
   firstStepDescription: string;
   secondStepDescription: string;
   completionDescription: string;
-  previewer: React.ReactNode;
+  previewer: ReactNode;
 }) {
   const isMobile = useMediaQuery(IS_MOBILE_MEDIA_QUERY);
 
@@ -115,7 +115,7 @@ export function Completed({ description }: { description: string }) {
   );
 }
 
-export function StepLayout({ children }: { children: React.ReactNode }) {
+export function StepLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <Divider my="sm" />

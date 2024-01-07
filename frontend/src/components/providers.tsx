@@ -7,9 +7,9 @@ import { Center, MantineProvider, Skeleton } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { motion } from "framer-motion";
 import { useSessionUserStore } from "@/stores/session";
-import React, { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export default function Providers({ children }: { children: ReactNode }) {
   return (
     <MantineProvider defaultColorScheme="dark">
       <Notifications />
@@ -18,7 +18,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SessionInitialiser({ children }: { children: React.ReactNode }) {
+function SessionInitialiser({ children }: { children: ReactNode }) {
   const session = useSessionUserStore();
   const [loaded, setLoaded] = useState(false);
 

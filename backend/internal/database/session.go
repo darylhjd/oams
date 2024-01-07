@@ -11,8 +11,8 @@ import (
 )
 
 type ManagementDetails struct {
-	Attendance      bool `alias:".attendance" json:"attendance"`
-	RulesAndReports bool `alias:".rules_and_reports" json:"rules_and_reports"`
+	Attendance     bool `alias:".attendance" json:"attendance"`
+	Administrative bool `alias:".administrative" json:"administrative"`
 }
 
 func (d *DB) GetManagementDetails(ctx context.Context) (ManagementDetails, error) {
@@ -44,7 +44,7 @@ func (d *DB) GetManagementDetails(ctx context.Context) (ManagementDetails, error
 			),
 		).OR(
 			Bool(isSystemAdmin),
-		).AS("rules_and_reports"),
+		).AS("administrative"),
 	)
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err

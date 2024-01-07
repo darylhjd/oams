@@ -10,7 +10,7 @@ import { ColorSchemeScript } from "@mantine/core";
 import Header from "@/components/header";
 import CenteredPage from "@/components/centered_page";
 import Providers from "@/components/providers";
-import React from "react";
+import { ReactNode } from "react";
 
 export const metadata = {
   title: "OAMS",
@@ -20,11 +20,7 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>

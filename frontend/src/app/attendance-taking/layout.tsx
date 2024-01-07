@@ -1,6 +1,6 @@
 import { CanTakeAttendance } from "@/components/session_checker";
-import React from "react";
 import NotFoundPage from "@/app/not-found";
+import { ReactNode } from "react";
 
 export const metadata = {
   title: "Attendance Taking",
@@ -13,7 +13,7 @@ export const metadata = {
 export default function AttendanceTakingLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <CanTakeAttendance failNode={<NotFoundPage />}>

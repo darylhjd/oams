@@ -1,7 +1,4 @@
-"use client";
-
-import styles from "@/styles/AttendanceRulePage.module.css";
-
+import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import {
   Accordion,
   AccordionControl,
@@ -9,7 +6,6 @@ import {
   AccordionPanel,
   Button,
   Center,
-  Container,
   Divider,
   Group,
   Modal,
@@ -17,64 +13,39 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { Params } from "@/app/attendance-rules/[id]/layout";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import styles from "@/styles/ClassAdministrationPage.module.css";
+import { Dispatch, SetStateAction, useState } from "react";
+import { CodeHighlightTabs } from "@mantine/code-highlight";
+import { useDisclosure } from "@mantine/hooks";
+import { useForm, UseFormReturnType } from "@mantine/form";
 import {
-  CoordinatingClass,
   CoordinatingClassRulesPostRequest,
   RuleType,
 } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
-import { RequestLoader } from "@/components/request_loader";
-import { ClassAttendanceRule } from "@/api/class_attendance_rule";
-import { useDisclosure } from "@mantine/hooks";
-import { useForm, UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconX } from "@tabler/icons-react";
 import { getError } from "@/api/error";
-import { RuleForm } from "@/app/attendance-rules/[id]/rule_form";
-import { CodeHighlightTabs } from "@mantine/code-highlight";
+import { IconX } from "@tabler/icons-react";
+import { RuleForm } from "@/app/class-administration/[id]/rules_form";
 
-export default function AttendanceRulePage({ params }: { params: Params }) {
-  const [coordinatingClass, setCoordinatingClass] = useState<CoordinatingClass>(
-    {} as CoordinatingClass,
-  );
-  const [rules, setRules] = useState<ClassAttendanceRule[]>([]);
-  const promiseFunc = async () => {
-    const data = await APIClient.coordinatingClassRulesGet(params.id);
-    setCoordinatingClass(data.coordinating_class);
-    return setRules(data.rules);
-  };
-
-  return (
-    <RequestLoader promiseFunc={promiseFunc}>
-      <Container className={styles.container} fluid>
-        <CoordinatingClassDetails coordinatingClass={coordinatingClass} />
-        <Divider my="md" />
-        <CreateRuleButton id={params.id} rules={rules} setRules={setRules} />
-        <RuleDisplay rules={rules} />
-      </Container>
-    </RequestLoader>
-  );
-}
-
-function CoordinatingClassDetails({
-  coordinatingClass,
+export function RulesTab({
+  id,
+  rules,
+  setRules,
 }: {
-  coordinatingClass: CoordinatingClass;
+  id: number;
+  rules: ClassAttendanceRule[];
+  setRules: Dispatch<SetStateAction<ClassAttendanceRule[]>>;
 }) {
   return (
-    <Title order={2} ta="center">
-      <Text span inherit c="teal">
-        {coordinatingClass.code} {coordinatingClass.year}/
-        {coordinatingClass.semester}
-      </Text>{" "}
-      - Attendance Rules
-    </Title>
+    <>
+      <CreateRuleButton id={id} rules={rules} setRules={setRules} />
+      <RuleDisplay rules={rules} />
+    </>
   );
 }
 
-function CreateRuleButton({
+export function CreateRuleButton({
   id,
   rules,
   setRules,
@@ -148,7 +119,7 @@ function CreateRuleButton({
   );
 }
 
-function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
+export function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
   if (rules.length == 0) {
     return (
       <Text className={styles.noRulesText} ta="center">

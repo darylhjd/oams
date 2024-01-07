@@ -1,10 +1,6 @@
 import styles from "@/styles/CenteredPage.module.css";
-import React from "react";
+import { ReactNode } from "react";
 
-export default function CenteredPage({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function CenteredPage({ children }: { children: ReactNode }) {
   return <div className={styles.centered}>{children}</div>;
 }

@@ -1,5 +1,5 @@
 import { IsLoggedIn } from "@/components/session_checker";
-import React from "react";
+import { ReactNode } from "react";
 
 export const metadata = {
   title: "Profile",
@@ -9,10 +9,6 @@ export const metadata = {
   },
 };
 
-export default function ProfileLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ProfileLayout({ children }: { children: ReactNode }) {
   return <IsLoggedIn>{children}</IsLoggedIn>;
 }
