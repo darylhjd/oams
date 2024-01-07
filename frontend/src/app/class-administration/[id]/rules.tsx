@@ -45,7 +45,7 @@ export function RulesTab({
   );
 }
 
-export function CreateRuleButton({
+function CreateRuleButton({
   id,
   rules,
   setRules,
@@ -119,7 +119,7 @@ export function CreateRuleButton({
   );
 }
 
-export function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
+function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
   if (rules.length == 0) {
     return (
       <Text className={styles.noRulesText} ta="center">
