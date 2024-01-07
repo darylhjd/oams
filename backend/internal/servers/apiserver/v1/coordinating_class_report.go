@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"mime"
 	"net/http"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
 	"github.com/darylhjd/oams/backend/pkg/to"
@@ -58,7 +59,7 @@ func (v *APIServerV1) coordinatingClassReportGet(w http.ResponseWriter, r *http.
 	}
 
 	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{
-		"filename": fmt.Sprintf("class_%d_report.pdf", classId),
+		"filename": fmt.Sprintf("class_%d_%s_report.pdf", classId, time.Now().Format("2006-01-02_150405")),
 	}))
 	w.Header().Set("Content-Type", "application/octet-stream")
 

@@ -3,14 +3,15 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/go-pdf/fpdf"
 )
 
 type classReport struct {
-	pdf        *fpdf.Fpdf
-	reportData database.CoordinatingClassReportData
+	*fpdf.Fpdf
+	data database.CoordinatingClassReportData
 
 	// PDF settings
 	margin float64
@@ -61,33 +62,33 @@ func newClassReport(data database.CoordinatingClassReportData) *classReport {
 
 func (r *classReport) generateTitlePage() {
 	r.setFontDefaults()
-	r.pdf.AddPage()
+	r.AddPage()
 
-	_, height := r.pdf.GetPageSize()
+	_, height := r.GetPageSize()
 
 	// OAMS Title.
-	r.pdf.SetFont("Times", "BI", 75)
-	r.pdf.SetTextColor(0, 191, 255) // Blue
-	r.pdf.CellFormat(
+	r.SetFont("Times", "BI", 75)
+	r.SetTextColor(0, 191, 255) // Blue
+	r.CellFormat(
 		0, (height-2*r.margin)/2-15,
 		"OAMS",
 		"", 2, "CB", false, 0, "",
 	)
 
 	// Class Report Subheading.
-	r.pdf.SetFont("Times", "B", 15)
-	r.pdf.SetTextColor(0, 0, 0) // Black
-	r.pdf.CellFormat(
+	r.SetFont("Times", "B", 15)
+	r.SetTextColor(0, 0, 0) // Black
+	r.CellFormat(
 		0, 20,
 		"Class Report",
 		"", 2, "CB", false, 0, "",
 	)
 
 	// Class Quick Info.
-	r.pdf.SetFont("Times", "I", 13)
-	r.pdf.CellFormat(
+	r.SetFont("Times", "I", 13)
+	r.CellFormat(
 		0, 10,
-		fmt.Sprintf("%s, %d/%s", r.reportData.Class.Code, r.reportData.Class.Year, r.reportData.Class.Semester),
+		fmt.Sprintf("%s, %d/%s", r.data.Class.Code, r.data.Class.Year, r.data.Class.Semester),
 		"", 0, "C", false, 0, "",
 	)
 }
@@ -99,37 +100,37 @@ func (r *classReport) fillData() {
 
 func (r *classReport) fillRules() {
 	r.setFontDefaults()
-	r.pdf.AddPage()
+	r.AddPage()
 
 	// Set Class Rules section title.
 	r.drawSectionTitle("I. RULES")
 	r.setFontDefaults()
 
 	// Section description.
-	r.pdf.CellFormat(
+	r.CellFormat(
 		0, 7,
 		"The following rules are registered to this class.",
 		"", 2, "LT", false, 0, "",
 	)
 
 	generateSubSection := func(title, content string) {
-		r.pdf.SetFontStyle("BI")
-		r.pdf.CellFormat(
+		r.SetFontStyle("BI")
+		r.CellFormat(
 			0, 7,
 			title,
 			"LR", 1, "", false, 0, "",
 		)
-		r.pdf.SetFontStyle("")
-		r.pdf.MultiCell(0, 6, content, "LRB", "LT", false)
+		r.SetFontStyle("")
+		r.MultiCell(0, 6, content, "LRB", "LT", false)
 	}
 
 	// List rules.
-	r.pdf.SetFillColor(128, 128, 128)
-	rules := r.reportData.Rules
+	r.SetFillColor(128, 128, 128)
+	rules := r.data.Rules
 	for idx, rule := range rules {
 		// Heading.
-		r.pdf.SetFontStyle("BI")
-		r.pdf.CellFormat(
+		r.SetFontStyle("BI")
+		r.CellFormat(
 			0, 7,
 			fmt.Sprintf("Rule %d", idx+1),
 			"LTRB", 1, "", true, 0, "",
@@ -139,30 +140,33 @@ func (r *classReport) fillRules() {
 		generateSubSection("Description:", rule.Description)
 		generateSubSection("Rule:", rule.Rule)
 
-		e, err := json.MarshalIndent(rule.Environment, "", "    ")
+		e, err := json.MarshalIndent(rule.Environment, "", strings.Repeat(" ", 4))
 		if err != nil {
-			r.pdf.SetError(err)
+			r.SetError(err)
 		}
 
 		generateSubSection("Environment:", string(e))
 	}
 
-	r.pdf.SetFillColor(0, 0, 0) // Reset the fill color.
+	r.SetFillColor(0, 0, 0) // Reset the fill color.
 }
 
 func (r *classReport) fillManagers() {
 	r.setFontDefaults()
-	r.pdf.AddPage()
+	r.AddPage()
 
+	// Set Class Rules section title.
+	r.drawSectionTitle("II. MANAGERS")
+	r.setFontDefaults()
 }
 
 func (r *classReport) generateLastPage() {
 	r.setFontDefaults()
-	r.pdf.AddPage()
+	r.AddPage()
 
-	_, height := r.pdf.GetPageSize()
+	_, height := r.GetPageSize()
 
-	r.pdf.CellFormat(
+	r.CellFormat(
 		0, (height-2*r.margin)/2,
 		"END OF REPORT",
 		"", 0, "CB", false, 0, "",
@@ -171,24 +175,24 @@ func (r *classReport) generateLastPage() {
 
 func (r *classReport) drawSectionTitle(title string) {
 	// Set section title.
-	r.pdf.SetFont("Times", "B", 12)
-	r.pdf.CellFormat(
+	r.SetFont("Times", "B", 12)
+	r.CellFormat(
 		0, 7,
 		title,
 		"", 2, "CM", false, 0, "",
 	)
 
 	// Add some margin from horizontal line break.
-	r.pdf.SetY(r.pdf.GetY() + 2)
+	r.SetY(r.GetY() + 2)
 }
 
 func (r *classReport) setFontDefaults() {
-	r.pdf.SetFont("Times", "", 12)
-	r.pdf.SetTextColor(0, 0, 0)
+	r.SetFont("Times", "", 12)
+	r.SetTextColor(0, 0, 0)
 }
 
 func (r *classReport) close() {
-	r.pdf.AliasNbPages("")
+	r.AliasNbPages("")
 }
 
 func GenerateClassReport(data database.CoordinatingClassReportData) *fpdf.Fpdf {
@@ -199,5 +203,5 @@ func GenerateClassReport(data database.CoordinatingClassReportData) *fpdf.Fpdf {
 	report.generateLastPage()
 
 	report.close()
-	return report.pdf
+	return report.Fpdf
 }
