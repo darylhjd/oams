@@ -13,8 +13,11 @@ export type CoordinatingClass = {
   au: number;
 };
 
-export type CoordinatingClassRulesGetResponse = {
+export type CoordinatingClassGetResponse = {
   coordinating_class: CoordinatingClass;
+};
+
+export type CoordinatingClassRulesGetResponse = {
   rules: ClassAttendanceRule[];
 };
 

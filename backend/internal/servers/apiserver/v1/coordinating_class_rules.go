@@ -29,22 +29,11 @@ func (v *APIServerV1) coordinatingClassRules(w http.ResponseWriter, r *http.Requ
 
 type coordinatingClassRulesGetResponse struct {
 	response
-	CoordinatingClass database.CoordinatingClass  `json:"coordinating_class"`
-	Rules             []model.ClassAttendanceRule `json:"rules"`
+	Rules []model.ClassAttendanceRule `json:"rules"`
 }
 
 // TODO: Implement tests for this endpoint.
 func (v *APIServerV1) coordinatingClassRulesGet(r *http.Request, classId int64) apiResponse {
-	class, err := v.db.GetCoordinatingClass(r.Context(), classId)
-	if err != nil {
-		if errors.Is(err, qrm.ErrNoRows) {
-			return newErrorResponse(http.StatusNotFound, "the requested coordinating class does not exist")
-		}
-
-		v.logInternalServerError(r, err)
-		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class get database action")
-	}
-
 	classRules, err := v.db.GetCoordinatingClassRules(r.Context(), classId)
 	if err != nil {
 		v.logInternalServerError(r, err)
@@ -53,7 +42,6 @@ func (v *APIServerV1) coordinatingClassRulesGet(r *http.Request, classId int64) 
 
 	return coordinatingClassRulesGetResponse{
 		newSuccessResponse(),
-		class,
 		append(make([]model.ClassAttendanceRule, 0, len(classRules)), classRules...),
 	}
 }

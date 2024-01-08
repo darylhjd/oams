@@ -27,21 +27,20 @@ import { notifications } from "@mantine/notifications";
 import { getError } from "@/api/error";
 import { IconX } from "@tabler/icons-react";
 import { RuleForm } from "@/app/class-administration/[id]/rules_form";
+import { RequestLoader } from "@/components/request_loader";
 
-export function RulesTab({
-  id,
-  rules,
-  setRules,
-}: {
-  id: number;
-  rules: ClassAttendanceRule[];
-  setRules: Dispatch<SetStateAction<ClassAttendanceRule[]>>;
-}) {
+export function RulesTab({ id }: { id: number }) {
+  const [rules, setRules] = useState<ClassAttendanceRule[]>([]);
+  const promiseFunc = async () => {
+    const rulesData = await APIClient.coordinatingClassRulesGet(id);
+    setRules(rulesData.rules);
+  };
+
   return (
-    <>
+    <RequestLoader promiseFunc={promiseFunc}>
       <CreateRuleButton id={id} rules={rules} setRules={setRules} />
       <RuleDisplay rules={rules} />
-    </>
+    </RequestLoader>
   );
 }
 
