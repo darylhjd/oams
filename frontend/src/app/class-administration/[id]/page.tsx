@@ -21,6 +21,7 @@ import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import { RulesTab } from "@/app/class-administration/[id]/rules";
+import { DashboardTab } from "@/app/class-administration/[id]/dashboard";
 
 export default function ClassAdministrationPage({
   params,
@@ -32,11 +33,9 @@ export default function ClassAdministrationPage({
   const [coordinatingClass, setCoordinatingClass] = useState<CoordinatingClass>(
     {} as CoordinatingClass,
   );
-  const [rules, setRules] = useState<ClassAttendanceRule[]>([]);
   const promiseFunc = async () => {
-    const data = await APIClient.coordinatingClassRulesGet(params.id);
-    setCoordinatingClass(data.coordinating_class);
-    return setRules(data.rules);
+    const classData = await APIClient.coordinatingClassGet(params.id);
+    setCoordinatingClass(classData.coordinating_class);
   };
 
   return (
@@ -57,11 +56,13 @@ export default function ClassAdministrationPage({
           </TabsList>
 
           <TabsPanel value="dashboard">
-            <Panel>This is the dashboard tab</Panel>
+            <Panel>
+              <DashboardTab />
+            </Panel>
           </TabsPanel>
           <TabsPanel value="rules">
             <Panel>
-              <RulesTab id={params.id} rules={rules} setRules={setRules} />
+              <RulesTab id={params.id} />
             </Panel>
           </TabsPanel>
         </Tabs>
