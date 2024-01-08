@@ -1,9 +1,4 @@
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
-import { Class } from "@/api/class";
-import { ManagingRole } from "@/api/class_group_manager";
-import { ClassGroup } from "@/api/class_group";
-import { ClassGroupSession } from "@/api/class_group_session";
-import { SessionEnrollment } from "@/api/session_enrollment";
 
 export type CoordinatingClassesGetResponse = {
   coordinating_classes: CoordinatingClass[];
@@ -59,25 +54,5 @@ export type CoordinatingClassRulesPostResponse = {
 };
 
 export type CoordinatingClassDashboardGetResponse = {
-  data: CoordinatingClassDashboardReportData;
-};
-
-export type CoordinatingClassDashboardReportData = {
-  class: Class;
-  rules: ClassAttendanceRule[];
-  managers: ClassGroupManagerReportData[];
-  class_groups: ClassGroupReportData[];
-};
-
-export type ClassGroupManagerReportData = {
-  user_id: string;
-  user_name: string;
-  class_group_name: string;
-  managing_role: ManagingRole;
-};
-
-export type ClassGroupReportData = {
-  class_group: ClassGroup;
-  class_group_session: ClassGroupSession;
-  session_enrollment: SessionEnrollment;
+  result: boolean;
 };
