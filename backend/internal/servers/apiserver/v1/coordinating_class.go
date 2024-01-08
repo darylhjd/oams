@@ -21,8 +21,7 @@ const (
 )
 
 type coordinatingClassMux struct {
-	classId int64
-	mux     *http.ServeMux
+	mux *http.ServeMux
 }
 
 func (c *coordinatingClassMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -65,9 +64,7 @@ func (v *APIServerV1) newCoordinatingClassMux(classId int64) *coordinatingClassM
 		},
 	))
 
-	return &coordinatingClassMux{
-		classId, mux,
-	}
+	return &coordinatingClassMux{mux}
 }
 
 func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) {
