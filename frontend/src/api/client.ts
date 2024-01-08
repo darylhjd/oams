@@ -27,6 +27,7 @@ import {
 import { SessionResponse } from "@/api/session";
 import { ClassAttendanceRulesGetResponse } from "@/api/class_attendance_rule";
 import {
+  CoordinatingClassDashboardGetResponse,
   CoordinatingClassesGetResponse,
   CoordinatingClassGetResponse,
   CoordinatingClassRulesGetResponse,
@@ -338,6 +339,16 @@ export class APIClient {
     return await this._client.get(`/coordinating-classes/${id}/report`, {
       responseType: "blob",
     });
+  }
+
+  static async coordinatingClassDashboardGet(
+    id: number,
+  ): Promise<CoordinatingClassDashboardGetResponse> {
+    const { data } =
+      await this._client.get<CoordinatingClassDashboardGetResponse>(
+        `/coordinating-classes/${id}/dashboard`,
+      );
+    return data;
   }
 
   static async dataExportGet() {

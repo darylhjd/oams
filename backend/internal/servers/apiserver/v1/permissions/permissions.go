@@ -39,6 +39,8 @@ const (
 
 	CoordinatingClassReportRead
 
+	CoordinatingClassDashboardRead
+
 	DataExportRead
 )
 
@@ -72,6 +74,8 @@ var userRolePermissions = permissionMap{
 
 	CoordinatingClassRuleRead:   {},
 	CoordinatingClassRuleCreate: {},
+
+	CoordinatingClassDashboardRead: {},
 
 	CoordinatingClassReportRead: {},
 }
@@ -110,6 +114,8 @@ var systemAdminRolePermissions = permissionMap{
 	CoordinatingClassRuleCreate: {},
 
 	CoordinatingClassReportRead: {},
+
+	CoordinatingClassDashboardRead: {},
 
 	DataExportRead: {},
 }

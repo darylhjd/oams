@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	coordinatingClassRulesUrl  = "/rules"
-	coordinatingClassReportUrl = "/report"
+	coordinatingClassRulesUrl     = "/rules"
+	coordinatingClassReportUrl    = "/report"
+	coordinatingClassDashboardUrl = "/dashboard"
 )
 
 func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +41,8 @@ func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) 
 			map[string][]permissions.P{
 				http.MethodGet: {permissions.CoordinatingClassRead},
 			},
-		))
+		),
+	)
 
 	mux.HandleFunc(fmt.Sprintf("%s%d%s", coordinatingClassUrl, classId, coordinatingClassRulesUrl),
 		permissions.EnforceAccessPolicy(
@@ -50,7 +52,8 @@ func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) 
 				http.MethodGet:  {permissions.CoordinatingClassRuleRead},
 				http.MethodPost: {permissions.CoordinatingClassRuleCreate},
 			},
-		))
+		),
+	)
 
 	mux.HandleFunc(fmt.Sprintf("%s%d%s", coordinatingClassUrl, classId, coordinatingClassReportUrl),
 		permissions.EnforceAccessPolicy(
@@ -59,7 +62,18 @@ func (v *APIServerV1) coordinatingClass(w http.ResponseWriter, r *http.Request) 
 			map[string][]permissions.P{
 				http.MethodGet: {permissions.CoordinatingClassReportRead},
 			},
-		))
+		),
+	)
+
+	mux.HandleFunc(fmt.Sprintf("%s%d%s", coordinatingClassUrl, classId, coordinatingClassDashboardUrl),
+		permissions.EnforceAccessPolicy(
+			middleware.WithID(classId, v.coordinatingClassDashboard),
+			v.auth, v.db,
+			map[string][]permissions.P{
+				http.MethodGet: {permissions.CoordinatingClassDashboardRead},
+			},
+		),
+	)
 
 	mux.ServeHTTP(w, r)
 }
