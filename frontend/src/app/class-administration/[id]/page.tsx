@@ -17,7 +17,6 @@ import { ReactNode, useState } from "react";
 import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
-import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import { RulesTab } from "@/app/class-administration/[id]/rules";
@@ -57,7 +56,7 @@ export default function ClassAdministrationPage({
 
           <TabsPanel value="dashboard">
             <Panel>
-              <DashboardTab />
+              <DashboardTab id={params.id} />
             </Panel>
           </TabsPanel>
           <TabsPanel value="rules">

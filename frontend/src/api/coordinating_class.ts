@@ -52,3 +52,7 @@ export type AdvancedParams = {
 export type CoordinatingClassRulesPostResponse = {
   rule: ClassAttendanceRule;
 };
+
+export type CoordinatingClassDashboardGetResponse = {
+  result: boolean;
+};

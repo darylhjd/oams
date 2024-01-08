@@ -115,23 +115,23 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 }
 
 type CoordinatingClassReportData struct {
-	Class       model.Class
-	Rules       []model.ClassAttendanceRule
-	Managers    []ClassGroupManagerReportData
-	ClassGroups []ClassGroupReportData
+	Class       model.Class                   `json:"class"`
+	Rules       []model.ClassAttendanceRule   `json:"rules"`
+	Managers    []ClassGroupManagerReportData `json:"managers"`
+	ClassGroups []ClassGroupReportData        `json:"class_groups"`
 }
 
 type ClassGroupManagerReportData struct {
-	UserID         string             `alias:"user.id"`
-	UserName       string             `alias:"user.name"`
-	ClassGroupName string             `alias:"class_group.name"`
-	ManagingRole   model.ManagingRole `alias:"class_group_manager.managing_role"`
+	UserID         string             `alias:"user.id" json:"user_id"`
+	UserName       string             `alias:"user.name" json:"user_name"`
+	ClassGroupName string             `alias:"class_group.name" json:"class_group_name"`
+	ManagingRole   model.ManagingRole `alias:"class_group_manager.managing_role" json:"managing_role"`
 }
 
 type ClassGroupReportData struct {
-	ClassGroup        model.ClassGroup
-	ClassGroupSession model.ClassGroupSession
-	SessionEnrollment model.SessionEnrollment
+	ClassGroup        model.ClassGroup        `json:"class_group"`
+	ClassGroupSession model.ClassGroupSession `json:"class_group_session"`
+	SessionEnrollment model.SessionEnrollment `json:"session_enrollment"`
 }
 
 func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (CoordinatingClassReportData, error) {
