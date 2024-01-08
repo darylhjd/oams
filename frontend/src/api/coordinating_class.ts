@@ -65,8 +65,8 @@ export type CoordinatingClassDashboardGetResponse = {
 export type CoordinatingClassDashboardReportData = {
   class: Class;
   rules: ClassAttendanceRule[];
-  managers: ClassGroupManagerReportData;
-  class_groups: ClassGroupReportData;
+  managers: ClassGroupManagerReportData[];
+  class_groups: ClassGroupReportData[];
 };
 
 export type ClassGroupManagerReportData = {
