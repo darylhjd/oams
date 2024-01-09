@@ -38,28 +38,3 @@
 .tabPanel {
   margin-top: rem(15px);
 }
-
-.createRuleButton {
-  padding-bottom: rem(20px);
-}
-
-.noRulesText {
-  padding-top: rem(100px);
-}
-
-.accordion {
-  max-width: rem(1000px);
-  margin: 0 auto;
-}
-
-.creatorLabel {
-  padding-right: rem(10px);
-}
-
-.divider {
-  padding-bottom: rem(15px);
-}
-
-.variableDropdown {
-  max-width: 100%;
-}

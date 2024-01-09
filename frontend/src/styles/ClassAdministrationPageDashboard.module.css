@@ -1,0 +1,15 @@
+.barChartBox {
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+
+.emptyBox {
+  border: rem(2px) solid var(--mantine-color-default-border);
+  padding: rem(5px);
+}
+
+.barChart {
+  max-width: rem(1000px);
+  min-width: rem(500px);
+  margin: 0 auto;
+}

@@ -1,3 +1,5 @@
+import styles from "@/styles/ClassAdministrationPageRules.module.css";
+
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import {
   Accordion,
@@ -13,7 +15,6 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import styles from "@/styles/ClassAdministrationPage.module.css";
 import { Dispatch, SetStateAction, useState } from "react";
 import { CodeHighlightTabs } from "@mantine/code-highlight";
 import { useDisclosure } from "@mantine/hooks";
