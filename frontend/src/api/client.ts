@@ -30,6 +30,7 @@ import {
   CoordinatingClassDashboardGetResponse,
   CoordinatingClassesGetResponse,
   CoordinatingClassGetResponse,
+  CoordinatingClassRulePatchResponse,
   CoordinatingClassRulesGetResponse,
   CoordinatingClassRulesPostRequest,
   CoordinatingClassRulesPostResponse,
@@ -331,6 +332,21 @@ export class APIClient {
       await this._client.post<CoordinatingClassRulesPostResponse>(
         `/coordinating-classes/${id}/rules`,
         params,
+      );
+    return data;
+  }
+
+  static async coordinatingClassRulePatch(
+    classId: number,
+    ruleId: number,
+    active: boolean,
+  ): Promise<CoordinatingClassRulePatchResponse> {
+    const { data } =
+      await this._client.patch<CoordinatingClassRulePatchResponse>(
+        `/coordinating-classes/${classId}/rules/${ruleId}`,
+        {
+          active,
+        },
       );
     return data;
   }

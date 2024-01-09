@@ -53,6 +53,10 @@ export type CoordinatingClassRulesPostResponse = {
   rule: ClassAttendanceRule;
 };
 
+export type CoordinatingClassRulePatchResponse = {
+  active: boolean;
+};
+
 export type CoordinatingClassDashboardGetResponse = {
   result: boolean;
   attendance_count: AttendanceCountData[];

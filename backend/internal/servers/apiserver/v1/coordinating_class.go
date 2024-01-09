@@ -16,6 +16,7 @@ import (
 const (
 	coordinatingClassBaseUrl      = "/"
 	coordinatingClassRulesUrl     = "/rules"
+	coordinatingClassRuleUrl      = "/rules/"
 	coordinatingClassReportUrl    = "/report"
 	coordinatingClassDashboardUrl = "/dashboard"
 )
@@ -43,8 +44,15 @@ func (v *APIServerV1) newCoordinatingClassMux(classId int64) *coordinatingClassM
 		middleware.WithID(classId, v.coordinatingClassRules),
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodGet:   {permissions.CoordinatingClassRuleRead},
-			http.MethodPost:  {permissions.CoordinatingClassRuleCreate},
+			http.MethodGet:  {permissions.CoordinatingClassRuleRead},
+			http.MethodPost: {permissions.CoordinatingClassRuleCreate},
+		},
+	))
+
+	mux.HandleFunc(coordinatingClassRuleUrl, permissions.EnforceAccessPolicy(
+		middleware.WithID(classId, v.coordinatingClassRule),
+		v.auth, v.db,
+		map[string][]permissions.P{
 			http.MethodPatch: {permissions.CoordinatingClassRuleUpdate},
 		},
 	))
