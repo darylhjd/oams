@@ -12,6 +12,7 @@ import {
   Group,
   Modal,
   Space,
+  Switch,
   Text,
   Title,
 } from "@mantine/core";
@@ -26,7 +27,7 @@ import {
 import { APIClient } from "@/api/client";
 import { notifications } from "@mantine/notifications";
 import { getError } from "@/api/error";
-import { IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { RuleForm } from "@/app/class-administration/[id]/rules_form";
 import { RequestLoader } from "@/components/request_loader";
 import { Panel } from "@/app/class-administration/[id]/panel";
@@ -42,7 +43,7 @@ export function RulesTab({ id }: { id: number }) {
     <Panel>
       <RequestLoader promiseFunc={promiseFunc}>
         <CreateRuleButton id={id} rules={rules} setRules={setRules} />
-        <RuleDisplay rules={rules} />
+        <RuleDisplay id={id} rules={rules} />
       </RequestLoader>
     </Panel>
   );
@@ -122,7 +123,13 @@ function CreateRuleButton({
   );
 }
 
-function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
+function RuleDisplay({
+  id,
+  rules,
+}: {
+  id: number;
+  rules: ClassAttendanceRule[];
+}) {
   if (rules.length == 0) {
     return (
       <Text className={styles.noRulesText} ta="center">
@@ -137,7 +144,7 @@ function RuleDisplay({ rules }: { rules: ClassAttendanceRule[] }) {
         <AccordionLabel rule={rule} />
       </AccordionControl>
       <AccordionPanel>
-        <AccordionContent rule={rule} />
+        <AccordionContent classId={id} rule={rule} />
       </AccordionPanel>
     </AccordionItem>
   ));
@@ -168,7 +175,15 @@ function AccordionLabel({ rule }: { rule: ClassAttendanceRule }) {
   );
 }
 
-function AccordionContent({ rule }: { rule: ClassAttendanceRule }) {
+function AccordionContent({
+  classId,
+  rule,
+}: {
+  classId: number;
+  rule: ClassAttendanceRule;
+}) {
+  const [checked, setChecked] = useState(rule.active);
+
   return (
     <>
       <Divider className={styles.divider} />
@@ -190,6 +205,30 @@ function AccordionContent({ rule }: { rule: ClassAttendanceRule }) {
           },
         ]}
       />
+      <Space h="lg" />
+      <Group justify="left">
+        <Switch
+          size="md"
+          checked={checked}
+          color="teal"
+          label={checked ? "Enabled" : "Disabled"}
+          thumbIcon={
+            checked ? (
+              <IconCheck size={16} color="green" />
+            ) : (
+              <IconX size={16} color="red" />
+            )
+          }
+          onChange={async (event) => {
+            const response = await APIClient.coordinatingClassRulePatch(
+              classId,
+              rule.id,
+              event.currentTarget.checked,
+            );
+            setChecked(response.active);
+          }}
+        />
+      </Group>
     </>
   );
 }

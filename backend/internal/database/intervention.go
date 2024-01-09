@@ -101,7 +101,9 @@ func (d *DB) Intervention(ctx context.Context) ([]rules.Fact, []RuleInfo, error)
 			Users, Users.ID.EQ(ClassAttendanceRules.CreatorID),
 		),
 	).WHERE(
-		classGroupSessionPredicate,
+		classGroupSessionPredicate.AND(
+			ClassAttendanceRules.Active.IS_TRUE(),
+		),
 	).ORDER_BY(
 		Classes.ID,
 	)

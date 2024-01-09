@@ -10,6 +10,7 @@ export type ClassAttendanceRule = {
   description: string;
   rule: string;
   environment: JSON;
+  active: boolean;
   created_at: Date;
   updated_at: Date;
 };

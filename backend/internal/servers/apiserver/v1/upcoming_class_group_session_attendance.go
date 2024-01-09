@@ -57,7 +57,7 @@ func (v *APIServerV1) upcomingClassGroupSessionAttendancePatch(r *http.Request, 
 	})
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
-			return newErrorResponse(http.StatusBadRequest, "not allowed to take attendance")
+			return newErrorResponse(http.StatusUnauthorized, "not allowed to take attendance")
 		}
 
 		v.logInternalServerError(r, err)

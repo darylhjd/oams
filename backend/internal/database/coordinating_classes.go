@@ -117,6 +117,39 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 	return res, err
 }
 
+func (d *DB) UpdateCoordinatingClassRule(ctx context.Context, ruleId int64, active bool) (bool, error) {
+	var res struct {
+		Active bool `alias:"class_attendance_rule.active"`
+	}
+
+	stmt := ClassAttendanceRules.UPDATE(
+		ClassAttendanceRules.Active,
+	).MODEL(
+		model.ClassAttendanceRule{
+			Active: active,
+		},
+	).WHERE(
+		EXISTS(
+			SELECT(
+				ClassAttendanceRules.AllColumns,
+			).FROM(
+				ClassAttendanceRules.INNER_JOIN(
+					Classes, Classes.ID.EQ(ClassAttendanceRules.ClassID),
+				),
+			).WHERE(
+				ClassAttendanceRules.ID.EQ(Int64(ruleId)).AND(
+					coordinatingClassRLS(ctx),
+				),
+			),
+		),
+	).RETURNING(
+		ClassAttendanceRules.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res.Active, err
+}
+
 type CoordinatingClassReportData struct {
 	Class       model.Class
 	Rules       []model.ClassAttendanceRule
