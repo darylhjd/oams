@@ -13,7 +13,7 @@ import {
   Title,
 } from "@mantine/core";
 import { Params } from "@/app/class-administration/[id]/layout";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
@@ -21,6 +21,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import { RulesTab } from "@/app/class-administration/[id]/rules";
 import { DashboardTab } from "@/app/class-administration/[id]/dashboard";
+import { ReportTab } from "@/app/class-administration/[id]/report";
 
 export default function ClassAdministrationPage({
   params,
@@ -51,18 +52,18 @@ export default function ClassAdministrationPage({
         >
           <TabsList grow={isMobile} justify="left">
             <TabsTab value="dashboard">Dashboard</TabsTab>
+            <TabsTab value="report">Report</TabsTab>
             <TabsTab value="rules">Rules</TabsTab>
           </TabsList>
 
           <TabsPanel value="dashboard">
-            <Panel>
-              <DashboardTab id={params.id} />
-            </Panel>
+            <DashboardTab id={params.id} />
+          </TabsPanel>
+          <TabsPanel value="report">
+            <ReportTab id={params.id} />
           </TabsPanel>
           <TabsPanel value="rules">
-            <Panel>
-              <RulesTab id={params.id} />
-            </Panel>
+            <RulesTab id={params.id} />
           </TabsPanel>
         </Tabs>
       </Container>
@@ -83,8 +84,4 @@ function CoordinatingClassDetails({
       </Text>
     </Title>
   );
-}
-
-function Panel({ children }: { children: ReactNode }) {
-  return <div className={styles.tabPanel}>{children}</div>;
 }
