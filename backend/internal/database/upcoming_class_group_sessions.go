@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	attendanceTimeBuffer = time.Minute * 15
+	attendanceTimeBuffer = time.Minute * 30
 )
 
 type UpcomingManagedClassGroupSession struct {
@@ -185,11 +185,10 @@ func selectManagedClassGroupSessionFields() SelectStatement {
 }
 
 func isManagedClassGroupSession(ctx context.Context) BoolExpression {
-	// TODO: Uncomment in production.
-	//return TimestampzT(time.Now()).BETWEEN(
-	//	ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
-	//	ClassGroupSessions.EndTime,
-	//).AND(
-	return classGroupManagerRLS(ctx)
-	//)
+	return TimestampzT(time.Now()).BETWEEN(
+		ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
+		ClassGroupSessions.EndTime,
+	).AND(
+		classGroupManagerRLS(ctx),
+	)
 }

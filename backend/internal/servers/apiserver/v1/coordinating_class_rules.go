@@ -20,6 +20,10 @@ func (v *APIServerV1) coordinatingClassRules(w http.ResponseWriter, r *http.Requ
 		resp = v.coordinatingClassRulesGet(r, classId)
 	case http.MethodPost:
 		resp = v.coordinatingClassRulesPost(r, classId)
+	case http.MethodPatch:
+		resp = newErrorResponse(http.StatusNotImplemented, "")
+	case http.MethodDelete:
+		resp = newErrorResponse(http.StatusNotImplemented, "")
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}

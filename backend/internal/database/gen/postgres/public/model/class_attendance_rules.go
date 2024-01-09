@@ -20,6 +20,7 @@ type ClassAttendanceRule struct {
 	Description string            `json:"description"`
 	Rule        string            `json:"rule"`
 	Environment rules.Environment `json:"environment"`
+	Active      bool              `json:"active"`
 	CreatedAt   time.Time         `json:"created_at"`
 	UpdatedAt   time.Time         `json:"updated_at"`
 }
