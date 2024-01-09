@@ -60,7 +60,7 @@ function PercentageAttendanceChart({ data }: { data: AttendanceCountData[] }) {
   return (
     <>
       <Title order={4} ta="center">
-        Percentage attendance by Class Group
+        Percentage Attendance by Class Group
       </Title>
       <Space h="md" />
       <Container className={styles.barChartBox} fluid>
