@@ -37,6 +37,7 @@ const (
 	CoordinatingClassRuleCreate
 	CoordinatingClassRuleRead
 	CoordinatingClassRuleUpdate
+	CoordinatingClassRuleDelete
 
 	CoordinatingClassReportRead
 
@@ -76,6 +77,7 @@ var userRolePermissions = permissionMap{
 	CoordinatingClassRuleCreate: {},
 	CoordinatingClassRuleRead:   {},
 	CoordinatingClassRuleUpdate: {},
+	CoordinatingClassRuleDelete: {},
 
 	CoordinatingClassDashboardRead: {},
 
@@ -115,6 +117,7 @@ var systemAdminRolePermissions = permissionMap{
 	CoordinatingClassRuleCreate: {},
 	CoordinatingClassRuleRead:   {},
 	CoordinatingClassRuleUpdate: {},
+	CoordinatingClassRuleDelete: {},
 
 	CoordinatingClassReportRead: {},
 

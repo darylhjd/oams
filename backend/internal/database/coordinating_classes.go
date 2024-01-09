@@ -117,7 +117,7 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 	return res, err
 }
 
-func (d *DB) UpdateCoordinatingClassRule(ctx context.Context, ruleId int64, active bool) (bool, error) {
+func (d *DB) UpdateCoordinatingClassRule(ctx context.Context, classId, ruleId int64, active bool) (bool, error) {
 	var res struct {
 		Active bool `alias:"class_attendance_rule.active"`
 	}
@@ -131,16 +131,16 @@ func (d *DB) UpdateCoordinatingClassRule(ctx context.Context, ruleId int64, acti
 	).WHERE(
 		EXISTS(
 			SELECT(
-				ClassAttendanceRules.AllColumns,
+				Classes.AllColumns,
 			).FROM(
-				ClassAttendanceRules.INNER_JOIN(
-					Classes, Classes.ID.EQ(ClassAttendanceRules.ClassID),
-				),
+				Classes,
 			).WHERE(
-				ClassAttendanceRules.ID.EQ(Int64(ruleId)).AND(
+				Classes.ID.EQ(Int64(classId)).AND(
 					coordinatingClassRLS(ctx),
 				),
 			),
+		).AND(
+			ClassAttendanceRules.ID.EQ(Int64(ruleId)),
 		),
 	).RETURNING(
 		ClassAttendanceRules.AllColumns,
@@ -148,6 +148,31 @@ func (d *DB) UpdateCoordinatingClassRule(ctx context.Context, ruleId int64, acti
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res.Active, err
+}
+
+func (d *DB) DeleteCoordinatingClassRule(ctx context.Context, classId, ruleId int64) error {
+	var res model.ClassAttendanceRule
+
+	stmt := ClassAttendanceRules.DELETE().
+		WHERE(
+			EXISTS(
+				SELECT(
+					Classes.AllColumns,
+				).FROM(
+					Classes,
+				).WHERE(
+					Classes.ID.EQ(Int64(classId)).AND(
+						coordinatingClassRLS(ctx),
+					),
+				),
+			).AND(
+				ClassAttendanceRules.ID.EQ(Int64(ruleId)),
+			),
+		).RETURNING(
+		ClassAttendanceRules.AllColumns,
+	)
+
+	return stmt.QueryContext(ctx, d.qe, &res)
 }
 
 type CoordinatingClassReportData struct {

@@ -351,6 +351,12 @@ export class APIClient {
     return data;
   }
 
+  static async coordinatingClassRuleDelete(classId: number, ruleId: number) {
+    await this._client.delete(
+      `/coordinating-classes/${classId}/rules/${ruleId}`,
+    );
+  }
+
   static async coordinatingClassReportGet(id: number) {
     return await this._client.get(`/coordinating-classes/${id}/report`, {
       responseType: "blob",

@@ -53,7 +53,8 @@ func (v *APIServerV1) newCoordinatingClassMux(classId int64) *coordinatingClassM
 		middleware.WithID(classId, v.coordinatingClassRule),
 		v.auth, v.db,
 		map[string][]permissions.P{
-			http.MethodPatch: {permissions.CoordinatingClassRuleUpdate},
+			http.MethodPatch:  {permissions.CoordinatingClassRuleUpdate},
+			http.MethodDelete: {permissions.CoordinatingClassRuleDelete},
 		},
 	))
 

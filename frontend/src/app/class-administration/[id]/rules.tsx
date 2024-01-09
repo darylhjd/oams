@@ -43,7 +43,7 @@ export function RulesTab({ id }: { id: number }) {
     <Panel>
       <RequestLoader promiseFunc={promiseFunc}>
         <CreateRuleButton id={id} rules={rules} setRules={setRules} />
-        <RuleDisplay id={id} rules={rules} />
+        <RuleDisplay id={id} rules={rules} setRules={setRules} />
       </RequestLoader>
     </Panel>
   );
@@ -126,9 +126,11 @@ function CreateRuleButton({
 function RuleDisplay({
   id,
   rules,
+  setRules,
 }: {
   id: number;
   rules: ClassAttendanceRule[];
+  setRules: Dispatch<SetStateAction<ClassAttendanceRule[]>>;
 }) {
   if (rules.length == 0) {
     return (
@@ -141,10 +143,15 @@ function RuleDisplay({
   const items = rules.map((rule, idx) => (
     <AccordionItem value={idx.toString()} key={idx}>
       <AccordionControl>
-        <AccordionLabel rule={rule} />
+        <RuleLabel rule={rule} />
       </AccordionControl>
       <AccordionPanel>
-        <AccordionContent classId={id} rule={rule} />
+        <RuleContent
+          classId={id}
+          rule={rule}
+          rules={rules}
+          setRules={setRules}
+        />
       </AccordionPanel>
     </AccordionItem>
   ));
@@ -156,7 +163,7 @@ function RuleDisplay({
   );
 }
 
-function AccordionLabel({ rule }: { rule: ClassAttendanceRule }) {
+function RuleLabel({ rule }: { rule: ClassAttendanceRule }) {
   return (
     <Group justify="space-between">
       <div>
@@ -175,15 +182,17 @@ function AccordionLabel({ rule }: { rule: ClassAttendanceRule }) {
   );
 }
 
-function AccordionContent({
+function RuleContent({
   classId,
   rule,
+  rules,
+  setRules,
 }: {
   classId: number;
   rule: ClassAttendanceRule;
+  rules: ClassAttendanceRule[];
+  setRules: Dispatch<SetStateAction<ClassAttendanceRule[]>>;
 }) {
-  const [checked, setChecked] = useState(rule.active);
-
   return (
     <>
       <Divider className={styles.divider} />
@@ -206,29 +215,97 @@ function AccordionContent({
         ]}
       />
       <Space h="lg" />
-      <Group justify="left">
-        <Switch
-          size="md"
-          checked={checked}
-          color="teal"
-          label={checked ? "Enabled" : "Disabled"}
-          thumbIcon={
-            checked ? (
-              <IconCheck size={16} color="green" />
-            ) : (
-              <IconX size={16} color="red" />
-            )
-          }
-          onChange={async (event) => {
+      <RuleActions
+        classId={classId}
+        rule={rule}
+        rules={rules}
+        setRules={setRules}
+      />
+    </>
+  );
+}
+
+function RuleActions({
+  classId,
+  rule,
+  rules,
+  setRules,
+}: {
+  classId: number;
+  rule: ClassAttendanceRule;
+  rules: ClassAttendanceRule[];
+  setRules: Dispatch<SetStateAction<ClassAttendanceRule[]>>;
+}) {
+  const [checked, setChecked] = useState(rule.active);
+  const [opened, { open, close }] = useDisclosure(false);
+
+  return (
+    <Group justify="left">
+      <Switch
+        size="md"
+        checked={checked}
+        color="teal"
+        label={checked ? "Enabled" : "Disabled"}
+        thumbIcon={
+          checked ? (
+            <IconCheck size={16} color="green" />
+          ) : (
+            <IconX size={16} color="red" />
+          )
+        }
+        onChange={async (event) => {
+          try {
             const response = await APIClient.coordinatingClassRulePatch(
               classId,
               rule.id,
               event.currentTarget.checked,
             );
             setChecked(response.active);
-          }}
-        />
-      </Group>
-    </>
+          } catch (error) {
+            notifications.show({
+              title: "Rule Toggle Error",
+              message: getError(error),
+              icon: <IconX />,
+              color: "red",
+            });
+          }
+        }}
+      />
+      <>
+        <Modal opened={opened} onClose={close} title="Delete Rule" centered>
+          <Text ta="center">
+            You are about to delete this rule. Are you sure?
+          </Text>
+          <Space h="lg" />
+          <Group justify="center">
+            <Button variant="outline" onClick={close}>
+              Cancel
+            </Button>
+            <Button
+              color="red"
+              onClick={async () => {
+                try {
+                  await APIClient.coordinatingClassRuleDelete(classId, rule.id);
+                  close();
+                  setRules([...rules.filter((r) => r.id != rule.id)]);
+                } catch (error) {
+                  notifications.show({
+                    title: "Rule Delete Error",
+                    message: getError(error),
+                    icon: <IconX />,
+                    color: "red",
+                  });
+                }
+              }}
+            >
+              Yes, I&apos;m sure!
+            </Button>
+          </Group>
+        </Modal>
+        <Button variant="outline" color="red" onClick={open}>
+          Delete Rule
+        </Button>
+      </>
+    </Group>
   );
 }

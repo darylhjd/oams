@@ -10,7 +10,7 @@ import (
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-func (v *APIServerV1) coordinatingClassRule(w http.ResponseWriter, r *http.Request, _ int64) {
+func (v *APIServerV1) coordinatingClassRule(w http.ResponseWriter, r *http.Request, classId int64) {
 	var resp apiResponse
 
 	ruleId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, coordinatingClassRuleUrl), 10, 64)
@@ -21,7 +21,9 @@ func (v *APIServerV1) coordinatingClassRule(w http.ResponseWriter, r *http.Reque
 
 	switch r.Method {
 	case http.MethodPatch:
-		resp = v.coordinatingClassRulePatch(r, ruleId)
+		resp = v.coordinatingClassRulePatch(r, classId, ruleId)
+	case http.MethodDelete:
+		resp = v.coordinatingClassRuleDelete(r, classId, ruleId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -38,13 +40,13 @@ type coordinatingClassRulePatchResponse struct {
 	Active bool `json:"active"`
 }
 
-func (v *APIServerV1) coordinatingClassRulePatch(r *http.Request, ruleId int64) apiResponse {
+func (v *APIServerV1) coordinatingClassRulePatch(r *http.Request, classId, ruleId int64) apiResponse {
 	var req coordinatingClassRulePatchRequest
 	if err := v.parseRequestBody(r.Body, &req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	active, err := v.db.UpdateCoordinatingClassRule(r.Context(), ruleId, req.Active)
+	active, err := v.db.UpdateCoordinatingClassRule(r.Context(), classId, ruleId, req.Active)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return newErrorResponse(http.StatusUnauthorized, "not allowed to toggle rule active")
@@ -57,5 +59,24 @@ func (v *APIServerV1) coordinatingClassRulePatch(r *http.Request, ruleId int64) 
 	return coordinatingClassRulePatchResponse{
 		newSuccessResponse(),
 		active,
+	}
+}
+
+type coordinatingClassRuleDeleteResponse struct {
+	response
+}
+
+func (v *APIServerV1) coordinatingClassRuleDelete(r *http.Request, classId, ruleId int64) apiResponse {
+	if err := v.db.DeleteCoordinatingClassRule(r.Context(), classId, ruleId); err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return newErrorResponse(http.StatusUnauthorized, "not allowed to delete rule")
+		}
+
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not process coordinating class rule delete database action")
+	}
+
+	return coordinatingClassRuleDeleteResponse{
+		newSuccessResponse(),
 	}
 }
