@@ -18,8 +18,8 @@ const (
 	ClassAttendanceRulesRead
 
 	ClassGroupManagerPost
-	ClassGroupManagerPut
 	ClassGroupManagerRead
+	ClassGroupManagerPut
 
 	ClassGroupRead
 
@@ -34,8 +34,9 @@ const (
 
 	CoordinatingClassRead
 
-	CoordinatingClassRuleRead
 	CoordinatingClassRuleCreate
+	CoordinatingClassRuleRead
+	CoordinatingClassRuleUpdate
 
 	CoordinatingClassReportRead
 
@@ -72,8 +73,9 @@ var userRolePermissions = permissionMap{
 
 	CoordinatingClassRead: {},
 
-	CoordinatingClassRuleRead:   {},
 	CoordinatingClassRuleCreate: {},
+	CoordinatingClassRuleRead:   {},
+	CoordinatingClassRuleUpdate: {},
 
 	CoordinatingClassDashboardRead: {},
 
@@ -110,8 +112,9 @@ var systemAdminRolePermissions = permissionMap{
 
 	CoordinatingClassRead: {},
 
-	CoordinatingClassRuleRead:   {},
 	CoordinatingClassRuleCreate: {},
+	CoordinatingClassRuleRead:   {},
+	CoordinatingClassRuleUpdate: {},
 
 	CoordinatingClassReportRead: {},
 

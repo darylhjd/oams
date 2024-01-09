@@ -109,6 +109,18 @@ export const ClassAttendanceRulesDataTableColumns: MRT_ColumnDef<ClassAttendance
         );
       },
     },
+    {
+      accessorKey: "active",
+      header: "Active",
+      Cell: ({ cell }: { cell: MRT_Cell<ClassAttendanceRule> }) => {
+        const active = cell.getValue<boolean>();
+        return (
+          <Badge color={active ? "green" : "red"}>
+            {active ? "Active" : "Inactive"}
+          </Badge>
+        );
+      },
+    },
     ...CreatedAtUpdatedAtDataTableColumns,
   ];
 

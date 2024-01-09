@@ -86,6 +86,7 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 		ClassAttendanceRules.Description,
 		ClassAttendanceRules.Rule,
 		ClassAttendanceRules.Environment,
+		ClassAttendanceRules.Active,
 	).QUERY(
 		SELECT(
 			Int64(arg.ClassID),
@@ -94,6 +95,7 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 			String(arg.Description),
 			String(arg.Rule),
 			Json(envString),
+			Bool(true),
 		).WHERE(
 			EXISTS(
 				SELECT(
