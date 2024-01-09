@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
@@ -115,23 +116,23 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 }
 
 type CoordinatingClassReportData struct {
-	Class       model.Class                   `json:"class"`
-	Rules       []model.ClassAttendanceRule   `json:"rules"`
-	Managers    []ClassGroupManagerReportData `json:"managers"`
-	ClassGroups []ClassGroupReportData        `json:"class_groups"`
+	Class       model.Class
+	Rules       []model.ClassAttendanceRule
+	Managers    []ClassGroupManagerReportData
+	ClassGroups []ClassGroupReportData
 }
 
 type ClassGroupManagerReportData struct {
-	UserID         string             `alias:"user.id" json:"user_id"`
-	UserName       string             `alias:"user.name" json:"user_name"`
-	ClassGroupName string             `alias:"class_group.name" json:"class_group_name"`
-	ManagingRole   model.ManagingRole `alias:"class_group_manager.managing_role" json:"managing_role"`
+	UserID         string             `alias:"user.id"`
+	UserName       string             `alias:"user.name"`
+	ClassGroupName string             `alias:"class_group.name"`
+	ManagingRole   model.ManagingRole `alias:"class_group_manager.managing_role"`
 }
 
 type ClassGroupReportData struct {
-	ClassGroup        model.ClassGroup        `json:"class_group"`
-	ClassGroupSession model.ClassGroupSession `json:"class_group_session"`
-	SessionEnrollment model.SessionEnrollment `json:"session_enrollment"`
+	ClassGroup        model.ClassGroup
+	ClassGroupSession model.ClassGroupSession
+	SessionEnrollment model.SessionEnrollment
 }
 
 func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (CoordinatingClassReportData, error) {
@@ -205,7 +206,11 @@ func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (Coor
 			SessionEnrollments, SessionEnrollments.SessionID.EQ(ClassGroupSessions.ID),
 		),
 	).WHERE(
-		coordinatingClassRLS(ctx),
+		Classes.ID.EQ(Int64(id)).AND(
+			coordinatingClassRLS(ctx),
+		).AND(
+			ClassGroupSessions.EndTime.LT(TimestampzT(time.Now())),
+		),
 	).ORDER_BY(
 		ClassGroups.Name,
 		ClassGroups.ClassType,
@@ -218,6 +223,44 @@ func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (Coor
 	}
 
 	return res, nil
+}
+
+type AttendanceCountData struct {
+	ClassGroupName string `alias:"class_group.name" json:"class_group_name"`
+	Attended       int    `alias:".attended" json:"attended"`
+	NotAttended    int    `alias:".not_attended" json:"not_attended"`
+}
+
+func (d *DB) GetDashboardData(ctx context.Context, id int64) ([]AttendanceCountData, error) {
+	var res []AttendanceCountData
+
+	stmt := SELECT(
+		ClassGroups.Name,
+		SUM(CASE().WHEN(SessionEnrollments.Attended.IS_TRUE()).THEN(Int64(1)).ELSE(Int64(0))).AS("attended"),
+		SUM(CASE().WHEN(SessionEnrollments.Attended.IS_FALSE()).THEN(Int64(1)).ELSE(Int64(0))).AS("not_attended"),
+	).FROM(
+		Classes.INNER_JOIN(
+			ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
+		).INNER_JOIN(
+			ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
+		).INNER_JOIN(
+			SessionEnrollments, SessionEnrollments.SessionID.EQ(ClassGroupSessions.ID),
+		),
+	).WHERE(
+		Classes.ID.EQ(Int64(id)).AND(
+			coordinatingClassRLS(ctx),
+		).AND(
+			ClassGroupSessions.EndTime.LT(TimestampzT(time.Now())),
+		),
+	).GROUP_BY(
+		ClassGroups.Name,
+	)
+	ORDER_BY(
+		ClassGroups.Name,
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
 }
 
 func selectCoordinatingClassFields() SelectStatement {

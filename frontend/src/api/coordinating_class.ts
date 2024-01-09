@@ -55,4 +55,11 @@ export type CoordinatingClassRulesPostResponse = {
 
 export type CoordinatingClassDashboardGetResponse = {
   result: boolean;
+  attendance_count: AttendanceCountData[];
+};
+
+export type AttendanceCountData = {
+  class_group_name: string;
+  attended: number;
+  not_attended: number;
 };

@@ -1,4 +1,4 @@
-import styles from "@/styles/ClassAdministrationPage.module.css";
+import styles from "@/styles/ClassAdministrationPageRules.module.css";
 
 import { UseFormReturnType } from "@mantine/form";
 import { FormEvent, ReactNode } from "react";
