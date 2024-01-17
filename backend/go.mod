@@ -4,15 +4,15 @@ go 1.21
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
-	github.com/expr-lang/expr v1.15.7
+	github.com/expr-lang/expr v1.15.8
 	github.com/go-jet/jet/v2 v2.10.2-0.20231201113740-5cbaa9099234
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/google/uuid v1.5.0
 	github.com/gorilla/schema v1.2.1
-	github.com/jackc/pgx/v5 v5.5.1
-	github.com/lestrrat-go/jwx/v2 v2.0.18
+	github.com/jackc/pgx/v5 v5.5.2
+	github.com/lestrrat-go/jwx/v2 v2.0.19
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
 	github.com/stretchr/testify v1.8.4
@@ -49,8 +49,8 @@ require (
 	github.com/xuri/nfp v0.0.0-20230919160717-d98342af3f05 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/crypto v0.18.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
