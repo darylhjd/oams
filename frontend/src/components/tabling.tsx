@@ -20,6 +20,7 @@ import {
   MRT_Cell,
   MRT_ColumnDef,
   MRT_Row,
+  MRT_TableBodyCellValue,
   MRT_TablePagination,
   useMantineReactTable,
 } from "mantine-react-table";
@@ -243,10 +244,7 @@ export function CoordinatingClassPicker({
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableTd key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.Cell ?? cell.column.columnDef.cell,
-                      cell.getContext(),
-                    )}
+                    <MRT_TableBodyCellValue cell={cell} table={table} />
                   </TableTd>
                 ))}
               </TableTr>
