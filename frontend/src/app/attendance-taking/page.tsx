@@ -36,7 +36,7 @@ function PageTitle() {
         Upcoming Class Group Sessions
       </Title>
       <Tooltip
-        label="Only sessions beginning in less than 15 minutes are shown."
+        label="Only sessions beginning in less than 30 minutes are shown."
         events={{
           hover: true,
           focus: false,
