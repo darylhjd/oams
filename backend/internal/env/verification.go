@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 )
 
 func verifyEnvironment() error {
@@ -28,6 +27,8 @@ func verifyConfiguration() error {
 			apiServerPort,
 			apiServerAzureTenantId,
 			apiServerAzureClientId,
+			apiServerAzureClientSecret,
+			apiServerAzureLoginScope,
 			webServer,
 			databaseType,
 			databaseName,
@@ -55,6 +56,8 @@ func verifyConfiguration() error {
 			apiServerPort,
 			apiServerAzureTenantId,
 			apiServerAzureClientId,
+			apiServerAzureClientSecret,
+			apiServerAzureLoginScope,
 			webServer,
 			databaseType,
 			databaseName,
@@ -101,18 +104,10 @@ func verifyDatabaseSsl() error {
 func checkEnvsNotEmpty(envs ...string) error {
 	var errs []error
 	for _, env := range envs {
-		if checkVarEmpty(os.Getenv(env)) {
+		if _, ok := os.LookupEnv(env); !ok {
 			errs = append(errs, fmt.Errorf("%s not set, but is required", env))
 		}
 	}
 
 	return errors.Join(errs...)
-}
-
-func checkVarEmpty(v string) bool {
-	if strings.TrimSpace(v) == "" {
-		return true
-	}
-
-	return false
 }

@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/oauth2"
@@ -39,6 +38,10 @@ func MustAuth(handlerFunc http.HandlerFunc, auth oauth2.AuthProvider, db *databa
 
 // CheckAuthorizationToken to see if request is paired with a valid user session.
 func CheckAuthorizationToken(r *http.Request, auth oauth2.AuthProvider) (oauth2.Claims, *jwt.Token, error) {
-	accessToken := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-	return auth.CheckToken(r.Context(), accessToken)
+	accessToken, err := r.Cookie(oauth2.SessionCookieIdent)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return auth.CheckToken(r.Context(), accessToken.Value)
 }
