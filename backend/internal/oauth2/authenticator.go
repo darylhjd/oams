@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwk"
+	"golang.org/x/oauth2"
 )
 
 const authenticatorNamespace = "authenticator"
@@ -14,6 +15,8 @@ type AuthProvider interface {
 	GetKeyCache() *jwk.Cache
 	GetKeySetSource() string
 	GetIssuer() string
+	AuthCodeURL(string, string) string
+	Exchange(context.Context, string, string) (*oauth2.Token, error)
 	CheckToken(context.Context, string) (Claims, *jwt.Token, error)
 }
 

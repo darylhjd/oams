@@ -9,6 +9,8 @@ import (
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwk"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/microsoft"
 )
 
 var (
@@ -37,6 +39,19 @@ func (a AzureClaims) UserEmail() string {
 
 type AzureAuthenticator struct {
 	Authenticator
+	config *oauth2.Config
+}
+
+func (a *AzureAuthenticator) AuthCodeURL(state, verifier string) string {
+	return a.config.AuthCodeURL(
+		state,
+		oauth2.SetAuthURLParam("response_mode", "form_post"),
+		oauth2.S256ChallengeOption(verifier),
+	)
+}
+
+func (a *AzureAuthenticator) Exchange(ctx context.Context, code, verifier string) (*oauth2.Token, error) {
+	return a.config.Exchange(ctx, code, oauth2.VerifierOption(verifier))
 }
 
 func (a *AzureAuthenticator) CheckToken(ctx context.Context, tokenString string) (Claims, *jwt.Token, error) {
@@ -92,5 +107,10 @@ func NewAzureAuthenticator() (*AzureAuthenticator, error) {
 		return nil, err
 	}
 
-	return &AzureAuthenticator{Authenticator: *baseAuthenticator}, nil
+	return &AzureAuthenticator{*baseAuthenticator, &oauth2.Config{
+		ClientID:     env.GetAPIServerAzureClientID(),
+		ClientSecret: env.GetAPIServerAzureClientSecret(),
+		Scopes:       []string{env.GetAPIServerAzureLoginScope()},
+		Endpoint:     microsoft.AzureADEndpoint(env.GetAPIServerAzureTenantID()),
+	}}, nil
 }

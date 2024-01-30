@@ -3,23 +3,23 @@
 import styles from "@/styles/Header.module.css";
 
 import {
+  Box,
+  Burger,
   Button,
   Center,
   Container,
-  Image,
-  Group,
-  Burger,
+  Divider,
   Drawer,
-  Box,
-  Stack,
+  Flex,
+  Group,
+  Image,
   Menu,
-  MenuTarget,
   MenuDropdown,
   MenuItem,
+  MenuTarget,
   NavLink,
-  Divider,
-  Flex,
   Space,
+  Stack,
 } from "@mantine/core";
 import { usePathname, useRouter } from "next/navigation";
 import { useSessionUserStore } from "@/stores/session";
@@ -178,7 +178,7 @@ function LoginButton() {
     <Button
       onClick={async () => {
         const redirectLink = `${process.env.WEB_SERVER}${pathname}`;
-        await APIClient.login(redirectLink);
+        location.href = await APIClient.login(redirectLink);
       }}
     >
       Login

@@ -1,5 +1,4 @@
 import axios from "axios";
-import { createClient } from "@supabase/supabase-js";
 import { UserGetResponse, UsersGetResponse } from "./user";
 import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
@@ -35,39 +34,25 @@ import {
   CoordinatingClassRulesPostRequest,
   CoordinatingClassRulesPostResponse,
 } from "@/api/coordinating_class";
+import { LoginResponse } from "@/api/login";
 
 export class APIClient {
-  static readonly _supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_KEY!,
-  );
   static _client = axios.create({
     baseURL: `${process.env.API_SERVER}/api/v1`,
+    withCredentials: true,
   });
 
-  static async login(redirectUrl: string = "") {
-    await this._supabase.auth.signInWithOAuth({
-      provider: "azure",
-      options: {
-        redirectTo: redirectUrl,
-        scopes: `${process.env.AZURE_LOGIN_SCOPE} email`,
+  static async login(redirectUrl: string = ""): Promise<string> {
+    const { data } = await this._client.get<LoginResponse>("/login", {
+      params: {
+        redirect_url: redirectUrl ? redirectUrl : process.env.WEB_SERVER,
       },
     });
+    return data.redirect_url;
   }
 
-  static async logout(): Promise<boolean> {
-    await this._supabase.auth.signOut();
-    return true;
-  }
-
-  static async loadSessionToken() {
-    const session = (await this._supabase.auth.getSession()).data.session;
-    if (session == null) {
-      return;
-    }
-
-    this._client.defaults.headers.common["Authorization"] =
-      `Bearer ${session.provider_token}`;
+  static async logout() {
+    await this._client.get("/logout");
   }
 
   static async sessionGet(): Promise<SessionResponse> {

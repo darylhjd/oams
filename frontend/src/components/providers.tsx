@@ -23,8 +23,7 @@ function SessionInitialiser({ children }: { children: ReactNode }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    APIClient.loadSessionToken()
-      .then(() => APIClient.sessionGet())
+    APIClient.sessionGet()
       .then((data) => session.setSession(data.session))
       .catch((_error) => null)
       .finally(() => setLoaded(true));

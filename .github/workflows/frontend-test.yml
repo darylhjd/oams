@@ -23,9 +23,6 @@ jobs:
 
       - name: Build frontend
         env:
-          AZURE_LOGIN_SCOPE: ${{ vars.AZURE_LOGIN_SCOPE }}
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
           API_SERVER: ${{ vars.API_SERVER }}
           WEB_SERVER: ${{ vars.WEB_SERVER }}
         run: |
