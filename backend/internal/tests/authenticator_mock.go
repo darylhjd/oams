@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwk"
+	goauth2 "golang.org/x/oauth2"
 )
 
 type MockAuthenticator struct {
@@ -23,6 +24,14 @@ func (m *MockAuthenticator) GetKeySetSource() string {
 
 func (m *MockAuthenticator) GetIssuer() string {
 	return uuid.NewString()
+}
+
+func (m *MockAuthenticator) AuthCodeURL(_, _ string) string {
+	return uuid.NewString()
+}
+
+func (m *MockAuthenticator) Exchange(_ context.Context, _, _ string) (*goauth2.Token, error) {
+	return nil, nil
 }
 
 func (m *MockAuthenticator) CheckToken(_ context.Context, _ string) (oauth2.Claims, *jwt.Token, error) {
