@@ -30,9 +30,6 @@ jobs:
         run: |
           cd frontend
           touch .env.production
-          echo AZURE_LOGIN_SCOPE=${{ secrets.OAMSWEBSERVERSTAGING_AZURE_LOGIN_SCOPE }} >> .env.production
-          echo SUPABASE_URL=${{ secrets.OAMSWEBSERVERSTAGING_SUPABASE_URL }} >> .env.production
-          echo SUPABASE_KEY=${{ secrets.OAMSWEBSERVERSTAGING_SUPABASE_KEY }} >> .env.production
           echo API_SERVER=${{ secrets.OAMSWEBSERVERSTAGING_API_SERVER }} >> .env.production
           echo WEB_SERVER=${{ secrets.OAMSWEBSERVERSTAGING_WEB_SERVER }} >> .env.production
 
