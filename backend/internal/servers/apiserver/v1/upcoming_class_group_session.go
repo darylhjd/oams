@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/darylhjd/oams/backend/internal/middleware"
-	"github.com/darylhjd/oams/backend/internal/servers/apiserver/v1/permissions"
 )
 
 const (
@@ -29,19 +28,17 @@ func (v *APIServerV1) upcomingClassGroupSession(w http.ResponseWriter, r *http.R
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(upcomingClassGroupSessionAttendancesUrl, permissions.EnforceAccessPolicy(
+	mux.HandleFunc(upcomingClassGroupSessionAttendancesUrl, v.enforceAccessPolicy(
 		middleware.WithID(sessionId, v.upcomingClassGroupSessionAttendances),
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.UpcomingClassGroupSessionAttendanceRead},
+		map[string][]Permission{
+			http.MethodGet: {UpcomingClassGroupSessionAttendanceRead},
 		},
 	))
 
-	mux.HandleFunc(upcomingClassGroupSessionAttendanceUrl, permissions.EnforceAccessPolicy(
+	mux.HandleFunc(upcomingClassGroupSessionAttendanceUrl, v.enforceAccessPolicy(
 		middleware.WithID(sessionId, v.upcomingClassGroupSessionAttendance),
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodPatch: {permissions.UpcomingClassGroupSessionAttendanceUpdate},
+		map[string][]Permission{
+			http.MethodPatch: {UpcomingClassGroupSessionAttendanceUpdate},
 		},
 	))
 

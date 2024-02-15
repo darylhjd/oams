@@ -1,11 +1,17 @@
-package permissions
+package v1
 
-import "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+import (
+	"net/http"
 
-type P int
+	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/internal/middleware"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
+)
+
+type Permission int
 
 const (
-	SignaturePut P = iota
+	SignaturePut Permission = iota
 
 	BatchPost
 	BatchPut
@@ -46,7 +52,7 @@ const (
 	DataExportRead
 )
 
-type permissionMap map[P]struct{}
+type permissionMap map[Permission]struct{}
 
 var rolePermissionMapping = map[model.UserRole]permissionMap{
 	model.UserRole_User:        userRolePermissions,
@@ -124,4 +130,39 @@ var systemAdminRolePermissions = permissionMap{
 	CoordinatingClassDashboardRead: {},
 
 	DataExportRead: {},
+}
+
+// hasPermissions checks if a user with a role has all the given permissions.
+func hasPermissions(role model.UserRole, permissions ...Permission) bool {
+	permModel, ok := rolePermissionMapping[role]
+	if !ok {
+		return false
+	}
+
+	for _, perm := range permissions {
+		if _, ok = permModel[perm]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+// enforceAccessPolicy based on role-based access control.
+func (v *APIServerV1) enforceAccessPolicy(
+	handlerFunc http.HandlerFunc,
+	methodPermissions map[string][]Permission,
+) http.HandlerFunc {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		authContext := oauth2.GetAuthContext(r.Context())
+
+		if !hasPermissions(authContext.User.Role, methodPermissions[r.Method]...) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		handlerFunc(w, r)
+	}
+
+	return middleware.MustAuth(handler, v.auth, v.db)
 }

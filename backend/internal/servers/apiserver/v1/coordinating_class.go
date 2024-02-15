@@ -9,7 +9,6 @@ import (
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/middleware"
-	"github.com/darylhjd/oams/backend/internal/servers/apiserver/v1/permissions"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
@@ -32,45 +31,40 @@ func (c *coordinatingClassMux) ServeHTTP(w http.ResponseWriter, r *http.Request)
 func (v *APIServerV1) newCoordinatingClassMux(classId int64) *coordinatingClassMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", permissions.EnforceAccessPolicy(
+	mux.HandleFunc("/", v.enforceAccessPolicy(
 		middleware.WithID(classId, v.coordinatingClassBase),
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.CoordinatingClassRead},
+		map[string][]Permission{
+			http.MethodGet: {CoordinatingClassRead},
 		},
 	))
 
-	mux.HandleFunc(coordinatingClassRulesUrl, permissions.EnforceAccessPolicy(
+	mux.HandleFunc(coordinatingClassRulesUrl, v.enforceAccessPolicy(
 		middleware.WithID(classId, v.coordinatingClassRules),
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet:  {permissions.CoordinatingClassRuleRead},
-			http.MethodPost: {permissions.CoordinatingClassRuleCreate},
+		map[string][]Permission{
+			http.MethodGet:  {CoordinatingClassRuleRead},
+			http.MethodPost: {CoordinatingClassRuleCreate},
 		},
 	))
 
-	mux.HandleFunc(coordinatingClassRuleUrl, permissions.EnforceAccessPolicy(
+	mux.HandleFunc(coordinatingClassRuleUrl, v.enforceAccessPolicy(
 		middleware.WithID(classId, v.coordinatingClassRule),
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodPatch:  {permissions.CoordinatingClassRuleUpdate},
-			http.MethodDelete: {permissions.CoordinatingClassRuleDelete},
+		map[string][]Permission{
+			http.MethodPatch:  {CoordinatingClassRuleUpdate},
+			http.MethodDelete: {CoordinatingClassRuleDelete},
 		},
 	))
 
-	mux.HandleFunc(coordinatingClassReportUrl, permissions.EnforceAccessPolicy(
+	mux.HandleFunc(coordinatingClassReportUrl, v.enforceAccessPolicy(
 		middleware.WithID(classId, v.coordinatingClassReport),
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.CoordinatingClassReportRead},
+		map[string][]Permission{
+			http.MethodGet: {CoordinatingClassReportRead},
 		},
 	))
 
-	mux.HandleFunc(coordinatingClassDashboardUrl, permissions.EnforceAccessPolicy(
+	mux.HandleFunc(coordinatingClassDashboardUrl, v.enforceAccessPolicy(
 		middleware.WithID(classId, v.coordinatingClassDashboard),
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.CoordinatingClassDashboardRead},
+		map[string][]Permission{
+			http.MethodGet: {CoordinatingClassDashboardRead},
 		},
 	))
 
