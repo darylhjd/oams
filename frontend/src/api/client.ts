@@ -33,6 +33,7 @@ import {
   CoordinatingClassRulesGetResponse,
   CoordinatingClassRulesPostRequest,
   CoordinatingClassRulesPostResponse,
+  CoordinatingClassSchedulesGetResponse,
 } from "@/api/coordinating_class";
 import { LoginResponse } from "@/api/login";
 
@@ -354,6 +355,16 @@ export class APIClient {
     const { data } =
       await this._client.get<CoordinatingClassDashboardGetResponse>(
         `/coordinating-classes/${id}/dashboard`,
+      );
+    return data;
+  }
+
+  static async coordinatingClassSchedulesGet(
+    id: number,
+  ): Promise<CoordinatingClassSchedulesGetResponse> {
+    const { data } =
+      await this._client.get<CoordinatingClassSchedulesGetResponse>(
+        `/coordinating-classes/${id}/schedule`,
       );
     return data;
   }

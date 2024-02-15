@@ -22,6 +22,7 @@ import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
 import { RulesTab } from "@/app/class-administration/[id]/rules";
 import { DashboardTab } from "@/app/class-administration/[id]/dashboard";
 import { ReportTab } from "@/app/class-administration/[id]/report";
+import { ScheduleTab } from "@/app/class-administration/[id]/schedule";
 
 export default function ClassAdministrationPage({
   params,
@@ -52,18 +53,22 @@ export default function ClassAdministrationPage({
         >
           <TabsList grow={isMobile} justify="left">
             <TabsTab value="dashboard">Dashboard</TabsTab>
-            <TabsTab value="report">Report</TabsTab>
             <TabsTab value="rules">Rules</TabsTab>
+            <TabsTab value="report">Report</TabsTab>
+            <TabsTab value="schedule">Schedule</TabsTab>
           </TabsList>
 
           <TabsPanel value="dashboard">
             <DashboardTab id={params.id} />
           </TabsPanel>
+          <TabsPanel value="rules">
+            <RulesTab id={params.id} />
+          </TabsPanel>
           <TabsPanel value="report">
             <ReportTab id={params.id} />
           </TabsPanel>
-          <TabsPanel value="rules">
-            <RulesTab id={params.id} />
+          <TabsPanel value="schedule">
+            <ScheduleTab id={params.id} />
           </TabsPanel>
         </Tabs>
       </Container>
