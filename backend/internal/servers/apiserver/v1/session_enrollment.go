@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/go-jet/jet/v2/qrm"
@@ -13,7 +12,7 @@ import (
 func (v *APIServerV1) sessionEnrollment(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	enrollmentId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, sessionEnrollmentUrl), 10, 64)
+	enrollmentId, err := strconv.ParseInt(r.PathValue("enrollmentId"), 10, 64)
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid session enrollment id"))
 		return
