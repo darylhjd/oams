@@ -1,4 +1,6 @@
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
+import { ClassGroupSession } from "@/api/class_group_session";
+import { ClassType } from "@/api/class_group";
 
 export type CoordinatingClassesGetResponse = {
   coordinating_classes: CoordinatingClass[];
@@ -60,6 +62,19 @@ export type CoordinatingClassRulePatchResponse = {
 export type CoordinatingClassDashboardGetResponse = {
   result: boolean;
   attendance_count: AttendanceCountData[];
+};
+
+export type CoordinatingClassSchedulesGetResponse = {
+  schedule: ScheduleData[];
+};
+
+export type ScheduleData = {
+  class_group_name: string;
+  class_type: ClassType;
+  class_group_session_id: number;
+  start_time: Date;
+  end_time: Date;
+  venue: string;
 };
 
 export type AttendanceCountData = {

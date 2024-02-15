@@ -323,6 +323,43 @@ func (d *DB) GetDashboardData(ctx context.Context, id int64) ([]AttendanceCountD
 	return res, err
 }
 
+type ScheduleData struct {
+	ClassGroupName      string          `alias:"class_group.name" json:"class_group_name"`
+	ClassType           model.ClassType `alias:"class_group.class_type" json:"class_type"`
+	ClassGroupSessionID int64           `alias:"class_group_session.id" json:"class_group_session_id"`
+	StartTime           time.Time       `alias:"class_group_session.start_time" json:"start_time"`
+	EndTime             time.Time       `alias:"class_group_session.end_time" json:"end_time"`
+	Venue               string          `alias:"class_group_session.venue" json:"venue"`
+}
+
+func (d *DB) GetCoordinatingClassSchedule(ctx context.Context, id int64) ([]ScheduleData, error) {
+	var res []ScheduleData
+
+	stmt := SELECT(
+		ClassGroups.Name,
+		ClassGroups.ClassType,
+		ClassGroupSessions.ID,
+		ClassGroupSessions.StartTime,
+		ClassGroupSessions.EndTime,
+		ClassGroupSessions.Venue,
+	).FROM(
+		ClassGroupSessions.INNER_JOIN(
+			ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
+		).INNER_JOIN(
+			Classes, Classes.ID.EQ(ClassGroups.ClassID),
+		),
+	).WHERE(
+		ClassGroups.ClassID.EQ(Int64(id)).AND(
+			coordinatingClassRLS(ctx),
+		),
+	).ORDER_BY(
+		ClassGroupSessions.StartTime,
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
 func selectCoordinatingClassFields() SelectStatement {
 	return SELECT(
 		Classes.ID,
