@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/darylhjd/oams/backend/internal/servers/apiserver/v1/permissions"
 	"github.com/gorilla/schema"
 	"go.uber.org/zap"
 
@@ -81,147 +80,130 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(sessionUrl, v.session)
 
-	v.mux.HandleFunc(signatureUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(signatureUrl, v.enforceAccessPolicy(
 		v.signature,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodPut: {permissions.SignaturePut},
+		map[string][]Permission{
+			http.MethodPut: {SignaturePut},
 		},
 	))
 
-	v.mux.HandleFunc(batchUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(batchUrl, v.enforceAccessPolicy(
 		v.batch,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodPost: {permissions.BatchPost},
-			http.MethodPut:  {permissions.BatchPut},
+		map[string][]Permission{
+			http.MethodPost: {BatchPost},
+			http.MethodPut:  {BatchPut},
 		},
 	))
 
-	v.mux.HandleFunc(usersUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(usersUrl, v.enforceAccessPolicy(
 		v.users,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.UserRead},
+		map[string][]Permission{
+			http.MethodGet: {UserRead},
 		},
 	))
 
-	v.mux.HandleFunc(userUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(userUrl, v.enforceAccessPolicy(
 		v.user,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet:   {permissions.UserRead},
-			http.MethodPatch: {permissions.UserUpdate},
+		map[string][]Permission{
+			http.MethodGet:   {UserRead},
+			http.MethodPatch: {UserUpdate},
 		},
 	))
 
-	v.mux.HandleFunc(classesUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(classesUrl, v.enforceAccessPolicy(
 		v.classes,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.ClassRead},
+		map[string][]Permission{
+			http.MethodGet: {ClassRead},
 		},
 	))
 
-	v.mux.HandleFunc(classUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(classUrl, v.enforceAccessPolicy(
 		v.class,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.ClassRead},
+		map[string][]Permission{
+			http.MethodGet: {ClassRead},
 		},
 	))
 
-	v.mux.HandleFunc(classAttendanceRulesUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(classAttendanceRulesUrl, v.enforceAccessPolicy(
 		v.classAttendanceRules,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.ClassAttendanceRulesRead},
+		map[string][]Permission{
+			http.MethodGet: {ClassAttendanceRulesRead},
 		},
 	))
 
-	v.mux.HandleFunc(classGroupManagersUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(classGroupManagersUrl, v.enforceAccessPolicy(
 		v.classGroupManagers,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet:  {permissions.ClassGroupManagerRead},
-			http.MethodPost: {permissions.ClassGroupManagerPost},
-			http.MethodPut:  {permissions.ClassGroupManagerPut},
+		map[string][]Permission{
+			http.MethodGet:  {ClassGroupManagerRead},
+			http.MethodPost: {ClassGroupManagerPost},
+			http.MethodPut:  {ClassGroupManagerPut},
 		},
 	))
 
-	v.mux.HandleFunc(classGroupsUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(classGroupsUrl, v.enforceAccessPolicy(
 		v.classGroups,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.ClassGroupRead},
+		map[string][]Permission{
+			http.MethodGet: {ClassGroupRead},
 		},
 	))
 
-	v.mux.HandleFunc(classGroupUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(classGroupUrl, v.enforceAccessPolicy(
 		v.classGroup,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.ClassGroupRead},
+		map[string][]Permission{
+			http.MethodGet: {ClassGroupRead},
 		},
 	))
 
-	v.mux.HandleFunc(classGroupSessionsUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(classGroupSessionsUrl, v.enforceAccessPolicy(
 		v.classGroupSessions,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.ClassGroupSessionRead},
+		map[string][]Permission{
+			http.MethodGet: {ClassGroupSessionRead},
 		},
 	))
 
-	v.mux.HandleFunc(classGroupSessionUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(classGroupSessionUrl, v.enforceAccessPolicy(
 		v.classGroupSession,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.ClassGroupSessionRead},
+		map[string][]Permission{
+			http.MethodGet: {ClassGroupSessionRead},
 		},
 	))
 
-	v.mux.HandleFunc(sessionEnrollmentsUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(sessionEnrollmentsUrl, v.enforceAccessPolicy(
 		v.sessionEnrollments,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.SessionEnrollmentRead},
+		map[string][]Permission{
+			http.MethodGet: {SessionEnrollmentRead},
 		},
 	))
 
-	v.mux.HandleFunc(sessionEnrollmentUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(sessionEnrollmentUrl, v.enforceAccessPolicy(
 		v.sessionEnrollment,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.SessionEnrollmentRead},
+		map[string][]Permission{
+			http.MethodGet: {SessionEnrollmentRead},
 		},
 	))
 
-	v.mux.HandleFunc(upcomingClassGroupSessionsUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(upcomingClassGroupSessionsUrl, v.enforceAccessPolicy(
 		v.upcomingClassGroupSessions,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.UpcomingClassGroupSessionRead},
+		map[string][]Permission{
+			http.MethodGet: {UpcomingClassGroupSessionRead},
 		},
 	))
 
 	v.mux.HandleFunc(upcomingClassGroupSessionUrl, v.upcomingClassGroupSession)
 
-	v.mux.HandleFunc(coordinatingClassesUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassesUrl, v.enforceAccessPolicy(
 		v.coordinatingClasses,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.CoordinatingClassRead},
+		map[string][]Permission{
+			http.MethodGet: {CoordinatingClassRead},
 		},
 	))
 
 	v.mux.HandleFunc(coordinatingClassUrl, v.coordinatingClass)
 
-	v.mux.HandleFunc(dataExportUrl, permissions.EnforceAccessPolicy(
+	v.mux.HandleFunc(dataExportUrl, v.enforceAccessPolicy(
 		v.dataExport,
-		v.auth, v.db,
-		map[string][]permissions.P{
-			http.MethodGet: {permissions.DataExportRead},
+		map[string][]Permission{
+			http.MethodGet: {DataExportRead},
 		},
 	))
 }
