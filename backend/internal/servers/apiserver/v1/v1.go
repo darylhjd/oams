@@ -46,6 +46,10 @@ const (
 	upcomingClassGroupSessionAttendanceUrl  = "/upcoming-class-group-sessions/{sessionId}/attendances/{enrollmentId}"
 	coordinatingClassesUrl                  = "/coordinating-classes"
 	coordinatingClassUrl                    = "/coordinating-classes/{classId}"
+	coordinatingClassRulesUrl               = "/coordinating-classes/{classId}/rules"
+	coordinatingClassRuleUrl                = "/coordinating-classes/{classId}/rules/{ruleId}"
+	coordinatingClassReportUrl              = "/coordinating-classes/{classId}/report"
+	coordinatingClassDashboardUrl           = "/coordinating-classes/{classId}/dashboard"
 	dataExportUrl                           = "/data-export"
 )
 
@@ -211,7 +215,42 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(coordinatingClassUrl, v.coordinatingClass)
+	v.mux.HandleFunc(coordinatingClassUrl, v.enforceAccessPolicy(
+		v.coordinatingClass,
+		map[string][]Permission{
+			http.MethodGet: {CoordinatingClassRead},
+		},
+	))
+
+	v.mux.HandleFunc(coordinatingClassRulesUrl, v.enforceAccessPolicy(
+		v.coordinatingClassRules,
+		map[string][]Permission{
+			http.MethodGet:  {CoordinatingClassRuleRead},
+			http.MethodPost: {CoordinatingClassRuleCreate},
+		},
+	))
+
+	v.mux.HandleFunc(coordinatingClassRuleUrl, v.enforceAccessPolicy(
+		v.coordinatingClassRule,
+		map[string][]Permission{
+			http.MethodPatch:  {CoordinatingClassRuleUpdate},
+			http.MethodDelete: {CoordinatingClassRuleDelete},
+		},
+	))
+
+	v.mux.HandleFunc(coordinatingClassReportUrl, v.enforceAccessPolicy(
+		v.coordinatingClassReport,
+		map[string][]Permission{
+			http.MethodGet: {CoordinatingClassReportRead},
+		},
+	))
+
+	v.mux.HandleFunc(coordinatingClassDashboardUrl, v.enforceAccessPolicy(
+		v.coordinatingClassDashboard,
+		map[string][]Permission{
+			http.MethodGet: {CoordinatingClassDashboardRead},
+		},
+	))
 
 	v.mux.HandleFunc(dataExportUrl, v.enforceAccessPolicy(
 		v.dataExport,

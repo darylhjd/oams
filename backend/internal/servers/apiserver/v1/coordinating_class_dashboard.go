@@ -2,12 +2,19 @@ package v1
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 )
 
-func (v *APIServerV1) coordinatingClassDashboard(w http.ResponseWriter, r *http.Request, classId int64) {
+func (v *APIServerV1) coordinatingClassDashboard(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
+
+	classId, err := strconv.ParseInt(r.PathValue("classId"), 10, 64)
+	if err != nil {
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
+		return
+	}
 
 	switch r.Method {
 	case http.MethodGet:

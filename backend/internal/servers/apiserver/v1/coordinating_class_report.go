@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"mime"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
@@ -13,8 +14,14 @@ import (
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-func (v *APIServerV1) coordinatingClassReport(w http.ResponseWriter, r *http.Request, classId int64) {
+func (v *APIServerV1) coordinatingClassReport(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
+
+	classId, err := strconv.ParseInt(r.PathValue("classId"), 10, 64)
+	if err != nil {
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
+		return
+	}
 
 	switch r.Method {
 	case http.MethodGet:

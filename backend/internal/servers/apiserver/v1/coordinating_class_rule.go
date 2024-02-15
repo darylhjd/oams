@@ -5,15 +5,20 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-func (v *APIServerV1) coordinatingClassRule(w http.ResponseWriter, r *http.Request, classId int64) {
+func (v *APIServerV1) coordinatingClassRule(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	ruleId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, coordinatingClassRuleUrl), 10, 64)
+	classId, err := strconv.ParseInt(r.PathValue("classId"), 10, 64)
+	if err != nil {
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
+		return
+	}
+
+	ruleId, err := strconv.ParseInt(r.PathValue("ruleId"), 10, 64)
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid rule id"))
 		return
