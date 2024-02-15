@@ -1,5 +1,4 @@
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
-import { ClassGroupSession } from "@/api/class_group_session";
 import { ClassType } from "@/api/class_group";
 
 export type CoordinatingClassesGetResponse = {

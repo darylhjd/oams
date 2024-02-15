@@ -38,7 +38,7 @@ import {
 } from "@mantine/core";
 import { AttendanceEntry } from "@/api/upcoming_class_group_session";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
-import { CoordinatingClass } from "@/api/coordinating_class";
+import { CoordinatingClass, ScheduleData } from "@/api/coordinating_class";
 
 export const DEFAULT_PAGE_SIZE = 50;
 
@@ -197,6 +197,15 @@ export const AttendanceEntriesDataTableColumns: MRT_ColumnDef<AttendanceEntry>[]
     ...getSessionEnrollmentsSharedColumns<AttendanceEntry>().slice(0, 1),
     { accessorKey: "user_name", header: "Name" },
     ...getSessionEnrollmentsSharedColumns<AttendanceEntry>().slice(1),
+  ];
+
+export const CoordinatingClassScheduleTableColumns: MRT_ColumnDef<ScheduleData>[] =
+  [
+    { accessorKey: "class_group_name", header: "Class Group Name" },
+    { accessorKey: "class_type", header: "Class Type" },
+    { accessorKey: "start_time", header: "Start Time" },
+    { accessorKey: "end_time", header: "End Time" },
+    { accessorKey: "venue", header: "Venue" },
   ];
 
 export function CoordinatingClassPicker({
