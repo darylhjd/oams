@@ -19,7 +19,7 @@ func (v *APIServerV1) upcomingClassGroupSessionAttendance(w http.ResponseWriter,
 		return
 	}
 
-	enrollmentId, err := strconv.ParseInt(r.PathValue("sessionId"), 10, 64)
+	enrollmentId, err := strconv.ParseInt(r.PathValue("enrollmentId"), 10, 64)
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid session enrollment id"))
 		return
