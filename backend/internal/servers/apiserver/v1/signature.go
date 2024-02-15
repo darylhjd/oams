@@ -3,13 +3,12 @@ package v1
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 func (v *APIServerV1) signature(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	userId := strings.TrimPrefix(r.URL.Path, signatureUrl)
+	userId := r.PathValue("userId")
 	switch r.Method {
 	case http.MethodPut:
 		resp = v.signaturePut(r, userId)

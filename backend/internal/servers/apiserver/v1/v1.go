@@ -21,31 +21,32 @@ const (
 )
 
 const (
-	baseUrl                       = "/"
-	pingUrl                       = "/ping"
-	loginUrl                      = "/login"
-	msLoginCallbackUrl            = "/ms-login-callback"
-	logoutUrl                     = "/logout"
-	sessionUrl                    = "/session"
-	signatureUrl                  = "/signature/"
-	batchUrl                      = "/batch"
-	usersUrl                      = "/users"
-	userUrl                       = "/users/"
-	classesUrl                    = "/classes"
-	classUrl                      = "/classes/"
-	classAttendanceRulesUrl       = "/class-attendance-rules"
-	classGroupManagersUrl         = "/class-group-managers"
-	classGroupsUrl                = "/class-groups"
-	classGroupUrl                 = "/class-groups/"
-	classGroupSessionsUrl         = "/class-group-sessions"
-	classGroupSessionUrl          = "/class-group-sessions/"
-	sessionEnrollmentsUrl         = "/session-enrollments"
-	sessionEnrollmentUrl          = "/session-enrollments/"
-	upcomingClassGroupSessionsUrl = "/upcoming-class-group-sessions"
-	upcomingClassGroupSessionUrl  = "/upcoming-class-group-sessions/"
-	coordinatingClassesUrl        = "/coordinating-classes"
-	coordinatingClassUrl          = "/coordinating-classes/"
-	dataExportUrl                 = "/data-export"
+	baseUrl                                 = "/"
+	pingUrl                                 = "/ping"
+	loginUrl                                = "/login"
+	msLoginCallbackUrl                      = "/ms-login-callback"
+	logoutUrl                               = "/logout"
+	sessionUrl                              = "/session"
+	signatureUrl                            = "/signature/{userId}"
+	batchUrl                                = "/batch"
+	usersUrl                                = "/users"
+	userUrl                                 = "/users/{userId}"
+	classesUrl                              = "/classes"
+	classUrl                                = "/classes/{classId}"
+	classAttendanceRulesUrl                 = "/class-attendance-rules"
+	classGroupManagersUrl                   = "/class-group-managers"
+	classGroupsUrl                          = "/class-groups"
+	classGroupUrl                           = "/class-groups/{groupId}"
+	classGroupSessionsUrl                   = "/class-group-sessions"
+	classGroupSessionUrl                    = "/class-group-sessions/{sessionId}"
+	sessionEnrollmentsUrl                   = "/session-enrollments"
+	sessionEnrollmentUrl                    = "/session-enrollments/{enrollmentId}"
+	upcomingClassGroupSessionsUrl           = "/upcoming-class-group-sessions"
+	upcomingClassGroupSessionAttendancesUrl = "/upcoming-class-group-sessions/{sessionId}/attendances"
+	upcomingClassGroupSessionAttendanceUrl  = "/upcoming-class-group-sessions/{sessionId}/attendances/{enrollmentId}"
+	coordinatingClassesUrl                  = "/coordinating-classes"
+	coordinatingClassUrl                    = "/coordinating-classes/{classId}"
+	dataExportUrl                           = "/data-export"
 )
 
 var (
@@ -189,7 +190,19 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(upcomingClassGroupSessionUrl, v.upcomingClassGroupSession)
+	v.mux.HandleFunc(upcomingClassGroupSessionAttendancesUrl, v.enforceAccessPolicy(
+		v.upcomingClassGroupSessionAttendances,
+		map[string][]Permission{
+			http.MethodGet: {UpcomingClassGroupSessionAttendanceRead},
+		},
+	))
+
+	v.mux.HandleFunc(upcomingClassGroupSessionAttendanceUrl, v.enforceAccessPolicy(
+		v.upcomingClassGroupSessionAttendance,
+		map[string][]Permission{
+			http.MethodPatch: {UpcomingClassGroupSessionAttendanceUpdate},
+		},
+	))
 
 	v.mux.HandleFunc(coordinatingClassesUrl, v.enforceAccessPolicy(
 		v.coordinatingClasses,

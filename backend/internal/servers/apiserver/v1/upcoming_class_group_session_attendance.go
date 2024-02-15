@@ -5,16 +5,21 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-func (v *APIServerV1) upcomingClassGroupSessionAttendance(w http.ResponseWriter, r *http.Request, sessionId int64) {
+func (v *APIServerV1) upcomingClassGroupSessionAttendance(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	enrollmentId, err := strconv.ParseInt(strings.TrimPrefix(r.URL.Path, upcomingClassGroupSessionAttendanceUrl), 10, 64)
+	sessionId, err := strconv.ParseInt(r.PathValue("sessionId"), 10, 64)
+	if err != nil {
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group session id"))
+		return
+	}
+
+	enrollmentId, err := strconv.ParseInt(r.PathValue("sessionId"), 10, 64)
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid session enrollment id"))
 		return

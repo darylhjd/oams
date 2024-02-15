@@ -3,7 +3,6 @@ package v1
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/go-jet/jet/v2/qrm"
@@ -12,7 +11,7 @@ import (
 func (v *APIServerV1) user(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	userId := strings.TrimPrefix(r.URL.Path, userUrl)
+	userId := r.PathValue("userId")
 	switch r.Method {
 	case http.MethodGet:
 		resp = v.userGet(r, userId)

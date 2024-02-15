@@ -3,13 +3,20 @@ package v1
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
-func (v *APIServerV1) upcomingClassGroupSessionAttendances(w http.ResponseWriter, r *http.Request, sessionId int64) {
+func (v *APIServerV1) upcomingClassGroupSessionAttendances(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
+
+	sessionId, err := strconv.ParseInt(r.PathValue("sessionId"), 10, 64)
+	if err != nil {
+		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group session id"))
+		return
+	}
 
 	switch r.Method {
 	case http.MethodGet:
