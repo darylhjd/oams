@@ -369,6 +369,21 @@ export class APIClient {
     return data;
   }
 
+  static async coordinatingClassSchedulePut(
+    classId: number,
+    sessionId: number,
+    start_time: Date,
+    end_time: Date,
+  ) {
+    // const { data } = await this._client.put(
+    //   `/coordinating-classes/${classId}/schedule/${sessionId}`,
+    //   {
+    //     start_time: start_time.getUTCMilliseconds(),
+    //     end_time: end_time.getUTCMilliseconds(),
+    //   },
+    // );
+  }
+
   static async dataExportGet() {
     return await this._client.get("/data-export", {
       responseType: "blob",
