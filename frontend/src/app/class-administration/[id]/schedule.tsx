@@ -16,7 +16,6 @@ import {
   Group,
   Modal,
   Space,
-  Text,
   Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
