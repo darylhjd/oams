@@ -33,6 +33,7 @@ import {
   CoordinatingClassRulesGetResponse,
   CoordinatingClassRulesPostRequest,
   CoordinatingClassRulesPostResponse,
+  CoordinatingClassSchedulePutResponse,
   CoordinatingClassSchedulesGetResponse,
 } from "@/api/coordinating_class";
 import { LoginResponse } from "@/api/login";
@@ -374,14 +375,16 @@ export class APIClient {
     sessionId: number,
     start_time: Date,
     end_time: Date,
-  ) {
-    // const { data } = await this._client.put(
-    //   `/coordinating-classes/${classId}/schedule/${sessionId}`,
-    //   {
-    //     start_time: start_time.getUTCMilliseconds(),
-    //     end_time: end_time.getUTCMilliseconds(),
-    //   },
-    // );
+  ): Promise<CoordinatingClassSchedulePutResponse> {
+    const { data } =
+      await this._client.put<CoordinatingClassSchedulePutResponse>(
+        `/coordinating-classes/${classId}/schedule/${sessionId}`,
+        {
+          start_time: start_time.getTime(),
+          end_time: end_time.getTime(),
+        },
+      );
+    return data;
   }
 
   static async dataExportGet() {

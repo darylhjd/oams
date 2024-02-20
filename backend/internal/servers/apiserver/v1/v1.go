@@ -51,6 +51,7 @@ const (
 	coordinatingClassReportUrl              = "/coordinating-classes/{classId}/report"
 	coordinatingClassDashboardUrl           = "/coordinating-classes/{classId}/dashboard"
 	coordinatingClassSchedulesUrl           = "/coordinating-classes/{classId}/schedule"
+	coordinatingClassScheduleUrl            = "/coordinating-classes/{classId}/schedule/{sessionId}"
 	dataExportUrl                           = "/data-export"
 )
 
@@ -257,6 +258,13 @@ func (v *APIServerV1) registerHandlers() {
 		v.coordinatingClassSchedules,
 		map[string][]Permission{
 			http.MethodGet: {CoordinatingClassScheduleRead},
+		},
+	))
+
+	v.mux.HandleFunc(coordinatingClassScheduleUrl, v.enforceAccessPolicy(
+		v.coordinatingClassSchedule,
+		map[string][]Permission{
+			http.MethodPut: {CoordinatingClassScheduleUpdate},
 		},
 	))
 

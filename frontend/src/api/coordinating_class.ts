@@ -76,6 +76,11 @@ export type ScheduleData = {
   venue: string;
 };
 
+export type CoordinatingClassSchedulePutResponse = {
+  start_time: Date;
+  end_time: Date;
+};
+
 export type AttendanceCountData = {
   class_group_name: string;
   attended: number;

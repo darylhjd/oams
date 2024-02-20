@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { APIClient } from "@/api/client";
 import { Panel } from "@/app/class-administration/[id]/panel";
 import { RequestLoader } from "@/components/request_loader";
@@ -35,7 +35,11 @@ export function ScheduleTab({ id }: { id: number }) {
   return (
     <Panel>
       <RequestLoader promiseFunc={promiseFunc}>
-        <ScheduleDisplay id={id} schedule={schedule} />
+        <ScheduleDisplay
+          id={id}
+          schedule={schedule}
+          setSchedule={setSchedule}
+        />
       </RequestLoader>
     </Panel>
   );
@@ -44,9 +48,11 @@ export function ScheduleTab({ id }: { id: number }) {
 function ScheduleDisplay({
   id,
   schedule,
+  setSchedule,
 }: {
   id: number;
   schedule: ScheduleData[];
+  setSchedule: Dispatch<SetStateAction<ScheduleData[]>>;
 }) {
   const table = useMantineReactTable({
     columns: CoordinatingClassScheduleTableColumns,
@@ -57,7 +63,14 @@ function ScheduleDisplay({
     },
     enableRowActions: true,
     positionActionsColumn: "last",
-    renderRowActions: ({ row }) => <ChangeSchedule id={id} row={row} />,
+    renderRowActions: ({ row }) => (
+      <ChangeSchedule
+        id={id}
+        row={row}
+        schedule={schedule}
+        setSchedule={setSchedule}
+      />
+    ),
   });
 
   return <MantineReactTable table={table} />;
@@ -66,9 +79,13 @@ function ScheduleDisplay({
 function ChangeSchedule({
   id,
   row,
+  schedule,
+  setSchedule,
 }: {
   id: number;
   row: MRT_Row<ScheduleData>;
+  schedule: ScheduleData[];
+  setSchedule: Dispatch<SetStateAction<ScheduleData[]>>;
 }) {
   const [opened, { open, close }] = useDisclosure(false);
   const [loading, setLoading] = useState(false);
@@ -83,13 +100,25 @@ function ChangeSchedule({
 
   const onSubmit = form.onSubmit(async (values) => {
     setLoading(true);
+    values.start_time.setMilliseconds(0);
+    values.end_time.setMilliseconds(0);
+
     try {
-      await APIClient.coordinatingClassSchedulePut(
+      const response = await APIClient.coordinatingClassSchedulePut(
         id,
         row.original.class_group_session_id,
         values.start_time,
         values.end_time,
       );
+      schedule[row.index].start_time = response.start_time;
+      schedule[row.index].end_time = response.end_time;
+      form.setInitialValues({
+        start_time: response.start_time,
+        end_time: response.end_time,
+      });
+      form.resetDirty();
+      setSchedule([...schedule]);
+      close();
     } catch (e) {
       notifications.show({
         title: "Schedule Update Failed",

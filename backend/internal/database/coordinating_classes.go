@@ -360,6 +360,48 @@ func (d *DB) GetCoordinatingClassSchedule(ctx context.Context, id int64) ([]Sche
 	return res, err
 }
 
+type UpdateCoordinatingClassScheduleParams struct {
+	ClassID   int64
+	SessionID int64
+	StartTime time.Time
+	EndTime   time.Time
+}
+
+func (d *DB) UpdateCoordinatingClassSchedule(ctx context.Context, arg UpdateCoordinatingClassScheduleParams) error {
+	stmt := ClassGroupSessions.UPDATE(
+		ClassGroupSessions.StartTime,
+		ClassGroupSessions.EndTime,
+	).MODEL(
+		model.ClassGroupSession{
+			StartTime: arg.StartTime,
+			EndTime:   arg.EndTime,
+		},
+	).WHERE(
+		EXISTS(
+			SELECT(
+				ClassGroupSessions.AllColumns,
+			).FROM(
+				Classes.INNER_JOIN(
+					ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
+				).INNER_JOIN(
+					ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
+				),
+			).WHERE(
+				coordinatingClassRLS(ctx).AND(
+					Classes.ID.EQ(Int64(arg.ClassID)),
+				).AND(
+					ClassGroupSessions.ID.EQ(Int64(arg.SessionID)),
+				),
+			),
+		).AND(
+			ClassGroupSessions.ID.EQ(Int64(arg.SessionID)),
+		),
+	)
+
+	_, err := stmt.ExecContext(ctx, d.qe)
+	return err
+}
+
 func selectCoordinatingClassFields() SelectStatement {
 	return SELECT(
 		Classes.ID,
