@@ -4,15 +4,15 @@ go 1.22
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
-	github.com/expr-lang/expr v1.16.0
-	github.com/go-jet/jet/v2 v2.10.2-0.20231201113740-5cbaa9099234
+	github.com/expr-lang/expr v1.16.1
+	github.com/go-jet/jet/v2 v2.10.2-0.20240219103357-493d3a4a2582
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/schema v1.2.1
 	github.com/jackc/pgx/v5 v5.5.3
-	github.com/lestrrat-go/jwx/v2 v2.0.19
+	github.com/lestrrat-go/jwx/v2 v2.0.20
 	github.com/lib/pq v1.10.9
 	github.com/rs/cors v1.10.1
 	github.com/stretchr/testify v1.8.4
