@@ -10,6 +10,7 @@ type SQLState string
 
 const (
 	SQLStateDuplicateKeyOrIndex SQLState = "23505"
+	SQLStateFailedConstraint    SQLState = "23514"
 )
 
 // ErrSQLState is a helper function to check if a given error is of a given SQLState.
