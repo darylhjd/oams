@@ -54,21 +54,18 @@ func (v *APIServerV1) coordinatingClassSchedulePut(r *http.Request, classId, ses
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	startTime := time.UnixMilli(req.StartTime).In(datetime.Location)
-	endTime := time.UnixMilli(req.EndTime).In(datetime.Location)
-
-	err := v.db.UpdateCoordinatingClassSchedule(r.Context(), database.UpdateCoordinatingClassScheduleParams{
+	s, err := v.db.UpdateCoordinatingClassSchedule(r.Context(), database.UpdateCoordinatingClassScheduleParams{
 		ClassID:   classId,
 		SessionID: sessionId,
-		StartTime: startTime,
-		EndTime:   endTime,
+		StartTime: time.UnixMilli(req.StartTime).In(datetime.Location),
+		EndTime:   time.UnixMilli(req.EndTime).In(datetime.Location),
 	})
 	if err != nil {
 		switch {
 		case errors.Is(err, qrm.ErrNoRows):
 			return newErrorResponse(http.StatusUnauthorized, "not allowed to update coordinating class schedule")
 		case database.ErrSQLState(err, database.SQLStateDuplicateKeyOrIndex):
-			return newErrorResponse(http.StatusBadRequest, "class group already has session at this timing")
+			return newErrorResponse(http.StatusBadRequest, "class group already has s at this timing")
 		case database.ErrSQLState(err, database.SQLStateFailedConstraint):
 			return newErrorResponse(http.StatusBadRequest, "start time must be before end time")
 		default:
@@ -77,5 +74,9 @@ func (v *APIServerV1) coordinatingClassSchedulePut(r *http.Request, classId, ses
 		}
 	}
 
-	return coordinatingClassSchedulePutResponse{newSuccessResponse(), startTime, endTime}
+	return coordinatingClassSchedulePutResponse{
+		newSuccessResponse(),
+		s.StartTime,
+		s.EndTime,
+	}
 }

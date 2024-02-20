@@ -367,7 +367,9 @@ type UpdateCoordinatingClassScheduleParams struct {
 	EndTime   time.Time
 }
 
-func (d *DB) UpdateCoordinatingClassSchedule(ctx context.Context, arg UpdateCoordinatingClassScheduleParams) error {
+func (d *DB) UpdateCoordinatingClassSchedule(ctx context.Context, arg UpdateCoordinatingClassScheduleParams) (model.ClassGroupSession, error) {
+	var res model.ClassGroupSession
+
 	stmt := ClassGroupSessions.UPDATE(
 		ClassGroupSessions.StartTime,
 		ClassGroupSessions.EndTime,
@@ -396,10 +398,12 @@ func (d *DB) UpdateCoordinatingClassSchedule(ctx context.Context, arg UpdateCoor
 		).AND(
 			ClassGroupSessions.ID.EQ(Int64(arg.SessionID)),
 		),
+	).RETURNING(
+		ClassGroupSessions.AllColumns,
 	)
 
-	_, err := stmt.ExecContext(ctx, d.qe)
-	return err
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
 }
 
 func selectCoordinatingClassFields() SelectStatement {
