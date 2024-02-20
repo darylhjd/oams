@@ -16,6 +16,7 @@ import {
   Group,
   Modal,
   Space,
+  Text,
   Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -132,7 +133,12 @@ function ChangeSchedule({
 
   return (
     <>
-      <Modal opened={opened} onClose={close} centered title="Change Schedule">
+      <Modal
+        opened={opened}
+        onClose={close}
+        centered
+        title={`Change Schedule: ${row.original.class_group_name}, ${row.original.class_type}`}
+      >
         <form onSubmit={onSubmit}>
           <DateTimePicker
             dropdownType="modal"
