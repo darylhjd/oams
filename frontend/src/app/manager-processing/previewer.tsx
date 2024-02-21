@@ -5,7 +5,7 @@ import {
   useMantineReactTable,
 } from "mantine-react-table";
 import { useManagerDataStore } from "@/stores/manager_processing";
-import { ClassGroupManagersProcessingDataTableColumns } from "@/components/tabling";
+import { ClassGroupManagersProcessingDataTableColumns } from "@/components/columns";
 
 export function ManagerProcessingPreviewer() {
   const managerDataStorage = useManagerDataStore();

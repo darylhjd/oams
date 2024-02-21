@@ -25,7 +25,7 @@ import {
   UsersDataTableColumns,
   DEFAULT_PAGE_SIZE,
   ClassAttendanceRulesDataTableColumns,
-} from "@/components/tabling";
+} from "@/components/columns";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/routing/routes";
 

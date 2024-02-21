@@ -1,3 +1,9 @@
 .container {
   padding-top: rem(30px);
 }
+
+.tableRow {
+  @mixin hover {
+    cursor: pointer;
+  }
+}
