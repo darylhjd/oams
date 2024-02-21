@@ -9,7 +9,7 @@ import {
   MRT_Row,
   useMantineReactTable,
 } from "mantine-react-table";
-import { CoordinatingClassScheduleTableColumns } from "@/components/tabling";
+import { CoordinatingClassScheduleTableColumns } from "@/components/columns";
 import {
   ActionIcon,
   Button,

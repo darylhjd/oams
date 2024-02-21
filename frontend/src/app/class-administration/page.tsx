@@ -20,7 +20,7 @@ import { useState } from "react";
 import { CoordinatingClass } from "@/api/coordinating_class";
 import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
-import { CoordinatingClassesDataTableColumns } from "@/components/tabling";
+import { CoordinatingClassesDataTableColumns } from "@/components/columns";
 import { Routes } from "@/routing/routes";
 import { useRouter } from "next/navigation";
 import {

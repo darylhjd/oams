@@ -33,7 +33,7 @@ import {
 import {
   AttendanceEntriesDataTableColumns,
   DEFAULT_PAGE_SIZE,
-} from "@/components/tabling";
+} from "@/components/columns";
 import { IconHelp, IconX } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
