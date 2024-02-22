@@ -14,7 +14,6 @@ import (
 
 const (
 	functionsCustomHandlerPort = "FUNCTIONS_CUSTOMHANDLER_PORT"
-	defaultPort                = "3000"
 )
 
 const (
@@ -23,8 +22,8 @@ const (
 
 func main() {
 	port, ok := os.LookupEnv(functionsCustomHandlerPort)
-	if !ok {
-		port = defaultPort
+	if ok {
+		log.Printf("Custom handler port: %s", port)
 	}
 
 	mux := http.NewServeMux()
@@ -63,7 +62,8 @@ func interventionHandler(w http.ResponseWriter, _ *http.Request) {
 		env.GetAzureEmailEndpoint(), env.GetAzureEmailAccessKey(), env.GetAzureEmailSenderAddress(),
 	)
 	if err != nil {
-		log.Fatalf("could not create mail client: %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	mail := azmail.NewMail()
@@ -87,8 +87,12 @@ func interventionHandler(w http.ResponseWriter, _ *http.Request) {
 		Logs: []string{fmt.Sprintf("Early Intervention Service successfully run at %s", now.String())},
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err = json.NewEncoder(w).Encode(response); err != nil {
-		log.Fatalf("could not set function response: %s", err)
+	b, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write(b)
 }
