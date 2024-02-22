@@ -96,10 +96,17 @@ export function ClassGroupsTable() {
 }
 
 export function ClassGroupManagersTable() {
+  const router = useRouter();
+
   return (
     <AsyncDataTable
       columns={ClassGroupManagersDataTableColumns}
       dataSource={new ClassGroupManagersDataSource()}
+      mantineTableBodyRowProps={({ row }) => ({
+        onClick: (_) =>
+          router.push(Routes.adminPanelClassGroupManager + row.original.id),
+        ...ROW_PROPS,
+      })}
     />
   );
 }

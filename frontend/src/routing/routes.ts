@@ -8,6 +8,7 @@ export const Routes = {
   adminPanelClass: "/admin-panel/classes/",
   adminPanelClassAttendanceRule: "/admin-panel/class-attendance-rules/",
   adminPanelClassGroup: "/admin-panel/class-groups/",
+  adminPanelClassGroupManager: "/admin-panel/class-group-managers/",
   adminPanelClassGroupSession: "/admin-panel/class-group-sessions/",
   adminPanelSessionEnrollment: "/admin-panel/session-enrollments/",
   batchProcessing: "/batch-processing",
