@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/darylhjd/azmail"
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/darylhjd/oams/backend/internal/logger"
+	"github.com/darylhjd/oams/backend/pkg/azmail"
 	"go.uber.org/zap"
 )
 
