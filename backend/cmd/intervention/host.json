@@ -1,20 +1,22 @@
 {
   "version": "2.0",
   "logging": {
-    "logLevel": {
-      "default": "Trace"
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      }
     }
   },
   "extensionBundle": {
     "id": "Microsoft.Azure.Functions.ExtensionBundle",
-    "version": "[3.*, 4.0.0)"
+    "version": "[4.*, 5.0.0)"
   },
   "customHandler": {
     "description": {
       "defaultExecutablePath": "main",
       "workingDirectory": "",
       "arguments": []
-    },
-    "enableForwardingHttpRequest": true
+    }
   }
 }

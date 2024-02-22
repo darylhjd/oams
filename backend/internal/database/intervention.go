@@ -29,7 +29,7 @@ func (d *DB) Intervention(ctx context.Context) ([]rules.Fact, []RuleInfo, error)
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
 	classGroupSessionPredicate := ClassGroupSessions.StartTime.GT_EQ(TimestampzT(startOfDay)).AND(
-		ClassGroupSessions.EndTime.LT(TimestampzT(now)),
+		ClassGroupSessions.EndTime.LT(TimestampzT(now.Add(time.Hour * 24 * 99))),
 	)
 
 	stmt := SELECT(
