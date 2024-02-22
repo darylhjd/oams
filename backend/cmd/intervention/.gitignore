@@ -1,6 +1,9 @@
 # Builds
 main
 
+# Secrets
+db.crt.pem
+
 # Azure Functions artifacts
 bin
 obj
