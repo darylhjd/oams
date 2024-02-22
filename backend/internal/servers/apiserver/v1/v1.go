@@ -35,6 +35,7 @@ const (
 	classUrl                                = "/classes/{classId}"
 	classAttendanceRulesUrl                 = "/class-attendance-rules"
 	classGroupManagersUrl                   = "/class-group-managers"
+	classGroupManagerUrl                    = "/class-group-managers/{managerId}"
 	classGroupsUrl                          = "/class-groups"
 	classGroupUrl                           = "/class-groups/{groupId}"
 	classGroupSessionsUrl                   = "/class-group-sessions"
@@ -144,6 +145,13 @@ func (v *APIServerV1) registerHandlers() {
 			http.MethodGet:  {ClassGroupManagerRead},
 			http.MethodPost: {ClassGroupManagerPost},
 			http.MethodPut:  {ClassGroupManagerPut},
+		},
+	))
+
+	v.mux.HandleFunc(classGroupManagerUrl, v.enforceAccessPolicy(
+		v.classGroupManager,
+		map[string][]Permission{
+			http.MethodGet: {ClassGroupManagerRead},
 		},
 	))
 

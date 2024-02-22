@@ -4,6 +4,7 @@ import { BatchData, BatchPostResponse, BatchPutResponse } from "./batch";
 import { FileWithPath } from "@mantine/dropzone";
 import { ClassesGetResponse, ClassGetResponse } from "./class";
 import {
+  ClassGroupManagerGetResponse,
   ClassGroupManagersGetResponse,
   ClassGroupManagersPostResponse,
   ClassGroupManagersPutResponse,
@@ -170,6 +171,15 @@ export class APIClient {
           limit: limit,
         },
       },
+    );
+    return data;
+  }
+
+  static async classGroupManagerGet(
+    id: number,
+  ): Promise<ClassGroupManagerGetResponse> {
+    const { data } = await this._client.get<ClassGroupManagerGetResponse>(
+      `/class-group-managers/${id}`,
     );
     return data;
   }

@@ -27,6 +27,23 @@ func (d *DB) ListClassGroupManagers(ctx context.Context, params ListQueryParams)
 	return res, err
 }
 
+func (d *DB) GetClassGroupManager(ctx context.Context, id int64) (model.ClassGroupManager, error) {
+	var res model.ClassGroupManager
+
+	stmt := SELECT(
+		ClassGroupManagers.AllColumns,
+	).FROM(
+		ClassGroupManagers,
+	).WHERE(
+		classGroupManagerRLS(ctx).AND(
+			ClassGroupManagers.ID.EQ(Int64(id)),
+		),
+	).LIMIT(1)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
 type CreateClassGroupManagerParams struct {
 	UserID       string             `json:"user_id"`
 	ClassGroupID int64              `json:"class_group_id"`
