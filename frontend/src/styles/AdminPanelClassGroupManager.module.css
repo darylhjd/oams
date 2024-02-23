@@ -1,0 +1,7 @@
+.container {
+  max-width: rem(700px);
+}
+
+.danger {
+  border-color: darkred;
+}
