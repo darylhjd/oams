@@ -97,6 +97,20 @@ func (d *DB) UpdateClassGroupManager(ctx context.Context, arg UpdateClassGroupMa
 	return res, err
 }
 
+func (d *DB) DeleteClassGroupManager(ctx context.Context, id int64) error {
+	var res model.ClassGroupManager
+
+	stmt := ClassGroupManagers.DELETE().WHERE(
+		classGroupManagerRLS(ctx).AND(
+			ClassGroupManagers.ID.EQ(Int64(id)),
+		),
+	).RETURNING(
+		ClassGroupManagers.AllColumns,
+	)
+
+	return stmt.QueryContext(ctx, d.qe, &res)
+}
+
 type ProcessUpsertClassGroupManagerParams struct {
 	UserID         string             `json:"user_id"`
 	ClassCode      string             `json:"class_code"`

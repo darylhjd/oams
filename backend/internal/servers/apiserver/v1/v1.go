@@ -151,8 +151,9 @@ func (v *APIServerV1) registerHandlers() {
 	v.mux.HandleFunc(classGroupManagerUrl, v.enforceAccessPolicy(
 		v.classGroupManager,
 		map[string][]permission{
-			http.MethodGet:   {ClassGroupManagerRead},
-			http.MethodPatch: {ClassGroupManagerUpdate},
+			http.MethodGet:    {ClassGroupManagerRead},
+			http.MethodPatch:  {ClassGroupManagerUpdate},
+			http.MethodDelete: {ClassGroupManagerDelete},
 		},
 	))
 

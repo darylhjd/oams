@@ -26,6 +26,7 @@ const (
 	ClassGroupManagerPost
 	ClassGroupManagerRead
 	ClassGroupManagerUpdate
+	ClassGroupManagerDelete
 	ClassGroupManagerPut
 
 	ClassGroupRead
@@ -113,6 +114,7 @@ var systemAdminRolePermissions = permissionMap{
 	ClassGroupManagerPost:   {},
 	ClassGroupManagerRead:   {},
 	ClassGroupManagerUpdate: {},
+	ClassGroupManagerDelete: {},
 	ClassGroupManagerPut:    {},
 
 	ClassGroupRead: {},

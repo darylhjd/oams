@@ -129,9 +129,23 @@ function ManagerSettings({ manager }: { manager: ClassGroupManager }) {
 
 function ManagerDangerZone({ manager }: { manager: ClassGroupManager }) {
   const [opened, { open, close }] = useDisclosure(false);
+  const [loading, setLoading] = useState(false);
 
   const deleteManager = async () => {
-    close();
+    setLoading(true);
+    try {
+      await APIClient.classGroupManagerDelete(manager.id);
+      close();
+      location.href = Routes.adminPanel;
+    } catch (e) {
+      notifications.show({
+        title: "Could not delete manager",
+        message: getError(e),
+        icon: <IconX />,
+        color: "red",
+      });
+    }
+    setLoading(false);
   };
 
   return (
@@ -157,7 +171,12 @@ function ManagerDangerZone({ manager }: { manager: ClassGroupManager }) {
               <Button onClick={close} variant="light">
                 Cancel
               </Button>
-              <Button color="red" variant="filled" onClick={deleteManager}>
+              <Button
+                color="red"
+                variant="filled"
+                onClick={deleteManager}
+                loading={loading}
+              >
                 Confirm
               </Button>
             </Group>

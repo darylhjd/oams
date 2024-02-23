@@ -25,6 +25,8 @@ func (v *APIServerV1) classGroupManager(w http.ResponseWriter, r *http.Request) 
 		resp = v.classGroupManagerGet(r, managerId)
 	case http.MethodPatch:
 		resp = v.classGroupManagerPatch(r, managerId)
+	case http.MethodDelete:
+		resp = v.classGroupManagerDelete(r, managerId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -85,5 +87,24 @@ func (v *APIServerV1) classGroupManagerPatch(r *http.Request, managerId int64) a
 	return classGroupManagerPatchResponse{
 		newSuccessResponse(),
 		manager,
+	}
+}
+
+type classGroupManagerDeleteResponse struct {
+	response
+}
+
+func (v *APIServerV1) classGroupManagerDelete(r *http.Request, managerId int64) apiResponse {
+	if err := v.db.DeleteClassGroupManager(r.Context(), managerId); err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return newErrorResponse(http.StatusUnauthorized, "not allowed to delete manager")
+		}
+
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not delete class group manager")
+	}
+
+	return classGroupManagerDeleteResponse{
+		newSuccessResponse(),
 	}
 }

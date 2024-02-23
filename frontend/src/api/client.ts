@@ -199,6 +199,10 @@ export class APIClient {
     return data;
   }
 
+  static async classGroupManagerDelete(id: number) {
+    await this._client.delete(`/class-group-managers/${id}`);
+  }
+
   static async classGroupManagersPost(
     files: FileWithPath[],
   ): Promise<ClassGroupManagersPostResponse> {
