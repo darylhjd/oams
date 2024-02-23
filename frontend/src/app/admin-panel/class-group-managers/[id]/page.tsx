@@ -122,7 +122,7 @@ function ManagerDangerZone({ manager }: { manager: ClassGroupManager }) {
             This user will no longer be a manager for this class group.
           </Text>
         </div>
-        <>
+        <div>
           <Modal
             opened={opened}
             onClose={close}
@@ -144,7 +144,7 @@ function ManagerDangerZone({ manager }: { manager: ClassGroupManager }) {
           <Button color="red" variant="light" onClick={open}>
             Delete
           </Button>
-        </>
+        </div>
       </Group>
     </Fieldset>
   );
