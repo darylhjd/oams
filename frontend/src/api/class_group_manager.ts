@@ -6,6 +6,10 @@ export type ClassGroupManagerGetResponse = {
   manager: ClassGroupManager;
 };
 
+export type ClassGroupManagerPatchResponse = {
+  manager: ClassGroupManager;
+};
+
 export type ClassGroupManagersPostResponse = {
   class_group_managers: UpsertClassGroupManagerParams[];
 };

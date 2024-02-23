@@ -8,10 +8,10 @@ import (
 	"github.com/darylhjd/oams/backend/internal/oauth2"
 )
 
-type Permission int
+type permission int
 
 const (
-	SignaturePut Permission = iota
+	SignaturePut permission = iota
 
 	BatchPost
 	BatchPut
@@ -25,6 +25,7 @@ const (
 
 	ClassGroupManagerPost
 	ClassGroupManagerRead
+	ClassGroupManagerUpdate
 	ClassGroupManagerPut
 
 	ClassGroupRead
@@ -55,7 +56,7 @@ const (
 	DataExportRead
 )
 
-type permissionMap map[Permission]struct{}
+type permissionMap map[permission]struct{}
 
 var rolePermissionMapping = map[model.UserRole]permissionMap{
 	model.UserRole_User:        userRolePermissions,
@@ -109,9 +110,10 @@ var systemAdminRolePermissions = permissionMap{
 
 	ClassAttendanceRulesRead: {},
 
-	ClassGroupManagerPost: {},
-	ClassGroupManagerPut:  {},
-	ClassGroupManagerRead: {},
+	ClassGroupManagerPost:   {},
+	ClassGroupManagerRead:   {},
+	ClassGroupManagerUpdate: {},
+	ClassGroupManagerPut:    {},
 
 	ClassGroupRead: {},
 
@@ -142,7 +144,7 @@ var systemAdminRolePermissions = permissionMap{
 }
 
 // hasPermissions checks if a user with a role has all the given permissions.
-func hasPermissions(role model.UserRole, permissions ...Permission) bool {
+func hasPermissions(role model.UserRole, permissions ...permission) bool {
 	permModel, ok := rolePermissionMapping[role]
 	if !ok {
 		return false
@@ -160,13 +162,13 @@ func hasPermissions(role model.UserRole, permissions ...Permission) bool {
 // enforceAccessPolicy based on role-based access control.
 func (v *APIServerV1) enforceAccessPolicy(
 	handlerFunc http.HandlerFunc,
-	methodPermissions map[string][]Permission,
+	methodPermissions map[string][]permission,
 ) http.HandlerFunc {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		authContext := oauth2.GetAuthContext(r.Context())
 
 		if !hasPermissions(authContext.User.Role, methodPermissions[r.Method]...) {
-			w.WriteHeader(http.StatusUnauthorized)
+			v.writeResponse(w, r, newErrorResponse(http.StatusUnauthorized, "insufficient permissions"))
 			return
 		}
 

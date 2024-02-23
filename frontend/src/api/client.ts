@@ -5,9 +5,11 @@ import { FileWithPath } from "@mantine/dropzone";
 import { ClassesGetResponse, ClassGetResponse } from "./class";
 import {
   ClassGroupManagerGetResponse,
+  ClassGroupManagerPatchResponse,
   ClassGroupManagersGetResponse,
   ClassGroupManagersPostResponse,
   ClassGroupManagersPutResponse,
+  ManagingRole,
   UpsertClassGroupManagerParams,
 } from "./class_group_manager";
 import { ClassGroupGetResponse, ClassGroupsGetResponse } from "./class_group";
@@ -180,6 +182,19 @@ export class APIClient {
   ): Promise<ClassGroupManagerGetResponse> {
     const { data } = await this._client.get<ClassGroupManagerGetResponse>(
       `/class-group-managers/${id}`,
+    );
+    return data;
+  }
+
+  static async classGroupManagerPatch(
+    id: number,
+    role: ManagingRole,
+  ): Promise<ClassGroupManagerPatchResponse> {
+    const { data } = await this._client.patch<ClassGroupManagerPatchResponse>(
+      `/class-group-managers/${id}`,
+      {
+        managing_role: role,
+      },
     );
     return data;
   }

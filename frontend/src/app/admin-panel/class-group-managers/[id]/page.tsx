@@ -22,6 +22,9 @@ import { ManagingRole } from "@/api/class_group_manager";
 import { Routes } from "@/routing/routes";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { IconX } from "@tabler/icons-react";
+import { getError } from "@/api/error";
 
 export default function AdminPanelClassGroupManagerPage({
   params,
@@ -73,14 +76,27 @@ function ManagerDetails({ manager }: { manager: ClassGroupManager }) {
 }
 
 function ManagerSettings({ manager }: { manager: ClassGroupManager }) {
+  const [loading, setLoading] = useState(false);
   const form = useForm({
     initialValues: {
       role: manager.managing_role,
     },
   });
 
-  const changeRoleOnSubmit = form.onSubmit((values) => {
-    form.resetDirty();
+  const changeRoleOnSubmit = form.onSubmit(async (values) => {
+    setLoading(true);
+    try {
+      await APIClient.classGroupManagerPatch(manager.id, values.role);
+      form.resetDirty();
+    } catch (e) {
+      notifications.show({
+        title: "Could not update role",
+        message: getError(e),
+        icon: <IconX />,
+        color: "red",
+      });
+    }
+    setLoading(false);
   });
 
   return (
@@ -97,7 +113,12 @@ function ManagerSettings({ manager }: { manager: ClassGroupManager }) {
         />
         <Space h="md" />
         <Group justify="center">
-          <Button type="submit" variant="filled" disabled={!form.isDirty()}>
+          <Button
+            type="submit"
+            variant="filled"
+            disabled={!form.isDirty()}
+            loading={loading}
+          >
             Confirm
           </Button>
         </Group>
