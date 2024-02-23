@@ -2,9 +2,11 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/go-jet/jet/v2/qrm"
 )
@@ -21,6 +23,8 @@ func (v *APIServerV1) classGroupManager(w http.ResponseWriter, r *http.Request) 
 	switch r.Method {
 	case http.MethodGet:
 		resp = v.classGroupManagerGet(r, managerId)
+	case http.MethodPatch:
+		resp = v.classGroupManagerPatch(r, managerId)
 	default:
 		resp = newErrorResponse(http.StatusMethodNotAllowed, "")
 	}
@@ -45,6 +49,40 @@ func (v *APIServerV1) classGroupManagerGet(r *http.Request, managerId int64) api
 	}
 
 	return classGroupManagerGetResponse{
+		newSuccessResponse(),
+		manager,
+	}
+}
+
+type classGroupManagerPatchRequest struct {
+	ManagingRole model.ManagingRole `json:"managing_role"`
+}
+
+type classGroupManagerPatchResponse struct {
+	response
+	Manager model.ClassGroupManager `json:"manager"`
+}
+
+func (v *APIServerV1) classGroupManagerPatch(r *http.Request, managerId int64) apiResponse {
+	var req classGroupManagerPatchRequest
+	if err := v.parseRequestBody(r.Body, &req); err != nil {
+		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
+	}
+
+	manager, err := v.db.UpdateClassGroupManager(r.Context(), database.UpdateClassGroupManagerParams{
+		ID:   managerId,
+		Role: req.ManagingRole,
+	})
+	if err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return newErrorResponse(http.StatusUnauthorized, "not allowed to update managing role")
+		}
+
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not update class group manager role")
+	}
+
+	return classGroupManagerPatchResponse{
 		newSuccessResponse(),
 		manager,
 	}

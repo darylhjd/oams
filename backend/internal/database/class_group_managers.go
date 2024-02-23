@@ -71,6 +71,32 @@ func (d *DB) CreateClassGroupManager(ctx context.Context, arg CreateClassGroupMa
 	return res, err
 }
 
+type UpdateClassGroupManagerParams struct {
+	ID   int64
+	Role model.ManagingRole
+}
+
+func (d *DB) UpdateClassGroupManager(ctx context.Context, arg UpdateClassGroupManagerParams) (model.ClassGroupManager, error) {
+	var res model.ClassGroupManager
+
+	stmt := ClassGroupManagers.UPDATE(
+		ClassGroupManagers.ManagingRole,
+	).MODEL(
+		model.ClassGroupManager{
+			ManagingRole: arg.Role,
+		},
+	).WHERE(
+		classGroupManagerRLS(ctx).AND(
+			ClassGroupManagers.ID.EQ(Int64(arg.ID)),
+		),
+	).RETURNING(
+		ClassGroupManagers.AllColumns,
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
 type ProcessUpsertClassGroupManagerParams struct {
 	UserID         string             `json:"user_id"`
 	ClassCode      string             `json:"class_code"`

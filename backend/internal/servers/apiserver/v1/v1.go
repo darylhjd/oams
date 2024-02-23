@@ -90,14 +90,14 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(signatureUrl, v.enforceAccessPolicy(
 		v.signature,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodPut: {SignaturePut},
 		},
 	))
 
 	v.mux.HandleFunc(batchUrl, v.enforceAccessPolicy(
 		v.batch,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodPost: {BatchPost},
 			http.MethodPut:  {BatchPut},
 		},
@@ -105,14 +105,14 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(usersUrl, v.enforceAccessPolicy(
 		v.users,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {UserRead},
 		},
 	))
 
 	v.mux.HandleFunc(userUrl, v.enforceAccessPolicy(
 		v.user,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet:   {UserRead},
 			http.MethodPatch: {UserUpdate},
 		},
@@ -120,28 +120,28 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classesUrl, v.enforceAccessPolicy(
 		v.classes,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {ClassRead},
 		},
 	))
 
 	v.mux.HandleFunc(classUrl, v.enforceAccessPolicy(
 		v.class,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {ClassRead},
 		},
 	))
 
 	v.mux.HandleFunc(classAttendanceRulesUrl, v.enforceAccessPolicy(
 		v.classAttendanceRules,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {ClassAttendanceRulesRead},
 		},
 	))
 
 	v.mux.HandleFunc(classGroupManagersUrl, v.enforceAccessPolicy(
 		v.classGroupManagers,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet:  {ClassGroupManagerRead},
 			http.MethodPost: {ClassGroupManagerPost},
 			http.MethodPut:  {ClassGroupManagerPut},
@@ -150,91 +150,92 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(classGroupManagerUrl, v.enforceAccessPolicy(
 		v.classGroupManager,
-		map[string][]Permission{
-			http.MethodGet: {ClassGroupManagerRead},
+		map[string][]permission{
+			http.MethodGet:   {ClassGroupManagerRead},
+			http.MethodPatch: {ClassGroupManagerUpdate},
 		},
 	))
 
 	v.mux.HandleFunc(classGroupsUrl, v.enforceAccessPolicy(
 		v.classGroups,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {ClassGroupRead},
 		},
 	))
 
 	v.mux.HandleFunc(classGroupUrl, v.enforceAccessPolicy(
 		v.classGroup,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {ClassGroupRead},
 		},
 	))
 
 	v.mux.HandleFunc(classGroupSessionsUrl, v.enforceAccessPolicy(
 		v.classGroupSessions,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {ClassGroupSessionRead},
 		},
 	))
 
 	v.mux.HandleFunc(classGroupSessionUrl, v.enforceAccessPolicy(
 		v.classGroupSession,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {ClassGroupSessionRead},
 		},
 	))
 
 	v.mux.HandleFunc(sessionEnrollmentsUrl, v.enforceAccessPolicy(
 		v.sessionEnrollments,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {SessionEnrollmentRead},
 		},
 	))
 
 	v.mux.HandleFunc(sessionEnrollmentUrl, v.enforceAccessPolicy(
 		v.sessionEnrollment,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {SessionEnrollmentRead},
 		},
 	))
 
 	v.mux.HandleFunc(upcomingClassGroupSessionsUrl, v.enforceAccessPolicy(
 		v.upcomingClassGroupSessions,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {UpcomingClassGroupSessionRead},
 		},
 	))
 
 	v.mux.HandleFunc(upcomingClassGroupSessionAttendancesUrl, v.enforceAccessPolicy(
 		v.upcomingClassGroupSessionAttendances,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {UpcomingClassGroupSessionAttendanceRead},
 		},
 	))
 
 	v.mux.HandleFunc(upcomingClassGroupSessionAttendanceUrl, v.enforceAccessPolicy(
 		v.upcomingClassGroupSessionAttendance,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodPatch: {UpcomingClassGroupSessionAttendanceUpdate},
 		},
 	))
 
 	v.mux.HandleFunc(coordinatingClassesUrl, v.enforceAccessPolicy(
 		v.coordinatingClasses,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {CoordinatingClassRead},
 		},
 	))
 
 	v.mux.HandleFunc(coordinatingClassUrl, v.enforceAccessPolicy(
 		v.coordinatingClass,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {CoordinatingClassRead},
 		},
 	))
 
 	v.mux.HandleFunc(coordinatingClassRulesUrl, v.enforceAccessPolicy(
 		v.coordinatingClassRules,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet:  {CoordinatingClassRuleRead},
 			http.MethodPost: {CoordinatingClassRuleCreate},
 		},
@@ -242,7 +243,7 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(coordinatingClassRuleUrl, v.enforceAccessPolicy(
 		v.coordinatingClassRule,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodPatch:  {CoordinatingClassRuleUpdate},
 			http.MethodDelete: {CoordinatingClassRuleDelete},
 		},
@@ -250,35 +251,35 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(coordinatingClassReportUrl, v.enforceAccessPolicy(
 		v.coordinatingClassReport,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {CoordinatingClassReportRead},
 		},
 	))
 
 	v.mux.HandleFunc(coordinatingClassDashboardUrl, v.enforceAccessPolicy(
 		v.coordinatingClassDashboard,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {CoordinatingClassDashboardRead},
 		},
 	))
 
 	v.mux.HandleFunc(coordinatingClassSchedulesUrl, v.enforceAccessPolicy(
 		v.coordinatingClassSchedules,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {CoordinatingClassScheduleRead},
 		},
 	))
 
 	v.mux.HandleFunc(coordinatingClassScheduleUrl, v.enforceAccessPolicy(
 		v.coordinatingClassSchedule,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodPut: {CoordinatingClassScheduleUpdate},
 		},
 	))
 
 	v.mux.HandleFunc(dataExportUrl, v.enforceAccessPolicy(
 		v.dataExport,
-		map[string][]Permission{
+		map[string][]permission{
 			http.MethodGet: {DataExportRead},
 		},
 	))
