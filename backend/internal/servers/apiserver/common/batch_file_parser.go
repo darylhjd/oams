@@ -15,7 +15,7 @@ import (
 )
 
 // ParseBatchFile parses a class creation file.
-func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
+func ParseBatchFile(filename string, startWeek int, f io.Reader) (BatchData, error) {
 	file, err := excelize.OpenReader(f)
 	if err != nil {
 		return BatchData{}, fmt.Errorf("cannot open file: %w", err)
@@ -43,7 +43,7 @@ func ParseBatchFile(filename string, f io.Reader) (BatchData, error) {
 		return creationData, fmt.Errorf("error while parsing class metadata: %w", err)
 	}
 
-	if err = parseClassGroups(&creationData, rows); err != nil {
+	if err = parseClassGroups(&creationData, startWeek, rows); err != nil {
 		return creationData, fmt.Errorf("error while parsing class groups: %w", err)
 	}
 
@@ -99,7 +99,7 @@ func parseClassMetaData(batchData *BatchData, rows [][]string) error {
 }
 
 // parseClassGroups is a helper function to parse a class' groups.
-func parseClassGroups(batchData *BatchData, rows [][]string) error {
+func parseClassGroups(batchData *BatchData, startWeek int, rows [][]string) error {
 	index := expectedClassMetaDataRows + 1            // Skip blank row after metadata.
 	for index+expectedClassGroupIDRows <= len(rows) { // For each class group.
 		group := ClassGroupData{
@@ -139,7 +139,7 @@ func parseClassGroups(batchData *BatchData, rows [][]string) error {
 			// Parse session venue.
 			venue := strings.TrimPrefix(rows[index+1][expectedClassGroupMetaDataRowLength-1], classGroupSessionVenuePrefix)
 
-			sessions, err := parseClassGroupSessions(batchData, dayOfWeek, from, to, weeks, venue)
+			sessions, err := parseClassGroupSessions(batchData, startWeek, dayOfWeek, from, to, weeks, venue)
 			if err != nil {
 				return fmt.Errorf("could not parse class group sessions: %w", err)
 			}
@@ -179,17 +179,15 @@ func parseClassGroups(batchData *BatchData, rows [][]string) error {
 }
 
 // parseClassGroupSessions is a helper function to create the appropriate sessions for a given class group session.
-func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr, venue string) ([]database.UpsertClassGroupSessionParams, error) {
+func parseClassGroupSessions(batchData *BatchData, startWeek int, dayOfWeek, from, to, weeksStr, venue string) ([]database.UpsertClassGroupSessionParams, error) {
 	var firstSessionStartDateTime, firstSessionEndDateTime time.Time
 	{
-		var year, week int
+		var year int
 		switch batchData.Class.Semester {
 		case semester1:
 			year = int(batchData.Class.Year)
-			week = semester1YearWeek
 		case semester2:
 			year = int(batchData.Class.Year + 1)
-			week = semester2YearWeek
 		default:
 			return nil, errors.New("cannot guess semester start week due to unknown semester value")
 		}
@@ -216,7 +214,7 @@ func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr
 		startHour, startMinute, _ := startTime.Clock()
 		endHour, endMinute, _ := endTime.Clock()
 
-		firstSessionDate := datetime.WeekStart(year, week, datetime.Location).AddDate(0, 0, int(day)-1)
+		firstSessionDate := datetime.WeekStart(year, startWeek, datetime.Location).AddDate(0, 0, int(day)-1)
 
 		firstSessionStartDateTime = firstSessionDate.
 			Add(time.Hour*time.Duration(startHour) + time.Minute*time.Duration(startMinute))
@@ -235,17 +233,17 @@ func parseClassGroupSessions(batchData *BatchData, dayOfWeek, from, to, weeksStr
 			return nil, errors.New("unexpected week formatting with hyphen separator")
 		}
 
-		startWeek, err := strconv.Atoi(startEnd[0])
+		firstWeek, err := strconv.Atoi(startEnd[0])
 		if err != nil {
-			return nil, errors.New("start week number is not actually a number")
+			return nil, errors.New("first week number is not actually a number")
 		}
 
-		endWeek, err := strconv.Atoi(startEnd[classGroupSessionWeekHyphenExpectedLength-1])
+		lastWeek, err := strconv.Atoi(startEnd[classGroupSessionWeekHyphenExpectedLength-1])
 		if err != nil {
-			return nil, errors.New("end week number is not actually a number")
+			return nil, errors.New("last week number is not actually a number")
 		}
 
-		for i := startWeek; i <= endWeek; i++ {
+		for i := firstWeek; i <= lastWeek; i++ {
 			weeks = append(weeks, i)
 		}
 	case strings.Contains(weeksStr, classGroupSessionWeekCommaSep):

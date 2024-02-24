@@ -43,7 +43,5 @@ const (
 	classGroupSessionWeekHyphenSep            = "-"
 	classGroupSessionWeekHyphenExpectedLength = 2
 
-	semester1YearWeek   = 33
-	semester2YearWeek   = 2
 	recessWeekAfterWeek = 7
 )
