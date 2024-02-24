@@ -4,7 +4,7 @@ import {
   MRT_DensityState,
   useMantineReactTable,
 } from "mantine-react-table";
-import { useManagerDataStore } from "@/stores/manager_processing";
+import { useManagerDataStore } from "@/app/manager-processing/manager_processing_store";
 import { ClassGroupManagersProcessingDataTableColumns } from "@/components/columns";
 
 export function ManagerProcessingPreviewer() {
