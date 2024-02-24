@@ -95,9 +95,13 @@ func (v *APIServerV1) registerHandlers() {
 		},
 	))
 
-	v.mux.HandleFunc(batchUrl,
+	v.mux.HandleFunc(batchUrl, v.enforceAccessPolicy(
 		v.batch,
-	)
+		map[string][]permission{
+			http.MethodPost: {BatchPost},
+			http.MethodPut:  {BatchPut},
+		},
+	))
 
 	v.mux.HandleFunc(usersUrl, v.enforceAccessPolicy(
 		v.users,
