@@ -15,12 +15,14 @@ import (
 func TestParseBatchFile(t *testing.T) {
 	tests := []struct {
 		name         string
+		weekNum      int
 		file         string
 		wantErr      string
 		expectedData *BatchData
 	}{
 		{
 			"sample class creation file",
+			2,
 			"batch_file_well_formatted.xlsx",
 			"",
 			&BatchData{
@@ -126,6 +128,7 @@ func TestParseBatchFile(t *testing.T) {
 		},
 		{
 			"empty class group session has no null array",
+			2,
 			"batch_file_empty_class_group_enrollments.xlsx",
 			"",
 			&BatchData{
@@ -174,6 +177,7 @@ func TestParseBatchFile(t *testing.T) {
 		},
 		{
 			"empty class groups has no null array",
+			33,
 			"batch_file_no_class_groups.xlsx",
 			"",
 			&BatchData{
@@ -192,36 +196,42 @@ func TestParseBatchFile(t *testing.T) {
 		},
 		{
 			"empty class creation file",
+			33,
 			"batch_file_empty_test.xlsx",
 			"not enough rows for class metadata",
 			nil,
 		},
 		{
 			"too many class metadata rows",
+			33,
 			"batch_file_excessive_class_metadata_rows.xlsx",
 			"unexpected number of columns for class group row",
 			nil,
 		},
 		{
 			"missing class group enrollment list identifier",
+			33,
 			"batch_file_no_enrollment_list_ident.xlsx",
 			"unexpected start of class group enrollment list",
 			nil,
 		},
 		{
 			"second class group missing enrollment list identifier",
+			33,
 			"batch_file_no_enrollment_list_ident_2.xlsx",
 			"unexpected start of class group enrollment list",
 			nil,
 		},
 		{
 			"student row with wrong length",
+			33,
 			"batch_file_student_row_wrong_length.xlsx",
 			"unexpected number of columns for student enrollment row",
 			nil,
 		},
 		{
 			"invalid format for class group name",
+			33,
 			"batch_file_invalid_class_group_name.xlsx",
 			"could not parse class group",
 			nil,
@@ -235,7 +245,7 @@ func TestParseBatchFile(t *testing.T) {
 			file, err := os.Open(tt.file)
 			a.Nil(err)
 
-			data, err := ParseBatchFile(tt.file, file)
+			data, err := ParseBatchFile(tt.file, tt.weekNum, file)
 			if tt.wantErr != "" {
 				a.Contains(err.Error(), tt.wantErr)
 				return

@@ -92,6 +92,10 @@ func TestAPIServerV1_batchPost(t *testing.T) {
 				var b bytes.Buffer
 				w := multipart.NewWriter(&b)
 
+				if err := w.WriteField(multipartFormBatchWeekIdent, "2"); err != nil {
+					return nil, "", err
+				}
+
 				f, err := os.Open(file)
 				if err != nil {
 					return nil, "", err
