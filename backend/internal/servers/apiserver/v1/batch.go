@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -16,6 +17,7 @@ const (
 	maxBatchPostParseMemory     = 32 << 20
 	maxBatchPostGoRoutines      = 10
 	multipartFormBatchFileIdent = "batch-attachments"
+	multipartFormBatchWeekIdent = "start-week"
 )
 
 func (v *APIServerV1) batch(w http.ResponseWriter, r *http.Request) {
@@ -55,12 +57,20 @@ func (v *APIServerV1) batchPost(r *http.Request) apiResponse {
 }
 
 func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, error) {
-	if err := r.ParseMultipartForm(maxBatchPostParseMemory); err != nil {
+	err := r.ParseMultipartForm(maxBatchPostParseMemory)
+	if err != nil {
 		return batchPostResponse{}, err
 	}
 
-	limiter := goroutines.NewLimiter(maxBatchPostGoRoutines)
+	var startWeek int64
+	startWeekField := r.MultipartForm.Value[multipartFormBatchWeekIdent]
+	if len(startWeekField) != 1 {
+		return newErrorResponse(http.StatusBadRequest, "unexpected start week field format"), nil
+	} else if startWeek, err = strconv.ParseInt(startWeekField[0], 10, 64); err != nil {
+		return newErrorResponse(http.StatusBadRequest, "start week field is not an integer"), nil
+	}
 
+	limiter := goroutines.NewLimiter(maxBatchPostGoRoutines)
 	saveRes := sync.Map{}
 	for _, header := range r.MultipartForm.File[multipartFormBatchFileIdent] {
 		header := header // Required for go routine to point to different file for each loop.
@@ -77,7 +87,7 @@ func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, err
 				_ = file.Close()
 			}()
 
-			data, err = common.ParseBatchFile(header.Filename, file)
+			data, err = common.ParseBatchFile(header.Filename, int(startWeek), file)
 			if err != nil {
 				// Save as string type. This is a request error.
 				saveRes.Store(&data, err.Error())
@@ -94,7 +104,6 @@ func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, err
 		errResp       errorResponse
 		okResp        batchPostResponse
 		isErrResponse bool
-		err           error
 	)
 	saveRes.Range(func(key, value any) bool {
 		data, ok := key.(*common.BatchData)
