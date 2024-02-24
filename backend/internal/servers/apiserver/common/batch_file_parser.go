@@ -189,7 +189,7 @@ func parseClassGroupSessions(batchData *BatchData, startWeek int, dayOfWeek, fro
 		case semester2:
 			year = int(batchData.Class.Year + 1)
 		default:
-			return nil, errors.New("cannot guess semester start week due to unknown semester value")
+			return nil, errors.New("unknown semester value")
 		}
 
 		day, err := datetime.ParseWeekday(dayOfWeek)
