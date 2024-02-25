@@ -18,6 +18,7 @@ import { Badge, Text } from "@mantine/core";
 import { AttendanceEntry } from "@/api/upcoming_class_group_session";
 import { ClassAttendanceRule } from "@/api/class_attendance_rule";
 import { CoordinatingClass, ScheduleData } from "@/api/coordinating_class";
+import { CreatedUpdatedAt } from "@/api/types";
 
 export const DEFAULT_PAGE_SIZE = 50;
 
@@ -32,6 +33,23 @@ function dateCell(date: Date) {
   return <Text>{`${day}/${month}/${year}, ${hour}:${minute}:${second}`}</Text>;
 }
 
+function createdUpdatedAtColumns<
+  T extends CreatedUpdatedAt,
+>(): MRT_ColumnDef<T>[] {
+  return [
+    {
+      accessorKey: "created_at",
+      header: "Created At",
+      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
+    },
+    {
+      accessorKey: "updated_at",
+      header: "Updated At",
+      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
+    },
+  ];
+}
+
 export const UsersBatchDataTableColumns: MRT_ColumnDef<UpsertUserParams>[] = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "name", header: "Name" },
@@ -41,16 +59,7 @@ export const UsersDataTableColumns: MRT_ColumnDef<User>[] = [
   { accessorKey: "name", header: "Name" },
   { accessorKey: "email", header: "Email" },
   { accessorKey: "role", header: "Role" },
-  {
-    accessorKey: "created_at",
-    header: "Created At",
-    Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-  },
-  {
-    accessorKey: "updated_at",
-    header: "Updated At",
-    Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-  },
+  ...createdUpdatedAtColumns<User>(),
 ];
 
 export const ClassesBatchDataTableColumns: MRT_ColumnDef<UpsertClassParams>[] =
@@ -70,16 +79,7 @@ export const ClassesDataTableColumns: MRT_ColumnDef<Class>[] = [
   { accessorKey: "semester", header: "Semester" },
   { accessorKey: "programme", header: "Programme" },
   { accessorKey: "au", header: "AU" },
-  {
-    accessorKey: "created_at",
-    header: "Created At",
-    Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-  },
-  {
-    accessorKey: "updated_at",
-    header: "Updated At",
-    Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-  },
+  ...createdUpdatedAtColumns<Class>(),
 ];
 
 export const CoordinatingClassesDataTableColumns: MRT_ColumnDef<CoordinatingClass>[] =
@@ -134,16 +134,7 @@ export const ClassAttendanceRulesDataTableColumns: MRT_ColumnDef<ClassAttendance
         );
       },
     },
-    {
-      accessorKey: "created_at",
-      header: "Created At",
-      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-    },
-    {
-      accessorKey: "updated_at",
-      header: "Updated At",
-      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-    },
+    ...createdUpdatedAtColumns<ClassAttendanceRule>(),
   ];
 
 export const ClassGroupsBatchDataTableColumns: MRT_ColumnDef<UpsertClassGroupParams>[] =
@@ -158,16 +149,7 @@ export const ClassGroupsDataTableColumns: MRT_ColumnDef<ClassGroup>[] = [
   { accessorKey: "class_id", header: "Class ID" },
   { accessorKey: "name", header: "Name" },
   { accessorKey: "class_type", header: "Class Type" },
-  {
-    accessorKey: "created_at",
-    header: "Created At",
-    Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-  },
-  {
-    accessorKey: "updated_at",
-    header: "Updated At",
-    Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-  },
+  ...createdUpdatedAtColumns<ClassGroup>(),
 ];
 
 export const ClassGroupManagersDataTableColumns: MRT_ColumnDef<ClassGroupManager>[] =
@@ -176,16 +158,7 @@ export const ClassGroupManagersDataTableColumns: MRT_ColumnDef<ClassGroupManager
     { accessorKey: "user_id", header: "User ID" },
     { accessorKey: "class_group_id", header: "Class Group ID" },
     { accessorKey: "managing_role", header: "Managing Role" },
-    {
-      accessorKey: "created_at",
-      header: "Created At",
-      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-    },
-    {
-      accessorKey: "updated_at",
-      header: "Updated At",
-      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-    },
+    ...createdUpdatedAtColumns<ClassGroupManager>(),
   ];
 export const ClassGroupManagersProcessingDataTableColumns: MRT_ColumnDef<UpsertClassGroupManagerParams>[] =
   [
@@ -224,16 +197,7 @@ export const ClassGroupSessionsDataTableColumns: MRT_ColumnDef<ClassGroupSession
       Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
     },
     { accessorKey: "venue", header: "Venue" },
-    {
-      accessorKey: "created_at",
-      header: "Created At",
-      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-    },
-    {
-      accessorKey: "updated_at",
-      header: "Updated At",
-      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-    },
+    ...createdUpdatedAtColumns<ClassGroupSession>(),
   ];
 
 export const SessionEnrollmentsDataTableColumns: MRT_ColumnDef<SessionEnrollment>[] =
@@ -253,16 +217,7 @@ export const SessionEnrollmentsDataTableColumns: MRT_ColumnDef<SessionEnrollment
         );
       },
     },
-    {
-      accessorKey: "created_at",
-      header: "Created At",
-      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-    },
-    {
-      accessorKey: "updated_at",
-      header: "Updated At",
-      Cell: ({ cell }) => dateCell(cell.getValue<Date>()),
-    },
+    ...createdUpdatedAtColumns<SessionEnrollment>(),
   ];
 export const AttendanceEntriesDataTableColumns: MRT_ColumnDef<AttendanceEntry>[] =
   [

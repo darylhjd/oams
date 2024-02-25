@@ -1,3 +1,5 @@
+import { CreatedUpdatedAt } from "@/api/types";
+
 export type SessionEnrollmentsGetResponse = {
   session_enrollments: SessionEnrollment[];
 };
@@ -11,6 +13,4 @@ export type SessionEnrollment = {
   session_id: number;
   user_id: string;
   attended: boolean;
-  created_at: Date;
-  updated_at: Date;
-};
+} & CreatedUpdatedAt;

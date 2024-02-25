@@ -1,3 +1,5 @@
+import { CreatedUpdatedAt } from "@/api/types";
+
 export type UsersGetResponse = {
   users: User[];
 };
@@ -11,9 +13,7 @@ export type User = {
   name: string;
   email: string;
   role: UserRole;
-  created_at: Date;
-  updated_at: Date;
-};
+} & CreatedUpdatedAt;
 
 export enum UserRole {
   User = "USER",
