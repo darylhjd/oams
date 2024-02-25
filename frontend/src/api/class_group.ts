@@ -1,3 +1,5 @@
+import { CreatedUpdatedAt } from "@/api/types";
+
 export type ClassGroupsGetResponse = {
   class_groups: ClassGroup[];
 };
@@ -11,9 +13,7 @@ export type ClassGroup = {
   class_id: number;
   name: string;
   class_type: ClassType;
-  created_at: Date;
-  updated_at: Date;
-};
+} & CreatedUpdatedAt;
 
 export enum ClassType {
   Lecture = "LEC",

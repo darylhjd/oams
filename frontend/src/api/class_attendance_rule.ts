@@ -1,3 +1,5 @@
+import { CreatedUpdatedAt } from "@/api/types";
+
 export type ClassAttendanceRulesGetResponse = {
   class_attendance_rules: ClassAttendanceRule[];
 };
@@ -11,6 +13,4 @@ export type ClassAttendanceRule = {
   rule: string;
   environment: JSON;
   active: boolean;
-  created_at: Date;
-  updated_at: Date;
-};
+} & CreatedUpdatedAt;

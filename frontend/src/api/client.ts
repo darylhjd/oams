@@ -50,13 +50,13 @@ export class APIClient {
   static async login(redirectUrl: string = ""): Promise<string> {
     const { data } = await this._client.get<LoginResponse>("/login", {
       params: {
-        redirect_url: redirectUrl ? redirectUrl : process.env.WEB_SERVER,
+        redirect_url: redirectUrl || process.env.WEB_SERVER,
       },
     });
     return data.redirect_url;
   }
 
-  static async logout() {
+  static async logout(): Promise<void> {
     await this._client.get("/logout");
   }
 
@@ -83,9 +83,9 @@ export class APIClient {
     return data;
   }
 
-  static async batchPut(batchData: BatchData[]): Promise<BatchPutResponse> {
+  static async batchPut(batches: BatchData[]): Promise<BatchPutResponse> {
     const { data } = await this._client.put<BatchPutResponse>("/batch", {
-      batches: batchData,
+      batches,
     });
     return data;
   }
@@ -96,8 +96,8 @@ export class APIClient {
   ): Promise<UsersGetResponse> {
     const { data } = await this._client.get<UsersGetResponse>("/users", {
       params: {
-        offset: offset,
-        limit: limit,
+        offset,
+        limit,
       },
     });
     return data;
@@ -114,8 +114,8 @@ export class APIClient {
   ): Promise<ClassesGetResponse> {
     const { data } = await this._client.get<ClassesGetResponse>("/classes", {
       params: {
-        offset: offset,
-        limit: limit,
+        offset,
+        limit,
       },
     });
     return data;
@@ -134,8 +134,8 @@ export class APIClient {
       "/class-attendance-rules",
       {
         params: {
-          offset: offset,
-          limit: limit,
+          offset,
+          limit,
         },
       },
     );
@@ -150,8 +150,8 @@ export class APIClient {
       "/class-groups",
       {
         params: {
-          offset: offset,
-          limit: limit,
+          offset,
+          limit,
         },
       },
     );
@@ -173,8 +173,8 @@ export class APIClient {
       "/class-group-managers",
       {
         params: {
-          offset: offset,
-          limit: limit,
+          offset,
+          limit,
         },
       },
     );
@@ -192,18 +192,18 @@ export class APIClient {
 
   static async classGroupManagerPatch(
     id: number,
-    role: ManagingRole,
+    newRole: ManagingRole,
   ): Promise<ClassGroupManagerPatchResponse> {
     const { data } = await this._client.patch<ClassGroupManagerPatchResponse>(
       `/class-group-managers/${id}`,
       {
-        managing_role: role,
+        managing_role: newRole,
       },
     );
     return data;
   }
 
-  static async classGroupManagerDelete(id: number) {
+  static async classGroupManagerDelete(id: number): Promise<void> {
     await this._client.delete(`/class-group-managers/${id}`);
   }
 
@@ -240,8 +240,8 @@ export class APIClient {
       "/class-group-sessions",
       {
         params: {
-          offset: offset,
-          limit: limit,
+          offset,
+          limit,
         },
       },
     );
@@ -265,8 +265,8 @@ export class APIClient {
       "/session-enrollments",
       {
         params: {
-          offset: offset,
-          limit: limit,
+          offset,
+          limit,
         },
       },
     );
@@ -311,7 +311,7 @@ export class APIClient {
       await this._client.patch<UpcomingClassGroupSessionAttendancePatchResponse>(
         `/upcoming-class-group-sessions/${id}/attendances/${sessionEnrollmentId}`,
         {
-          attended: attended,
+          attended,
           user_id: userId,
           user_signature: userSignature,
         },
@@ -371,7 +371,10 @@ export class APIClient {
     return data;
   }
 
-  static async coordinatingClassRuleDelete(classId: number, ruleId: number) {
+  static async coordinatingClassRuleDelete(
+    classId: number,
+    ruleId: number,
+  ): Promise<void> {
     await this._client.delete(
       `/coordinating-classes/${classId}/rules/${ruleId}`,
     );

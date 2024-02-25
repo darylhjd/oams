@@ -1,3 +1,5 @@
+import { CreatedUpdatedAt } from "@/api/types";
+
 export type ClassesGetResponse = {
   classes: Class[];
 };
@@ -13,6 +15,4 @@ export type Class = {
   semester: string;
   programme: string;
   au: number;
-  created_at: Date;
-  updated_at: Date;
-};
+} & CreatedUpdatedAt;

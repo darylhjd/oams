@@ -1,3 +1,5 @@
+import { CreatedUpdatedAt } from "@/api/types";
+
 export type ClassGroupManagersGetResponse = {
   class_group_managers: ClassGroupManager[];
 };
@@ -29,9 +31,7 @@ export type ClassGroupManager = {
   user_id: string;
   class_group_id: number;
   managing_role: ManagingRole;
-  created_at: Date;
-  updated_at: Date;
-};
+} & CreatedUpdatedAt;
 
 export enum ManagingRole {
   TeachingAssistant = "TEACHING_ASSISTANT",

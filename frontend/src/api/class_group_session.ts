@@ -1,3 +1,5 @@
+import { CreatedUpdatedAt } from "@/api/types";
+
 export type ClassGroupSessionsGetResponse = {
   class_group_sessions: ClassGroupSession[];
 };
@@ -12,6 +14,4 @@ export type ClassGroupSession = {
   start_time: Date;
   end_time: Date;
   venue: string;
-  created_at: Date;
-  updated_at: Date;
-};
+} & CreatedUpdatedAt;
