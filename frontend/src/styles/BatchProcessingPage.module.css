@@ -30,3 +30,8 @@
     }
   }
 }
+
+.startWeekField {
+  max-width: rem(600px);
+  margin: auto;
+}

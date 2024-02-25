@@ -11,7 +11,7 @@ import {
   ClassGroupSessionsBatchDataTableColumns,
   UsersBatchDataTableColumns,
 } from "@/components/columns";
-import { useBatchDataStore } from "@/stores/batch_processing";
+import { useBatchDataStore } from "@/app/batch-processing/batch_processing_store";
 import {
   MantineReactTable,
   MRT_ColumnDef,
