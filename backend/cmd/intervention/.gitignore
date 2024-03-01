@@ -1,5 +1,6 @@
 # Builds
 main
+main.exe
 
 # Secrets
 db.crt.pem
