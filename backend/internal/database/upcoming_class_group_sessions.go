@@ -171,7 +171,7 @@ func selectManagedClassGroupSessionFields() SelectStatement {
 		ClassGroups.Name,
 		ClassGroups.ClassType,
 		ClassGroupManagers.ManagingRole,
-	).FROM(
+	).DISTINCT().FROM(
 		ClassGroupSessions.INNER_JOIN(
 			ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
 		).INNER_JOIN(
