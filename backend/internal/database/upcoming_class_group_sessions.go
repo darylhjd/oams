@@ -91,39 +91,37 @@ type UpdateAttendanceEntryParams struct {
 	SessionEnrollmentID int64
 	UserID              string
 	Attended            bool
-	UserSignature       *string
+	UserSignature       string
 }
 
 func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntryParams) error {
-	if arg.UserSignature != nil {
-		var signature struct {
-			Signature string `alias:"user_signature.signature"`
-		}
-		signatureStmt := SELECT(
-			UserSignatures.Signature,
-		).FROM(
-			UserSignatures.INNER_JOIN(
-				SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
-			),
-		).WHERE(
-			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
-		)
-		err := signatureStmt.QueryContext(ctx, d.qe, &signature)
-		if errors.Is(err, qrm.ErrNoRows) {
-			signature.Signature, err = argon2id.CreateHash(arg.UserID, argon2id.DefaultParams)
-			if err != nil {
-				return err
-			}
-		} else if err != nil {
-			return err
-		}
-
-		match, err := argon2id.ComparePasswordAndHash(*arg.UserSignature, signature.Signature)
+	var signature struct {
+		Signature string `alias:"user_signature.signature"`
+	}
+	signatureStmt := SELECT(
+		UserSignatures.Signature,
+	).FROM(
+		UserSignatures.INNER_JOIN(
+			SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
+		),
+	).WHERE(
+		SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
+	)
+	err := signatureStmt.QueryContext(ctx, d.qe, &signature)
+	if errors.Is(err, qrm.ErrNoRows) {
+		signature.Signature, err = argon2id.CreateHash(arg.UserID, argon2id.DefaultParams)
 		if err != nil {
 			return err
-		} else if !match {
-			return qrm.ErrNoRows
 		}
+	} else if err != nil {
+		return err
+	}
+
+	match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
+	if err != nil {
+		return err
+	} else if !match {
+		return qrm.ErrNoRows
 	}
 
 	stmt := SessionEnrollments.UPDATE(
@@ -157,7 +155,7 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 		),
 	)
-	_, err := stmt.ExecContext(ctx, d.qe)
+	_, err = stmt.ExecContext(ctx, d.qe)
 	return err
 }
 
@@ -173,7 +171,7 @@ func selectManagedClassGroupSessionFields() SelectStatement {
 		ClassGroups.Name,
 		ClassGroups.ClassType,
 		ClassGroupManagers.ManagingRole,
-	).DISTINCT().FROM(
+	).FROM(
 		ClassGroupSessions.INNER_JOIN(
 			ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
 		).INNER_JOIN(

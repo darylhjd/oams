@@ -36,9 +36,9 @@ func (v *APIServerV1) upcomingClassGroupSessionAttendance(w http.ResponseWriter,
 }
 
 type upcomingClassGroupSessionAttendancePatchRequest struct {
-	Attended      bool    `json:"attended"`
-	UserID        string  `json:"user_id"`
-	UserSignature *string `json:"user_signature"`
+	Attended      bool   `json:"attended"`
+	UserID        string `json:"user_id"`
+	UserSignature string `json:"user_signature"`
 }
 
 type upcomingClassGroupSessionAttendancePatchResponse struct {
