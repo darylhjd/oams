@@ -4,17 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
 func (v *APIServerV1) classGroupManager(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	managerId, err := strconv.ParseInt(r.PathValue("managerId"), 10, 64)
+	managerId, err := to.Int64(r.PathValue("managerId"))
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class group manager id"))
 		return

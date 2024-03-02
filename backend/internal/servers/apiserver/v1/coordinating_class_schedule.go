@@ -4,24 +4,24 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/pkg/datetime"
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
 func (v *APIServerV1) coordinatingClassSchedule(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	classId, err := strconv.ParseInt(r.PathValue("classId"), 10, 64)
+	classId, err := to.Int64(r.PathValue("classId"))
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
 		return
 	}
 
-	sessionId, err := strconv.ParseInt(r.PathValue("sessionId"), 10, 64)
+	sessionId, err := to.Int64(r.PathValue("sessionId"))
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid session id"))
 		return

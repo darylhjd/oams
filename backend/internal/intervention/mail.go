@@ -3,7 +3,7 @@ package intervention
 import (
 	"strings"
 
-	"github.com/darylhjd/oams/backend/pkg/azmail"
+	"github.com/darylhjd/azmail"
 )
 
 func (s *Service) generateNotificationMails(users userFailedRules, ruleCreators ruleCreatorRuleFailedUsers) ([]*azmail.Mail, error) {

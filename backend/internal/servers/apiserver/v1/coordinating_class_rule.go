@@ -4,21 +4,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
 func (v *APIServerV1) coordinatingClassRule(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	classId, err := strconv.ParseInt(r.PathValue("classId"), 10, 64)
+	classId, err := to.Int64(r.PathValue("classId"))
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
 		return
 	}
 
-	ruleId, err := strconv.ParseInt(r.PathValue("ruleId"), 10, 64)
+	ruleId, err := to.Int64(r.PathValue("ruleId"))
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid rule id"))
 		return

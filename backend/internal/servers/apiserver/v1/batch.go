@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/darylhjd/oams/backend/internal/database"
 	"github.com/darylhjd/oams/backend/internal/servers/apiserver/common"
 	"github.com/darylhjd/oams/backend/pkg/goroutines"
+	"github.com/darylhjd/oams/backend/pkg/to"
 )
 
 const (
@@ -66,7 +66,7 @@ func (v *APIServerV1) processBatchPostRequest(r *http.Request) (apiResponse, err
 	startWeekField := r.MultipartForm.Value[multipartFormBatchWeekIdent]
 	if len(startWeekField) != 1 {
 		return newErrorResponse(http.StatusBadRequest, "unexpected start week field format"), nil
-	} else if startWeek, err = strconv.ParseInt(startWeekField[0], 10, 64); err != nil {
+	} else if startWeek, err = to.Int64(startWeekField[0]); err != nil {
 		return newErrorResponse(http.StatusBadRequest, "start week field is not an integer"), nil
 	}
 

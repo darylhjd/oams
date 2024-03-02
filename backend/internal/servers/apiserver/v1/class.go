@@ -3,16 +3,16 @@ package v1
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
+	"github.com/darylhjd/oams/backend/pkg/to"
 	"github.com/go-jet/jet/v2/qrm"
 )
 
 func (v *APIServerV1) class(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	classId, err := strconv.ParseInt(r.PathValue("classId"), 10, 64)
+	classId, err := to.Int64(r.PathValue("classId"))
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
 		return
