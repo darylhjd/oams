@@ -13,6 +13,7 @@ import {
 } from "@/app/manager-processing/manager_processing_store";
 import { useState } from "react";
 import {
+  Anchor,
   Button,
   Container,
   Group,
@@ -20,6 +21,7 @@ import {
   Stepper,
   StepperCompleted,
   StepperStep,
+  Text,
 } from "@mantine/core";
 import fileProcessingStyles from "@/styles/FileProcessing.module.css";
 import { ManagerProcessingPreviewer } from "@/app/manager-processing/previewer";
@@ -49,6 +51,12 @@ export function ManagerProcessingStepper() {
         >
           <StepperStep label="First step" description="Choose manager file">
             <FilePicker fileStorage={fileStorage} />
+            <Text mt="md" ta="center">
+              Unsure about the file formatting?{" "}
+              <Anchor href="/manager-processing/template.xlsx">
+                Download the file template.
+              </Anchor>
+            </Text>
           </StepperStep>
           <StepperStep label="Second step" description="Preview manager data">
             <ManagerProcessingPreviewer />
