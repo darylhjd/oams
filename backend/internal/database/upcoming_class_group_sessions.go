@@ -8,6 +8,7 @@ import (
 	"github.com/alexedwards/argon2id"
 	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	. "github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/table"
+	"github.com/darylhjd/oams/backend/internal/oauth2"
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 )
@@ -95,33 +96,36 @@ type UpdateAttendanceEntryParams struct {
 }
 
 func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntryParams) error {
-	var signature struct {
-		Signature string `alias:"user_signature.signature"`
-	}
-	signatureStmt := SELECT(
-		UserSignatures.Signature,
-	).FROM(
-		UserSignatures.INNER_JOIN(
-			SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
-		),
-	).WHERE(
-		SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
-	)
-	err := signatureStmt.QueryContext(ctx, d.qe, &signature)
-	if errors.Is(err, qrm.ErrNoRows) {
-		signature.Signature, err = argon2id.CreateHash(arg.UserID, argon2id.DefaultParams)
-		if err != nil {
+	if oauth2.GetAuthContext(ctx).User.Role != model.UserRole_SystemAdmin {
+		var signature struct {
+			Signature string `alias:"user_signature.signature"`
+		}
+
+		signatureStmt := SELECT(
+			UserSignatures.Signature,
+		).FROM(
+			UserSignatures.INNER_JOIN(
+				SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
+			),
+		).WHERE(
+			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
+		)
+
+		err := signatureStmt.QueryContext(ctx, d.qe, &signature)
+		if errors.Is(err, qrm.ErrNoRows) {
+			if signature.Signature, err = argon2id.CreateHash(arg.UserID, argon2id.DefaultParams); err != nil {
+				return err
+			}
+		} else if err != nil {
 			return err
 		}
-	} else if err != nil {
-		return err
-	}
 
-	match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
-	if err != nil {
-		return err
-	} else if !match {
-		return qrm.ErrNoRows
+		match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
+		if err != nil {
+			return err
+		} else if !match {
+			return qrm.ErrNoRows
+		}
 	}
 
 	stmt := SessionEnrollments.UPDATE(
@@ -155,7 +159,7 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 		),
 	)
-	_, err = stmt.ExecContext(ctx, d.qe)
+	_, err := stmt.ExecContext(ctx, d.qe)
 	return err
 }
 

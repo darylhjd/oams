@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -24,10 +25,12 @@ func TestAPIServerV1_ping(t *testing.T) {
 	rr := httptest.NewRecorder()
 	v1.ping(rr, req)
 
-	expectedBytes, err := json.Marshal(pingResponse{
+	var expectedBytes bytes.Buffer
+
+	err := json.NewEncoder(&expectedBytes).Encode(pingResponse{
 		response: newSuccessResponse(),
 		Message:  "Pong~ OAMS API Service is running normally!",
 	})
 	a.Nil(err)
-	a.Equal(string(expectedBytes), rr.Body.String())
+	a.Equal(expectedBytes.String(), rr.Body.String())
 }

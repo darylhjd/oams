@@ -59,16 +59,11 @@ func interventionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := &Response{
+	w.Header().Set("Content-Type", "application/json")
+	if err = json.NewEncoder(w).Encode(Response{
 		Logs: []string{fmt.Sprintf("Early Intervention Service successfully run at %s", now.String())},
-	}
-
-	b, err := json.Marshal(response)
-	if err != nil {
+	}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write(b)
 }

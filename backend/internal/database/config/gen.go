@@ -48,17 +48,18 @@ func main() {
 									defaultTableModelField.Type = template.NewType(rules.Environment{})
 								}
 
-								return defaultTableModelField.UseTags(
-									fmt.Sprintf(`json:"%s"`, columnMetaData.Name))
+								return defaultTableModelField.UseTags(fmt.Sprintf(`json:"%s"`, columnMetaData.Name))
 							}).
 							// Use singular of table plural name for model name.
 							UseTypeName(toCamelCase(trimTableName(table.Name)))
-					})).
+					}),
+				).
 				UseSQLBuilder(template.DefaultSQLBuilder().
 					UseTable(func(table metadata.Table) template.TableSQLBuilder {
 						// Set proper alias to custom type name.
 						return template.DefaultTableSQLBuilder(table).UseDefaultAlias(trimTableName(table.Name))
-					}))
+					}),
+				)
 		}))
 	if err != nil {
 		log.Fatal(err)
