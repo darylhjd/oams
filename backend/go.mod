@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
+	github.com/darylhjd/azmail v0.0.2
 	github.com/expr-lang/expr v1.16.1
 	github.com/go-jet/jet/v2 v2.11.0
 	github.com/go-pdf/fpdf v0.9.0

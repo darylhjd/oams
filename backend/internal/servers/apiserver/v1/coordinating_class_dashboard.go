@@ -2,15 +2,15 @@ package v1
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/darylhjd/oams/backend/internal/database"
+	"github.com/darylhjd/oams/backend/pkg/to"
 )
 
 func (v *APIServerV1) coordinatingClassDashboard(w http.ResponseWriter, r *http.Request) {
 	var resp apiResponse
 
-	classId, err := strconv.ParseInt(r.PathValue("classId"), 10, 64)
+	classId, err := to.Int64(r.PathValue("classId"))
 	if err != nil {
 		v.writeResponse(w, r, newErrorResponse(http.StatusUnprocessableEntity, "invalid class id"))
 		return
