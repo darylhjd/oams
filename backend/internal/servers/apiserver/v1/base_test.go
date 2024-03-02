@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -49,9 +50,10 @@ func TestAPIServerV1_base(t *testing.T) {
 			rr := httptest.NewRecorder()
 			v1.base(rr, req)
 
-			expectedBytes, err := json.Marshal(tt.wantResponse)
+			var expectedBytes bytes.Buffer
+			err := json.NewEncoder(&expectedBytes).Encode(tt.wantResponse)
 			a.Nil(err)
-			a.Equal(string(expectedBytes), rr.Body.String())
+			a.Equal(expectedBytes.String(), rr.Body.String())
 		})
 	}
 }

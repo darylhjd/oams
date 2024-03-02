@@ -303,19 +303,9 @@ func (v *APIServerV1) parseRequestBody(body io.ReadCloser, a any) error {
 }
 
 func (v *APIServerV1) writeResponse(w http.ResponseWriter, r *http.Request, resp apiResponse) {
-	b, err := json.Marshal(resp)
-	if err != nil {
-		v.l.Error(fmt.Sprintf("%s - could not marshal response", namespace),
-			zap.String("endpoint", r.URL.Path),
-			zap.String("method", r.Method),
-			zap.Error(err),
-		)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(resp.Code())
-	if _, err = w.Write(b); err != nil {
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		v.l.Error(fmt.Sprintf("%s - could not write response", namespace),
 			zap.String("endpoint", r.URL.Path),
 			zap.String("method", r.Method),
