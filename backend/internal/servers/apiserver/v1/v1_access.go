@@ -181,7 +181,7 @@ const (
 
 func (v *APIServerV1) enforceRoleAccess(
 	handlerFunc http.HandlerFunc,
-	allowedRoles ...string,
+	allowedRoles []string,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		roles := oauth2.GetAuthContext(r.Context()).Claims.AppRoles()
@@ -209,7 +209,7 @@ func (v *APIServerV1) enforceAccess(
 
 		switch {
 		case authContext.Claims.IsApplication():
-			v.enforceRoleAccess(handlerFunc, allowedRoles...)(w, r)
+			v.enforceRoleAccess(handlerFunc, allowedRoles)(w, r)
 		default:
 			v.enforcePermissionAccess(handlerFunc, methodPermissions)(w, r)
 		}

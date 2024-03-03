@@ -32,7 +32,7 @@ type AzureClaims struct {
 }
 
 // ID returns the unique identifier for the auth user. For users, this is a normal username. For applications, this
-// may in the form of a hash string.
+// is a unique string identifier.
 func (a AzureClaims) ID() string {
 	if a.IsApplication() {
 		return a.AppID
