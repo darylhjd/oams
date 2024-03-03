@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -49,7 +50,7 @@ type upcomingClassGroupSessionAttendancePatchResponse struct {
 // TODO: Implement tests for this endpoint.
 func (v *APIServerV1) upcomingClassGroupSessionAttendancePatch(r *http.Request, sessionId, enrollmentId int64) apiResponse {
 	var req upcomingClassGroupSessionAttendancePatchRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 

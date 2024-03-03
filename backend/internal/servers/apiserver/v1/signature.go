@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -29,7 +30,7 @@ type signaturePutResponse struct {
 
 func (v *APIServerV1) signaturePut(r *http.Request, userId string) apiResponse {
 	var req signaturePutRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse user request body: %s", err))
 	}
 

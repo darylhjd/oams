@@ -34,8 +34,8 @@ func (m *MockAuthenticator) Exchange(_ context.Context, _, _ string) (*goauth2.T
 	return nil, nil
 }
 
-func (m *MockAuthenticator) CheckToken(_ context.Context, _ string) (oauth2.Claims, *jwt.Token, error) {
-	return nil, nil, nil
+func (m *MockAuthenticator) CheckToken(_ context.Context, _ string) (oauth2.AzureClaims, *jwt.Token, error) {
+	return oauth2.AzureClaims{}, nil, nil
 }
 
 // NewMockAzureAuthenticator creates a new mock Azure Authenticator client, useful for tests.

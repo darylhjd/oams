@@ -19,8 +19,8 @@ func MustAuth(handlerFunc http.HandlerFunc, auth oauth2.AuthProvider, db *databa
 		}
 
 		user, err := db.RegisterUser(r.Context(), database.RegisterUserParams{
-			ID:    claims.UserID(),
-			Email: claims.UserEmail(),
+			ID:    claims.ID(),
+			Email: claims.Email(),
 		})
 		if err != nil {
 			http.Error(w, "could not get user information", http.StatusInternalServerError)
@@ -37,10 +37,10 @@ func MustAuth(handlerFunc http.HandlerFunc, auth oauth2.AuthProvider, db *databa
 }
 
 // CheckAuthorizationToken to see if request is paired with a valid user session.
-func CheckAuthorizationToken(r *http.Request, auth oauth2.AuthProvider) (oauth2.Claims, *jwt.Token, error) {
+func CheckAuthorizationToken(r *http.Request, auth oauth2.AuthProvider) (oauth2.AzureClaims, *jwt.Token, error) {
 	accessToken, err := r.Cookie(oauth2.SessionCookieIdent)
 	if err != nil {
-		return nil, nil, err
+		return oauth2.AzureClaims{}, nil, err
 	}
 
 	return auth.CheckToken(r.Context(), accessToken.Value)

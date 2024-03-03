@@ -25,16 +25,35 @@ var (
 // AzureClaims is a custom struct to hold the claims received from Microsoft Azure AD.
 type AzureClaims struct {
 	jwt.RegisteredClaims
-	Name              string `json:"name"`
-	PreferredUsername string `json:"preferred_username"`
+	AppID             string   `json:"azp"`
+	Name              string   `json:"name"`
+	PreferredUsername string   `json:"preferred_username"`
+	Roles             []string `json:"roles"`
 }
 
-func (a AzureClaims) UserID() string {
+// ID returns the unique identifier for the auth user. For users, this is a normal username. For applications, this
+// may in the form of a hash string.
+func (a AzureClaims) ID() string {
+	if a.IsApplication() {
+		return a.AppID
+	}
+
 	return a.Name
 }
 
-func (a AzureClaims) UserEmail() string {
+// Email returns the email for the auth user. If the user is an application, then this field will likely be empty.
+func (a AzureClaims) Email() string {
 	return a.PreferredUsername
+}
+
+// IsApplication checks if the auth user is an application or a normal user.
+func (a AzureClaims) IsApplication() bool {
+	return a.Roles != nil
+}
+
+// AppRoles returns the roles assigned to an application user. This is unused for normal users.
+func (a AzureClaims) AppRoles() []string {
+	return a.Roles
 }
 
 type AzureAuthenticator struct {
@@ -54,17 +73,17 @@ func (a *AzureAuthenticator) Exchange(ctx context.Context, code, verifier string
 	return a.config.Exchange(ctx, code, oauth2.VerifierOption(verifier))
 }
 
-func (a *AzureAuthenticator) CheckToken(ctx context.Context, tokenString string) (Claims, *jwt.Token, error) {
+func (a *AzureAuthenticator) CheckToken(ctx context.Context, tokenString string) (AzureClaims, *jwt.Token, error) {
+	claims := AzureClaims{}
+
 	set, err := a.GetKeyCache().Get(ctx, a.GetKeySetSource())
 	if err != nil {
-		return nil, nil, errors.New("could not get key set source")
+		return claims, nil, errors.New("could not get key set source")
 	}
-
-	claims := AzureClaims{}
 
 	token, err := parseAzureToken(set, &claims, tokenString)
 	if err != nil || !token.Valid {
-		return nil, nil, fmt.Errorf("token check failed: %w", err)
+		return claims, nil, fmt.Errorf("token check failed: %w", err)
 	}
 
 	return claims, token, nil
