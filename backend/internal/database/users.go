@@ -124,6 +124,7 @@ func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]m
 type RegisterUserParams struct {
 	ID    string
 	Email string
+	Role  model.UserRole
 }
 
 // RegisterUser is used to register a user into the database on login. If the user already exists, then nothing is done.
@@ -134,10 +135,12 @@ func (d *DB) RegisterUser(ctx context.Context, arg RegisterUserParams) (model.Us
 		Users.ID,
 		Users.Name,
 		Users.Email,
+		Users.Role,
 	).MODEL(
 		model.User{
 			ID:    arg.ID,
 			Email: arg.Email,
+			Role:  arg.Role,
 		},
 	).ON_CONFLICT(
 		Users.ID,

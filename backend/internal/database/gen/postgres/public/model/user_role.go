@@ -12,8 +12,9 @@ import "errors"
 type UserRole string
 
 const (
-	UserRole_User        UserRole = "USER"
-	UserRole_SystemAdmin UserRole = "SYSTEM_ADMIN"
+	UserRole_User            UserRole = "USER"
+	UserRole_SystemAdmin     UserRole = "SYSTEM_ADMIN"
+	UserRole_ExternalService UserRole = "EXTERNAL_SERVICE"
 )
 
 func (e *UserRole) Scan(value interface{}) error {
@@ -32,6 +33,8 @@ func (e *UserRole) Scan(value interface{}) error {
 		*e = UserRole_User
 	case "SYSTEM_ADMIN":
 		*e = UserRole_SystemAdmin
+	case "EXTERNAL_SERVICE":
+		*e = UserRole_ExternalService
 	default:
 		return errors.New("jet: Invalid scan value '" + enumValue + "' for UserRole enum")
 	}
