@@ -21,6 +21,7 @@ func MustAuth(handlerFunc http.HandlerFunc, auth oauth2.AuthProvider, db *databa
 		user, err := db.RegisterUser(r.Context(), database.RegisterUserParams{
 			ID:    claims.ID(),
 			Email: claims.Email(),
+			Role:  claims.UserType(),
 		})
 		if err != nil {
 			http.Error(w, "could not get user information", http.StatusInternalServerError)

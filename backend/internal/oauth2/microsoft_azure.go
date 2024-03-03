@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/darylhjd/oams/backend/internal/database/gen/postgres/public/model"
 	"github.com/darylhjd/oams/backend/internal/env"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -54,6 +55,15 @@ func (a AzureClaims) IsApplication() bool {
 // AppRoles returns the roles assigned to an application user. This is unused for normal users.
 func (a AzureClaims) AppRoles() []string {
 	return a.Roles
+}
+
+// UserType returns the inferred auth user type. This is useful for getting a default user role for the auth user.
+func (a AzureClaims) UserType() model.UserRole {
+	if a.IsApplication() {
+		return model.UserRole_ExternalService
+	}
+
+	return model.UserRole_User
 }
 
 type AzureAuthenticator struct {

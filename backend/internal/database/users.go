@@ -80,7 +80,7 @@ type UpsertUserParams struct {
 }
 
 // BatchUpsertUsers inserts a batch of users into the database. If the user already exists, then update the name and
-// email. Note that the role field is ignored in this operation.
+// email.
 func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]model.User, error) {
 	if len(args) == 0 {
 		return nil, nil
@@ -95,6 +95,7 @@ func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]m
 				inserts = append(inserts, model.User{
 					ID:   param.ID,
 					Name: param.Name,
+					Role: model.UserRole_User,
 				})
 			}
 		}
@@ -104,6 +105,7 @@ func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]m
 		Users.ID,
 		Users.Name,
 		Users.Email,
+		Users.Role,
 	).MODELS(
 		inserts,
 	).ON_CONFLICT(
@@ -124,6 +126,7 @@ func (d *DB) BatchUpsertUsers(ctx context.Context, args []UpsertUserParams) ([]m
 type RegisterUserParams struct {
 	ID    string
 	Email string
+	Role  model.UserRole
 }
 
 // RegisterUser is used to register a user into the database on login. If the user already exists, then nothing is done.
@@ -134,10 +137,12 @@ func (d *DB) RegisterUser(ctx context.Context, arg RegisterUserParams) (model.Us
 		Users.ID,
 		Users.Name,
 		Users.Email,
+		Users.Role,
 	).MODEL(
 		model.User{
 			ID:    arg.ID,
 			Email: arg.Email,
+			Role:  arg.Role,
 		},
 	).ON_CONFLICT(
 		Users.ID,
