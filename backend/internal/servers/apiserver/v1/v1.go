@@ -1,10 +1,8 @@
 package v1
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/gorilla/schema"
@@ -56,10 +54,6 @@ const (
 	dataExportUrl                           = "/data-export"
 )
 
-var (
-	internalErrorMsg = fmt.Sprintf("%s - internal server error", namespace)
-)
-
 type APIServerV1 struct {
 	l   *zap.Logger
 	db  *database.DB
@@ -88,218 +82,234 @@ func (v *APIServerV1) registerHandlers() {
 
 	v.mux.HandleFunc(sessionUrl, v.session)
 
-	v.mux.HandleFunc(signatureUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(signatureUrl, v.enforceAccess(
 		v.signature,
-		map[string][]permission{
-			http.MethodPut: {SignaturePut},
+		map[string]permission{
+			http.MethodPut: SignaturePut,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(batchUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(batchUrl, v.enforceAccess(
 		v.batch,
-		map[string][]permission{
-			http.MethodPost: {BatchPost},
-			http.MethodPut:  {BatchPut},
+		map[string]permission{
+			http.MethodPost: BatchPost,
+			http.MethodPut:  BatchPut,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(usersUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(usersUrl, v.enforceAccess(
 		v.users,
-		map[string][]permission{
-			http.MethodGet: {UserRead},
+		map[string]permission{
+			http.MethodGet: UserRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(userUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(userUrl, v.enforceAccess(
 		v.user,
-		map[string][]permission{
-			http.MethodGet:   {UserRead},
-			http.MethodPatch: {UserUpdate},
+		map[string]permission{
+			http.MethodGet:   UserRead,
+			http.MethodPatch: UserUpdate,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classesUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classesUrl, v.enforceAccess(
 		v.classes,
-		map[string][]permission{
-			http.MethodGet: {ClassRead},
+		map[string]permission{
+			http.MethodGet: ClassRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classUrl, v.enforceAccess(
 		v.class,
-		map[string][]permission{
-			http.MethodGet: {ClassRead},
+		map[string]permission{
+			http.MethodGet: ClassRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classAttendanceRulesUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classAttendanceRulesUrl, v.enforceAccess(
 		v.classAttendanceRules,
-		map[string][]permission{
-			http.MethodGet: {ClassAttendanceRulesRead},
+		map[string]permission{
+			http.MethodGet: ClassAttendanceRulesRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classGroupManagersUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classGroupManagersUrl, v.enforceAccess(
 		v.classGroupManagers,
-		map[string][]permission{
-			http.MethodGet:  {ClassGroupManagerRead},
-			http.MethodPost: {ClassGroupManagerPost},
-			http.MethodPut:  {ClassGroupManagerPut},
+		map[string]permission{
+			http.MethodGet:  ClassGroupManagerRead,
+			http.MethodPost: ClassGroupManagerPost,
+			http.MethodPut:  ClassGroupManagerPut,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classGroupManagerUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classGroupManagerUrl, v.enforceAccess(
 		v.classGroupManager,
-		map[string][]permission{
-			http.MethodGet:    {ClassGroupManagerRead},
-			http.MethodPatch:  {ClassGroupManagerUpdate},
-			http.MethodDelete: {ClassGroupManagerDelete},
+		map[string]permission{
+			http.MethodGet:    ClassGroupManagerRead,
+			http.MethodPatch:  ClassGroupManagerUpdate,
+			http.MethodDelete: ClassGroupManagerDelete,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classGroupsUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classGroupsUrl, v.enforceAccess(
 		v.classGroups,
-		map[string][]permission{
-			http.MethodGet: {ClassGroupRead},
+		map[string]permission{
+			http.MethodGet: ClassGroupRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classGroupUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classGroupUrl, v.enforceAccess(
 		v.classGroup,
-		map[string][]permission{
-			http.MethodGet: {ClassGroupRead},
+		map[string]permission{
+			http.MethodGet: ClassGroupRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classGroupSessionsUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classGroupSessionsUrl, v.enforceAccess(
 		v.classGroupSessions,
-		map[string][]permission{
-			http.MethodGet: {ClassGroupSessionRead},
+		map[string]permission{
+			http.MethodGet: ClassGroupSessionRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(classGroupSessionUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(classGroupSessionUrl, v.enforceAccess(
 		v.classGroupSession,
-		map[string][]permission{
-			http.MethodGet: {ClassGroupSessionRead},
+		map[string]permission{
+			http.MethodGet: ClassGroupSessionRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(sessionEnrollmentsUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(sessionEnrollmentsUrl, v.enforceAccess(
 		v.sessionEnrollments,
-		map[string][]permission{
-			http.MethodGet: {SessionEnrollmentRead},
+		map[string]permission{
+			http.MethodGet: SessionEnrollmentRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(sessionEnrollmentUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(sessionEnrollmentUrl, v.enforceAccess(
 		v.sessionEnrollment,
-		map[string][]permission{
-			http.MethodGet: {SessionEnrollmentRead},
+		map[string]permission{
+			http.MethodGet: SessionEnrollmentRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(upcomingClassGroupSessionsUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(upcomingClassGroupSessionsUrl, v.enforceAccess(
 		v.upcomingClassGroupSessions,
-		map[string][]permission{
-			http.MethodGet: {UpcomingClassGroupSessionRead},
+		map[string]permission{
+			http.MethodGet: UpcomingClassGroupSessionRead,
 		},
+		[]string{roleAttendanceTaker},
 	))
 
-	v.mux.HandleFunc(upcomingClassGroupSessionAttendancesUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(upcomingClassGroupSessionAttendancesUrl, v.enforceAccess(
 		v.upcomingClassGroupSessionAttendances,
-		map[string][]permission{
-			http.MethodGet: {UpcomingClassGroupSessionAttendanceRead},
+		map[string]permission{
+			http.MethodGet: UpcomingClassGroupSessionAttendanceRead,
 		},
+		[]string{roleAttendanceTaker},
 	))
 
-	v.mux.HandleFunc(upcomingClassGroupSessionAttendanceUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(upcomingClassGroupSessionAttendanceUrl, v.enforceAccess(
 		v.upcomingClassGroupSessionAttendance,
-		map[string][]permission{
-			http.MethodPatch: {UpcomingClassGroupSessionAttendanceUpdate},
+		map[string]permission{
+			http.MethodPatch: UpcomingClassGroupSessionAttendanceUpdate,
 		},
+		[]string{roleAttendanceTaker},
 	))
 
-	v.mux.HandleFunc(coordinatingClassesUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassesUrl, v.enforceAccess(
 		v.coordinatingClasses,
-		map[string][]permission{
-			http.MethodGet: {CoordinatingClassRead},
+		map[string]permission{
+			http.MethodGet: CoordinatingClassRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(coordinatingClassUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassUrl, v.enforceAccess(
 		v.coordinatingClass,
-		map[string][]permission{
-			http.MethodGet: {CoordinatingClassRead},
+		map[string]permission{
+			http.MethodGet: CoordinatingClassRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(coordinatingClassRulesUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassRulesUrl, v.enforceAccess(
 		v.coordinatingClassRules,
-		map[string][]permission{
-			http.MethodGet:  {CoordinatingClassRuleRead},
-			http.MethodPost: {CoordinatingClassRuleCreate},
+		map[string]permission{
+			http.MethodGet:  CoordinatingClassRuleRead,
+			http.MethodPost: CoordinatingClassRuleCreate,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(coordinatingClassRuleUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassRuleUrl, v.enforceAccess(
 		v.coordinatingClassRule,
-		map[string][]permission{
-			http.MethodPatch:  {CoordinatingClassRuleUpdate},
-			http.MethodDelete: {CoordinatingClassRuleDelete},
+		map[string]permission{
+			http.MethodPatch:  CoordinatingClassRuleUpdate,
+			http.MethodDelete: CoordinatingClassRuleDelete,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(coordinatingClassReportUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassReportUrl, v.enforceAccess(
 		v.coordinatingClassReport,
-		map[string][]permission{
-			http.MethodGet: {CoordinatingClassReportRead},
+		map[string]permission{
+			http.MethodGet: CoordinatingClassReportRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(coordinatingClassDashboardUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassDashboardUrl, v.enforceAccess(
 		v.coordinatingClassDashboard,
-		map[string][]permission{
-			http.MethodGet: {CoordinatingClassDashboardRead},
+		map[string]permission{
+			http.MethodGet: CoordinatingClassDashboardRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(coordinatingClassSchedulesUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassSchedulesUrl, v.enforceAccess(
 		v.coordinatingClassSchedules,
-		map[string][]permission{
-			http.MethodGet: {CoordinatingClassScheduleRead},
+		map[string]permission{
+			http.MethodGet: CoordinatingClassScheduleRead,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(coordinatingClassScheduleUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(coordinatingClassScheduleUrl, v.enforceAccess(
 		v.coordinatingClassSchedule,
-		map[string][]permission{
-			http.MethodPut: {CoordinatingClassScheduleUpdate},
+		map[string]permission{
+			http.MethodPut: CoordinatingClassScheduleUpdate,
 		},
+		[]string{},
 	))
 
-	v.mux.HandleFunc(dataExportUrl, v.enforceAccessPolicy(
+	v.mux.HandleFunc(dataExportUrl, v.enforceAccess(
 		v.dataExport,
-		map[string][]permission{
-			http.MethodGet: {DataExportRead},
+		map[string]permission{
+			http.MethodGet: DataExportRead,
 		},
+		[]string{},
 	))
 }
 
 func (v *APIServerV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	v.l.Debug(fmt.Sprintf("%s - handling request", namespace), zap.String("endpoint", r.URL.Path))
-
 	v.mux.ServeHTTP(w, r)
-}
-
-func (v *APIServerV1) parseRequestBody(body io.ReadCloser, a any) error {
-	var b bytes.Buffer
-
-	if _, err := b.ReadFrom(body); err != nil {
-		return err
-	}
-
-	return json.Unmarshal(b.Bytes(), a)
 }
 
 func (v *APIServerV1) writeResponse(w http.ResponseWriter, r *http.Request, resp apiResponse) {
@@ -315,5 +325,8 @@ func (v *APIServerV1) writeResponse(w http.ResponseWriter, r *http.Request, resp
 }
 
 func (v *APIServerV1) logInternalServerError(r *http.Request, err error) {
-	v.l.Error(internalErrorMsg, zap.String("endpoint", r.URL.Path), zap.String("method", r.Method), zap.Error(err))
+	v.l.Error(
+		fmt.Sprintf("%s - internal server error", namespace),
+		zap.String("endpoint", r.URL.Path), zap.String("method", r.Method), zap.Error(err),
+	)
 }

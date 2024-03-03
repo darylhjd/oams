@@ -18,7 +18,7 @@ var (
 
 // AuthContext stores useful information regarding an authentication.
 type AuthContext struct {
-	Claims Claims
+	Claims AzureClaims
 	User   model.User
 }
 

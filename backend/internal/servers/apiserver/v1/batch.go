@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -152,7 +153,7 @@ type batchPutResponse struct {
 // batchPut is the handler that does the actual processing of the entities.
 func (v *APIServerV1) batchPut(r *http.Request) apiResponse {
 	var req batchPutRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 

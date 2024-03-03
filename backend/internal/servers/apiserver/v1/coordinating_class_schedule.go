@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -50,7 +51,7 @@ type coordinatingClassSchedulePutResponse struct {
 
 func (v *APIServerV1) coordinatingClassSchedulePut(r *http.Request, classId, sessionId int64) apiResponse {
 	var req coordinatingClassSchedulePutRequest
-	if err := v.parseRequestBody(r.Body, &req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 

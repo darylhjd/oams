@@ -11,13 +11,14 @@ import (
 
 const authenticatorNamespace = "authenticator"
 
+// AuthProvider interface supports mock testing.
 type AuthProvider interface {
 	GetKeyCache() *jwk.Cache
 	GetKeySetSource() string
 	GetIssuer() string
 	AuthCodeURL(string, string) string
 	Exchange(context.Context, string, string) (*oauth2.Token, error)
-	CheckToken(context.Context, string) (Claims, *jwt.Token, error)
+	CheckToken(context.Context, string) (AzureClaims, *jwt.Token, error)
 }
 
 // Authenticator provides a key cache that is used for verifying access tokens.

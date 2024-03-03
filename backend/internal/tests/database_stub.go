@@ -11,22 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// StubAuthContextUser inserts the mock auth context user into the database.
-func StubAuthContextUser(t *testing.T, ctx context.Context, db *database.DB) model.User {
-	t.Helper()
-
-	user, err := db.CreateUser(ctx, database.CreateUserParams{
-		ID:    MockAuthenticatorUserID,
-		Email: MockAuthenticatorUserEmail,
-		Role:  MockAuthenticatorUserRole,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return user
-}
-
 // StubUser inserts a mock user with the given ID into the database.
 func StubUser(t *testing.T, ctx context.Context, db *database.DB, params database.CreateUserParams) model.User {
 	t.Helper()
