@@ -51,9 +51,7 @@ func (d *DB) GetCoordinatingClassRules(ctx context.Context, id int64) ([]model.C
 	).FROM(
 		ClassAttendanceRules,
 	).WHERE(
-		ClassAttendanceRules.ClassID.EQ(Int64(id)).AND(
-			classAttendanceRuleRLS(ctx),
-		),
+		ClassAttendanceRules.ClassID.EQ(Int64(id)),
 	).ORDER_BY(
 		ClassAttendanceRules.CreatedAt,
 	)

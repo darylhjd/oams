@@ -15,8 +15,6 @@ func (d *DB) ListClassAttendanceRules(ctx context.Context, params ListQueryParam
 		ClassAttendanceRules.AllColumns,
 	).FROM(
 		ClassAttendanceRules,
-	).WHERE(
-		classAttendanceRuleRLS(ctx),
 	)
 
 	stmt = params.setSorts(stmt)
