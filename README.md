@@ -29,6 +29,8 @@ Anyone is capable of creating an external service if they are so inclined!
 
 The following endpoints are available for usage by external services.
 
+</div>
+
 <table>
     <tr>
         <th>Endpoint</th>
@@ -155,5 +157,3 @@ The following endpoints are available for usage by external services.
         </td>
     </tr>
 </table>
-
-</div>
