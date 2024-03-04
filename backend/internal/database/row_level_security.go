@@ -34,16 +34,6 @@ func coordinatingClassRLS(ctx context.Context) BoolExpression {
 	)
 }
 
-func classGroupManagerRLS(ctx context.Context) BoolExpression {
-	authContext := oauth2.GetAuthContext(ctx)
-
-	return Bool(
-		authContext.User.Role == model.UserRole_SystemAdmin,
-	).OR(
-		ClassGroupManagers.UserID.EQ(String(authContext.User.ID)),
-	)
-}
-
 func sessionEnrollmentRLS(ctx context.Context) BoolExpression {
 	authContext := oauth2.GetAuthContext(ctx)
 

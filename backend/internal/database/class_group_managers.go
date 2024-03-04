@@ -82,9 +82,7 @@ func (d *DB) UpdateClassGroupManager(ctx context.Context, arg UpdateClassGroupMa
 			ManagingRole: arg.Role,
 		},
 	).WHERE(
-		classGroupManagerRLS(ctx).AND(
-			ClassGroupManagers.ID.EQ(Int64(arg.ID)),
-		),
+		ClassGroupManagers.ID.EQ(Int64(arg.ID)),
 	).RETURNING(
 		ClassGroupManagers.AllColumns,
 	)
@@ -97,9 +95,7 @@ func (d *DB) DeleteClassGroupManager(ctx context.Context, id int64) error {
 	var res model.ClassGroupManager
 
 	stmt := ClassGroupManagers.DELETE().WHERE(
-		classGroupManagerRLS(ctx).AND(
-			ClassGroupManagers.ID.EQ(Int64(id)),
-		),
+		ClassGroupManagers.ID.EQ(Int64(id)),
 	).RETURNING(
 		ClassGroupManagers.AllColumns,
 	)
