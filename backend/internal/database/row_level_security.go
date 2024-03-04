@@ -10,32 +10,6 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 )
 
-func classAttendanceRuleRLS(ctx context.Context) BoolExpression {
-	authContext := oauth2.GetAuthContext(ctx)
-
-	return Bool(
-		authContext.User.Role == model.UserRole_SystemAdmin,
-	).OR(
-		ClassAttendanceRules.ClassID.IN(
-			SELECT(
-				ClassAttendanceRules.ClassID,
-			).FROM(
-				ClassAttendanceRules.INNER_JOIN(
-					Classes, Classes.ID.EQ(ClassAttendanceRules.ClassID),
-				).INNER_JOIN(
-					ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
-				).INNER_JOIN(
-					ClassGroupManagers, ClassGroupManagers.ClassGroupID.EQ(ClassGroups.ID),
-				),
-			).WHERE(
-				ClassGroupManagers.UserID.EQ(String(authContext.User.ID)).AND(
-					ClassGroupManagers.ManagingRole.EQ(ManagingRole.CourseCoordinator),
-				),
-			),
-		),
-	)
-}
-
 func coordinatingClassRLS(ctx context.Context) BoolExpression {
 	authContext := oauth2.GetAuthContext(ctx)
 

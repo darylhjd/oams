@@ -15,8 +15,6 @@ func (d *DB) ListClassGroupManagers(ctx context.Context, params ListQueryParams)
 		ClassGroupManagers.AllColumns,
 	).FROM(
 		ClassGroupManagers,
-	).WHERE(
-		classGroupManagerRLS(ctx),
 	)
 
 	stmt = params.setSorts(stmt)
@@ -35,9 +33,7 @@ func (d *DB) GetClassGroupManager(ctx context.Context, id int64) (model.ClassGro
 	).FROM(
 		ClassGroupManagers,
 	).WHERE(
-		classGroupManagerRLS(ctx).AND(
-			ClassGroupManagers.ID.EQ(Int64(id)),
-		),
+		ClassGroupManagers.ID.EQ(Int64(id)),
 	).LIMIT(1)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
