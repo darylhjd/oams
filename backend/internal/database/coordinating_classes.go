@@ -34,8 +34,8 @@ func (d *DB) GetCoordinatingClass(ctx context.Context, id int64) (CoordinatingCl
 	var res CoordinatingClass
 
 	stmt := selectCoordinatingClassFields().WHERE(
-		Classes.ID.EQ(Int64(id)).AND(
-			coordinatingClassRLS(ctx),
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(id)),
 		),
 	)
 
@@ -101,8 +101,8 @@ func (d *DB) CreateNewCoordinatingClassRule(ctx context.Context, arg CreateNewCo
 				).FROM(
 					Classes,
 				).WHERE(
-					Classes.ID.EQ(Int64(arg.ClassID)).AND(
-						coordinatingClassRLS(ctx),
+					coordinatingClassRLS(ctx).AND(
+						Classes.ID.EQ(Int64(arg.ClassID)),
 					),
 				),
 			),
@@ -133,8 +133,8 @@ func (d *DB) UpdateCoordinatingClassRule(ctx context.Context, classId, ruleId in
 			).FROM(
 				Classes,
 			).WHERE(
-				Classes.ID.EQ(Int64(classId)).AND(
-					coordinatingClassRLS(ctx),
+				coordinatingClassRLS(ctx).AND(
+					Classes.ID.EQ(Int64(classId)),
 				),
 			),
 		).AND(
@@ -159,8 +159,8 @@ func (d *DB) DeleteCoordinatingClassRule(ctx context.Context, classId, ruleId in
 				).FROM(
 					Classes,
 				).WHERE(
-					Classes.ID.EQ(Int64(classId)).AND(
-						coordinatingClassRLS(ctx),
+					coordinatingClassRLS(ctx).AND(
+						Classes.ID.EQ(Int64(classId)),
 					),
 				),
 			).AND(
@@ -201,8 +201,8 @@ func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (Coor
 	).FROM(
 		Classes,
 	).WHERE(
-		Classes.ID.EQ(Int64(id)).AND(
-			coordinatingClassRLS(ctx),
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(id)),
 		),
 	)
 	if err := classStmt.QueryContext(ctx, d.qe, &res.Class); err != nil {
@@ -216,8 +216,8 @@ func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (Coor
 			Classes, Classes.ID.EQ(ClassAttendanceRules.ClassID),
 		),
 	).WHERE(
-		Classes.ID.EQ(Int64(id)).AND(
-			coordinatingClassRLS(ctx),
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(id)),
 		),
 	).ORDER_BY(
 		ClassAttendanceRules.CreatorID,
@@ -240,8 +240,8 @@ func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (Coor
 			Users, Users.ID.EQ(ClassGroupManagers.UserID),
 		),
 	).WHERE(
-		Classes.ID.EQ(Int64(id)).AND(
-			coordinatingClassRLS(ctx),
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(id)),
 		),
 	).ORDER_BY(
 		ClassGroups.Name,
@@ -264,8 +264,8 @@ func (d *DB) GetCoordinatingClassReportData(ctx context.Context, id int64) (Coor
 			SessionEnrollments, SessionEnrollments.SessionID.EQ(ClassGroupSessions.ID),
 		),
 	).WHERE(
-		Classes.ID.EQ(Int64(id)).AND(
-			coordinatingClassRLS(ctx),
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(id)),
 		).AND(
 			ClassGroupSessions.EndTime.LT(TimestampzT(time.Now())),
 		),
@@ -305,8 +305,8 @@ func (d *DB) GetDashboardData(ctx context.Context, id int64) ([]AttendanceCountD
 			SessionEnrollments, SessionEnrollments.SessionID.EQ(ClassGroupSessions.ID),
 		),
 	).WHERE(
-		Classes.ID.EQ(Int64(id)).AND(
-			coordinatingClassRLS(ctx),
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(id)),
 		).AND(
 			ClassGroupSessions.EndTime.LT(TimestampzT(time.Now())),
 		),
@@ -347,8 +347,8 @@ func (d *DB) GetCoordinatingClassSchedule(ctx context.Context, id int64) ([]Sche
 			Classes, Classes.ID.EQ(ClassGroups.ClassID),
 		),
 	).WHERE(
-		ClassGroups.ClassID.EQ(Int64(id)).AND(
-			coordinatingClassRLS(ctx),
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(id)),
 		),
 	).ORDER_BY(
 		ClassGroupSessions.StartTime,
@@ -377,24 +377,24 @@ func (d *DB) UpdateCoordinatingClassSchedule(ctx context.Context, arg UpdateCoor
 			EndTime:   arg.EndTime,
 		},
 	).WHERE(
-		EXISTS(
-			SELECT(
-				ClassGroupSessions.AllColumns,
-			).FROM(
-				Classes.INNER_JOIN(
-					ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
-				).INNER_JOIN(
-					ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
-				),
-			).WHERE(
-				coordinatingClassRLS(ctx).AND(
-					Classes.ID.EQ(Int64(arg.ClassID)),
-				).AND(
-					ClassGroupSessions.ID.EQ(Int64(arg.SessionID)),
+		ClassGroupSessions.ID.EQ(
+			IntExp(
+				SELECT(
+					ClassGroupSessions.ID,
+				).FROM(
+					Classes.INNER_JOIN(
+						ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
+					).INNER_JOIN(
+						ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
+					),
+				).WHERE(
+					coordinatingClassRLS(ctx).AND(
+						Classes.ID.EQ(Int64(arg.ClassID)),
+					).AND(
+						ClassGroupSessions.ID.EQ(Int64(arg.SessionID)),
+					),
 				),
 			),
-		).AND(
-			ClassGroupSessions.ID.EQ(Int64(arg.SessionID)),
 		),
 	).RETURNING(
 		ClassGroupSessions.AllColumns,
