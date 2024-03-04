@@ -40,6 +40,7 @@ The following endpoints are available for usage by external services.
         <th>Request</th>
         <th>Result</th>
     </tr>
+    <tr />
     <tr>
         <td>/upcoming-class-group-sessions</td>
         <td>Gets upcoming class group sessions.</td>
@@ -47,7 +48,7 @@ The following endpoints are available for usage by external services.
         <td>200: Success</td>
         <td>-</td>
         <td>
-            <details open>
+            <details>
             <summary>Response</summary>
             <pre>
 <code>{
@@ -58,6 +59,7 @@ The following endpoints are available for usage by external services.
             </details>
         </td>
     </tr>
+    <tr />
     <tr>
         <td rowspan="2">/upcoming-class-group-sessions/{sessionId}/attendances</td>
         <td rowspan="2">Get attendance records for class group session with {sessionId}</td>
@@ -65,13 +67,13 @@ The following endpoints are available for usage by external services.
         <td rowspan="1">200: Success</td>
         <td rowspan="2">-</td>
         <td rowspan="2">
-            <details open>
+            <details>
             <summary>Response</summary>
             <pre>
 <code>{
     "result": boolean,
     "upcoming_class_group_session": UpcomingClassGroupSession,
-    "attendance_entries": []AttendanceEntry;
+    "attendance_entries": []AttendanceEntry
 }</code>
             </pre>
             </details>
@@ -86,7 +88,7 @@ The following endpoints are available for usage by external services.
         <td rowspan="2">PATCH</td>
         <td rowspan="1">200: Success</td>
         <td rowspan="2">
-            <details open>
+            <details>
             <summary>Request</summary>
             <pre>
 <code>{
@@ -96,7 +98,7 @@ The following endpoints are available for usage by external services.
             </details>
         </td>
         <td rowspan="2">
-            <details open>
+            <details>
             <summary>Response</summary>
             <pre>
 <code>{
@@ -117,10 +119,11 @@ The following endpoints are available for usage by external services.
         <th>Entity</th>
         <th>Format</th>
     </tr>
+    <tr />
     <tr>
         <th>UpcomingClassGroupSession</th>
         <td>
-            <details open>
+            <details>
             <summary>Example</summary>
             <pre>
 <code>{
@@ -139,10 +142,11 @@ The following endpoints are available for usage by external services.
             </details>
         </td>
     </tr>
+    <tr />
     <tr>
         <th>AttendanceEntry</th>
         <td>
-            <details open>
+            <details>
             <summary>Example</summary>
             <pre>
 <code>{
