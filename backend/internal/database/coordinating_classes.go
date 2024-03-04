@@ -377,25 +377,23 @@ func (d *DB) UpdateCoordinatingClassSchedule(ctx context.Context, arg UpdateCoor
 			EndTime:   arg.EndTime,
 		},
 	).WHERE(
-		ClassGroupSessions.ID.EQ(
-			IntExp(
-				SELECT(
-					ClassGroupSessions.ID,
-				).FROM(
-					Classes.INNER_JOIN(
-						ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
-					).INNER_JOIN(
-						ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
-					),
-				).WHERE(
-					coordinatingClassRLS(ctx).AND(
-						Classes.ID.EQ(Int64(arg.ClassID)),
-					).AND(
-						ClassGroupSessions.ID.EQ(Int64(arg.SessionID)),
-					),
+		ClassGroupSessions.ID.EQ(IntExp(
+			SELECT(
+				ClassGroupSessions.ID,
+			).FROM(
+				Classes.INNER_JOIN(
+					ClassGroups, ClassGroups.ClassID.EQ(Classes.ID),
+				).INNER_JOIN(
+					ClassGroupSessions, ClassGroupSessions.ClassGroupID.EQ(ClassGroups.ID),
+				),
+			).WHERE(
+				coordinatingClassRLS(ctx).AND(
+					Classes.ID.EQ(Int64(arg.ClassID)),
+				).AND(
+					ClassGroupSessions.ID.EQ(Int64(arg.SessionID)),
 				),
 			),
-		),
+		)),
 	).RETURNING(
 		ClassGroupSessions.AllColumns,
 	)
