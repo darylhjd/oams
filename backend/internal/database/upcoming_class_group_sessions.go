@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"errors"
 	"log"
 	"time"
 
@@ -103,41 +102,48 @@ func (d *DB) GetUpcomingClassGroupAttendanceEntries(ctx context.Context, id int6
 type UpdateAttendanceEntryParams struct {
 	ClassGroupSessionID int64
 	SessionEnrollmentID int64
-	UserID              string
 	Attended            bool
 	UserSignature       string
 }
 
-func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntryParams) error {
-	if oauth2.GetAuthContext(ctx).User.Role != model.UserRole_SystemAdmin {
+func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntryParams) (model.SessionEnrollment, error) {
+	var res model.SessionEnrollment
+
+	if oauth2.GetAuthContext(ctx).User.Role != model.UserRole_ExternalService {
 		var signature struct {
-			Signature string `alias:"user_signature.signature"`
+			UserID    string  `alias:"session_enrollment.user_id"`
+			Signature *string `alias:"user_signature.signature"`
 		}
 
 		signatureStmt := SELECT(
+			SessionEnrollments.UserID,
 			UserSignatures.Signature,
 		).FROM(
-			UserSignatures.INNER_JOIN(
-				SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
+			SessionEnrollments.LEFT_JOIN(
+				UserSignatures, UserSignatures.UserID.EQ(SessionEnrollments.UserID),
 			),
 		).WHERE(
 			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 		)
 
 		err := signatureStmt.QueryContext(ctx, d.qe, &signature)
-		if errors.Is(err, qrm.ErrNoRows) {
-			if signature.Signature, err = argon2id.CreateHash(arg.UserID, argon2id.DefaultParams); err != nil {
-				return err
+		log.Println(signature)
+		if signature.Signature == nil {
+			sig, err := argon2id.CreateHash(signature.UserID, argon2id.DefaultParams)
+			if err != nil {
+				return res, err
 			}
+
+			signature.Signature = &sig
 		} else if err != nil {
-			return err
+			return res, err
 		}
 
-		match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
+		match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, *signature.Signature)
 		if err != nil {
-			return err
+			return res, err
 		} else if !match {
-			return qrm.ErrNoRows
+			return res, qrm.ErrNoRows
 		}
 	}
 
@@ -163,10 +169,12 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 				),
 			),
 		),
+	).RETURNING(
+		SessionEnrollments.AllColumns,
 	)
 
-	_, err := stmt.ExecContext(ctx, d.qe)
-	return err
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
 }
 
 func selectUpcomingClassGroupSessionFields() SelectStatement {

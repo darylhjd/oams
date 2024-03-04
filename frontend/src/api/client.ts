@@ -304,7 +304,6 @@ export class APIClient {
     id: number,
     sessionEnrollmentId: number,
     attended: boolean,
-    userId: string,
     userSignature: string,
   ): Promise<UpcomingClassGroupSessionAttendancePatchResponse> {
     const { data } =
@@ -312,7 +311,6 @@ export class APIClient {
         `/upcoming-class-group-sessions/${id}/attendances/${sessionEnrollmentId}`,
         {
           attended,
-          user_id: userId,
           user_signature: userSignature,
         },
       );
