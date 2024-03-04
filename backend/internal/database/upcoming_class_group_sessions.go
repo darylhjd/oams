@@ -206,7 +206,7 @@ func isManagedUpcomingClassGroupSession(ctx context.Context) BoolExpression {
 	return managedClassGroupSessionRLS(ctx).AND(
 		TimestampzT(time.Now()).BETWEEN(
 			ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
-			ClassGroupSessions.EndTime.ADD(INTERVALd(time.Hour*24*30*6)),
+			ClassGroupSessions.EndTime,
 		),
 	)
 }
