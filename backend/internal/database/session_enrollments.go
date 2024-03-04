@@ -36,8 +36,8 @@ func (d *DB) GetSessionEnrollment(ctx context.Context, id int64) (model.SessionE
 	).FROM(
 		SessionEnrollments,
 	).WHERE(
-		SessionEnrollments.ID.EQ(Int64(id)).AND(
-			sessionEnrollmentRLS(ctx),
+		sessionEnrollmentRLS(ctx).AND(
+			SessionEnrollments.ID.EQ(Int64(id)),
 		),
 	).LIMIT(1)
 

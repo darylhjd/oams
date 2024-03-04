@@ -214,7 +214,6 @@ function SignAttendance({
                   id,
                   row.original.id,
                   true,
-                  row.original.user_id,
                   values.signature,
                 );
               data[row.index].attended = resp.attended;

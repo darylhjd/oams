@@ -38,7 +38,6 @@ func (v *APIServerV1) upcomingClassGroupSessionAttendance(w http.ResponseWriter,
 
 type upcomingClassGroupSessionAttendancePatchRequest struct {
 	Attended      bool   `json:"attended"`
-	UserID        string `json:"user_id"`
 	UserSignature string `json:"user_signature"`
 }
 
@@ -54,10 +53,9 @@ func (v *APIServerV1) upcomingClassGroupSessionAttendancePatch(r *http.Request, 
 		return newErrorResponse(http.StatusBadRequest, fmt.Sprintf("could not parse request body: %s", err))
 	}
 
-	err := v.db.UpdateAttendanceEntry(r.Context(), database.UpdateAttendanceEntryParams{
+	s, err := v.db.UpdateAttendanceEntry(r.Context(), database.UpdateAttendanceEntryParams{
 		ClassGroupSessionID: sessionId,
 		SessionEnrollmentID: enrollmentId,
-		UserID:              req.UserID,
 		Attended:            req.Attended,
 		UserSignature:       req.UserSignature,
 	})
@@ -72,6 +70,6 @@ func (v *APIServerV1) upcomingClassGroupSessionAttendancePatch(r *http.Request, 
 
 	return upcomingClassGroupSessionAttendancePatchResponse{
 		newSuccessResponse(),
-		req.Attended,
+		s.Attended,
 	}
 }

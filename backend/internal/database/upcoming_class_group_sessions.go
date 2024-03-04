@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"errors"
+	"log"
 	"time"
 
 	"github.com/alexedwards/argon2id"
@@ -33,9 +33,11 @@ type UpcomingManagedClassGroupSession struct {
 func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]UpcomingManagedClassGroupSession, error) {
 	var res []UpcomingManagedClassGroupSession
 
-	stmt := selectManagedClassGroupSessionFields().WHERE(
-		isUpcomingClassGroupSession(ctx),
+	stmt := selectUpcomingClassGroupSessionFields().WHERE(
+		isManagedUpcomingClassGroupSession(ctx),
 	)
+
+	log.Println(stmt.DebugSql())
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
@@ -44,9 +46,9 @@ func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]Upcomi
 func (d *DB) GetUpcomingManagedClassGroupSession(ctx context.Context, id int64) (UpcomingManagedClassGroupSession, error) {
 	var res UpcomingManagedClassGroupSession
 
-	stmt := selectManagedClassGroupSessionFields().WHERE(
+	stmt := selectUpcomingClassGroupSessionFields().WHERE(
 		ClassGroupSessions.ID.EQ(Int64(id)).AND(
-			isUpcomingClassGroupSession(ctx),
+			isManagedUpcomingClassGroupSession(ctx),
 		),
 	)
 
@@ -76,8 +78,18 @@ func (d *DB) GetUpcomingClassGroupAttendanceEntries(ctx context.Context, id int6
 			Users, Users.ID.EQ(SessionEnrollments.UserID),
 		),
 	).WHERE(
-		SessionEnrollments.SessionID.EQ(Int64(id)).AND(
-			sessionEnrollmentRLS(ctx),
+		sessionEnrollmentRLS(ctx).AND(
+			SessionEnrollments.SessionID.IN(
+				SELECT(
+					ClassGroupSessions.ID,
+				).FROM(
+					ClassGroupSessions,
+				).WHERE(
+					isManagedUpcomingClassGroupSession(ctx).AND(
+						ClassGroupSessions.ID.EQ(Int64(id)),
+					),
+				),
+			),
 		),
 	).ORDER_BY(
 		Users.Name,
@@ -90,41 +102,48 @@ func (d *DB) GetUpcomingClassGroupAttendanceEntries(ctx context.Context, id int6
 type UpdateAttendanceEntryParams struct {
 	ClassGroupSessionID int64
 	SessionEnrollmentID int64
-	UserID              string
 	Attended            bool
 	UserSignature       string
 }
 
-func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntryParams) error {
-	if oauth2.GetAuthContext(ctx).User.Role != model.UserRole_SystemAdmin {
+func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntryParams) (model.SessionEnrollment, error) {
+	var res model.SessionEnrollment
+
+	if oauth2.GetAuthContext(ctx).User.Role != model.UserRole_ExternalService {
 		var signature struct {
-			Signature string `alias:"user_signature.signature"`
+			UserID    string  `alias:"session_enrollment.user_id"`
+			Signature *string `alias:"user_signature.signature"`
 		}
 
 		signatureStmt := SELECT(
+			SessionEnrollments.UserID,
 			UserSignatures.Signature,
 		).FROM(
-			UserSignatures.INNER_JOIN(
-				SessionEnrollments, SessionEnrollments.UserID.EQ(UserSignatures.UserID),
+			SessionEnrollments.LEFT_JOIN(
+				UserSignatures, UserSignatures.UserID.EQ(SessionEnrollments.UserID),
 			),
 		).WHERE(
 			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 		)
 
 		err := signatureStmt.QueryContext(ctx, d.qe, &signature)
-		if errors.Is(err, qrm.ErrNoRows) {
-			if signature.Signature, err = argon2id.CreateHash(arg.UserID, argon2id.DefaultParams); err != nil {
-				return err
+		log.Println(signature)
+		if signature.Signature == nil {
+			sig, err := argon2id.CreateHash(signature.UserID, argon2id.DefaultParams)
+			if err != nil {
+				return res, err
 			}
+
+			signature.Signature = &sig
 		} else if err != nil {
-			return err
+			return res, err
 		}
 
-		match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, signature.Signature)
+		match, err := argon2id.ComparePasswordAndHash(arg.UserSignature, *signature.Signature)
 		if err != nil {
-			return err
+			return res, err
 		} else if !match {
-			return qrm.ErrNoRows
+			return res, qrm.ErrNoRows
 		}
 	}
 
@@ -135,35 +154,30 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 			Attended: arg.Attended,
 		},
 	).WHERE(
-		EXISTS(
-			selectManagedClassGroupSessionFields().WHERE(
-				ClassGroupSessions.ID.EQ(
-					Int64(arg.ClassGroupSessionID),
-				).AND(
-					ClassGroupSessions.ID.EQ(
-						IntExp(
-							SELECT(
-								SessionEnrollments.SessionID,
-							).FROM(
-								SessionEnrollments,
-							).WHERE(
-								SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
-							),
-						),
+		sessionEnrollmentRLS(ctx).AND(
+			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
+		).AND(
+			SessionEnrollments.SessionID.IN(
+				SELECT(
+					ClassGroupSessions.ID,
+				).FROM(
+					ClassGroupSessions,
+				).WHERE(
+					isManagedUpcomingClassGroupSession(ctx).AND(
+						ClassGroupSessions.ID.EQ(Int64(arg.ClassGroupSessionID)),
 					),
-				).AND(
-					isUpcomingClassGroupSession(ctx),
 				),
 			),
-		).AND(
-			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 		),
+	).RETURNING(
+		SessionEnrollments.AllColumns,
 	)
-	_, err := stmt.ExecContext(ctx, d.qe)
-	return err
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
 }
 
-func selectManagedClassGroupSessionFields() SelectStatement {
+func selectUpcomingClassGroupSessionFields() SelectStatement {
 	return SELECT(
 		ClassGroupSessions.ID,
 		ClassGroupSessions.StartTime,
@@ -188,17 +202,11 @@ func selectManagedClassGroupSessionFields() SelectStatement {
 	)
 }
 
-func isUpcomingClassGroupSession(ctx context.Context) BoolExpression {
-	auth := oauth2.GetAuthContext(ctx)
-
-	return TimestampzT(time.Now()).BETWEEN(
-		ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
-		ClassGroupSessions.EndTime,
-	).AND(
-		Bool(
-			auth.User.Role == model.UserRole_SystemAdmin,
-		).OR(
-			ClassGroupManagers.UserID.EQ(String(auth.User.ID)),
+func isManagedUpcomingClassGroupSession(ctx context.Context) BoolExpression {
+	return managedClassGroupSessionRLS(ctx).AND(
+		TimestampzT(time.Now()).BETWEEN(
+			ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
+			ClassGroupSessions.EndTime,
 		),
 	)
 }
