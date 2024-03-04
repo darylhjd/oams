@@ -76,8 +76,8 @@ func (d *DB) GetUpcomingClassGroupAttendanceEntries(ctx context.Context, id int6
 			Users, Users.ID.EQ(SessionEnrollments.UserID),
 		),
 	).WHERE(
-		SessionEnrollments.SessionID.EQ(Int64(id)).AND(
-			sessionEnrollmentRLS(ctx),
+		sessionEnrollmentRLS(ctx).AND(
+			SessionEnrollments.SessionID.EQ(Int64(id)),
 		),
 	).ORDER_BY(
 		Users.Name,
