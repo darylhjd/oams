@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/alexedwards/argon2id"
@@ -33,9 +34,11 @@ type UpcomingManagedClassGroupSession struct {
 func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]UpcomingManagedClassGroupSession, error) {
 	var res []UpcomingManagedClassGroupSession
 
-	stmt := selectManagedClassGroupSessionFields().WHERE(
-		isUpcomingClassGroupSession(ctx),
+	stmt := selectUpcomingClassGroupSessionFields().WHERE(
+		isManagedUpcomingClassGroupSession(ctx),
 	)
+
+	log.Println(stmt.DebugSql())
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
@@ -44,9 +47,9 @@ func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]Upcomi
 func (d *DB) GetUpcomingManagedClassGroupSession(ctx context.Context, id int64) (UpcomingManagedClassGroupSession, error) {
 	var res UpcomingManagedClassGroupSession
 
-	stmt := selectManagedClassGroupSessionFields().WHERE(
+	stmt := selectUpcomingClassGroupSessionFields().WHERE(
 		ClassGroupSessions.ID.EQ(Int64(id)).AND(
-			isUpcomingClassGroupSession(ctx),
+			isManagedUpcomingClassGroupSession(ctx),
 		),
 	)
 
@@ -77,7 +80,17 @@ func (d *DB) GetUpcomingClassGroupAttendanceEntries(ctx context.Context, id int6
 		),
 	).WHERE(
 		sessionEnrollmentRLS(ctx).AND(
-			SessionEnrollments.SessionID.EQ(Int64(id)),
+			SessionEnrollments.SessionID.IN(
+				SELECT(
+					ClassGroupSessions.ID,
+				).FROM(
+					ClassGroupSessions,
+				).WHERE(
+					isManagedUpcomingClassGroupSession(ctx).AND(
+						ClassGroupSessions.ID.EQ(Int64(id)),
+					),
+				),
+			),
 		),
 	).ORDER_BY(
 		Users.Name,
@@ -135,35 +148,28 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 			Attended: arg.Attended,
 		},
 	).WHERE(
-		EXISTS(
-			selectManagedClassGroupSessionFields().WHERE(
-				ClassGroupSessions.ID.EQ(
-					Int64(arg.ClassGroupSessionID),
-				).AND(
-					ClassGroupSessions.ID.EQ(
-						IntExp(
-							SELECT(
-								SessionEnrollments.SessionID,
-							).FROM(
-								SessionEnrollments,
-							).WHERE(
-								SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
-							),
-						),
+		sessionEnrollmentRLS(ctx).AND(
+			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
+		).AND(
+			SessionEnrollments.SessionID.IN(
+				SELECT(
+					ClassGroupSessions.ID,
+				).FROM(
+					ClassGroupSessions,
+				).WHERE(
+					isManagedUpcomingClassGroupSession(ctx).AND(
+						ClassGroupSessions.ID.EQ(Int64(arg.ClassGroupSessionID)),
 					),
-				).AND(
-					isUpcomingClassGroupSession(ctx),
 				),
 			),
-		).AND(
-			SessionEnrollments.ID.EQ(Int64(arg.SessionEnrollmentID)),
 		),
 	)
+
 	_, err := stmt.ExecContext(ctx, d.qe)
 	return err
 }
 
-func selectManagedClassGroupSessionFields() SelectStatement {
+func selectUpcomingClassGroupSessionFields() SelectStatement {
 	return SELECT(
 		ClassGroupSessions.ID,
 		ClassGroupSessions.StartTime,
@@ -188,17 +194,11 @@ func selectManagedClassGroupSessionFields() SelectStatement {
 	)
 }
 
-func isUpcomingClassGroupSession(ctx context.Context) BoolExpression {
-	auth := oauth2.GetAuthContext(ctx)
-
-	return TimestampzT(time.Now()).BETWEEN(
-		ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
-		ClassGroupSessions.EndTime,
-	).AND(
-		Bool(
-			auth.User.Role == model.UserRole_SystemAdmin,
-		).OR(
-			ClassGroupManagers.UserID.EQ(String(auth.User.ID)),
+func isManagedUpcomingClassGroupSession(ctx context.Context) BoolExpression {
+	return managedClassGroupSessionRLS(ctx).AND(
+		TimestampzT(time.Now()).BETWEEN(
+			ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
+			ClassGroupSessions.EndTime.ADD(INTERVALd(time.Hour*24*30*6)),
 		),
 	)
 }
