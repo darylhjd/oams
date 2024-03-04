@@ -34,7 +34,7 @@ func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]Upcomi
 	var res []UpcomingManagedClassGroupSession
 
 	stmt := selectManagedClassGroupSessionFields().WHERE(
-		isManagedClassGroupSession(ctx),
+		isUpcomingClassGroupSession(ctx),
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)
@@ -46,7 +46,7 @@ func (d *DB) GetUpcomingManagedClassGroupSession(ctx context.Context, id int64) 
 
 	stmt := selectManagedClassGroupSessionFields().WHERE(
 		ClassGroupSessions.ID.EQ(Int64(id)).AND(
-			isManagedClassGroupSession(ctx),
+			isUpcomingClassGroupSession(ctx),
 		),
 	)
 
@@ -152,7 +152,7 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 						),
 					),
 				).AND(
-					isManagedClassGroupSession(ctx),
+					isUpcomingClassGroupSession(ctx),
 				),
 			),
 		).AND(
@@ -188,11 +188,17 @@ func selectManagedClassGroupSessionFields() SelectStatement {
 	)
 }
 
-func isManagedClassGroupSession(ctx context.Context) BoolExpression {
+func isUpcomingClassGroupSession(ctx context.Context) BoolExpression {
+	auth := oauth2.GetAuthContext(ctx)
+
 	return TimestampzT(time.Now()).BETWEEN(
 		ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
 		ClassGroupSessions.EndTime,
 	).AND(
-		classGroupManagerRLS(ctx),
+		Bool(
+			auth.User.Role == model.UserRole_SystemAdmin,
+		).OR(
+			ClassGroupManagers.UserID.EQ(String(auth.User.ID)),
+		),
 	)
 }

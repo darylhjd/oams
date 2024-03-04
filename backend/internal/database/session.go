@@ -18,7 +18,8 @@ type ManagementDetails struct {
 func (d *DB) GetManagementDetails(ctx context.Context) (ManagementDetails, error) {
 	var res ManagementDetails
 
-	isSystemAdmin := oauth2.GetAuthContext(ctx).User.Role == model.UserRole_SystemAdmin
+	auth := oauth2.GetAuthContext(ctx)
+	isSystemAdmin := auth.User.Role == model.UserRole_SystemAdmin
 
 	stmt := SELECT(
 		EXISTS(
@@ -27,7 +28,7 @@ func (d *DB) GetManagementDetails(ctx context.Context) (ManagementDetails, error
 			).FROM(
 				ClassGroupManagers,
 			).WHERE(
-				classGroupManagerRLS(ctx),
+				ClassGroupManagers.UserID.EQ(String(auth.User.ID)),
 			),
 		).OR(
 			Bool(isSystemAdmin),
@@ -38,7 +39,7 @@ func (d *DB) GetManagementDetails(ctx context.Context) (ManagementDetails, error
 			).FROM(
 				ClassGroupManagers,
 			).WHERE(
-				classGroupManagerRLS(ctx).AND(
+				ClassGroupManagers.UserID.EQ(String(auth.User.ID)).AND(
 					ClassGroupManagers.ManagingRole.EQ(ManagingRole.CourseCoordinator),
 				),
 			),
