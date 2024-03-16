@@ -103,7 +103,7 @@ The following endpoints are available for usage by external services.
             <pre>
 <code>{
     "result": boolean,
-    "attended: boolean,
+    "attended: boolean
 }</code>
             </pre>
             </details>
