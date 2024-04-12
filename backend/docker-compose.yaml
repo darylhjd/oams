@@ -10,8 +10,6 @@ services:
     build:
       context: .
       dockerfile: ./cmd/apiserver/Dockerfile
-      secrets:
-        - ssh_key
     ports:
       - "3001:3001"
     network_mode: bridge
@@ -51,7 +49,3 @@ services:
 
 volumes:
   postgres-data:
-
-secrets:
-  ssh_key:
-    file: ~/.ssh/id_rsa
