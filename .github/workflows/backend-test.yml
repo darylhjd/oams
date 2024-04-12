@@ -34,12 +34,6 @@ jobs:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
 
-      - name: Configuration for private dependencies
-        env:
-          GOPRIVATE: "github.com/darylhjd/*"
-          TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        run: git config --global url."https://darylhjd:${TOKEN}@github.com".insteadOf "https://github.com"
-
       - name: Install Go dependencies
         run: |
           cd backend  
