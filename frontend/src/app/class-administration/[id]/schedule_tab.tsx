@@ -78,7 +78,7 @@ function ScheduleDisplay({
     mantineTableBodyRowProps: ({ row }) => ({
       onClick: () =>
         router.push(
-          `${Routes.classAdministration}/${id}/sessions/${row.original.class_group_session_id}`,
+          `${Routes.classAdministrations}/${id}/sessions/${row.original.class_group_session_id}`,
         ),
       style: {
         cursor: "pointer",
