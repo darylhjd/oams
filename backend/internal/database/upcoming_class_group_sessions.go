@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/alexedwards/argon2id"
@@ -125,7 +124,6 @@ func (d *DB) UpdateAttendanceEntry(ctx context.Context, arg UpdateAttendanceEntr
 		)
 
 		err := signatureStmt.QueryContext(ctx, d.qe, &signature)
-		log.Println(signature)
 		if signature.Signature == nil {
 			sig, err := argon2id.CreateHash(signature.UserID, argon2id.DefaultParams)
 			if err != nil {

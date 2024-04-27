@@ -3,7 +3,6 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/darylhjd/oams/backend/internal/database"
@@ -190,9 +189,6 @@ func (r *classReport) fillManagers() {
 	headers := []string{"User ID", "User Name", "Class Group", "Managing Role"}
 
 	r.SetFillColor(classReportGreyFillColor, classReportGreyFillColor, classReportGreyFillColor)
-	pageWidth, _ := r.GetPageSize()
-	columnWidth := (pageWidth - 2*r.margin) / float64(len(headers))
-	log.Println(columnWidth)
 	columnWidths := []float64{
 		classReportManagerUserIDWidth,
 		classReportManagerUserNameWidth,
