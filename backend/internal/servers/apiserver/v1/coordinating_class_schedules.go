@@ -32,7 +32,7 @@ type coordinatingClassSchedulesGetResponse struct {
 }
 
 func (v *APIServerV1) coordinatingClassSchedulesGet(r *http.Request, classId int64) apiResponse {
-	schedule, err := v.db.GetCoordinatingClassSchedule(r.Context(), classId)
+	schedule, err := v.db.GetCoordinatingClassSchedules(r.Context(), classId)
 	if err != nil {
 		v.logInternalServerError(r, err)
 		return newErrorResponse(http.StatusInternalServerError, "could not get coordinating class schedule")

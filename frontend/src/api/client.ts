@@ -36,6 +36,7 @@ import {
   CoordinatingClassRulesGetResponse,
   CoordinatingClassRulesPostRequest,
   CoordinatingClassRulesPostResponse,
+  CoordinatingClassScheduleGetResponse,
   CoordinatingClassSchedulePutResponse,
   CoordinatingClassSchedulesGetResponse,
 } from "@/api/coordinating_class";
@@ -401,6 +402,18 @@ export class APIClient {
       await this._client.get<CoordinatingClassSchedulesGetResponse>(
         `/coordinating-classes/${id}/schedule`,
       );
+    return data;
+  }
+
+  static async coordinatingClassScheduleGet(
+    classId: number,
+    sessionId: number,
+  ): Promise<CoordinatingClassScheduleGetResponse> {
+    const { data } =
+      await this._client.get<CoordinatingClassScheduleGetResponse>(
+        `/coordinating-classes/${classId}/schedule/${sessionId}`,
+      );
+    console.log(data.attendance_entries);
     return data;
   }
 

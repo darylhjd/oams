@@ -19,10 +19,10 @@ import { APIClient } from "@/api/client";
 import { RequestLoader } from "@/components/request_loader";
 import { useMediaQuery } from "@mantine/hooks";
 import { IS_MOBILE_MEDIA_QUERY } from "@/components/media_query";
-import { RulesTab } from "@/app/class-administration/[id]/rules";
-import { DashboardTab } from "@/app/class-administration/[id]/dashboard";
-import { ReportTab } from "@/app/class-administration/[id]/report";
-import { ScheduleTab } from "@/app/class-administration/[id]/schedule";
+import { RulesTab } from "@/app/class-administration/[id]/rules_tab";
+import { DashboardTab } from "@/app/class-administration/[id]/dashboard_tab";
+import { ReportTab } from "@/app/class-administration/[id]/report_tab";
+import { ScheduleTab } from "@/app/class-administration/[id]/schedule_tab";
 
 export default function ClassAdministrationPage({
   params,

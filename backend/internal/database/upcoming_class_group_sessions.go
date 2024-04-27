@@ -37,8 +37,6 @@ func (d *DB) GetUpcomingManagedClassGroupSessions(ctx context.Context) ([]Upcomi
 		isManagedUpcomingClassGroupSession(ctx),
 	)
 
-	log.Println(stmt.DebugSql())
-
 	err := stmt.QueryContext(ctx, d.qe, &res)
 	return res, err
 }
