@@ -12,6 +12,7 @@ import {
 import { CoordinatingClassScheduleTableColumns } from "@/components/columns";
 import {
   ActionIcon,
+  Box,
   Button,
   Group,
   Modal,
@@ -19,7 +20,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconAdjustments, IconX } from "@tabler/icons-react";
+import { IconAdjustments, IconClipboardList, IconX } from "@tabler/icons-react";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm, UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
@@ -68,22 +69,27 @@ function ScheduleDisplay({
     enableRowActions: true,
     positionActionsColumn: "last",
     renderRowActions: ({ row }) => (
-      <ChangeSchedule
-        id={id}
-        row={row}
-        schedule={schedule}
-        setSchedule={setSchedule}
-      />
+      <Box>
+        <Tooltip label="View Attendance Records">
+          <ActionIcon
+            mr={5}
+            onClick={() =>
+              router.push(
+                `${Routes.classAdministrations}/${id}/sessions/${row.original.class_group_session_id}`,
+              )
+            }
+          >
+            <IconClipboardList />
+          </ActionIcon>
+        </Tooltip>
+        <ChangeSchedule
+          id={id}
+          row={row}
+          schedule={schedule}
+          setSchedule={setSchedule}
+        />
+      </Box>
     ),
-    mantineTableBodyRowProps: ({ row }) => ({
-      onClick: () =>
-        router.push(
-          `${Routes.classAdministrations}/${id}/sessions/${row.original.class_group_session_id}`,
-        ),
-      style: {
-        cursor: "pointer",
-      },
-    }),
   });
 
   return <MantineReactTable table={table} />;
@@ -187,7 +193,7 @@ function ChangeSchedule({
         </form>
       </Modal>
       <Tooltip label="Change session schedule">
-        <ActionIcon onClick={open}>
+        <ActionIcon onClick={open} color="yellow">
           <IconAdjustments />
         </ActionIcon>
       </Tooltip>
