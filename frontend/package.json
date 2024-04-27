@@ -20,12 +20,12 @@
     "@mantine/notifications": "^7.7.0",
     "@tabler/icons-react": "^3.2.0",
     "axios": "^1.6.8",
-    "framer-motion": "^11.0.28",
+    "framer-motion": "^11.1.7",
     "mantine-react-table": "^2.0.0-beta.1",
-    "next": "14.2.0",
+    "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
-    "recharts": "^2.12.4",
+    "recharts": "^2.12.6",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
@@ -33,10 +33,10 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.0",
+    "eslint-config-next": "14.2.3",
     "eslint-config-prettier": "^9.1.0",
     "postcss": "^8.4.38",
-    "postcss-preset-mantine": "^1.14.4",
+    "postcss-preset-mantine": "^1.15.0",
     "postcss-simple-vars": "^7.0.1",
     "prettier": "3.2.5",
     "typescript": "^5"
