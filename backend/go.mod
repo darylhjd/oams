@@ -5,17 +5,17 @@ go 1.22
 require (
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/darylhjd/azmail v0.0.2
-	github.com/expr-lang/expr v1.16.4
+	github.com/expr-lang/expr v1.16.5
 	github.com/go-jet/jet/v2 v2.11.1
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/golang-migrate/migrate/v4 v4.17.0
+	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/schema v1.3.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/lestrrat-go/jwx/v2 v2.0.21
 	github.com/lib/pq v1.10.9
-	github.com/rs/cors v1.10.1
+	github.com/rs/cors v1.11.0
 	github.com/stretchr/testify v1.9.0
 	github.com/xuri/excelize/v2 v2.8.1
 	go.uber.org/zap v1.27.0
