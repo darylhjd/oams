@@ -29,6 +29,8 @@ func (v *APIServerV1) coordinatingClassSchedule(w http.ResponseWriter, r *http.R
 	}
 
 	switch r.Method {
+	case http.MethodGet:
+		resp = v.coordinatingClassScheduleGet(r, classId, sessionId)
 	case http.MethodPut:
 		resp = v.coordinatingClassSchedulePut(r, classId, sessionId)
 	default:
@@ -36,6 +38,39 @@ func (v *APIServerV1) coordinatingClassSchedule(w http.ResponseWriter, r *http.R
 	}
 
 	v.writeResponse(w, r, resp)
+}
+
+type coordinatingClassScheduleGetResponse struct {
+	response
+	Session           database.ScheduleData      `json:"session"`
+	AttendanceEntries []database.AttendanceEntry `json:"attendance_entries"`
+}
+
+func (v *APIServerV1) coordinatingClassScheduleGet(r *http.Request, classId, sessionId int64) apiResponse {
+	s, err := v.db.GetCoordinatingClassSchedule(r.Context(), classId, sessionId)
+	if err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return newErrorResponse(http.StatusNotFound, "the requested class group session does not exist")
+		}
+
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not get class group session data")
+	}
+
+	entries, err := v.db.GetCoordinatingClassScheduleAttendance(r.Context(), classId, sessionId)
+	if err != nil {
+		v.logInternalServerError(r, err)
+		return newErrorResponse(http.StatusInternalServerError, "could not get attendance entries")
+	}
+
+	return coordinatingClassScheduleGetResponse{
+		newSuccessResponse(),
+		s,
+		append(
+			make([]database.AttendanceEntry, 0, len(entries)),
+			entries...,
+		),
+	}
 }
 
 type coordinatingClassSchedulePutRequest struct {

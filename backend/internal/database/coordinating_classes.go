@@ -330,7 +330,7 @@ type ScheduleData struct {
 	Venue               string          `alias:"class_group_session.venue" json:"venue"`
 }
 
-func (d *DB) GetCoordinatingClassSchedule(ctx context.Context, id int64) ([]ScheduleData, error) {
+func (d *DB) GetCoordinatingClassSchedules(ctx context.Context, id int64) ([]ScheduleData, error) {
 	var res []ScheduleData
 
 	stmt := SELECT(
@@ -352,6 +352,67 @@ func (d *DB) GetCoordinatingClassSchedule(ctx context.Context, id int64) ([]Sche
 		),
 	).ORDER_BY(
 		ClassGroupSessions.StartTime,
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
+func (d *DB) GetCoordinatingClassSchedule(ctx context.Context, classId, sessionId int64) (ScheduleData, error) {
+	var res ScheduleData
+
+	stmt := SELECT(
+		ClassGroups.Name,
+		ClassGroups.ClassType,
+		ClassGroupSessions.ID,
+		ClassGroupSessions.StartTime,
+		ClassGroupSessions.EndTime,
+		ClassGroupSessions.Venue,
+	).FROM(
+		ClassGroupSessions.INNER_JOIN(
+			ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
+		).INNER_JOIN(
+			Classes, Classes.ID.EQ(ClassGroups.ClassID),
+		),
+	).WHERE(
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(classId)),
+		).AND(
+			ClassGroupSessions.ID.EQ(Int64(sessionId)),
+		),
+	)
+
+	err := stmt.QueryContext(ctx, d.qe, &res)
+	return res, err
+}
+
+func (d *DB) GetCoordinatingClassScheduleAttendance(ctx context.Context, classId, sessionId int64) ([]AttendanceEntry, error) {
+	var res []AttendanceEntry
+
+	stmt := SELECT(
+		SessionEnrollments.ID,
+		SessionEnrollments.SessionID,
+		SessionEnrollments.UserID,
+		Users.Name,
+		SessionEnrollments.Attended,
+	).FROM(
+		SessionEnrollments.INNER_JOIN(
+			ClassGroupSessions, ClassGroupSessions.ID.EQ(SessionEnrollments.SessionID),
+		).INNER_JOIN(
+			ClassGroups, ClassGroups.ID.EQ(ClassGroupSessions.ClassGroupID),
+		).INNER_JOIN(
+			Classes, Classes.ID.EQ(ClassGroups.ClassID),
+		).INNER_JOIN(
+			Users, Users.ID.EQ(SessionEnrollments.UserID),
+		),
+	).WHERE(
+		coordinatingClassRLS(ctx).AND(
+			Classes.ID.EQ(Int64(classId)),
+		).AND(
+			ClassGroupSessions.ID.EQ(Int64(sessionId)),
+		),
+	).ORDER_BY(
+		Users.Name,
 	)
 
 	err := stmt.QueryContext(ctx, d.qe, &res)

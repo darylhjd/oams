@@ -24,6 +24,8 @@ import { DateTimePicker } from "@mantine/dates";
 import { useForm, UseFormReturnType } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { getError } from "@/api/error";
+import { useRouter } from "next/navigation";
+import { Routes } from "@/routing/routes";
 
 export function ScheduleTab({ id }: { id: number }) {
   const [schedule, setSchedule] = useState<ScheduleData[]>([]);
@@ -54,6 +56,8 @@ function ScheduleDisplay({
   schedule: ScheduleData[];
   setSchedule: Dispatch<SetStateAction<ScheduleData[]>>;
 }) {
+  const router = useRouter();
+
   const table = useMantineReactTable({
     columns: CoordinatingClassScheduleTableColumns,
     data: schedule,
@@ -71,6 +75,15 @@ function ScheduleDisplay({
         setSchedule={setSchedule}
       />
     ),
+    mantineTableBodyRowProps: ({ row }) => ({
+      onClick: () =>
+        router.push(
+          `${Routes.classAdministration}/${id}/sessions/${row.original.class_group_session_id}`,
+        ),
+      style: {
+        cursor: "pointer",
+      },
+    }),
   });
 
   return <MantineReactTable table={table} />;
