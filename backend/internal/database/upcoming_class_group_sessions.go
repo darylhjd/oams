@@ -199,10 +199,5 @@ func selectUpcomingClassGroupSessionFields() SelectStatement {
 }
 
 func isManagedUpcomingClassGroupSession(ctx context.Context) BoolExpression {
-	return managedClassGroupSessionRLS(ctx).AND(
-		TimestampzT(time.Now()).BETWEEN(
-			ClassGroupSessions.StartTime.SUB(INTERVALd(attendanceTimeBuffer)),
-			ClassGroupSessions.EndTime,
-		),
-	)
+	return managedClassGroupSessionRLS(ctx)
 }

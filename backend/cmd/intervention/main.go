@@ -28,6 +28,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc(interventionUrl, interventionHandler)
 
+	port = "4000"
 	log.Println("server listening on port ", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), mux))
 }
